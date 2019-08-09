@@ -1,0 +1,33 @@
+# SQLite version 3.x
+#   gem install sqlite3
+#
+#   Ensure the SQLite 3 gem is defined in your Gemfile
+#   gem 'sqlite3'
+#
+default: &default
+  adapter: mysql2
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  database: <%= ENV.fetch("SQL_DATABASE") %>
+  username: <%= ENV.fetch("SQL_USER") %>
+  password: <%= ENV.fetch("SQL_PASSWORD") %>
+  host: <%= ENV.fetch("SQL_HOST") %>
+  timeout: 5000
+
+development:
+  <<: *default
+  adapter: mysql2
+  #database: openode_dev
+  #username: root
+  #password: test1234
+  #host: localhost
+
+# Warning: The database defined as "test" will be erased and
+# re-generated from your development database when you run "rake".
+# Do not set this db to the same as development or production.
+test:
+  <<: *default
+  database: db/test.sqlite3
+
+production:
+  <<: *default
+  database: db/production.sqlite3

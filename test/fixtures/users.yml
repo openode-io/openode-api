@@ -1,0 +1,41 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  email: MyString
+  password_hash: MyString
+  reset_token: MyString
+  is_admin: false
+  first_admin_entry_at: 2019-08-09 17:57:23
+  token: MyString
+  day_one_mail_at: 2019-08-09 17:57:23
+  credits: 
+  last_free_credit_distribute_at: 2019-08-09 17:57:23
+  newsletter: false
+  notified_low_credit: false
+  coupons: MyText
+  nb_credits_threshold_notification: 1.5
+  activated: false
+  activation_hash: MyString
+  suspended: false
+  created_at: 2019-08-09 17:57:23
+  updated_at: 2019-08-09 17:57:23
+
+two:
+  email: MyString
+  password_hash: MyString
+  reset_token: MyString
+  is_admin: false
+  first_admin_entry_at: 2019-08-09 17:57:23
+  token: MyString
+  day_one_mail_at: 2019-08-09 17:57:23
+  credits: 
+  last_free_credit_distribute_at: 2019-08-09 17:57:23
+  newsletter: false
+  notified_low_credit: false
+  coupons: MyText
+  nb_credits_threshold_notification: 1.5
+  activated: false
+  activation_hash: MyString
+  suspended: false
+  created_at: 2019-08-09 17:57:23
+  updated_at: 2019-08-09 17:57:23
