@@ -33,3 +33,9 @@ module OpenodeApi
     config.api_only = true
   end
 end
+
+puts "Verifying database connection..."
+require "./config/environment.rb"
+ActiveRecord::Base.establish_connection # Establishes connection
+ActiveRecord::Base.connection # Calls connection object
+puts "database connection valid"
