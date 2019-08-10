@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_10_022400) do
+ActiveRecord::Schema.define(version: 2019_08_10_141548) do
 
   create_table "users", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "email"
@@ -32,7 +32,12 @@ ActiveRecord::Schema.define(version: 2019_08_10_022400) do
     t.boolean "suspended", default: false
     t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }
     t.datetime "updated_at", default: -> { "CURRENT_TIMESTAMP" }
+    t.index ["day_one_mail_at"], name: "index_users_on_day_one_mail_at"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["is_admin"], name: "index_users_on_is_admin"
+    t.index ["last_free_credit_distribute_at"], name: "index_users_on_last_free_credit_distribute_at"
+    t.index ["newsletter"], name: "index_users_on_newsletter"
+    t.index ["notified_low_credit"], name: "index_users_on_notified_low_credit"
     t.index ["token"], name: "index_users_on_token", unique: true
   end
 
