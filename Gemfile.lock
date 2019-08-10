@@ -113,6 +113,8 @@ GEM
     rb-inotify (0.10.0)
       ffi (~> 1.0)
     ruby_dep (1.5.0)
+    safe_attributes (1.0.10)
+      activerecord (>= 3.0.0)
     spring (2.1.0)
     spring-watcher-listen (2.0.1)
       listen (>= 2.7, < 4.0)
@@ -143,6 +145,7 @@ DEPENDENCIES
   mysql2
   puma (~> 3.11)
   rails (~> 5.2.3)
+  safe_attributes
   spring
   spring-watcher-listen (~> 2.0.0)
   tzinfo-data

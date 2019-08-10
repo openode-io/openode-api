@@ -1,14 +1,14 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  email: MyString
+  email: myadmin@thisisit.com
   password_hash: MyString
   reset_token: MyString
   is_admin: false
   first_admin_entry_at: 2019-08-09 17:57:23
-  token: MyString
+  token: 123456789
   day_one_mail_at: 2019-08-09 17:57:23
-  credits: 
+  credits:
   last_free_credit_distribute_at: 2019-08-09 17:57:23
   newsletter: false
   notified_low_credit: false
@@ -21,14 +21,14 @@ one:
   updated_at: 2019-08-09 17:57:23
 
 two:
-  email: MyString
+  email: myadmin2@thisisit.com
   password_hash: MyString
   reset_token: MyString
   is_admin: false
   first_admin_entry_at: 2019-08-09 17:57:23
-  token: MyString
+  token: 12345678
   day_one_mail_at: 2019-08-09 17:57:23
-  credits: 
+  credits:
   last_free_credit_distribute_at: 2019-08-09 17:57:23
   newsletter: false
   notified_low_credit: false

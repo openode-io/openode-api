@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_10_141548) do
+ActiveRecord::Schema.define(version: 2019_08_10_230826) do
 
   create_table "users", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "email"
@@ -41,4 +41,45 @@ ActiveRecord::Schema.define(version: 2019_08_10_141548) do
     t.index ["token"], name: "index_users_on_token", unique: true
   end
 
+  create_table "websites", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "site_name"
+    t.text "data"
+    t.text "pm2_info"
+    t.boolean "valid"
+    t.datetime "last_access_at"
+    t.string "status"
+    t.string "type"
+    t.boolean "http_port_available"
+    t.datetime "first_online_at"
+    t.string "account_type"
+    t.datetime "credits_check_at"
+    t.string "domain_type"
+    t.string "domains"
+    t.integer "nb_launch_issues"
+    t.text "storage_areas"
+    t.string "container_id"
+    t.text "crontab"
+    t.boolean "redir_http_to_https"
+    t.text "config"
+    t.text "open_source"
+    t.string "instance_type"
+    t.string "sub_status"
+    t.text "dns"
+    t.boolean "is_educational"
+    t.string "cloud_type"
+    t.text "init_script"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["cloud_type"], name: "index_websites_on_cloud_type"
+    t.index ["credits_check_at"], name: "index_websites_on_credits_check_at"
+    t.index ["domains"], name: "index_websites_on_domains"
+    t.index ["last_access_at"], name: "index_websites_on_last_access_at"
+    t.index ["site_name"], name: "index_websites_on_site_name", unique: true
+    t.index ["status"], name: "index_websites_on_status"
+    t.index ["user_id"], name: "index_websites_on_user_id"
+    t.index ["valid"], name: "index_websites_on_valid"
+  end
+
+  add_foreign_key "websites", "users"
 end

@@ -3,10 +3,9 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '2.6.3'
 
-gem 'dotenv-rails'
-
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 5.2.3'
+
 
 gem 'mysql2'
 # Use Puma as the app server
@@ -17,6 +16,9 @@ gem 'puma', '~> 3.11'
 # gem 'redis', '~> 4.0'
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
+
+gem 'dotenv-rails'
+gem 'safe_attributes'
 
 # Use ActiveStorage variant
 # gem 'mini_magick', '~> 4.8'
