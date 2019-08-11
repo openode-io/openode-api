@@ -12,7 +12,7 @@ class InstancesController < ApplicationController
   private
 
   def authorize
-    token = params["token"]
+    token = request.headers["x-auth-token"] || params["token"]
 
     @user = User.find_by! token: token
   end

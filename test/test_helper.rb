@@ -10,6 +10,11 @@ class ActiveSupport::TestCase
     User.find_by email: "myadmin@thisisit.com"
   end
 
+  def default_headers_auth
+    {
+      "x-auth-token": "123456789"
+    }
+  end
 
   # Add more helper methods to be used by all tests here...
 end
