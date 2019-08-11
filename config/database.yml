@@ -16,10 +16,6 @@ default: &default
 development:
   <<: *default
   adapter: mysql2
-  #database: openode_dev
-  #username: root
-  #password: test1234
-  #host: localhost
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -28,6 +24,9 @@ test:
   <<: *default
   adapter: mysql2
   database: openode_test
+  username: travis
+  password:
+  host: localhost
 
 production:
   <<: *default
