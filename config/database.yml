@@ -7,10 +7,10 @@
 default: &default
   adapter: mysql2
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  database: <%= ENV.fetch("SQL_DATABASE") %>
-  username: <%= ENV.fetch("SQL_USER") %>
-  password: <%= ENV.fetch("SQL_PASSWORD") %>
-  host: <%= ENV.fetch("SQL_HOST") %>
+  database: <%= ENV.fetch("SQL_DATABASE") { "" } %>
+  username: <%= ENV.fetch("SQL_USER") { "" } %>
+  password: <%= ENV.fetch("SQL_PASSWORD") { "" } %>
+  host: <%= ENV.fetch("SQL_HOST") { "localhost" } %>
   timeout: 5000
 
 development:
