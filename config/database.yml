@@ -10,12 +10,12 @@ default: &default
   database: <%= ENV.fetch("SQL_DATABASE") { "" } %>
   username: <%= ENV.fetch("SQL_USER") { "" } %>
   password: <%= ENV.fetch("SQL_PASSWORD") { "" } %>
-  host: <%= ENV.fetch("SQL_HOST") { "localhost" } %>
+  host: <%= ENV.fetch("SQL_HOST") { "127.0.0.1" } %>
   timeout: 5000
 
 development:
   <<: *default
-  adapter: mysql2
+  database: openode_dev
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -30,5 +30,4 @@ test:
 
 production:
   <<: *default
-  adapter: mysql2
   database: openode

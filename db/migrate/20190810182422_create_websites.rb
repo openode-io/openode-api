@@ -30,6 +30,6 @@ class CreateWebsites < ActiveRecord::Migration[5.2]
       t.text :init_script
 
       t.timestamps
-    end
+    end  if ENV["DO_MIGRATIONS"]
   end
 end

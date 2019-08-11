@@ -1,0 +1,15 @@
+version: '3'
+services:
+  apiv2:
+    env_file:
+      - .env
+    restart: always
+    volumes:
+      - .:/opt/app/
+    ports:
+      - '3000:3000'
+    network_mode: "host"
+    build:
+      args:
+        ENV: production
+      context: .

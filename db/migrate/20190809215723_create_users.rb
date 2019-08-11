@@ -20,6 +20,6 @@ class CreateUsers < ActiveRecord::Migration[5.2]
       t.boolean :suspended, :default => 0
       t.datetime :created_at, default: -> { 'CURRENT_TIMESTAMP' }
       t.datetime :updated_at, default: -> { 'CURRENT_TIMESTAMP' }
-    end
+    end if ENV["DO_MIGRATIONS"]
   end
 end

@@ -34,6 +34,8 @@ module OpenodeApi
   end
 end
 
+puts "Env: #{ENV["RAILS_ENV"]}"
+
 puts "Verifying database connection..."
 require "./config/environment.rb"
 ActiveRecord::Base.establish_connection # Establishes connection
