@@ -21,4 +21,18 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body[0]["status"], "online"
   end
 
+  test "/instances/:instance_id with valid site name" do
+    get "/instances/testsite", as: :json, headers: default_headers_auth
+
+    assert_response :success
+    assert_equal response.parsed_body["site_name"], "testsite"
+    assert_equal response.parsed_body["status"], "online"
+  end
+
+  test "/instances/:instance_id with non existent site name" do
+    get "/instances/testsite10", as: :json, headers: default_headers_auth
+
+    assert_response :not_found
+  end
+
 end
