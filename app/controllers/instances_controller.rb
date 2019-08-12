@@ -21,8 +21,8 @@ class InstancesController < ApplicationController
   end
 
   def populate_website
-    if params["instance_id"]
-      @website = Website.find_by!(site_name: params["instance_id"])
+    if params["site_name"]
+      @website = Website.find_by!(site_name: params["site_name"])
     end
   end
 

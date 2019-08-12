@@ -13,4 +13,33 @@ class Website < ApplicationRecord
   enum type: [ :nodejs, :docker ]
   enum domain_type: [ :subdomain, :custom_domain ]
   enum cloud_type: [ :cloud, "private-cloud" ]
+
+  CONFIG_VARIABLES = [
+    {
+      variable: "SSL_CERTIFICATE_PATH",
+      description: "Certificate file. Example: certs/mysite.crt"
+    },
+    {
+      variable: "SSL_CERTIFICATE_KEY_PATH",
+      description: "Private key generated. Example: certs/privatekey.key"
+    },
+    {
+      variable: "REDIR_HTTP_TO_HTTPS",
+      description: "Will redirect HTTP traffic to HTTPS. An HTTPS server is required.",
+      type: "website",
+      enum: [true, false]
+    },
+    {
+      variable: "MAX_BUILD_DURATION",
+      description: "The build duration limit in seconds.",
+      min: 50,
+      default: 100,
+      max: 600
+    },
+    {
+      variable: "SKIP_PORT_CHECK",
+      description: "Skip the port verification while deploying.",
+      enum: ["true", "false", ""]
+    }
+  ].freeze
 end
