@@ -36,6 +36,12 @@ end
 
 # do we have all env vars ?
 
+if ENV["RAILS_ENV"] == "test"
+  require 'dotenv'
+  puts "loading test env"
+  Dotenv.load('.test.env')
+end
+
 required_env_vars = [
   "SQL_HOST",
   "SQL_USER",
