@@ -47,7 +47,8 @@ required_env_vars = [
   "SQL_USER",
   "SQL_PASSWORD",
   "SQL_DATABASE",
-  "AUTH_SALT"
+  "AUTH_SALT",
+  "VULTR_API_KEY"
 ]
 
 required_env_vars.each do |var|

@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+canada:
+  str_id: canada
+  full_name: Montreal (Canada)
+  country_fullname: Canada
+
+usa:
+  str_id: usa
+  full_name: New York (USA)
+  country_fullname: United States
