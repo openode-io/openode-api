@@ -34,7 +34,25 @@ module OpenodeApi
   end
 end
 
+# do we have all env vars ?
+
+required_env_vars = [
+  "SQL_HOST",
+  "SQL_USER",
+  "SQL_PASSWORD",
+  "SQL_DATABASE",
+  "AUTH_SALT"
+]
+
+required_env_vars.each do |var|
+  unless ENV[var]
+    raise "missing env var #{var}"
+  end
+end
+
 puts "Env: #{ENV["RAILS_ENV"]}"
+
+# Relational db connection verification
 
 puts "Verifying database connection..."
 require "./config/environment.rb"
