@@ -11,9 +11,9 @@ class Website < ApplicationRecord
   validates :domain_type, presence: true
   validates :cloud_type, presence: true
 
-  enum type: [ :nodejs, :docker ]
-  enum domain_type: [ :subdomain, :custom_domain ]
-  enum cloud_type: [ :cloud, "private-cloud" ]
+  validates_inclusion_of :type, :in => %w( nodejs docker )
+  validates_inclusion_of :domain_type, :in => %w( subdomain custom_domain )
+  validates_inclusion_of :cloud_type, :in => %w( cloud "private-cloud" )
 
   CONFIG_VARIABLES = [
     {

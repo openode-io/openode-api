@@ -13,7 +13,7 @@ one:
   first_online_at: 2019-08-10 14:24:22
   account_type: MyString
   credits_check_at: 2019-08-10 14:24:22
-  domain_type: MyString
+  domain_type: subdomain
   domains: MyText
   nb_launch_issues: 1
   storage_areas: MyText
@@ -42,7 +42,36 @@ two:
   first_online_at: 2019-08-10 14:24:22
   account_type: MyString
   credits_check_at: 2019-08-10 14:24:22
-  domain_type: MyString
+  domain_type: subdomain
+  domains: MyText
+  nb_launch_issues: 1
+  storage_areas: MyText
+  container_id: MyString
+  crontab: MyText
+  redir_http_to_https: false
+  config: MyText
+  open_source: MyText
+  instance_type: MyString
+  sub_status: MyString
+  dns: MyText
+  is_educational: false
+  cloud_type: MyString
+  init_script: MyText
+
+three:
+  user: two
+  site_name: www.what.is
+  data: MyText
+  pm2_info: MyText
+  valid: false
+  last_access_at: 2019-08-10 14:24:22
+  status: MyString
+  type:
+  http_port_available: false
+  first_online_at: 2019-08-10 14:24:22
+  account_type: MyString
+  credits_check_at: 2019-08-10 14:24:22
+  domain_type: custom_domain
   domains: MyText
   nb_launch_issues: 1
   storage_areas: MyText

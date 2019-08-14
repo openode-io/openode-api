@@ -19,3 +19,13 @@ two:
   port: 11000
   second_port: 11005
   running_port: 11005
+
+three:
+  website: three
+  location: usa
+  location_server: usa1
+  extra_storage: 1
+  nb_cpus: 1
+  port: 11000
+  second_port: 11005
+  running_port: 11005
