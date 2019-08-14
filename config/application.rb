@@ -48,7 +48,8 @@ required_env_vars = [
   "SQL_PASSWORD",
   "SQL_DATABASE",
   "AUTH_SALT",
-  "VULTR_API_KEY"
+  "VULTR_API_KEY",
+  "RAILS_LOG_TO_STDOUT"
 ]
 
 required_env_vars.each do |var|
