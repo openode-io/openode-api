@@ -3,6 +3,8 @@ class WebsiteLocation < ApplicationRecord
   belongs_to :location
   belongs_to :location_server
 
+  INTERNAL_DOMAINS = ["openode.io", "openode.dev"]
+
   def domain
     send "domain_#{self.website.domain_type}"
   end
