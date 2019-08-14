@@ -1,0 +1,16 @@
+class CreateWebsiteLocations < ActiveRecord::Migration[5.2]
+  def change
+    create_table :website_locations do |t|
+      t.references :website, foreign_key: true
+      t.references :location, foreign_key: true
+      t.references :location_server, foreign_key: true
+      t.integer :extra_storage
+      t.integer :nb_cpus
+      t.integer :port
+      t.integer :second_port
+      t.integer :running_port
+
+      t.timestamps
+    end  if ENV["DO_MIGRATIONS"]
+  end
+end

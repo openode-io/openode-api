@@ -1,0 +1,21 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  website: one
+  location: canada
+  location_server: canada1
+  extra_storage: 1
+  nb_cpus: 1
+  port: 11003
+  second_port: 11004
+  running_port: 11004
+
+two:
+  website: two
+  location: usa
+  location_server: usa1
+  extra_storage: 1
+  nb_cpus: 1
+  port: 11000
+  second_port: 11005
+  running_port: 11005

@@ -10,7 +10,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_13_114551) do
+ActiveRecord::Schema.define(version: 2019_08_14_032528) do
+
+  create_table "location_servers", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.bigint "location_id"
+    t.string "ip"
+    t.string "user"
+    t.string "password"
+    t.integer "ram_mb"
+    t.integer "cpus"
+    t.integer "disk_gb"
+    t.text "docker_snapshot"
+    t.string "cloud_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["cloud_type"], name: "index_location_servers_on_cloud_type"
+    t.index ["location_id"], name: "index_location_servers_on_location_id"
+  end
 
   create_table "locations", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "str_id"
@@ -47,6 +63,22 @@ ActiveRecord::Schema.define(version: 2019_08_13_114551) do
     t.index ["newsletter"], name: "index_users_on_newsletter"
     t.index ["notified_low_credit"], name: "index_users_on_notified_low_credit"
     t.index ["token"], name: "index_users_on_token", unique: true
+  end
+
+  create_table "website_locations", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.bigint "website_id"
+    t.bigint "location_id"
+    t.bigint "location_server_id"
+    t.integer "extra_storage"
+    t.integer "nb_cpus"
+    t.integer "port"
+    t.integer "second_port"
+    t.integer "running_port"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["location_id"], name: "index_website_locations_on_location_id"
+    t.index ["location_server_id"], name: "index_website_locations_on_location_server_id"
+    t.index ["website_id"], name: "index_website_locations_on_website_id"
   end
 
   create_table "websites", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
@@ -89,5 +121,9 @@ ActiveRecord::Schema.define(version: 2019_08_13_114551) do
     t.index ["valid"], name: "index_websites_on_valid"
   end
 
+  add_foreign_key "location_servers", "locations"
+  add_foreign_key "website_locations", "location_servers"
+  add_foreign_key "website_locations", "locations"
+  add_foreign_key "website_locations", "websites"
   add_foreign_key "websites", "users"
 end

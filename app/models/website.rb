@@ -3,6 +3,7 @@ class Website < ApplicationRecord
   self.inheritance_column = :_type
 
   belongs_to :user
+  has_many :website_locations
 
   validates :site_name, presence: true
   validates :site_name, uniqueness: true

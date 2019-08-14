@@ -1,0 +1,23 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+canada1:
+  location: canada
+  ip: 127.0.0.1
+  user: MyString
+  password: ASDFASDFFFFEF
+  ram_mb: 10000
+  cpus: 8
+  disk_gb: 2000
+  docker_snapshot: empty
+  cloud_type: cloud
+
+usa1:
+  location: usa
+  ip: 127.0.0.2
+  user: MyString
+  password: ASDFASDFFFFEF
+  ram_mb: 10000
+  cpus: 10
+  disk_gb: 1100
+  docker_snapshot: MyText
+  cloud_type: private-cloud
