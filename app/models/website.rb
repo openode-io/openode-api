@@ -5,6 +5,8 @@ class Website < ApplicationRecord
   belongs_to :user
   has_many :website_locations
 
+  scope :custom_domain, -> { where(domain_type: "custom_domain") }
+
   validates :site_name, presence: true
   validates :site_name, uniqueness: true
   validates :type, presence: true

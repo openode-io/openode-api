@@ -19,6 +19,13 @@ class WebsiteTest < ActiveSupport::TestCase
 
       assert w.save
     end
+
+    test "get all custom domain websites" do
+      custom_domain_sites = Website.custom_domain
+
+      assert custom_domain_sites.length == 1
+      assert custom_domain_sites[0].site_name == "www.what.is"
+    end
   end
 
 end

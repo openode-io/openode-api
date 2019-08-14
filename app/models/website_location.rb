@@ -1,3 +1,5 @@
+require 'public_suffix'
+
 class WebsiteLocation < ApplicationRecord
   belongs_to :website
   belongs_to :location
@@ -25,6 +27,14 @@ class WebsiteLocation < ApplicationRecord
 
   def domain_custom_domain
     self.website.site_name
+  end
+
+  def self.root_domain(domain_name)
+    PublicSuffix.domain(domain_name)
+  end
+
+  def root_domain
+    WebsiteLocation.root_domain(self.domain)
   end
 
 end

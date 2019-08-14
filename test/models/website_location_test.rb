@@ -29,4 +29,14 @@ class WebsiteLocationTest < ActiveSupport::TestCase
 
     assert wl.domain() == "www.what.is"
   end
+
+  test "root domain of google" do
+    assert WebsiteLocation.root_domain("www.google.com") == "google.com"
+  end
+
+  test "root domain of .nl" do
+    assert WebsiteLocation.root_domain("dev.api.abnbouw.nl") == "abnbouw.nl"
+  end
+
+
 end

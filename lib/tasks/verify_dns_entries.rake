@@ -4,15 +4,24 @@ namespace :verify_dns do
   desc "This task does nothing"
   task :entries do
 
+    # get all custom domain site names
+    site_names = Website.custom_domain.pluck(:site_name)
+
+    # get DNS entries
     Vultr.api_key = ENV["VULTR_API_KEY"]
     dns_entries = Vultr::DNS.list[:result]
 
     dns_entries.each do |dns_entry|
       next if WebsiteLocation::INTERNAL_DOMAINS.include? dns_entry["domain"]
 
-      w = Website.find_by site_name: dns_entry["domain"]
-      puts "cur entry.. #{dns_entry.inspect}"
-      puts "w -> #{w ? w.site_name : "N/A"}"
+      puts "current .. #{dns_entry.inspect}"
+
+      site_name_found = site_names.select do |name|
+        puts "s #{WebsiteLocation.root_domain(name)} .."
+        WebsiteLocation.root_domain(name) == dns_entry["domain"]
+      end
+
+      puts "site found ? #{site_name_found}"
     end
 
   end

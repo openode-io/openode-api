@@ -20,6 +20,7 @@ gem 'bcrypt', '~> 3.1.7'
 gem 'dotenv-rails'
 gem 'safe_attributes'
 gem 'vultr'
+gem 'public_suffix'
 
 # Use ActiveStorage variant
 # gem 'mini_magick', '~> 4.8'
