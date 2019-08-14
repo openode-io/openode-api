@@ -16,12 +16,15 @@ namespace :verify_dns do
 
       puts "current .. #{dns_entry.inspect}"
 
-      site_name_found = site_names.select do |name|
-        puts "s #{WebsiteLocation.root_domain(name)} .."
+      site_names_found = site_names.select do |name|
         WebsiteLocation.root_domain(name) == dns_entry["domain"]
       end
 
       puts "site found ? #{site_name_found}"
+
+      if site_names_found.length == 0
+        puts "warning !"
+      end
     end
 
   end
