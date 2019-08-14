@@ -20,7 +20,7 @@ namespace :verify_dns do
         WebsiteLocation.root_domain(name) == dns_entry["domain"]
       end
 
-      puts "site found ? #{site_name_found}"
+      puts "site found ? #{site_names_found}"
 
       if site_names_found.length == 0
         puts "warning !"
