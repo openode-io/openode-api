@@ -8,6 +8,7 @@ Rails.application.routes.draw do
 
   scope :global do
     get 'available-configs', to: 'global#available_configs'
+    get 'test', to: 'global#test'
   end
 
   scope :instances do

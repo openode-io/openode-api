@@ -1,6 +1,12 @@
 require 'test_helper'
 
 class GlobalControllerTest < ActionDispatch::IntegrationTest
+  test "/global/test" do
+    get "/global/test", as: :json
+
+    assert_response :success
+  end
+
   test "/global/available-configs" do
     get "/global/available-configs", as: :json
 
