@@ -19,7 +19,6 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     website = Website.find_by site_name: "testsite2"
     wl = website.website_locations[0]
 
-    puts "wl domain #{wl.domain()}"
     assert wl.domain() == "testsite2.us.openode.io"
   end
 
