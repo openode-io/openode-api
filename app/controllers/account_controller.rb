@@ -2,7 +2,11 @@ class AccountController < ApplicationController
 
   # get a token given a login-passwd
   def get_token
-    json_res(Website::CONFIG_VARIABLES)
+    user = User.find_by! email: params["email"]
+
+    user.authenticate! params["password"]
+
+    json_res("\"#{user.token}\"")
   end
 
   private

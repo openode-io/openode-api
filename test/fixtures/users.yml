@@ -2,11 +2,11 @@
 
 one:
   email: myadmin@thisisit.com
-  password_hash: MyString
+  password_hash: $2a$10$BSZDSZNGxqkO8hka09TDIeO6tIJevwsLmHtk9IvPXbBISxe.PvDJG
   reset_token: MyString
   is_admin: false
   first_admin_entry_at: 2019-08-09 17:57:23
-  token: 123456789
+  token: 1234s56789
   day_one_mail_at: 2019-08-09 17:57:23
   credits:
   last_free_credit_distribute_at: 2019-08-09 17:57:23
@@ -22,7 +22,7 @@ one:
 
 two:
   email: myadmin2@thisisit.com
-  password_hash: MyString
+  password_hash: $2a$10$BSZDSZNGxqkO8hka09TDIeO6tIJevwsLmHtk9IvPXbBISxe.PvDJG
   reset_token: MyString
   is_admin: false
   first_admin_entry_at: 2019-08-09 17:57:23

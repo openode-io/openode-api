@@ -10,5 +10,9 @@ module ExceptionHandler
     rescue_from ActiveRecord::RecordInvalid do |e|
       json_res({ message: e.message }, :unprocessable_entity)
     end
+
+    rescue_from User::NotAuthorized do |e|
+      json_res({ message: e.message }, :unauthorized)
+    end
   end
 end

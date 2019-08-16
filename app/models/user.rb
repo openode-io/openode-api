@@ -2,6 +2,7 @@
 require 'bcrypt'
 
 class User < ApplicationRecord
+  NotAuthorized = Class.new(StandardError)
 
   has_many :websites
 
@@ -11,6 +12,16 @@ class User < ApplicationRecord
 
   validates :email, uniqueness: true
   validates :token, uniqueness: true
+
+  def before_save
+    self.password_hash = User.encrypt_passwd(self.password_hash)
+  end
+
+  def authenticate!(passwd)
+    if ! User.passwd_valid?(self.password_hash, passwd)
+      raise NotAuthorized.new("Not authorized")
+    end
+  end
 
   def self.encrypt_passwd(passwd, salt = ENV["AUTH_SALT"])
     BCrypt::Engine.hash_secret(passwd, salt)
