@@ -4,7 +4,7 @@ class AccountController < ApplicationController
   def get_token
     user = User.find_by! email: params["email"]
 
-    user.authenticate! params["password"]
+    user.verify_authentication params["password"]
 
     json_res("\"#{user.token}\"")
   end
