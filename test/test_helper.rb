@@ -12,7 +12,7 @@ class ActiveSupport::TestCase
 
   def default_headers_auth
     {
-      "x-auth-token": "123456789"
+      "x-auth-token": "1234s56789"
     }
   end
 
