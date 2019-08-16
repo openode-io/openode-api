@@ -9,6 +9,22 @@ class AccountController < ApplicationController
     json_res("\"#{user.token}\"")
   end
 
+  def register
+    user = User.create!(user_params)
+
+    # TODO: add registration email
+
+    json_res({
+      id: user.id,
+      email: user.email,
+      token: user.token
+    })
+  end
+
   private
+
+  def user_params
+    params.require(:account).permit(:email, :password, :password_confirmation, :newsletter)
+  end
 
 end

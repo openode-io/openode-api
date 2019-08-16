@@ -22,4 +22,33 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unauthorized
   end
+
+  test "/account/register valid" do
+    account = {
+      email: "myadminvalidregister@thisisit.com",
+      password: "Helloworld234",
+      password_confirmation: "Helloworld234"
+    }
+
+    post "/account/register", params: account, as: :json
+
+    assert_response :success
+
+    user = User.find(response.parsed_body["id"])
+
+    assert_equal user.email, account[:email]
+    assert_equal user.token, response.parsed_body["token"]
+  end
+
+  test "/account/register password does not match" do
+    account = {
+      email: "myadminvalidregister@thisisit.com",
+      password: "Helloworld234",
+      password_confirmation: "Helloworld234567"
+    }
+
+    post "/account/register", params: account, as: :json
+
+    assert response.status >= 400
+  end
 end

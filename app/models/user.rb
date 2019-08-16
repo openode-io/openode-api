@@ -4,12 +4,13 @@ require 'bcrypt'
 class User < ApplicationRecord
   NotAuthorized = Class.new(StandardError)
 
+  alias_attribute :password, :password_hash
+  attr_accessor   :password_confirmation
+
   has_many :websites
 
   validates :email, uniqueness: true
   validates :email, presence: true
-  validates :token, uniqueness: true
-  validates :token, presence: true
 
   validates :password_hash, presence: true
   PASSWORD_FORMAT = /\A
@@ -24,9 +25,18 @@ class User < ApplicationRecord
     }
   }
 
+  validate :verify_passwords_match, on: :create
+
+  def verify_passwords_match
+    if self.password_confirmation && self.password != self.password_confirmation
+      self.errors.add(:password_confirmation, "The password verification does not match.")
+    end
+  end
+
   before_validation do
     self.activated = false if self.activated.nil?
     self.activation_hash ||= SecureRandom.hex(16)
+    self.token ||= SecureRandom.hex(16)
     self.email = self.email.downcase if self.email
   end
 

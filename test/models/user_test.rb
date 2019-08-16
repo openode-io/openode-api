@@ -79,7 +79,7 @@ class UserTest < ActiveSupport::TestCase
   test "regen api token" do
     attribs = {
       email: "USER13@site.com" ,
-      password_hash: "NotW3akpasswd!",
+      password: "NotW3akpasswd!",
       is_admin: false,
       token: "1234s567891011123",
       credits: 80

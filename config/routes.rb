@@ -3,6 +3,7 @@ Rails.application.routes.draw do
 
   scope :account do
     post 'getToken', to: 'account#get_token'
+    post 'register', to: 'account#register'
   end
 
   scope :global do
