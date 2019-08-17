@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   end
 
   scope :global do
+    get 'available-locations', to: 'global#available_locations'
     get 'available-configs', to: 'global#available_configs'
     get 'test', to: 'global#test'
   end

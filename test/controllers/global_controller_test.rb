@@ -23,6 +23,21 @@ class GlobalControllerTest < ActionDispatch::IntegrationTest
     expected_variables.each do |var|
       assert_equal response.parsed_body.any? { |v| v["variable"] == var }, true
     end
+  end
 
+  test "/global/available-locations" do
+    get "/global/available-locations", as: :json
+
+    assert_response :success
+
+    canada = response.parsed_body.find { |l| l["id"] == "canada" }
+    assert_equal canada["id"], "canada"
+    assert_equal canada["name"], "Montreal (Canada)"
+    assert_equal canada["country_fullname"], "Canada"
+
+    usa = response.parsed_body.find { |l| l["id"] == "usa" }
+    assert_equal usa["id"], "usa"
+    assert_equal usa["name"], "New York (USA)"
+    assert_equal usa["country_fullname"], "United States"
   end
 end
