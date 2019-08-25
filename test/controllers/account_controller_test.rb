@@ -38,6 +38,9 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal user.email, account[:email]
     assert_equal user.token, response.parsed_body["token"]
+
+    mail_sent = ActionMailer::Base.deliveries.first
+    assert_equal mail_sent.subject, "Welcome to opeNode!"
   end
 
   test "/account/register password does not match" do

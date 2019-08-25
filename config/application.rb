@@ -33,6 +33,12 @@ module OpenodeApi
     config.api_only = true
 
     config.eager_load_paths << "#{Rails.root}/lib"
+
+    config.action_mailer.delivery_method = :mailgun
+    config.action_mailer.mailgun_settings = {
+      api_key: ENV["MAILGUN_API_KEY"],
+      domain: ENV["MAILGUN_DOMAIN"],
+    }
   end
 end
 
@@ -51,7 +57,9 @@ required_env_vars = [
   "SQL_DATABASE",
   "AUTH_SALT",
   "ACTIVE_CLOUDS",
-  "RAILS_LOG_TO_STDOUT"
+  "RAILS_LOG_TO_STDOUT",
+  "MAILGUN_API_KEY",
+  "MAILGUN_DOMAIN"
 ]
 
 required_env_vars.each do |var|
