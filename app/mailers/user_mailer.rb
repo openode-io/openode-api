@@ -4,8 +4,9 @@ class UserMailer < ApplicationMailer
     @user = params[:user]
     @activation_link =
       "https://www.openode.io/activate/#{@user.id}/#{@user.activation_hash}"
+    mail_to = @user.email
 
-    mail(to: @user.email, subject: 'Welcome to opeNode!')
+    mail(to: mail_to, subject: 'Welcome to opeNode!')
   end
 
 end

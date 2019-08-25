@@ -39,6 +39,8 @@ module OpenodeApi
       api_key: ENV["MAILGUN_API_KEY"],
       domain: ENV["MAILGUN_DOMAIN"],
     }
+
+    config.action_cable.disable_request_forgery_protection = true
   end
 end
 
