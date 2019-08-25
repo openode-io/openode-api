@@ -1,5 +1,7 @@
 class Website < ApplicationRecord
 
+  serialize :domains, Array
+
   self.inheritance_column = :_type
 
   belongs_to :user

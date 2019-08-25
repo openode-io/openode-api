@@ -14,7 +14,7 @@ one:
   account_type: MyString
   credits_check_at: 2019-08-10 14:24:22
   domain_type: subdomain
-  domains: MyText
+  domains: []
   nb_launch_issues: 1
   storage_areas: MyText
   container_id: MyString
@@ -43,7 +43,7 @@ two:
   account_type: MyString
   credits_check_at: 2019-08-10 14:24:22
   domain_type: subdomain
-  domains: MyText
+  domains: []
   nb_launch_issues: 1
   storage_areas: MyText
   container_id: MyString
@@ -72,7 +72,7 @@ three:
   account_type: MyString
   credits_check_at: 2019-08-10 14:24:22
   domain_type: custom_domain
-  domains: MyText
+  domains: ["www.what.is"]
   nb_launch_issues: 1
   storage_areas: MyText
   container_id: MyString

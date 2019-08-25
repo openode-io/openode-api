@@ -20,6 +20,21 @@ class WebsiteTest < ActiveSupport::TestCase
       assert w.save
     end
 
+    # domains:
+
+    test "getting empty domains" do
+      w = Website.where(site_name: "testsite").first
+
+      assert w.domains.length == 0
+    end
+
+    test "getting domains" do
+      w = Website.where(site_name: "www.what.is").first
+
+      assert_equal w.domains.length, 1
+      assert_equal w.domains[0], "www.what.is"
+    end
+
     test "get all custom domain websites" do
       custom_domain_sites = Website.custom_domain
 
