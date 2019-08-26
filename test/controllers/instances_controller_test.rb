@@ -19,6 +19,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body.length, 1
     assert_equal response.parsed_body[0]["site_name"], "testsite"
     assert_equal response.parsed_body[0]["status"], "online"
+
+    assert_equal response.parsed_body[0]["domains"], []
   end
 
   test "/instances/:instance_id with valid site name" do
