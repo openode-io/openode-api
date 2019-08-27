@@ -5,6 +5,8 @@ class WebsiteLocation < ApplicationRecord
   belongs_to :location
   belongs_to :location_server
 
+  validates :extra_storage, numericality: { only_integer: true, less_than_or_equal_to: 10 }
+
   INTERNAL_DOMAINS = ["openode.io", "openode.dev"]
 
   def domain
@@ -43,13 +45,12 @@ class WebsiteLocation < ApplicationRecord
     self.save!
   end
   ###
-  let newExtraStorage = amountGB + this.localizedWebsiteLocation.extra_storage;
+  #let newExtraStorage = amountGB + this.localizedWebsiteLocation.extra_storage;
 
-    if (newExtraStorage > 10) {
-      throw new Error(`The current extra storage is limited ${10} GB`);
-    }
-
-    return await this.changeExtraStorage(newExtraStorage);
+  #  if (newExtraStorage > 10) {
+  #    throw new Error(`The current extra storage is limited ${10} GB`);
+  #  }
+  #  return await this.changeExtraStorage(newExtraStorage);
 
 
 end
