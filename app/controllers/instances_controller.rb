@@ -2,6 +2,7 @@ class InstancesController < ApplicationController
 
   before_action :authorize
   before_action :populate_website
+  before_action :populate_website_location
 
   def index
     # https://scotch.io/tutorials/build-a-restful-json-api-with-rails-5-part-one
@@ -22,8 +23,14 @@ class InstancesController < ApplicationController
 
   def populate_website
     if params["site_name"]
-      @website = Website.find_by!(site_name: params["site_name"])
+      @website = Website.find_by! site_name: params["site_name"]
     end
   end
 
+  def populate_website_location
+    if params["location_str_id"]
+      @location = Location.find_by! str_id: params["location_str_id"]
+      @website_location = @website.website_locations.find_by! location_id: @location.id
+    end
+  end
 end

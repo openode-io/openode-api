@@ -19,6 +19,8 @@ class Website < ApplicationRecord
   validates_inclusion_of :domain_type, :in => %w( subdomain custom_domain )
   validates_inclusion_of :cloud_type, :in => %w( cloud "private-cloud" )
 
+  validates :extra_storage, numericality: { only_integer: true, less_than_or_equal_to: 10 }
+
   CONFIG_VARIABLES = [
     {
       variable: "SSL_CERTIFICATE_PATH",

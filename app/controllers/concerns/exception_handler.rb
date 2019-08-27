@@ -11,6 +11,10 @@ module ExceptionHandler
       json_res({ message: e.message }, :unprocessable_entity)
     end
 
+    rescue_from ApplicationRecord::ValidationError do |e|
+      json_res({ message: e.message }, :bad_request)
+    end
+
     rescue_from User::NotAuthorized do |e|
       json_res({ message: e.message }, :unauthorized)
     end
