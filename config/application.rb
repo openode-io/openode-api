@@ -48,11 +48,10 @@ end
 
 # do we have all env vars ?
 
-if ENV["RAILS_ENV"] == "test"
-  require 'dotenv'
-  puts "loading test env"
-  Dotenv.load('.test.env')
-end
+require 'dotenv'
+Dotenv.load(".#{ENV["RAILS_ENV"]}.env")
+
+
 
 required_env_vars = [
   "SQL_HOST",
@@ -61,7 +60,6 @@ required_env_vars = [
   "SQL_DATABASE",
   "AUTH_SALT",
   "ACTIVE_CLOUDS",
-  "RAILS_LOG_TO_STDOUT",
   "MAILGUN_API_KEY",
   "MAILGUN_DOMAIN"
 ]
