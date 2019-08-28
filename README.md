@@ -19,6 +19,7 @@ Things you may want to cover:
 
 * Database initialization
 
+
 * How to run the test suite
 
 * Services (job queues, cache servers, search engines, etc.)
@@ -26,3 +27,10 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+
+# Install
+
+ * Install rvm, https://rvm.io/
+ * rvm install ##.##.## where ##.##.## is the ruby version, see Gemfile
+ * apt-get install libmysqlclient-dev
+ * bundle install
