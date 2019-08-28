@@ -41,6 +41,8 @@ module OpenodeApi
     }
 
     config.action_cable.disable_request_forgery_protection = true
+
+    config.secret_key_base = ENV["SECRET_KEY_BASE"]
   end
 end
 

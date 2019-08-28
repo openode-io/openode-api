@@ -21,7 +21,7 @@ namespace :verify_dns do
 
       if site_names_found.length == 0
         Rails.logger.info "Removing DNS domain #{dns_entry}"
-        #Vultr::DNS.delete_domain(domain: dns_entry["domain"])
+        Vultr::DNS.delete_domain(domain: dns_entry["domain"])
       end
     end
 
