@@ -4,19 +4,19 @@ module ExceptionHandler
 
   included do
     rescue_from ActiveRecord::RecordNotFound do |e|
-      json_res({ message: e.message }, :not_found)
+      json_res({ error: e.message }, :not_found)
     end
 
     rescue_from ActiveRecord::RecordInvalid do |e|
-      json_res({ message: e.message }, :unprocessable_entity)
+      json_res({ error: e.message }, :unprocessable_entity)
     end
 
     rescue_from ApplicationRecord::ValidationError do |e|
-      json_res({ message: e.message }, :bad_request)
+      json_res({ error: e.message }, :bad_request)
     end
 
     rescue_from User::NotAuthorized do |e|
-      json_res({ message: e.message }, :unauthorized)
+      json_res({ error: e.message }, :unauthorized)
     end
   end
 end

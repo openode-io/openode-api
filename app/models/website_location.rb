@@ -41,16 +41,7 @@ class WebsiteLocation < ApplicationRecord
 
   ### storage
   def increase_storage!(amount_gb)
-    self.amount_gb + amount_gb
+    self.extra_storage += amount_gb
     self.save!
   end
-  ###
-  #let newExtraStorage = amountGB + this.localizedWebsiteLocation.extra_storage;
-
-  #  if (newExtraStorage > 10) {
-  #    throw new Error(`The current extra storage is limited ${10} GB`);
-  #  }
-  #  return await this.changeExtraStorage(newExtraStorage);
-
-
 end
