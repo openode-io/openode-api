@@ -6,6 +6,7 @@ class Website < ApplicationRecord
 
   belongs_to :user
   has_many :website_locations
+  has_many :events, foreign_key: :ref_id, class_name: :WebsiteEvent
 
   scope :custom_domain, -> { where(domain_type: "custom_domain") }
 

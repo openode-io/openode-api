@@ -1,16 +1,11 @@
 class StoragesController < InstancesController
 
   before_action :prepare_storage_change
+  after_action :record_website_event
 
   def increase_storage
     @website_location.increase_storage!(@gb_to_change)
     @website_location.reload
-
-    # TODO
-		#logActivityStream(req.query.website, `Increase Storage`, {
-		#	add: `${amountGB} GBs`,
-		#	total_extra_storage: `${webLocation.extra_storage} GBs`
-		#});
 
     json_res({
       result: "success",
@@ -26,6 +21,17 @@ class StoragesController < InstancesController
     if @gb_to_change <= 0
       raise ApplicationRecord::ValidationError.new("amount_gb must be positive")
     end
+  end
+
+  def record_website_event
+    WebsiteEvent.create({
+      ref_id: @website.id,
+      obj: {
+        title: "Extra Storage modification",
+        extra_storage_changed: "#{@gb_to_change} GBs",
+        total_extra_storage: "#{@website_location.extra_storage} GBs"
+      }
+    })
   end
 
 end

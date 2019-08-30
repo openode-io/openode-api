@@ -9,6 +9,14 @@ class StoragesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal response.parsed_body["result"], "success"
     assert_equal response.parsed_body["Extra Storage (GB)"], 3
+
+    website = Website.find_by! site_name: "testsite"
+    website_location = website.website_locations.first
+
+    assert_equal website_location.extra_storage, 3
+
+    assert_equal website.events.count, 1
+    assert_equal website.events[0].obj["title"], "Extra Storage modification"
   end
 
   test "POST /instances/:instance_id/increase_storage with negative gb" do
