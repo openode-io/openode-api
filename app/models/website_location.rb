@@ -40,7 +40,7 @@ class WebsiteLocation < ApplicationRecord
   end
 
   ### storage
-  def increase_storage!(amount_gb)
+  def change_storage!(amount_gb)
     self.extra_storage += amount_gb
     self.save!
   end
