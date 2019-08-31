@@ -34,7 +34,7 @@ class Website < ApplicationRecord
       variable: "REDIR_HTTP_TO_HTTPS",
       description: "Will redirect HTTP traffic to HTTPS. An HTTPS server is required.",
       type: "website",
-      enum: [true, false]
+      enum: ["true", "false", ""]
     },
     {
       variable: "MAX_BUILD_DURATION",
@@ -49,6 +49,10 @@ class Website < ApplicationRecord
       enum: ["true", "false", ""]
     }
   ].freeze
+
+  def self.config_def(var_name)
+    Website::CONFIG_VARIABLES.find { |c| c[:variable] == var_name }
+  end
 
   def self.valid_config_variable?(var_name)
     Website::CONFIG_VARIABLES

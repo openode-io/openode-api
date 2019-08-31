@@ -13,21 +13,7 @@ class InstancesController < ApplicationController
   def show
     json_res(@website)
   end
-
-  def get_config
-    var_name = params["variable"]
-
-    if ! Website.valid_config_variable?(var_name)
-      msg = "Invalid variable name, Run openode available-configs for the list of valid variables."
-      raise ApplicationRecord::ValidationError.new(msg)
-    end
-
-    json_res({
-      result: "success",
-      value: @website.configs[var_name]
-    })
-  end
-
+  
   private
 
   def authorize
