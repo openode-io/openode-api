@@ -17,9 +17,33 @@ class Website < ApplicationRecord
   validates :domain_type, presence: true
   validates :cloud_type, presence: true
 
+  validate :configs_must_comply
+
   validates_inclusion_of :type, :in => %w( nodejs docker )
   validates_inclusion_of :domain_type, :in => %w( subdomain custom_domain )
   validates_inclusion_of :cloud_type, :in => %w( cloud "private-cloud" )
+
+  def configs_must_comply
+    self.configs ||= {}
+
+    self.configs.each do |var_name, value|
+      config = Website.config_def(var_name)
+
+      next if ! config
+
+      if config[:enum] && ! config[:enum].include?(value)
+        errors.add(:configs, "Invalid value, valid ones: #{config[:enum]}")
+      end
+
+      if config[:min] && config[:max]
+        parsed_val = value.to_f
+
+        if ! (parsed_val.present? && parsed_val >= config[:min] && parsed_val <= config[:max])
+          errors.add(:configs, "Invalid value, , min = #{config[:min]}, max = #{config[:max]}")
+        end
+      end
+    end
+  end
 
   CONFIG_VARIABLES = [
     {

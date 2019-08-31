@@ -13,22 +13,7 @@ class ConfigsController < InstancesController
     config = Website.config_def(@var_name)
     value = params["value"]
 
-    if config[:enum] && ! config[:enum].include?(value)
-      msg = "Invalid value, valid ones: #{config[:enum]}"
-      raise ApplicationRecord::ValidationError.new(msg)
-    end
-
-    if config[:min] && config[:max]
-      parsed_val = value.to_f
-
-      if ! (parsed_val.present? && parsed_val >= config[:min] && parsed_val <= config[:max])
-        msg = "Invalid value, min = #{config[:min]}, max = #{config[:max]}"
-        raise ApplicationRecord::ValidationError.new(msg)
-      end
-    end
-
     @website.configs ||= {}
-
     @website.configs["#{@var_name}"] = value
 
     if config[:type] == "website"
@@ -38,11 +23,15 @@ class ConfigsController < InstancesController
 
     @website.save!
 
-    @website.reload
+    @website_event_obj = {
+      title: "Config value changed - #{@var_name}",
+      variable: @var_name,
+      value: value
+    }
 
     json_res({
       result: "success",
-      configs: @website.configs
+      configs: @website.reload.configs
     })
   end
 

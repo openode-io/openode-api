@@ -66,6 +66,9 @@ class ConfigsTest < ActionDispatch::IntegrationTest
     w = Website.find_by site_name: "testsite"
 
     assert_equal w.configs["MAX_BUILD_DURATION"], "60"
+
+    assert_equal w.events.count, 1
+    assert_equal w.events[0].obj["title"], "Config value changed - MAX_BUILD_DURATION"
   end
 
   test "/instances/:instance_id/set-config with valid variable, min, max invalid" do
@@ -74,7 +77,7 @@ class ConfigsTest < ActionDispatch::IntegrationTest
       params: { variable: "MAX_BUILD_DURATION", value: "20" },
       headers: default_headers_auth
 
-    assert_response :bad_request
+    assert_response :unprocessable_entity
   end
 
 end
