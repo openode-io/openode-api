@@ -18,6 +18,15 @@ class ConfigsController < InstancesController
       raise ApplicationRecord::ValidationError.new(msg)
     end
 
+    if config[:min] && config[:max]
+      parsed_val = value.to_f
+
+      if ! (parsed_val.present? && parsed_val >= config[:min] && parsed_val <= config[:max])
+        msg = "Invalid value, min = #{config[:min]}, max = #{config[:max]}"
+        raise ApplicationRecord::ValidationError.new(msg)
+      end
+    end
+
     @website.configs ||= {}
 
     @website.configs["#{@var_name}"] = value

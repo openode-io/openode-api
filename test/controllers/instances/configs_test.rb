@@ -44,4 +44,37 @@ class ConfigsTest < ActionDispatch::IntegrationTest
     assert_equal w.configs["SKIP_PORT_CHECK"], "true"
   end
 
+  test "/instances/:instance_id/set-config with valid variable" do
+    post "/instances/testsite/set-config",
+      as: :json,
+      params: { variable: "SSL_CERTIFICATE_PATH", value: "path/sub" },
+      headers: default_headers_auth
+
+    assert_response :success
+    w = Website.find_by site_name: "testsite"
+
+    assert_equal w.configs["SSL_CERTIFICATE_PATH"], "path/sub"
+  end
+
+  test "/instances/:instance_id/set-config with valid variable, min, max" do
+    post "/instances/testsite/set-config",
+      as: :json,
+      params: { variable: "MAX_BUILD_DURATION", value: "60" },
+      headers: default_headers_auth
+
+    assert_response :success
+    w = Website.find_by site_name: "testsite"
+
+    assert_equal w.configs["MAX_BUILD_DURATION"], "60"
+  end
+
+  test "/instances/:instance_id/set-config with valid variable, min, max invalid" do
+    post "/instances/testsite/set-config",
+      as: :json,
+      params: { variable: "MAX_BUILD_DURATION", value: "20" },
+      headers: default_headers_auth
+
+    assert_response :bad_request
+  end
+
 end
