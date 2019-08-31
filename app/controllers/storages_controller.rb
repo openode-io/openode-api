@@ -1,25 +1,25 @@
 class StoragesController < InstancesController
 
   def increase_storage
-    self.prepare_storage_change(1)
+    self.prepare_storage_change({ sign: 1 })
     self.change_storage(@gb_to_change)
   end
 
   def decrease_storage
-    self.prepare_storage_change(-1)
+    self.prepare_storage_change({ sign: -1})
     self.change_storage(- @gb_to_change)
   end
 
   protected
 
-  def prepare_storage_change(sign)
+  def prepare_storage_change(opts = {})
     @gb_to_change = params["amount_gb"].to_i
 
     if @gb_to_change <= 0
       raise ApplicationRecord::ValidationError.new("amount_gb must be positive")
     end
 
-    signed_gb_to_change = sign * @gb_to_change
+    signed_gb_to_change = opts[:sign] * @gb_to_change
 
     @website_event_obj = {
       title: "Extra Storage modification",

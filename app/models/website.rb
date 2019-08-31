@@ -1,6 +1,7 @@
 class Website < ApplicationRecord
 
-  serialize :domains, Array
+  serialize :domains, JSON
+  serialize :configs, JSON
 
   self.inheritance_column = :_type
 
@@ -48,4 +49,10 @@ class Website < ApplicationRecord
       enum: ["true", "false", ""]
     }
   ].freeze
+
+  def self.valid_config_variable?(var_name)
+    Website::CONFIG_VARIABLES
+      .map { |var| var[:variable] }
+      .include? var_name
+  end
 end

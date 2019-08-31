@@ -17,6 +17,7 @@ Rails.application.routes.draw do
   scope :instances do
     get '/', to: 'instances#index'
     get '/:site_name/', to: 'instances#show'
+    get '/:site_name/get-config', to: 'instances#get_config'
 
     post '/:site_name/increase-storage', to: 'storages#increase_storage'
   end

@@ -20,7 +20,7 @@ class CreateWebsites < ActiveRecord::Migration[5.2]
       t.string :container_id
       t.text :crontab
       t.boolean :redir_http_to_https
-      t.text :config
+      t.text :configs
       t.text :open_source
       t.string :instance_type
       t.string :sub_status
