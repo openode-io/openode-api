@@ -48,9 +48,45 @@ class WebsiteLocation < ApplicationRecord
     end
   end
 
+  def self.dns_entry_to_id(entry)
+    Digest::MD5.hexdigest(entry.to_json)
+  end
+
+  def compute_dns(opts = {})
+    result = (website.dns || []).clone
+
+    if opts[:with_auto_a] && (opts[:location_server] || self.location_server)
+      server = opts[:location_server] || self.location_server
+      computed_domains = self.compute_domains
+
+      result += WebsiteLocation.compute_a_record_dns(server, computed_domains)
+    end
+
+    result
+      .map { |r| r["id"] = WebsiteLocation.dns_entry_to_id(r) ; r }
+      .uniq { |r| r["id"] }
+  end
+
   ### storage
   def change_storage!(amount_gb)
     self.extra_storage += amount_gb
     self.save!
   end
+
+  def self.compute_a_record_dns(location_server, computed_domains)
+    result = []
+
+    computed_domains.each do |domain|
+      result << {
+        "domainName" => domain,
+        "type" => "A",
+        "value" => location_server.ip
+      }
+    end
+
+    result
+  end
+
+  protected
+
 end

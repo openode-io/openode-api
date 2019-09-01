@@ -84,14 +84,4 @@ class Website < ApplicationRecord
       .map { |var| var[:variable] }
       .include? var_name
   end
-
-  def compute_dns(opts = {  })
-    result = (self.dns || []).clone
-
-    if opts[:with_auto_a] && opts[:location_server]
-      # todo
-    end
-
-    result
-  end
 end
