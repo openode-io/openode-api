@@ -9,7 +9,8 @@ class WebsiteLocation < ApplicationRecord
 
   INTERNAL_DOMAINS = ["openode.io", "openode.dev"]
 
-  def domain
+  # main domain used internally
+  def main_domain
     send "domain_#{self.website.domain_type}"
   end
 
@@ -36,7 +37,15 @@ class WebsiteLocation < ApplicationRecord
   end
 
   def root_domain
-    WebsiteLocation.root_domain(self.domain)
+    WebsiteLocation.root_domain(self.main_domain)
+  end
+
+  def compute_domains
+    if website.domain_type == "subdomain"
+      [self.main_domain]
+    elsif website.domain_type == "custom_domain"
+      website.domains
+    end
   end
 
   ### storage

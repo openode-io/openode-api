@@ -2,12 +2,13 @@ class Website < ApplicationRecord
 
   serialize :domains, JSON
   serialize :configs, JSON
+  serialize :dns, JSON
 
   self.inheritance_column = :_type
 
   belongs_to :user
-  has_many :website_locations
-  has_many :events, foreign_key: :ref_id, class_name: :WebsiteEvent
+  has_many :website_locations, dependent: :destroy
+  has_many :events, foreign_key: :ref_id, class_name: :WebsiteEvent, dependent: :destroy
 
   scope :custom_domain, -> { where(domain_type: "custom_domain") }
 
@@ -82,5 +83,15 @@ class Website < ApplicationRecord
     Website::CONFIG_VARIABLES
       .map { |var| var[:variable] }
       .include? var_name
+  end
+
+  def compute_dns(opts = {  })
+    result = (self.dns || []).clone
+
+    if opts[:with_auto_a] && opts[:location_server]
+      # todo
+    end
+
+    result
   end
 end

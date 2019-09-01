@@ -22,7 +22,6 @@ one:
   open_source: MyText
   instance_type: MyString
   sub_status: MyString
-  dns: MyText
   is_educational: false
   cloud_type: cloud
   init_script: MyText
@@ -49,7 +48,6 @@ two:
   open_source: MyText
   instance_type: MyString
   sub_status: MyString
-  dns: MyText
   is_educational: false
   cloud_type: cloud
   init_script: MyText
@@ -76,7 +74,6 @@ three:
   open_source: MyText
   instance_type: MyString
   sub_status: MyString
-  dns: MyText
   is_educational: false
   cloud_type: cloud
   init_script: MyText

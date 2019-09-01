@@ -13,7 +13,7 @@ class InstancesController < ApplicationController
   def show
     json_res(@website)
   end
-  
+
   private
 
   def authorize
@@ -32,6 +32,7 @@ class InstancesController < ApplicationController
     if params["location_str_id"]
       @location = Location.find_by! str_id: params["location_str_id"]
       @website_location = @website.website_locations.find_by! location_id: @location.id
+      @location_server = @website_location.location_server
     end
   end
 
