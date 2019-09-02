@@ -15,6 +15,14 @@ class InstancesController < ApplicationController
     json_res(@website)
   end
 
+  protected
+
+  def ensure_location
+    if ! @website_location
+      @website_location = @website.website_locations.first
+    end
+  end
+
   private
 
   def authorize

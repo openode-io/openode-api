@@ -14,10 +14,4 @@ class DnsController < InstancesController
 
   protected
 
-  def ensure_location
-    if ! @website_location
-      @website_location = @website.website_locations.first
-    end
-  end
-
 end
