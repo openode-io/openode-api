@@ -34,6 +34,12 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body["status"], "online"
   end
 
+  test "/instances/:instance_id with custom domain" do
+    get "/instances/www.what.is", as: :json, headers: default_headers_auth
+
+    assert_response :success
+  end
+
   test "/instances/:instance_id with non existent site name" do
     get "/instances/testsite10", as: :json, headers: default_headers_auth
 

@@ -11,6 +11,7 @@ class InstancesController < ApplicationController
   end
 
   def show
+    puts "paramsmss #{params.inspect}"
     json_res(@website)
   end
 
