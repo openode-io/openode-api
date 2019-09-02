@@ -15,7 +15,6 @@ one:
   credits_check_at: 2019-08-10 14:24:22
   domain_type: subdomain
   nb_launch_issues: 1
-  storage_areas: MyText
   container_id: MyString
   crontab: MyText
   redir_http_to_https: false
@@ -41,7 +40,6 @@ two:
   credits_check_at: 2019-08-10 14:24:22
   domain_type: subdomain
   nb_launch_issues: 1
-  storage_areas: MyText
   container_id: MyString
   crontab: MyText
   redir_http_to_https: false
@@ -67,7 +65,6 @@ three:
   credits_check_at: 2019-08-10 14:24:22
   domain_type: custom_domain
   nb_launch_issues: 1
-  storage_areas: MyText
   container_id: MyString
   crontab: MyText
   redir_http_to_https: false

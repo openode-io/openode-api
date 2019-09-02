@@ -3,6 +3,7 @@ class Website < ApplicationRecord
   serialize :domains, JSON
   serialize :configs, JSON
   serialize :dns, JSON
+  serialize :storage_areas, JSON
 
   self.inheritance_column = :_type
 
