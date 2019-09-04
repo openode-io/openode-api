@@ -24,6 +24,9 @@ class StorageAreasTest < ActionDispatch::IntegrationTest
 
     w = Website.find_by site_name: "testsite"
     assert_equal w.storage_areas, ["tmp/"]
+
+    assert_equal w.events.count, 1
+    assert_equal w.events[0].obj["title"], "add-storage-area"
   end
 
   test "POST /instances/:instance_id/add-storage-area with unsecure path" do

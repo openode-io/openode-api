@@ -9,6 +9,11 @@ class StorageAreasController < InstancesController
     @website.add_storage_area(storage_area)
     @website.save!
 
+    @website_event_obj = {
+      title: "add-storage-area",
+      path: storage_area,
+    }
+
     json_res({
       "result": "success",
       "storageAreas": @website.reload.storage_areas
