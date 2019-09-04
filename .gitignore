@@ -29,3 +29,5 @@
 .env
 .dev.env
 .production.env
+
+coverage/
