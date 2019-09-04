@@ -13,6 +13,8 @@ class Website < ApplicationRecord
 
   scope :custom_domain, -> { where(domain_type: "custom_domain") }
 
+  REPOS_BASE_DIR = "/home/"
+
   validates :site_name, presence: true
   validates :site_name, uniqueness: true
   validates :type, presence: true
@@ -20,6 +22,7 @@ class Website < ApplicationRecord
   validates :cloud_type, presence: true
 
   validate :configs_must_comply
+  validate :storage_areas_must_be_secure
 
   validates_inclusion_of :type, :in => %w( nodejs docker )
   validates_inclusion_of :domain_type, :in => %w( subdomain custom_domain )
@@ -43,6 +46,18 @@ class Website < ApplicationRecord
         if ! (parsed_val.present? && parsed_val >= config[:min] && parsed_val <= config[:max])
           errors.add(:configs, "Invalid value, , min = #{config[:min]}, max = #{config[:max]}")
         end
+      end
+    end
+  end
+
+  def storage_areas_must_be_secure
+    self.storage_areas ||= []
+
+    self.storage_areas.each do |storage_area|
+      cur_dir = "#{self.repo_dir}#{storage_area}"
+
+      if ! Io::Path.is_secure?(self.repo_dir, cur_dir)
+        errors.add(:storage_areas, "Invalid storage area path #{cur_dir}")
       end
     end
   end
@@ -84,5 +99,15 @@ class Website < ApplicationRecord
     Website::CONFIG_VARIABLES
       .map { |var| var[:variable] }
       .include? var_name
+  end
+
+  def repo_dir
+    "#{Website::REPOS_BASE_DIR}#{self.user_id}/#{self.site_name}/"
+  end
+
+  def add_storage_area(storage_area)
+    self.storage_areas ||= []
+    self.storage_areas << storage_area
+    self.storage_areas = self.storage_areas.uniq
   end
 end

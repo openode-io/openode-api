@@ -58,6 +58,32 @@ class WebsiteTest < ActiveSupport::TestCase
       assert_equal w.configs["hello"], "world"
       assert_equal w.configs["field2"], 1234
     end
+
+    # repo dir
+    test "repo dir" do
+      w = Website.where(site_name: "testsite").first
+
+      assert_equal w.repo_dir, "#{Website::REPOS_BASE_DIR}#{w.user_id}/#{w.site_name}/"
+    end
+
+    # storage area validation
+
+    test "storage area validate with valid ones" do
+      w = Website.where(site_name: "testsite").first
+      w.storage_areas = ["tmp/", "what/is/this"]
+      w.save!
+      w.reload
+
+      assert_equal w.storage_areas, ["tmp/", "what/is/this"]
+    end
+
+    test "storage area validate with invalid ones" do
+      w = Website.where(site_name: "testsite").first
+      w.storage_areas = ["../tmp/", "what/is/this"]
+      w.save
+
+      assert_equal w.valid?, false
+    end
   end
 
 end
