@@ -110,4 +110,9 @@ class Website < ApplicationRecord
     self.storage_areas << storage_area
     self.storage_areas = self.storage_areas.uniq
   end
+
+  def remove_storage_area(storage_area)
+    self.storage_areas ||= []
+    self.storage_areas.delete(storage_area)
+  end
 end

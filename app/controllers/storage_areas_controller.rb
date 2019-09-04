@@ -5,12 +5,22 @@ class StorageAreasController < InstancesController
   end
 
   def add
+    change("add")
+  end
+
+  def remove
+    change("remove")
+  end
+
+  protected
+
+  def change(operation)
     storage_area = params["storage_area"]
-    @website.add_storage_area(storage_area)
+    @website.send "#{operation}_storage_area", storage_area
     @website.save!
 
     @website_event_obj = {
-      title: "add-storage-area",
+      title: "#{operation}-storage-area",
       path: storage_area,
     }
 
@@ -19,7 +29,5 @@ class StorageAreasController < InstancesController
       "storageAreas": @website.reload.storage_areas
     })
   end
-
-  protected
 
 end

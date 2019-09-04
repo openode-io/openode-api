@@ -38,4 +38,24 @@ class StorageAreasTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+  test "POST /instances/:instance_id/del-storage-area" do
+    w = Website.find_by site_name: "testsite"
+    w.storage_areas = ["t1/", "t2/"]
+    w.save!
+
+    post "/instances/testsite/del-storage-area",
+      as: :json,
+      params: { storage_area: "t2/" },
+      headers: default_headers_auth
+
+    assert_response :success
+    assert_equal response.parsed_body["result"], "success"
+
+    w.reload
+    assert_equal w.storage_areas, ["t1/"]
+
+    assert_equal w.events.count, 1
+    assert_equal w.events[0].obj["title"], "remove-storage-area"
+  end
+
 end
