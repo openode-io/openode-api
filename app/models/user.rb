@@ -4,6 +4,18 @@ require 'bcrypt'
 class User < ApplicationRecord
   NotAuthorized = Class.new(StandardError)
 
+  DISALLOWED_EMAIL_DOMAINS = [
+    "cuvox.de",
+    "superrito.com",
+    "teleworm.us",
+    "jourrapide.com",
+    "gustr.com",
+    "dayrep.com",
+    "fleckens.hu",
+    "einrot.com",
+    "armyspy.com"
+  ]
+
   alias_attribute :password, :password_hash
   attr_accessor   :password_confirmation
 
@@ -11,6 +23,8 @@ class User < ApplicationRecord
 
   validates :email, uniqueness: true
   validates :email, presence: true
+  validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validate :email_should_not_have_a_blacklisted_domain
 
   validates :password_hash, presence: true
   PASSWORD_FORMAT = /\A
@@ -30,6 +44,14 @@ class User < ApplicationRecord
   def verify_passwords_match
     if self.password_confirmation && self.password != self.password_confirmation
       self.errors.add(:password_confirmation, "The password verification does not match.")
+    end
+  end
+
+  def email_should_not_have_a_blacklisted_domain
+    email_domain = self.email.split("@").last
+
+    if User::DISALLOWED_EMAIL_DOMAINS.include?(email_domain)
+      self.errors.add(:email, "Blacklisted domain")
     end
   end
 

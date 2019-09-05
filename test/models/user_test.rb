@@ -76,6 +76,31 @@ class UserTest < ActiveSupport::TestCase
     assert_equal user.activation_hash.length, 32
   end
 
+  test "should fail to create with an invalid email" do
+    attribs = {
+      email: "USER10sitecom" ,
+      password_hash: "NotW3akpasswd!",
+      is_admin: false,
+      token: "1234s56789101112",
+      credits: 80
+    }
+
+    user = User.create(attribs)
+    assert_equal user.valid?, false
+  end
+
+  test "should fail to create with a blacklisted email domain" do
+    attribs = {
+      email: "asdf@supeRRito.com",
+      password_hash: "NotW3akpasswd!",
+      is_admin: false,
+      token: "1234s56789101112",
+      credits: 80
+    }
+
+    assert_equal User.create(attribs).valid?, false
+  end
+
   test "regen api token" do
     attribs = {
       email: "USER13@site.com" ,
