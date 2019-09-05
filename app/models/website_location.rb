@@ -5,7 +5,11 @@ class WebsiteLocation < ApplicationRecord
   belongs_to :location
   belongs_to :location_server
 
-  validates :extra_storage, numericality: { only_integer: true, less_than_or_equal_to: 10 }
+  validates :extra_storage, numericality: {
+    only_integer: true,
+    greater_than_or_equal_to: 0,
+    less_than_or_equal_to: 10
+  }
 
   INTERNAL_DOMAINS = ["openode.io", "openode.dev"]
 

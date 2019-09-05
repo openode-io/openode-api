@@ -1,11 +1,11 @@
 class StoragesController < InstancesController
 
-  def increase_storage
+  def increase
     self.prepare_storage_change({ sign: 1 })
     self.change_storage(@gb_to_change)
   end
 
-  def decrease_storage
+  def decrease
     self.prepare_storage_change({ sign: -1})
     self.change_storage(- @gb_to_change)
   end

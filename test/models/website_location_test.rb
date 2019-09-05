@@ -8,6 +8,31 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert wl.location.str_id == "canada"
   end
 
+  test "extra storage valid" do
+    website = Website.find_by site_name: "testsite"
+    wl = website.website_locations[0]
+    wl.extra_storage = 5
+    wl.save!
+  end
+
+  test "extra storage too high" do
+    website = Website.find_by site_name: "testsite"
+    wl = website.website_locations[0]
+    wl.extra_storage = 11
+    wl.save
+
+    assert_equal wl.valid?, false
+  end
+
+  test "extra storage too low" do
+    website = Website.find_by site_name: "testsite"
+    wl = website.website_locations[0]
+    wl.extra_storage = -1
+    wl.save
+
+    assert_equal wl.valid?, false
+  end
+
   test "domain with canada subdomain" do
     website = Website.find_by site_name: "testsite"
     wl = website.website_locations[0]
@@ -146,6 +171,5 @@ class WebsiteLocationTest < ActiveSupport::TestCase
   test "root domain of .nl" do
     assert WebsiteLocation.root_domain("dev.api.abnbouw.nl") == "abnbouw.nl"
   end
-
 
 end
