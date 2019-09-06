@@ -51,8 +51,6 @@ end
 require 'dotenv'
 Dotenv.load(".#{ENV["RAILS_ENV"]}.env")
 
-
-
 required_env_vars = [
   "SQL_HOST",
   "SQL_USER",

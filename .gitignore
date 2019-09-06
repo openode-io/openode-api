@@ -27,7 +27,10 @@
 /config/master.key
 
 .env
-.dev.env
+.development.env
 .production.env
 
 coverage/
+
+config/.development.openode.yml
+config/.production.openode.yml

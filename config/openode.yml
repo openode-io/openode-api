@@ -1,7 +1,0 @@
-application:
-  clouds:
-    internal:
-      locations:
-        - id: canada
-          name: Montreal (Canada)
-          country_fullname: Canada

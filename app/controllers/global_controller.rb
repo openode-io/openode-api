@@ -9,7 +9,6 @@ class GlobalController < ApplicationController
 
   def available_locations
 
-    #regions = Vultr::Regions.list
     #puts "regions ?! #{regions.inspect}"
 
     locations = Location.all.order(created_at: :asc).map do |l|
