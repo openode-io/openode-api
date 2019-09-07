@@ -112,7 +112,7 @@ ActiveRecord::Schema.define(version: 2019_09_07_144852) do
     t.string "container_id"
     t.text "crontab"
     t.boolean "redir_http_to_https"
-    t.text "config"
+    t.text "configs"
     t.text "open_source"
     t.string "instance_type"
     t.string "sub_status"

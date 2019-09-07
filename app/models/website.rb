@@ -28,6 +28,10 @@ class Website < ApplicationRecord
   validates_inclusion_of :domain_type, :in => %w( subdomain custom_domain )
   validates_inclusion_of :cloud_type, :in => %w( cloud "private-cloud" )
 
+  def locations
+    self.website_locations.map { |wl| wl.location }
+  end
+
   def configs_must_comply
     self.configs ||= {}
 

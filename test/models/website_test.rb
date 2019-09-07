@@ -84,6 +84,16 @@ class WebsiteTest < ActiveSupport::TestCase
 
       assert_equal w.valid?, false
     end
+
+    # locations
+
+    test "locations for a given website" do
+      w = Website.where(site_name: "testsite").first
+
+      assert_equal w.locations.length, 1
+      assert_equal w.locations[0].str_id, "canada"
+    end
+
   end
 
 end

@@ -8,6 +8,7 @@ module CloudProvider
 
     def initialize_locations
       locations = self.available_locations
+      puts "initialize locationsss locations = #{locations.inspect}"
 
       locations.each do |l|
         unless Location.exists?(str_id: l[:str_id])
