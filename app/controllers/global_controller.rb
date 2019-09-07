@@ -8,18 +8,7 @@ class GlobalController < ApplicationController
   end
 
   def available_locations
-
-    #puts "regions ?! #{regions.inspect}"
-
-    locations = Location.all.order(created_at: :asc).map do |l|
-      {
-        id: l.str_id,
-        name: l.full_name,
-        country_fullname: l.country_fullname
-      }
-    end
-
-    json_res(locations)
+    json_res(CloudProvider::Manager.instance.available_locations)
   end
 
   def available_configs

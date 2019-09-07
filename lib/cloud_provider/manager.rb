@@ -1,6 +1,8 @@
 
 module CloudProvider
   class Manager
+    attr_accessor :clouds
+    attr_accessor :application
 
     @@instance = nil
 
@@ -12,7 +14,6 @@ module CloudProvider
 
       if @clouds.present?
         @clouds.each do |cloud|
-          puts "should init.. #{cloud} "
           cloud["instance"] =
             "CloudProvider::#{cloud["type"].capitalize}".constantize.new(cloud)
         end
@@ -27,6 +28,21 @@ module CloudProvider
       end
 
       @@instance
+    end
+
+    def available_locations
+      Location.all.order(str_id: :asc).map do |l|
+        {
+          id: l.str_id,
+          name: l.full_name,
+          country_fullname: l.country_fullname
+        }
+      end
+    end
+
+    # for tests
+    def self.clear_instance
+      @@instance = nil
     end
 
   end

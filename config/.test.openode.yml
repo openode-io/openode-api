@@ -1,2 +1,8 @@
 application:
   clouds:
+    - type: internal
+      locations:
+        - str_id: canada2
+          full_name: Montreal (Canada2)
+          country_fullname: Canada2
+    - type: dummy
