@@ -1,29 +1,25 @@
 
 module CloudProvider
-  class Internal
+  class Internal < Base
 
     def initialize(configs = nil)
-      self.initialize_locations(configs) if configs
+      @configs = configs
+      self.initialize_locations if configs
     end
 
     def available_locations
-      
+      @configs["locations"]
+        .map do |l|
+          {
+            str_id: l["str_id"],
+            full_name: l["full_name"],
+            country_fullname: l["country_fullname"],
+            cloud_provider: "internal"
+          }
+        end
     end
 
     protected
 
-    def initialize_locations(configs)
-      if configs["locations"]
-        configs["locations"].each do |location|
-          unless Location.exists? str_id: location["str_id"]
-            Rails.logger.info "Creating location #{location["str_id"]}"
-
-            Location.create!(location)
-          end
-        end
-      else
-        Rails.logger.warn "No cloud provider internal locations."
-      end
-    end
   end
 end

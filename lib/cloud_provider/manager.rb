@@ -24,7 +24,13 @@ module CloudProvider
       unless @@instance
         openode_path =
           File.join(Rails.root, "config", ".#{ENV["RAILS_ENV"]}.openode.yml")
-        @@instance = Manager.new(openode_path)
+
+        #begin
+          @@instance = Manager.new(openode_path)
+        #rescue => ex
+        #  Rails.logger.info "Unable to read #{openode_path}, #{ex}"
+        #  Rails.logger.info ex.inspect
+        #end
       end
 
       @@instance

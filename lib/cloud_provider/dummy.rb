@@ -1,6 +1,6 @@
 
 module CloudProvider
-  class Dummy
+  class Dummy < Base
 
     def initialize(configs)
     end

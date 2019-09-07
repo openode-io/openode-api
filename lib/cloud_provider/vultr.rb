@@ -4,31 +4,37 @@ require "countries"
 Vultr.api_key = ENV[""]
 
 module CloudProvider
-  class Vultr
+  class Vultr < Base
 
     def initialize(configs)
-      puts "init vultr #{configs.inspect}"
       ::Vultr.api_key = configs["api_key"]
+
+      initialize_locations
     end
 
     def available_locations
-
       # string.parameterize
       regions = ::Vultr::Regions.list
       result = regions[:result]
-      puts "regions keys ? #{result.keys.inspect}"
 
-      rr = result.keys
+      result.keys
         .map do |key|
+          current_location = result[key]
+
+          country_code = result[key]["country"]
+          country = ISO3166::Country.new(country_code)
+          country_name = country.data["name"]
+
+          fullname = "#{current_location["name"]} " +
+            "(#{country_name}, #{current_location["continent"]})"
+
           {
-            str_id: "#{result[key]["name"]} #{result[key]["id"]}".parameterize,
-            
+            str_id: "#{current_location["name"]} #{current_location["DCID"]}".parameterize,
+            full_name: fullname,
+            country_fullname: country_name,
+            cloud_provider: "vultr"
           }
         end
-
-      puts "rr -> #{rr.inspect}"
-
-      rr
     end
 
   end

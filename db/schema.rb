@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_29_234338) do
+ActiveRecord::Schema.define(version: 2019_09_07_144852) do
 
   create_table "histories", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "ref_id"
@@ -44,6 +44,7 @@ ActiveRecord::Schema.define(version: 2019_08_29_234338) do
     t.string "country_fullname"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "cloud_provider", default: "internal"
   end
 
   create_table "users", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
@@ -111,7 +112,7 @@ ActiveRecord::Schema.define(version: 2019_08_29_234338) do
     t.string "container_id"
     t.text "crontab"
     t.boolean "redir_http_to_https"
-    t.text "configs"
+    t.text "config"
     t.text "open_source"
     t.string "instance_type"
     t.string "sub_status"
