@@ -40,4 +40,11 @@ class GlobalControllerTest < ActionDispatch::IntegrationTest
     assert_equal usa["name"], "New York (USA)"
     assert_equal usa["country_fullname"], "United States"
   end
+
+  test "/global/version" do
+    get "/global/version", as: :json
+
+    assert_response :success
+    assert response.parsed_body["version"].count("."), 2
+  end
 end

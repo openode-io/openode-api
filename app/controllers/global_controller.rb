@@ -15,6 +15,12 @@ class GlobalController < ApplicationController
     json_res(Website::CONFIG_VARIABLES)
   end
 
+  def version
+    json_res({
+      version: File.read(".version").strip
+    })
+  end
+
   private
 
 end
