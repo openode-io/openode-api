@@ -23,6 +23,8 @@ Rails.application.routes.draw do
 
     get '/:site_name/locations', to: 'locations#index'
 
+    get '/:site_name/docker-compose', to: 'instances#docker_compose'
+
     get '/:site_name/list-dns', to: 'dns#list_dns'
 
     get '/:site_name/storage-areas', to: 'storage_areas#index'

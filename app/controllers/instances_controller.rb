@@ -6,13 +6,25 @@ class InstancesController < ApplicationController
   after_action :record_website_event
 
   def index
-    # https://scotch.io/tutorials/build-a-restful-json-api-with-rails-5-part-one
     json_res(@user.websites)
   end
 
   def show
-    puts "paramsmss #{params.inspect}"
     json_res(@website)
+  end
+
+  def docker_compose
+    content = if params["has_env_file"]
+      DeploymentMethod::DockerCompose.default_docker_compose_file({
+        with_env_file: true
+      })
+    else
+      DeploymentMethod::DockerCompose.default_docker_compose_file
+    end
+
+    json_res({
+      content: content
+    })
   end
 
   protected
