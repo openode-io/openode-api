@@ -7,6 +7,12 @@ class GlobalController < ApplicationController
     json_res({})
   end
 
+  def version
+    json_res({
+      version: File.read(".version").strip
+    })
+  end
+
   def available_locations
     json_res(CloudProvider::Manager.instance.available_locations)
   end
@@ -15,10 +21,12 @@ class GlobalController < ApplicationController
     json_res(Website::CONFIG_VARIABLES)
   end
 
-  def version
-    json_res({
-      version: File.read(".version").strip
-    })
+  def services
+    json_res(Status.all)
+  end
+
+  def services_down
+    json_res(Status.with_status("down"))
   end
 
   private

@@ -47,4 +47,21 @@ class GlobalControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert response.parsed_body["version"].count("."), 2
   end
+
+  test "/global/services" do
+    get "/global/services", as: :json
+
+    assert_response :success
+    assert response.parsed_body.length, 2
+    assert response.parsed_body[0]["name"], "Mongodb"
+    assert response.parsed_body[1]["name"], "docker canada"
+  end
+
+  test "/global/services/down" do
+    get "/global/services/down", as: :json
+
+    assert_response :success
+    assert response.parsed_body.length, 1
+    assert response.parsed_body[0]["name"], "docker canada"
+  end
 end

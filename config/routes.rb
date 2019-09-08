@@ -9,10 +9,14 @@ Rails.application.routes.draw do
   end
 
   scope :global do
-    get 'available-locations', to: 'global#available_locations'
-    get 'available-configs', to: 'global#available_configs'
     get 'test', to: 'global#test'
     get 'version', to: 'global#version'
+
+    get '/services/down', to: 'global#services_down'
+    get '/services', to: 'global#services'
+
+    get 'available-locations', to: 'global#available_locations'
+    get 'available-configs', to: 'global#available_configs'
   end
 
   scope :instances, :constraints => {:site_name => /[^\/]+/} do
