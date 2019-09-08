@@ -184,6 +184,9 @@ GEM
       unf_ext
     unf_ext (0.0.7.6)
     unicode_utils (1.4.0)
+    uptimerobot (0.2.0)
+      faraday (>= 0.8)
+      faraday_middleware
     vultr (0.4.2)
       faraday (~> 0.9)
       faraday_middleware (~> 0.9, >= 0.9.1)
@@ -212,6 +215,7 @@ DEPENDENCIES
   spring
   spring-watcher-listen (~> 2.0.0)
   tzinfo-data
+  uptimerobot
   vultr
 
 RUBY VERSION

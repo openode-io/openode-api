@@ -57,7 +57,6 @@ required_env_vars = [
   "SQL_PASSWORD",
   "SQL_DATABASE",
   "AUTH_SALT",
-  "ACTIVE_CLOUDS",
   "MAILGUN_API_KEY",
   "MAILGUN_DOMAIN"
 ]

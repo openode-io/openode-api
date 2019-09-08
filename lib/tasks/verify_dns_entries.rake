@@ -1,7 +1,7 @@
 require 'vultr'
 
 namespace :verify_dns do
-  desc "This task does nothing"
+  desc "Verify and clean DNS entries"
   task :entries do
 
     # get all custom domain site names
