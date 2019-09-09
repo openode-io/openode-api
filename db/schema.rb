@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_09_08_195947) do
+ActiveRecord::Schema.define(version: 2019_09_09_233649) do
 
   create_table "histories", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "ref_id"
@@ -45,6 +45,20 @@ ActiveRecord::Schema.define(version: 2019_09_08_195947) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "cloud_provider", default: "internal"
+  end
+
+  create_table "snapshots", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "website_id", null: false
+    t.string "name"
+    t.string "status", default: "pending"
+    t.float "tx_time_in_sec"
+    t.float "size_in_mb"
+    t.text "details"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_snapshots_on_user_id"
+    t.index ["website_id"], name: "index_snapshots_on_website_id"
   end
 
   create_table "statuses", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
@@ -140,6 +154,8 @@ ActiveRecord::Schema.define(version: 2019_09_08_195947) do
   end
 
   add_foreign_key "location_servers", "locations"
+  add_foreign_key "snapshots", "users"
+  add_foreign_key "snapshots", "websites"
   add_foreign_key "website_locations", "location_servers"
   add_foreign_key "website_locations", "locations"
   add_foreign_key "website_locations", "websites"

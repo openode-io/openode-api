@@ -20,6 +20,7 @@ class User < ApplicationRecord
   attr_accessor   :password_confirmation
 
   has_many :websites
+  has_many :snapshots
 
   validates :email, uniqueness: true
   validates :email, presence: true
