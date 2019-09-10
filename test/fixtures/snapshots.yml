@@ -4,16 +4,16 @@ one:
   user: one
   website: one
   name: MyString
-  status: MyString
-  tx_time_in_sec: 
-  size_in_mb: 
+  status: pending
+  tx_time_in_sec:
+  size_in_mb:
   details: MyText
 
 two:
   user: two
   website: two
-  name: MyString
-  status: MyString
-  tx_time_in_sec: 
-  size_in_mb: 
+  name: MyString2
+  status: active
+  tx_time_in_sec:
+  size_in_mb:
   details: MyText
