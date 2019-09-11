@@ -33,6 +33,10 @@ class Website < ApplicationRecord
     self.website_locations.map { |wl| wl.location }
   end
 
+  def is_private_cloud?
+    self.cloud_type == "private-cloud"
+  end
+
   def configs_must_comply
     self.configs ||= {}
 

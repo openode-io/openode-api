@@ -1,5 +1,7 @@
 class StoragesController < InstancesController
 
+  before_action :requires_cloud_plan, only: [:increase, :decrease]
+
   def increase
     self.prepare_storage_change({ sign: 1 })
     self.change_storage(@gb_to_change)

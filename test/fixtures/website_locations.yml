@@ -29,3 +29,13 @@ three:
   port: 11000
   second_port: 11005
   running_port: 11005
+
+with_private_cloud:
+  website: with_private_cloud
+  location: usa
+  location_server: usa1
+  extra_storage: 1
+  nb_cpus: 1
+  port: 11000
+  second_port: 11005
+  running_port: 11005
