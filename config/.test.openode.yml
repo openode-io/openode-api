@@ -5,4 +5,11 @@ application:
         - str_id: canada2
           full_name: Montreal (Canada2)
           country_fullname: Canada2
+          servers:
+            - ip: 127.0.0.1
+              user: root
+              password: hellorroot
+              ram_mb: 5000
+              cpus: 2
+              disk_gb: 200
     - type: dummy

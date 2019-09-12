@@ -4,5 +4,7 @@
 Rails.application.config.filter_parameters += [
   :password,
   :password_hash,
-  :password_confirmation
+  :password_confirmation,
+  :encrypted_data,
+  :encrypted_data_id
 ]

@@ -20,6 +20,7 @@ gem 'bcrypt', '~> 3.1.7'
 
 gem 'dotenv-rails'
 gem 'safe_attributes'
+gem "attr_encrypted", "~> 3.1.0"
 gem 'vultr'
 gem 'uptimerobot'
 gem 'countries'

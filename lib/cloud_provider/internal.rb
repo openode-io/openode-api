@@ -4,10 +4,13 @@ module CloudProvider
 
     def initialize(configs = nil)
       @configs = configs
-      self.initialize_locations if configs
+      self.initialize_locations
+      self.initialize_servers
     end
 
     def available_locations
+      raise "Missing locations" unless @configs["locations"]
+
       @configs["locations"]
         .map do |l|
           {
@@ -17,6 +20,25 @@ module CloudProvider
             cloud_provider: "internal"
           }
         end
+    end
+
+    def initialize_servers
+      pk = @configs["secret_key_servers"]
+
+      @configs["locations"].each do |location|
+        raise "Missing servers" unless location["servers"]
+
+        location["servers"].each do |server|
+
+          location_server = LocationServer.find_by ip: server["ip"]
+
+          if location_server
+            location_server
+          end
+        end
+      end
+
+      puts "pkkk #{pk}"
     end
 
     protected

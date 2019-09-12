@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_09_09_233649) do
+ActiveRecord::Schema.define(version: 2019_09_12_000048) do
 
   create_table "histories", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "ref_id"
@@ -25,8 +25,6 @@ ActiveRecord::Schema.define(version: 2019_09_09_233649) do
   create_table "location_servers", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.bigint "location_id"
     t.string "ip"
-    t.string "user"
-    t.string "password"
     t.integer "ram_mb"
     t.integer "cpus"
     t.integer "disk_gb"
@@ -95,6 +93,17 @@ ActiveRecord::Schema.define(version: 2019_09_09_233649) do
     t.index ["newsletter"], name: "index_users_on_newsletter"
     t.index ["notified_low_credit"], name: "index_users_on_notified_low_credit"
     t.index ["token"], name: "index_users_on_token", unique: true
+  end
+
+  create_table "vaults", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.integer "ref_id"
+    t.string "entity_type"
+    t.text "encrypted_data"
+    t.text "encrypted_data_iv"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["entity_type", "ref_id"], name: "index_vaults_on_entity_type_and_ref_id"
+    t.index ["ref_id"], name: "index_vaults_on_ref_id"
   end
 
   create_table "website_locations", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|

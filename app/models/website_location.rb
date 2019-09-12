@@ -91,6 +91,10 @@ class WebsiteLocation < ApplicationRecord
     result
   end
 
+  def cmd(str_cmd, opts = {})
+    
+  end
+
   protected
 
 end

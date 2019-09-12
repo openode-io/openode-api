@@ -3,8 +3,6 @@
 canada1:
   location: canada
   ip: 127.0.0.1
-  user: MyString
-  password: ASDFASDFFFFEF
   ram_mb: 10000
   cpus: 8
   disk_gb: 2000
@@ -14,8 +12,6 @@ canada1:
 usa1:
   location: usa
   ip: 127.0.0.2
-  user: MyString
-  password: ASDFASDFFFFEF
   ram_mb: 10000
   cpus: 10
   disk_gb: 1100
