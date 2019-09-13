@@ -6,7 +6,7 @@ application:
           full_name: Montreal (Canada2)
           country_fullname: Canada2
           servers:
-            - ip: 127.0.0.1
+            - ip: 127.0.0.100
               user: root
               password: hellorroot
               ram_mb: 5000

@@ -36,7 +36,6 @@ qi2lhK9tNxxLDeOtdzBqTqEK9Sw+EUVEV/l+G8DIJah/0qhIBpx3mA==
       ref_id: ls.id,
       entity_type: "LocationServer",
       data: private_key
-
     })
 
     created_vault.reload
@@ -46,4 +45,22 @@ qi2lhK9tNxxLDeOtdzBqTqEK9Sw+EUVEV/l+G8DIJah/0qhIBpx3mA==
     assert_equal ls.vault.id, created_vault.id
     assert_equal ls.vault.data, private_key
   end
+
+  test "model save-load hash secret" do
+    ls = LocationServer.first
+
+    ls.save_secret!({ hello: "world", world: "hello" })
+
+    result = ls.reload.secret
+
+    assert_equal result[:hello], "world"
+    assert_equal result[:world], "hello"
+  end
+
+  test "model load missing secret" do
+    ls = LocationServer.first
+
+    assert_nil ls.secret
+  end
+
 end

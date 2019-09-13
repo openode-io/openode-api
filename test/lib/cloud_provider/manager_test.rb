@@ -28,4 +28,17 @@ class ManagerTest < ActiveSupport::TestCase
     assert_equal locations[2][:id], "usa"
   end
 
+  test "should create internal location server and secret properly" do
+    locations = CloudProvider::Manager.instance
+
+    ls = LocationServer.find_by! ip: "127.0.0.100"
+
+    assert_equal ls.ip, "127.0.0.100"
+    assert_equal ls.secret[:user], "root"
+    assert_equal ls.secret[:password], "hellorroot"
+    assert_equal ls.ram_mb, 5000
+    assert_equal ls.cpus, 2
+    assert_equal ls.disk_gb, 200
+  end
+
 end

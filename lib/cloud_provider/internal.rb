@@ -25,20 +25,27 @@ module CloudProvider
     def initialize_servers
       pk = @configs["secret_key_servers"]
 
-      @configs["locations"].each do |location|
-        raise "Missing servers" unless location["servers"]
+      @configs["locations"].each do |location_item|
+        location = Location.find_by! str_id: location_item["str_id"]
+        raise "Missing servers" unless location_item["servers"]
 
-        location["servers"].each do |server|
-
+        location_item["servers"].each do |server|
           location_server = LocationServer.find_by ip: server["ip"]
 
-          if location_server
-            location_server
+          unless location_server
+            location_server = LocationServer.create!(location: location, ip: server["ip"])
           end
+
+          location_server.assign_attributes(
+            ram_mb: server["ram_mb"],
+            cpus: server["cpus"],
+            disk_gb: server["disk_gb"]
+          )
+          location_server.save!
+
+          location_server.save_secret!({ user: server["user"], password: server["password"] })
         end
       end
-
-      puts "pkkk #{pk}"
     end
 
     protected
