@@ -23,8 +23,6 @@ module CloudProvider
     end
 
     def initialize_servers
-      pk = @configs["secret_key_servers"]
-
       @configs["locations"].each do |location_item|
         location = Location.find_by! str_id: location_item["str_id"]
         raise "Missing servers" unless location_item["servers"]
