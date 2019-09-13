@@ -41,4 +41,19 @@ class ManagerTest < ActiveSupport::TestCase
     assert_equal ls.disk_gb, 200
   end
 
+  test "should create internal location server and private key" do
+    locations = CloudProvider::Manager.instance
+
+    ls = LocationServer.find_by! ip: "127.0.0.101"
+
+    puts "secrett #{ls.secret.inspect}"
+
+    assert_equal ls.ip, "127.0.0.101"
+    assert_equal ls.secret[:private_key], "-----BEGIN RSA PRIVATE KEY-----\n" +
+      "AAA\n" +
+      "BBB\n" +
+      "CCC\n" +
+      "-----END RSA PRIVATE KEY-----\n"
+  end
+
 end

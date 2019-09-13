@@ -12,4 +12,15 @@ application:
               ram_mb: 5000
               cpus: 2
               disk_gb: 200
+            - ip: 127.0.0.101
+              user: root
+              private_key: |
+                -----BEGIN RSA PRIVATE KEY-----
+                AAA
+                BBB
+                CCC
+                -----END RSA PRIVATE KEY-----
+              ram_mb: 5000
+              cpus: 2
+              disk_gb: 200
     - type: dummy

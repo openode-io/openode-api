@@ -43,7 +43,7 @@ module CloudProvider
           )
           location_server.save!
 
-          location_server.save_secret!({ user: server["user"], password: server["password"] })
+          location_server.save_secret!(server)
         end
       end
     end
