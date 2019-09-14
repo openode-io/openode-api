@@ -10,6 +10,20 @@ class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   fixtures :all
 
+  def prepare_ssh_session(cmd, output)
+    story do |session|
+      channel = session.opens_channel
+      channel.sends_exec cmd
+      channel.gets_data output
+      channel.gets_close
+      channel.sends_close
+    end
+  end
+
+  def begin_ssh
+    Remote::Ssh.set_conn_test(connection)
+  end
+
   def default_user
     User.find_by email: "myadmin@thisisit.com"
   end

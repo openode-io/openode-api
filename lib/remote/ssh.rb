@@ -2,19 +2,34 @@ require 'net/ssh'
 
 module Remote
   class Ssh
+    @@conn_test = nil
+
+    def self.set_conn_test(conn)
+      @@conn_test = conn if ENV["RAILS_ENV"] == "test"
+    end
+
+    def self.get_conn_test
+      @@conn_test
+    end
 
     # opts: { host, user, password,  }
     def self.exec(cmds, opts = {})
       results = []
 
-      Net::SSH.start(opts[:host], opts[:user], :password => opts[:password],
-        :non_interactive => true) do |ssh|
-        cmds.each do |cmd|
-          results << Ssh.ssh_exec!(ssh, cmd)
+      if @@conn_test
+        results = Ssh.ssh_exec_commands(@@conn_test, cmds)
+      else
+        Net::SSH.start(opts[:host], opts[:user], :password => opts[:password],
+          :non_interactive => true) do |ssh|
+          results = Ssh.ssh_exec_commands(ssh, cmds)
         end
       end
 
       results
+    end
+
+    def self.ssh_exec_commands(ssh, cmds)
+      cmds.map { |cmd| Ssh.ssh_exec!(ssh, cmd) }
     end
 
     def self.ssh_exec!(ssh, command)
