@@ -24,6 +24,7 @@ gem "attr_encrypted", "~> 3.1.0"
 gem 'vultr'
 gem 'uptimerobot'
 gem 'countries'
+gem 'net-ssh'
 gem 'public_suffix'
 gem 'mailgun-ruby', '~>1.2.0'
 
