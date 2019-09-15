@@ -11,6 +11,16 @@ class WebsiteLocation < ApplicationRecord
     less_than_or_equal_to: 10
   }
 
+  def prepare_runner
+    configs = {
+      ip: location_server.ip,
+      secret: location_server.secret
+    }
+
+    @runner =
+      DeploymentMethod::Runner.new(website.type, website.cloud_type, configs)
+  end
+
   INTERNAL_DOMAINS = ["openode.io", "openode.dev"]
 
   # main domain used internally
@@ -92,7 +102,7 @@ class WebsiteLocation < ApplicationRecord
   end
 
   def cmd(str_cmd, opts = {})
-    
+
   end
 
   protected

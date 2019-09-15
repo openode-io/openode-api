@@ -3,6 +3,9 @@ module DeploymentMethod
 
   class DockerCompose
 
+    def initialize
+    end
+
     def self.default_docker_compose_file(opts = {})
       env_part =
         if opts[:with_env_file]

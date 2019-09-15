@@ -46,14 +46,25 @@ class ManagerTest < ActiveSupport::TestCase
 
     ls = LocationServer.find_by! ip: "127.0.0.101"
 
-    puts "secrett #{ls.secret.inspect}"
-
     assert_equal ls.ip, "127.0.0.101"
     assert_equal ls.secret[:private_key], "-----BEGIN RSA PRIVATE KEY-----\n" +
       "AAA\n" +
       "BBB\n" +
       "CCC\n" +
       "-----END RSA PRIVATE KEY-----\n"
+  end
+
+  test "first_of_type with existing" do
+    manager = CloudProvider::Manager.instance
+
+    assert_equal manager.first_of_type("internal").class.name,
+      "CloudProvider::Internal"
+  end
+
+  test "first_of_type with invalid" do
+    manager = CloudProvider::Manager.instance
+
+    assert_nil manager.first_of_type("external")
   end
 
 end

@@ -20,6 +20,12 @@ module CloudProvider
       end
     end
 
+    def first_of_type(type)
+      cloud = @clouds.find { |c| c["type"] == type }
+
+      cloud ? cloud["instance"] : nil
+    end
+
     def self.instance
       unless @@instance
         openode_path =
