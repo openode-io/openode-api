@@ -32,6 +32,8 @@ Rails.application.routes.draw do
 
     get '/:site_name/list-dns', to: 'dns#list_dns'
 
+    get '/:site_name/logs', to: 'instances#logs'
+
     get '/:site_name/storage-areas', to: 'storage_areas#index'
     post '/:site_name/add-storage-area', to: 'storage_areas#add'
     post '/:site_name/del-storage-area', to: 'storage_areas#remove' # todo refactor

@@ -16,6 +16,11 @@ class Website < ApplicationRecord
 
   REPOS_BASE_DIR = "/home/"
 
+  STATUS_ONLINE = "online"
+  STATUS_OFFLINE = "N/A"
+  STATUS_STARTING = "starting"
+  STATUSES = [STATUS_ONLINE, STATUS_OFFLINE, STATUS_STARTING]
+
   validates :site_name, presence: true
   validates :site_name, uniqueness: true
   validates :type, presence: true
@@ -28,6 +33,7 @@ class Website < ApplicationRecord
   validates_inclusion_of :type, :in => %w( nodejs docker )
   validates_inclusion_of :domain_type, :in => %w( subdomain custom_domain )
   validates_inclusion_of :cloud_type, :in => %w( cloud "private-cloud" )
+  validates_inclusion_of :status, :in => STATUSES
 
   def locations
     self.website_locations.map { |wl| wl.location }

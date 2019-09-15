@@ -11,6 +11,6 @@ class CreateWebsiteLocations < ActiveRecord::Migration[5.2]
       t.integer :running_port
 
       t.timestamps
-    end  if ENV["DO_MIGRATIONS"]
+    end  if ENV["DO_MIGRATIONS"] == "true"
   end
 end

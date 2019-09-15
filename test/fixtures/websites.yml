@@ -32,7 +32,7 @@ two:
   pm2_info: MyText
   valid: false
   last_access_at: 2019-08-10 14:24:22
-  status: MyString
+  status: online
   type: docker
   http_port_available: false
   first_online_at: 2019-08-10 14:24:22
@@ -57,7 +57,7 @@ three:
   pm2_info: MyText
   valid: false
   last_access_at: 2019-08-10 14:24:22
-  status: MyString
+  status: online
   type: docker
   http_port_available: false
   first_online_at: 2019-08-10 14:24:22

@@ -12,9 +12,9 @@ class CreateLocationServers < ActiveRecord::Migration[5.2]
       t.string :cloud_type
 
       t.timestamps
-    end if ENV["DO_MIGRATIONS"]
+    end if ENV["DO_MIGRATIONS"] == "true"
 
-    add_index :location_servers, :cloud_type if ENV["DO_MIGRATIONS"]
+    add_index :location_servers, :cloud_type if ENV["DO_MIGRATIONS"] == "true"
   end
 
 

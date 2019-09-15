@@ -14,6 +14,7 @@ class WebsiteTest < ActiveSupport::TestCase
         cloud_type: "cloud",
         user_id: User.first.id,
         type: "docker",
+        status: "starting",
         domain_type: "subdomain"
         })
 

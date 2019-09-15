@@ -6,6 +6,6 @@ class CreateLocations < ActiveRecord::Migration[5.2]
       t.string :country_fullname
 
       t.timestamps
-    end if ENV["DO_MIGRATIONS"]
+    end if ENV["DO_MIGRATIONS"] == "true"
   end
 end

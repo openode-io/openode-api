@@ -4,6 +4,9 @@ class InstancesController < ApplicationController
   before_action :populate_website
   before_action :populate_website_location
   after_action :record_website_event
+  before_action only: [:logs] do
+    requires_status_of("online")
+  end
 
   def index
     json_res(@user.websites)
@@ -27,11 +30,26 @@ class InstancesController < ApplicationController
     })
   end
 
+  def logs
+    nb_lines = params["nbLines"].present? ? params["nbLines"].to_i : 100
+
+    json_res({
+      logs: "what"
+    })
+  end
+
   protected
 
   def ensure_location
     if ! @website_location
       @website_location = @website.website_locations.first
+    end
+  end
+
+  def requires_status_of(status)
+    if @website.status != status
+      msg = "The instance must be in status #{status}."
+      raise ApplicationRecord::ValidationError.new(msg)
     end
   end
 
