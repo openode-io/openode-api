@@ -11,6 +11,10 @@ module CloudProvider
 
       initialize_locations
     end
+    
+    def deployment_protocol
+      "ssh"
+    end
 
     def available_locations
       # string.parameterize

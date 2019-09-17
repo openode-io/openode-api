@@ -1,0 +1,1 @@
+SolidAssert.enable_assertions

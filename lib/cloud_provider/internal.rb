@@ -8,6 +8,11 @@ module CloudProvider
       self.initialize_servers
     end
 
+    def deployment_protocol
+      
+      "ssh"
+    end
+
     def available_locations
       raise "Missing locations" unless @configs["locations"]
 

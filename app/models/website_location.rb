@@ -13,12 +13,14 @@ class WebsiteLocation < ApplicationRecord
 
   def prepare_runner
     configs = {
-      ip: location_server.ip,
+      host: location_server.ip,
       secret: location_server.secret
     }
 
     @runner =
       DeploymentMethod::Runner.new(website.type, website.cloud_type, configs)
+
+    @runner
   end
 
   INTERNAL_DOMAINS = ["openode.io", "openode.dev"]

@@ -3,6 +3,7 @@ class InstancesController < ApplicationController
   before_action :authorize
   before_action :populate_website
   before_action :populate_website_location
+  before_action :prepare_runner
   after_action :record_website_event
   before_action only: [:logs] do
     requires_status_of("online")
@@ -33,8 +34,12 @@ class InstancesController < ApplicationController
   def logs
     nb_lines = params["nbLines"].present? ? params["nbLines"].to_i : 100
 
+    cmds = [{ cmd_name: "logs", options: { website: @website, nb_lines: nb_lines } }]
+
+    logs = @runner.execute(cmds)
+
     json_res({
-      logs: "what"
+      logs: logs.first[:stdout]
     })
   end
 
@@ -79,6 +84,12 @@ class InstancesController < ApplicationController
       @location = Location.find_by! str_id: params["location_str_id"]
       @website_location = @website.website_locations.find_by! location_id: @location.id
       @location_server = @website_location.location_server
+    end
+  end
+
+  def prepare_runner
+    if @website_location
+      @runner = @website_location.prepare_runner
     end
   end
 

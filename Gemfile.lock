@@ -169,6 +169,7 @@ GEM
       simplecov-html (~> 0.10.0)
     simplecov-html (0.10.2)
     sixarm_ruby_unaccent (1.2.0)
+    solid_assert (1.0.0)
     spring (2.1.0)
     spring-watcher-listen (2.0.1)
       listen (>= 2.7, < 4.0)
@@ -218,6 +219,7 @@ DEPENDENCIES
   rails (~> 6.0.0)
   safe_attributes
   simplecov
+  solid_assert
   spring
   spring-watcher-listen (~> 2.0.0)
   tzinfo-data

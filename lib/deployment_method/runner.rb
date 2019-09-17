@@ -9,7 +9,22 @@ module DeploymentMethod
       @cloud_provider = self.get_cloud_provider()
     end
 
-    def logs
+    def execute(cmds)
+      protocol = @cloud_provider.deployment_protocol
+      self.send("execute_#{protocol}", cmds)
+    end
+
+    def execute_ssh(cmds)
+      generated_commands = cmds.map do |cmd|
+        @deployment_method.send(cmd[:cmd_name], cmd[:options])
+      end
+
+      Remote::Ssh.exec(generated_commands, {
+        host: @configs[:host],
+        user: @configs[:secret][:user],
+        password: @configs[:secret][:password],
+        private_key: @configs[:secret][:private_key]
+      })
     end
 
     def get_deployment_method()
@@ -21,7 +36,6 @@ module DeploymentMethod
       end
     end
 
-    # TODO test
     def get_cloud_provider()
       provider_type =
       case @cloud_type

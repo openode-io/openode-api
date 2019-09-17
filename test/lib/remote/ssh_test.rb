@@ -1,10 +1,8 @@
 # https://net-ssh.github.io/ssh/v2/api/classes/Net/SSH/Test.html
 
 require 'test_helper'
-require 'net/ssh/test'
 
 class RemoteSshTest < ActiveSupport::TestCase
-  include Net::SSH::Test
 
   def setup
 

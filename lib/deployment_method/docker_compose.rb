@@ -6,6 +6,17 @@ module DeploymentMethod
     def initialize
     end
 
+    def logs(options = {})
+      container_id = options[:container_id]
+
+      container_id = options[:website].container_id if options[:website]
+
+      assert container_id
+      assert options[:nb_lines]
+
+      "docker exec #{container_id} docker-compose logs --tail=#{options[:nb_lines]}"
+    end
+
     def self.default_docker_compose_file(opts = {})
       env_part =
         if opts[:with_env_file]

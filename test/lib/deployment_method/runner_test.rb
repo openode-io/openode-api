@@ -34,7 +34,6 @@ class RunnerTest < ActiveSupport::TestCase
     runner = DeploymentMethod::Runner.new("docker", "dummy2", {})
 
     assert_nil runner.get_cloud_provider rescue nil
-
   end
 
 end

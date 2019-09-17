@@ -1,14 +1,26 @@
 ENV['RAILS_ENV'] = 'test'
 require_relative '../config/environment'
 require 'rails/test_help'
+require 'net/ssh/test'
 
 require 'simplecov'
 SimpleCov.start
 
 class ActiveSupport::TestCase
+  include Net::SSH::Test
 
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   fixtures :all
+
+  def set_dummy_secrets_to(servers)
+    servers.each do |server|
+      server.save_secret!({
+        user: "myuser",
+        password: "mypass",
+        private_key: "toto"
+      })
+    end
+  end
 
   def prepare_ssh_session(cmd, output)
     story do |session|
