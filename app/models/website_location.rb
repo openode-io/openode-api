@@ -25,6 +25,10 @@ class WebsiteLocation < ApplicationRecord
 
   INTERNAL_DOMAINS = ["openode.io", "openode.dev"]
 
+  def has_location_server?
+    location_server.present?
+  end
+
   # main domain used internally
   def main_domain
     send "domain_#{self.website.domain_type}"

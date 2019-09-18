@@ -8,13 +8,24 @@ module DeploymentMethod
 
     def logs(options = {})
       container_id = options[:container_id]
-
       container_id = options[:website].container_id if options[:website]
 
       assert container_id
       assert options[:nb_lines]
 
       "docker exec #{container_id} docker-compose logs --tail=#{options[:nb_lines]}"
+    end
+
+    def erase_repository_files(options = {})
+      assert options[:path]
+
+      "rm -rf #{options[:path]}"
+    end
+
+    def initialize_repository(options = {})
+      assert options[:path]
+
+      "mkdir -p #{options[:path]}"
     end
 
     def self.default_docker_compose_file(opts = {})

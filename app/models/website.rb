@@ -117,6 +117,8 @@ class Website < ApplicationRecord
   end
 
   def repo_dir
+    return "/invalid/repository" if ! self.user_id || ! self.site_name
+
     "#{Website::REPOS_BASE_DIR}#{self.user_id}/#{self.site_name}/"
   end
 

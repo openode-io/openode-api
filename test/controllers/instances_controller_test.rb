@@ -46,7 +46,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
-  # /logs
+  # /logs with docker compose
   test "/instances/:instance_id/logs with subdomain" do
     set_dummy_secrets_to(LocationServer.all)
 
@@ -58,6 +58,27 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
       assert_response :success
       assert_equal response.parsed_body["logs"], "hellooutput"
+    end
+  end
+
+  # /erase-all with docker compose
+  test "/instances/:instance_id/erase-all typical scenario" do
+    set_dummy_secrets_to(LocationServer.all)
+
+    website = Website.find_by! site_name: "testsite"
+    path_repo = "#{Website::REPOS_BASE_DIR}#{website.user_id}/#{website.site_name}/"
+    prepare_ssh_session("rm -rf #{path_repo}", "out1")
+    prepare_ssh_session("mkdir -p #{path_repo}", "out2")
+
+    assert_scripted do
+      begin_ssh
+      get "/instances/testsite/erase-all?location_str_id=canada", as: :json, headers: default_headers_auth
+
+      assert_response :success
+      assert_equal response.parsed_body["result"], "success"
+
+      assert_equal website.events.count, 1
+      assert_equal website.events[0].obj["title"], "Repository cleared (erase-all)"
     end
   end
 end

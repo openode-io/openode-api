@@ -35,12 +35,24 @@ class InstancesController < ApplicationController
     nb_lines = params["nbLines"].present? ? params["nbLines"].to_i : 100
 
     cmds = [{ cmd_name: "logs", options: { website: @website, nb_lines: nb_lines } }]
-
     logs = @runner.execute(cmds)
 
-    json_res({
-      logs: logs.first[:stdout]
-    })
+    json_res({ logs: logs.first[:stdout] })
+  end
+
+  def erase_all
+    if ! @website_location || ! @website_location.has_location_server?
+      return json_res({ result: "success" }) 
+    end
+
+    logs = @runner.execute([
+      { cmd_name: "erase_repository_files", options: { path: @website.repo_dir } },
+      { cmd_name: "initialize_repository", options: { path: @website.repo_dir } }
+    ])
+
+    @website_event_obj = { title: "Repository cleared (erase-all)" }
+
+    json_res({ result: "success" }) 
   end
 
   protected
