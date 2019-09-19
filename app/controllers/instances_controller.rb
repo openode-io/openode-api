@@ -17,6 +17,15 @@ class InstancesController < ApplicationController
     json_res(@website)
   end
 
+  def changes
+    raise ApplicationRecord::ValidationError.new("Missing files") unless params["files"]
+    files_client = JSON.parse(params["files"])
+
+    puts "hello #{files_client.inspect}"
+
+    json_res({})
+  end
+
   def docker_compose
     content = if params["has_env_file"]
       DeploymentMethod::DockerCompose.default_docker_compose_file({
@@ -29,15 +38,6 @@ class InstancesController < ApplicationController
     json_res({
       content: content
     })
-  end
-
-  def logs
-    nb_lines = params["nbLines"].present? ? params["nbLines"].to_i : 100
-
-    cmds = [{ cmd_name: "logs", options: { website: @website, nb_lines: nb_lines } }]
-    logs = @runner.execute(cmds)
-
-    json_res({ logs: logs.first[:stdout] })
   end
 
   def erase_all
@@ -53,6 +53,20 @@ class InstancesController < ApplicationController
     @website_event_obj = { title: "Repository cleared (erase-all)" }
 
     json_res({ result: "success" }) 
+  end
+
+  def logs
+    nb_lines = params["nbLines"].present? ? params["nbLines"].to_i : 100
+
+    cmds = [{ cmd_name: "logs", options: { website: @website, nb_lines: nb_lines } }]
+    logs = @runner.execute(cmds)
+
+    json_res({ logs: logs.first[:stdout] })
+  end
+
+  def restart
+
+    json_res({ result: "success", deploymentId: 1234567 })
   end
 
   protected

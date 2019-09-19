@@ -46,6 +46,27 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  # /changes
+  test "/instances/:instance_id/changes with subdomain" do
+    set_dummy_secrets_to(LocationServer.all)
+
+    #prepare_ssh_session("docker exec 123456789 docker-compose logs --tail=100", "hellooutput")
+
+    post "/instances/testsite/changes?location_str_id=canada", 
+        params: { files: "{}" },
+        as: :json, 
+        headers: default_headers_auth
+
+    assert_response :success
+    puts "response body #{response.parsed_body.inspect}"
+
+    #assert_scripted do
+    #  begin_ssh
+      
+      #assert_equal response.parsed_body["logs"], "hellooutput"
+    #end
+  end
+
   # /logs with docker compose
   test "/instances/:instance_id/logs with subdomain" do
     set_dummy_secrets_to(LocationServer.all)
@@ -72,7 +93,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
     assert_scripted do
       begin_ssh
-      get "/instances/testsite/erase-all?location_str_id=canada", as: :json, headers: default_headers_auth
+      post "/instances/testsite/erase-all?location_str_id=canada", as: :json, headers: default_headers_auth
 
       assert_response :success
       assert_equal response.parsed_body["result"], "success"

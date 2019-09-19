@@ -1,7 +1,7 @@
 
 module DeploymentMethod
 
-  class DockerCompose
+  class DockerCompose < Base
 
     def initialize
     end

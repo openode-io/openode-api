@@ -32,8 +32,10 @@ Rails.application.routes.draw do
 
     get '/:site_name/list-dns', to: 'dns#list_dns'
 
+    post '/:site_name/changes', to: 'instances#changes'
+    post '/:site_name/restart', to: 'instances#restart'
     get '/:site_name/logs', to: 'instances#logs'
-    get '/:site_name/erase-all', to: 'instances#erase_all'
+    post '/:site_name/erase-all', to: 'instances#erase_all'
 
     get '/:site_name/storage-areas', to: 'storage_areas#index'
     post '/:site_name/add-storage-area', to: 'storage_areas#add'
