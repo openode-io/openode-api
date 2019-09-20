@@ -20,6 +20,9 @@ class InstancesController < ApplicationController
   def changes
     raise ApplicationRecord::ValidationError.new("Missing files") unless params["files"]
     files_client = JSON.parse(params["files"])
+    files_server = @runner.execute([
+      { cmd_name: "files_listing", options: { path: @website.repo_dir } }
+    ]).to_json
 
     puts "hello #{files_client.inspect}"
 

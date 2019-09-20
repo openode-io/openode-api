@@ -50,21 +50,21 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
   test "/instances/:instance_id/changes with subdomain" do
     set_dummy_secrets_to(LocationServer.all)
 
-    #prepare_ssh_session("docker exec 123456789 docker-compose logs --tail=100", "hellooutput")
+    website = Website.find_by site_name: "testsite"
 
-    post "/instances/testsite/changes?location_str_id=canada", 
-        params: { files: "{}" },
-        as: :json, 
-        headers: default_headers_auth
+    cmd = DeploymentMethod::Base.new.files_listing({ path: website.repo_dir })
 
-    assert_response :success
-    puts "response body #{response.parsed_body.inspect}"
+    prepare_ssh_session(cmd, "[]")
 
-    #assert_scripted do
-    #  begin_ssh
-      
-      #assert_equal response.parsed_body["logs"], "hellooutput"
-    #end
+    assert_scripted do
+      begin_ssh
+      post "/instances/testsite/changes?location_str_id=canada", 
+          params: { files: "[]" },
+          as: :json, 
+          headers: default_headers_auth
+
+      assert_response :success
+    end
   end
 
   # /logs with docker compose
