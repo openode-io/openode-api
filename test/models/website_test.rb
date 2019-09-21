@@ -95,6 +95,17 @@ class WebsiteTest < ActiveSupport::TestCase
       assert_equal w.locations[0].str_id, "canada"
     end
 
-  end
+    # normalize_storage_areas
+    test "normalized_storage_areas with two areas" do
+      w = Website.where(site_name: "testsite").first
+      w.storage_areas = ["tmp/", "what/is/this/"]
+      w.save
+      w.reload
 
+      n_storage_areas = w.normalized_storage_areas
+      
+      assert_equal n_storage_areas[0], "./tmp/"
+      assert_equal n_storage_areas[1], "./what/is/this/"
+    end
+  end
 end

@@ -117,7 +117,7 @@ class Website < ApplicationRecord
   end
 
   def repo_dir
-    return "/invalid/repository" if ! self.user_id || ! self.site_name
+    return "/invalid/repository/" if ! self.user_id || ! self.site_name
 
     "#{Website::REPOS_BASE_DIR}#{self.user_id}/#{self.site_name}/"
   end
@@ -131,5 +131,20 @@ class Website < ApplicationRecord
   def remove_storage_area(storage_area)
     self.storage_areas ||= []
     self.storage_areas.delete(storage_area)
+  end
+
+  def normalized_storage_areas
+    site_dir = self.repo_dir
+
+    self.storage_areas.map do |storage_area|
+      (site_dir + storage_area)
+        .gsub("//", "/")
+        .gsub(site_dir, "./")
+        .gsub("././", "./")
+        .gsub("//", "/")
+    end
+  rescue => e
+    logger.info("Issue normalizing storage areas #{e.inspect}")
+    []
   end
 end
