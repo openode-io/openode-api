@@ -47,23 +47,27 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
   end
 
   # /changes
-  test "/instances/:instance_id/changes with subdomain" do
+  test "/instances/:instance_id/changes with one file deleted" do
     set_dummy_secrets_to(LocationServer.all)
 
     website = Website.find_by site_name: "testsite"
 
     cmd = DeploymentMethod::Base.new.files_listing({ path: website.repo_dir })
 
-    prepare_ssh_session(cmd, "[]")
+    prepare_ssh_session(cmd, '[{"path":"test/what.txt","type":"F","checksum":"123456"},' +
+      '{"path":"test/what2.txt","type":"F","checksum":"123457"}]')
 
     assert_scripted do
       begin_ssh
       post "/instances/testsite/changes?location_str_id=canada", 
-          params: { files: "[]" },
+          params: { files: '[{"path":"test/what.txt","type":"F","checksum":"123456"}]' },
           as: :json, 
           headers: default_headers_auth
 
       assert_response :success
+      assert_equal response.parsed_body.length, 1
+      assert_equal response.parsed_body[0]["path"], "test/what2.txt"
+      assert_equal response.parsed_body[0]["change"], "D"
     end
   end
 

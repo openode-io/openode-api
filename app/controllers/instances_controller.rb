@@ -20,13 +20,15 @@ class InstancesController < ApplicationController
   def changes
     raise ApplicationRecord::ValidationError.new("Missing files") unless params["files"]
     files_client = JSON.parse(params["files"])
-    files_server = @runner.execute([
+    files_server = JSON.parse(@runner.execute([
       { cmd_name: "files_listing", options: { path: @website.repo_dir } }
-    ]).to_json
+    ]).first[:stdout])
 
-    puts "hello #{files_client.inspect}"
+    changes = Io::Dir.diff(files_client, files_server, @website.normalized_storage_areas)
 
-    json_res({})
+    @website_event_obj = { title: "sync-changes", changes: changes }
+
+    json_res(changes)
   end
 
   def docker_compose

@@ -31,9 +31,9 @@ module Io
 
   	def self.should_exclude?(f, dirs_to_exclude)
   		dirs_to_exclude.find do |dir_exclude|
-  			f["path"].include?(dir_exclude) || 
-  			(f["type"] == "D" && dir_exclude.include?(f["path"])) ||
-  			(f["type"] == "D" && "#{f["path"]}/".include?(dir_exclude))
+  			f["path"].include?(dir_exclude) ||
+  			dir_exclude.include?(f["path"]) ||
+  			"#{f["path"]}/".include?(dir_exclude)
   		end
   	end
 
