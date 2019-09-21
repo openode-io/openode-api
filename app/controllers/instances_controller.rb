@@ -31,6 +31,16 @@ class InstancesController < ApplicationController
     json_res(changes)
   end
 
+  def send_compressed_file
+    file = params["file"].tempfile
+    puts "paramss #{file.inspect}"
+
+    #Parameters: {"info"=>"{\"path\":\"009de841ac96841fd375d2f904354b27.zip\"}", "version"=>"2.0.14", "location_str_id"=>"canada", "file"=>#<ActionDispatch::Http::UploadedFile:0x00007f2a004177e8 @tempfile=#<Tempfile:/tmp/RackMultipart20190921-11527-cm6855.zip>, @original_filename="009de841ac96841fd375d2f904354b27.zip", @content_type="application/zip", @headers="Content-Disposition: form-data; name=\"file\"; filename=\"009de841ac96841fd375d2f904354b27.zip\"\r\nContent-Type: application/zip\r\n">, "site_name"=>"myprettytest.com"}
+
+
+    json_res({})
+  end
+
   def docker_compose
     content = if params["has_env_file"]
       DeploymentMethod::DockerCompose.default_docker_compose_file({

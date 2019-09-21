@@ -136,7 +136,7 @@ class Website < ApplicationRecord
   def normalized_storage_areas
     site_dir = self.repo_dir
 
-    self.storage_areas.map do |storage_area|
+    (self.storage_areas || []).map do |storage_area|
       (site_dir + storage_area)
         .gsub("//", "/")
         .gsub(site_dir, "./")

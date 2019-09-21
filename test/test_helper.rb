@@ -2,6 +2,7 @@ ENV['RAILS_ENV'] = 'test'
 require_relative '../config/environment'
 require 'rails/test_help'
 require 'net/ssh/test'
+require 'net/sftp'
 
 require 'simplecov'
 SimpleCov.start
@@ -30,6 +31,10 @@ class ActiveSupport::TestCase
       channel.gets_close
       channel.sends_close
     end
+  end
+
+  def begin_sftp
+    Remote::Sftp.set_conn_test("dummy")
   end
 
   def begin_ssh
