@@ -9,9 +9,26 @@ module DeploymentMethod
       @cloud_provider = self.get_cloud_provider()
     end
 
+    def ssh_configs
+      {
+        host: @configs[:host],
+        user: @configs[:secret][:user],
+        password: @configs[:secret][:password],
+        private_key: @configs[:secret][:private_key]
+      }
+    end
+
     def execute(cmds)
       protocol = @cloud_provider.deployment_protocol
       self.send("execute_#{protocol}", cmds)
+    end
+
+    def upload(local_path, remote_path)
+      files = [{
+        local_file_path: local_path,
+        remote_file_path: remote_path
+      }]
+      Remote::Sftp.transfer(files, self.ssh_configs)
     end
 
     def execute_ssh(cmds)
@@ -19,12 +36,7 @@ module DeploymentMethod
         @deployment_method.send(cmd[:cmd_name], cmd[:options])
       end
 
-      Remote::Ssh.exec(generated_commands, {
-        host: @configs[:host],
-        user: @configs[:secret][:user],
-        password: @configs[:secret][:password],
-        private_key: @configs[:secret][:private_key]
-      })
+      Remote::Ssh.exec(generated_commands, self.ssh_configs)
     end
 
     def get_deployment_method()

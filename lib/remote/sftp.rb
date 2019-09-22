@@ -30,7 +30,8 @@ module Remote
 
     def self.upload(sftp, files)
 		files.each do |file|
-		  sftp.upload!(file[:local_file_path], file[:remote_file_path])
+			puts "transfering #{file.inspect}"
+			sftp.upload!(file[:local_file_path], file[:remote_file_path])
 		end
     end
   end

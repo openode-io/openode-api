@@ -22,7 +22,7 @@ module DeploymentMethod
       "rm -rf #{options[:path]}"
     end
 
-    def initialize_repository(options = {})
+    def ensure_remote_repository(options = {})
       assert options[:path]
 
       "mkdir -p #{options[:path]}"

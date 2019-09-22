@@ -33,10 +33,17 @@ class InstancesController < ApplicationController
 
   def send_compressed_file
     file = params["file"].tempfile
-    puts "paramss #{file.inspect}"
+    local_file = file.path
+    archive_filename = params["file"].original_filename
+    remote_file = "#{@website.repo_dir}#{archive_filename}"
 
-    #Parameters: {"info"=>"{\"path\":\"009de841ac96841fd375d2f904354b27.zip\"}", "version"=>"2.0.14", "location_str_id"=>"canada", "file"=>#<ActionDispatch::Http::UploadedFile:0x00007f2a004177e8 @tempfile=#<Tempfile:/tmp/RackMultipart20190921-11527-cm6855.zip>, @original_filename="009de841ac96841fd375d2f904354b27.zip", @content_type="application/zip", @headers="Content-Disposition: form-data; name=\"file\"; filename=\"009de841ac96841fd375d2f904354b27.zip\"\r\nContent-Type: application/zip\r\n">, "site_name"=>"myprettytest.com"}
+    raise "bad remote file" unless Io::Path.is_secure?(@website.repo_dir, remote_file)
 
+    @runner.execute([
+      { cmd_name: "ensure_remote_repository", options: { path: @website.repo_dir } }
+    ])
+
+    @runner.upload(local_file, remote_file)
 
     json_res({})
   end
@@ -62,7 +69,7 @@ class InstancesController < ApplicationController
 
     logs = @runner.execute([
       { cmd_name: "erase_repository_files", options: { path: @website.repo_dir } },
-      { cmd_name: "initialize_repository", options: { path: @website.repo_dir } }
+      { cmd_name: "ensure_remote_repository", options: { path: @website.repo_dir } }
     ])
 
     @website_event_obj = { title: "Repository cleared (erase-all)" }
