@@ -33,6 +33,19 @@ class ActiveSupport::TestCase
     end
   end
 
+  def prepare_ssh_ensure_remote_repository(website)
+    prepare_ssh_session("mkdir -p #{website.repo_dir}", "")
+  end
+
+  def prepare_send_remote_repo(website, arch_filename, output)
+    cmd = DeploymentMethod::Base.new.uncompress_remote_archive({
+      repo_dir: website.repo_dir,
+      archive_path: "#{website.repo_dir}#{arch_filename}"
+    })
+
+    prepare_ssh_session(cmd, output)
+  end
+
   def begin_sftp
     Remote::Sftp.set_conn_test("dummy")
   end

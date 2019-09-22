@@ -27,6 +27,7 @@ module DeploymentMethod
       arch_path = options[:archive_path]
       repo_dir = options[:repo_dir]
 
+      "cd #{repo_dir} ; " +
       "unzip -o #{arch_path} ; " +
       "rm -f #{arch_path} ;" +
       "chmod -R 755 #{repo_dir}"

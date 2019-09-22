@@ -53,7 +53,7 @@ class InstancesController < ApplicationController
     ])
     logger.info("Uncompressing remote archive, result=#{logs.inspect}")
 
-    json_res({})
+    json_res({ result: "success" })
   end
 
   def docker_compose

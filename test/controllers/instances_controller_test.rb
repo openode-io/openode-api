@@ -71,6 +71,30 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # send_compressed_file
+  test "/instances/:instance_id/send_compressed_file " do
+    set_dummy_secrets_to(LocationServer.all)
+    file_to_upload = fixture_file_upload('files/small_repo.zip')
+
+    website = Website.find_by site_name: "testsite"
+
+    cmd = DeploymentMethod::Base.new.files_listing({ path: website.repo_dir })
+
+    prepare_ssh_ensure_remote_repository(website)
+    prepare_send_remote_repo(website, "small_repo.zip", "all ok")
+
+    assert_scripted do
+      begin_sftp
+      begin_ssh
+      post "/instances/testsite/sendCompressedFile?location_str_id=canada", 
+          params: { file: file_to_upload },
+          headers: default_headers_auth
+
+      assert_response :success
+      assert_equal response.parsed_body["result"], "success"
+    end
+  end
+
   # /logs with docker compose
   test "/instances/:instance_id/logs with subdomain" do
     set_dummy_secrets_to(LocationServer.all)
