@@ -56,7 +56,6 @@ class InstancesController < ApplicationController
 
   def delete_files
     assert params["filesInfo"].present?
-    puts "params[filesInfo] class #{params["filesInfo"].class.name}"
     input_files = 
       params["filesInfo"].class.name == "String" ? JSON.parse(params["filesInfo"]) : params["filesInfo"]
 
