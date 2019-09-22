@@ -52,7 +52,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
     website = Website.find_by site_name: "testsite"
 
-    cmd = DeploymentMethod::Base.new.files_listing({ path: website.repo_dir })
+    cmd = DeploymentMethod::DockerCompose.new.files_listing({ path: website.repo_dir })
 
     prepare_ssh_session(cmd, '[{"path":"test/what.txt","type":"F","checksum":"123456"},' +
       '{"path":"test/what2.txt","type":"F","checksum":"123457"}]')
@@ -78,8 +78,6 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
     website = Website.find_by site_name: "testsite"
 
-    cmd = DeploymentMethod::Base.new.files_listing({ path: website.repo_dir })
-
     prepare_ssh_ensure_remote_repository(website)
     prepare_send_remote_repo(website, "small_repo.zip", "all ok")
 
@@ -88,6 +86,36 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
       begin_ssh
       post "/instances/testsite/sendCompressedFile?location_str_id=canada", 
           params: { file: file_to_upload },
+          headers: default_headers_auth
+
+      assert_response :success
+      assert_equal response.parsed_body["result"], "success"
+    end
+  end
+
+  # /delete_files
+  test "/instances/:instance_id/deleteFiles " do
+    set_dummy_secrets_to(LocationServer.all)
+
+    website = Website.find_by site_name: "testsite"
+
+    cmd = DeploymentMethod::DockerCompose.new.delete_files({ files: [
+      "#{website.repo_dir}./test.txt",
+      "#{website.repo_dir}./test2.txt"
+    ]})
+    prepare_ssh_session(cmd, '')
+
+    assert_scripted do
+      begin_sftp
+      begin_ssh
+
+      files = [
+        { "path" => "./test.txt" },
+        { "path" => "./test2.txt" }
+      ]
+
+      delete "/instances/testsite/deleteFiles?location_str_id=canada", 
+          params: { filesInfo: files },
           headers: default_headers_auth
 
       assert_response :success

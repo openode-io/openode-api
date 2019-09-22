@@ -20,7 +20,11 @@ module DeploymentMethod
 
     def execute(cmds)
       protocol = @cloud_provider.deployment_protocol
-      self.send("execute_#{protocol}", cmds)
+      logs = self.send("execute_#{protocol}", cmds)
+
+      Rails.logger.info("Execute cmds=#{cmds.inspect}, result=#{logs.inspect}")
+
+      logs
     end
 
     def upload(local_path, remote_path)

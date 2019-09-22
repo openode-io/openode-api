@@ -24,4 +24,10 @@ class PathTest < ActiveSupport::TestCase
   test "is_secure? with root" do
     assert_equal Io::Path.is_secure?("/home/14/", "/root/test.html"), false
   end
+
+  test "filter_secure list of files" do
+    result = Io::Path.filter_secure("/home/14/", ["/root/test.html", "/home/14/test.txt"])
+    assert_equal result.length, 1
+    assert_equal result[0], "/home/14/test.txt"
+  end
 end

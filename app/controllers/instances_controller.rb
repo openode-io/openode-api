@@ -39,19 +39,39 @@ class InstancesController < ApplicationController
 
     raise "bad remote file" unless Io::Path.is_secure?(@website.repo_dir, remote_file)
 
-    logs = @runner.execute([
+    @runner.execute([
       { cmd_name: "ensure_remote_repository", options: { path: @website.repo_dir } }
     ])
-    logger.info("Ensure remote repo, result=#{logs.inspect}")
 
     @runner.upload(local_file, remote_file)
 
-    logs = @runner.execute([
+    @runner.execute([
       { cmd_name: "uncompress_remote_archive", 
         options: { archive_path: remote_file, repo_dir: @website.repo_dir }
       }
     ])
-    logger.info("Uncompressing remote archive, result=#{logs.inspect}")
+
+    json_res({ result: "success" })
+  end
+
+  def delete_files
+    assert params["filesInfo"].present?
+    puts "params[filesInfo] class #{params["filesInfo"].class.name}"
+    input_files = 
+      params["filesInfo"].class.name == "String" ? JSON.parse(params["filesInfo"]) : params["filesInfo"]
+
+    input_files = input_files.map { |file| "#{@website.repo_dir}#{file["path"]}" }
+    files = Io::Path.filter_secure(@website.repo_dir, input_files) 
+
+    @runner.execute([
+      {
+        cmd_name: "delete_files", options: { 
+          files: files
+        } 
+      }
+    ])
+
+    @website_event_obj = { title: "delete-files", files: files }
 
     json_res({ result: "success" })
   end

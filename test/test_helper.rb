@@ -38,7 +38,7 @@ class ActiveSupport::TestCase
   end
 
   def prepare_send_remote_repo(website, arch_filename, output)
-    cmd = DeploymentMethod::Base.new.uncompress_remote_archive({
+    cmd = DeploymentMethod::DockerCompose.new.uncompress_remote_archive({
       repo_dir: website.repo_dir,
       archive_path: "#{website.repo_dir}#{arch_filename}"
     })

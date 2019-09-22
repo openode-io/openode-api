@@ -54,4 +54,26 @@ class DockerComposeTest < ActiveSupport::TestCase
     assert_includes cmd, "=10"
   end
 
+  test "should have change dir and node" do
+    dep_method = DeploymentMethod::DockerCompose.new
+
+    result = dep_method.files_listing({ path: "/home/" })
+    assert_includes result, "cd #{DeploymentMethod::DockerCompose::REMOTE_PATH_API_LIB} &&"
+    assert_includes result, "node -e"
+  end
+
+  test "should be single line" do
+    dep_method = DeploymentMethod::DockerCompose.new
+
+    result = dep_method.files_listing({ path: "/home/" })
+    assert_equal result.lines.count, 1
+  end
+
+  test "delete files generate proper command" do
+    dep_method = DeploymentMethod::DockerCompose.new
+
+    result = dep_method.delete_files({ files: ["/home/4/test.txt", "/home/what/isthat"] })
+    assert_equal result, "rm -rf \"/home/4/test.txt\" ; rm -rf \"/home/what/isthat\" ; "
+  end
+
 end
