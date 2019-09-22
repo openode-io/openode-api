@@ -72,7 +72,7 @@ class UserTest < ActiveSupport::TestCase
     }
 
     user = User.create(attribs)
-    assert_equal user.activated, false
+    assert_equal [false, 0].include?(user.activated), true
     assert_equal user.activation_hash.length, 32
   end
 

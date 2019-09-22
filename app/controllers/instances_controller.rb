@@ -39,11 +39,19 @@ class InstancesController < ApplicationController
 
     raise "bad remote file" unless Io::Path.is_secure?(@website.repo_dir, remote_file)
 
-    @runner.execute([
+    logs = @runner.execute([
       { cmd_name: "ensure_remote_repository", options: { path: @website.repo_dir } }
     ])
+    logger.info("Ensure remote repo, result=#{logs.inspect}")
 
     @runner.upload(local_file, remote_file)
+
+    logs = @runner.execute([
+      { cmd_name: "uncompress_remote_archive", 
+        options: { archive_path: remote_file, repo_dir: @website.repo_dir }
+      }
+    ])
+    logger.info("Uncompressing remote archive, result=#{logs.inspect}")
 
     json_res({})
   end

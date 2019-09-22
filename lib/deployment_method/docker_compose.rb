@@ -11,21 +11,15 @@ module DeploymentMethod
       container_id = options[:website].container_id if options[:website]
 
       assert container_id
-      assert options[:nb_lines]
+      require_fields([:nb_lines], options)
 
       "docker exec #{container_id} docker-compose logs --tail=#{options[:nb_lines]}"
     end
 
     def erase_repository_files(options = {})
-      assert options[:path]
+      require_fields([:path], options)
 
       "rm -rf #{options[:path]}"
-    end
-
-    def ensure_remote_repository(options = {})
-      assert options[:path]
-
-      "mkdir -p #{options[:path]}"
     end
 
     def self.default_docker_compose_file(opts = {})

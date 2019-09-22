@@ -16,9 +16,9 @@ two:
   location_server: usa1
   extra_storage: 1
   nb_cpus: 1
-  port: 11000
-  second_port: 11005
-  running_port: 11005
+  port: 11005
+  second_port: 11006
+  running_port: 11006
 
 three:
   website: three
@@ -26,9 +26,9 @@ three:
   location_server: usa1
   extra_storage: 1
   nb_cpus: 1
-  port: 11000
-  second_port: 11005
-  running_port: 11005
+  port: 11007
+  second_port: 11008
+  running_port: 11008
 
 with_private_cloud:
   website: with_private_cloud
@@ -36,6 +36,6 @@ with_private_cloud:
   location_server: usa1
   extra_storage: 1
   nb_cpus: 1
-  port: 11000
-  second_port: 11005
-  running_port: 11005
+  port: 11009
+  second_port: 11010
+  running_port: 11010

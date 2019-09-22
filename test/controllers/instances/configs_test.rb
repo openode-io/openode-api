@@ -28,6 +28,8 @@ class ConfigsTest < ActionDispatch::IntegrationTest
     assert_response :success
     w = Website.find_by site_name: "testsite"
 
+    puts "  #{w.configs["REDIR_HTTP_TO_HTTPS"]}"
+
     assert_equal w.configs["REDIR_HTTP_TO_HTTPS"], "true"
     assert_equal w.redir_http_to_https, true
   end
