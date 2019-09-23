@@ -75,6 +75,25 @@ class InstancesController < ApplicationController
     json_res({ result: "success" })
   end
 
+  def cmd
+    assert params["cmd"].present?
+    assert params["service"].present?
+
+    result = @runner.execute([
+      {
+        cmd_name: "custom_cmd", options: {
+          container_id: @website.container_id,
+          cmd: Io::Cmd.sanitize_input_cmd(params["cmd"]),
+          service: Io::Cmd.sanitize_input_cmd(params["service"]),
+        } 
+      }
+    ])
+
+    puts "result #{result.inspect}"
+
+    json_res({ result: result })
+  end
+
   def docker_compose
     content = if params["has_env_file"]
       DeploymentMethod::DockerCompose.default_docker_compose_file({

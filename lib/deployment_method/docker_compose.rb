@@ -16,6 +16,18 @@ module DeploymentMethod
       "docker exec #{container_id} docker-compose logs --tail=#{options[:nb_lines]}"
     end
 
+    def custom_cmd(options = {})
+      puts "custom options #{options.inspect}"
+      require_fields([:container_id, :service, :cmd], options)
+      container_id, service, cmd = options.values_at(:container_id, :service, :cmd)
+      #container_id = options[:container_id]
+      #service = options[:service]
+      #cmd = options[:cmd]
+
+
+      "#{self.exec_begin(options[:container_id])} "
+    end
+
     def erase_repository_files(options = {})
       require_fields([:path], options)
 
@@ -81,6 +93,11 @@ services:
       context: .
     restart: always
 "
+    end
+
+    protected
+    def exec_begin(container_id)
+      "docker exec #{container_id} docker-compose exec -T "
     end
 
   end
