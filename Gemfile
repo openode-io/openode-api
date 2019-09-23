@@ -26,7 +26,7 @@ gem 'uptimerobot'
 gem 'countries'
 gem 'net-ssh'
 gem 'net-sftp'
-gem "solid_assert"
+gem 'solid_assert'
 gem 'public_suffix'
 gem 'mailgun-ruby', '~>1.2.0'
 
