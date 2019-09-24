@@ -20,12 +20,8 @@ module DeploymentMethod
       puts "custom options #{options.inspect}"
       require_fields([:container_id, :service, :cmd], options)
       container_id, service, cmd = options.values_at(:container_id, :service, :cmd)
-      #container_id = options[:container_id]
-      #service = options[:service]
-      #cmd = options[:cmd]
 
-
-      "#{self.exec_begin(options[:container_id])} "
+      "#{self.exec_begin(options[:container_id])} #{service} #{cmd}"
     end
 
     def erase_repository_files(options = {})

@@ -5,7 +5,7 @@ class InstancesController < ApplicationController
   before_action :populate_website_location
   before_action :prepare_runner
   after_action :record_website_event
-  before_action only: [:logs] do
+  before_action only: [:logs, :cmd] do
     requires_status_of("online")
   end
 
@@ -87,9 +87,7 @@ class InstancesController < ApplicationController
           service: Io::Cmd.sanitize_input_cmd(params["service"]),
         } 
       }
-    ])
-
-    puts "result #{result.inspect}"
+    ]).first
 
     json_res({ result: result })
   end

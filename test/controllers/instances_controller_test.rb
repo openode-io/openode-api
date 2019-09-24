@@ -138,6 +138,41 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # /cmd with docker compose
+  test "/instances/:instance_id/cmd with subdomain" do
+    set_dummy_secrets_to(LocationServer.all)
+
+    prepare_ssh_session("docker exec 123456789 docker-compose exec -T  www ls\\ -la", "hellooutput")
+
+    assert_scripted do
+      begin_ssh
+      post "/instances/testsite/cmd?location_str_id=canada", 
+        as: :json,
+        params: { service: "www", cmd: "ls -la" },
+        headers: default_headers_auth
+
+      assert_response :success
+      assert_equal response.parsed_body["result"]["stdout"], "hellooutput"
+    end
+  end
+
+  test "/instances/:instance_id/cmd fail if offline" do
+    set_dummy_secrets_to(LocationServer.all)
+    website = Website.find_by! site_name: "testsite"
+    website.status = Website::STATUS_OFFLINE
+    website.save!
+
+    assert_scripted do
+      begin_ssh
+      post "/instances/testsite/cmd?location_str_id=canada", 
+        as: :json,
+        params: { service: "www", cmd: "ls -la" },
+        headers: default_headers_auth
+
+      assert_response :bad_request
+    end
+  end
+
   # /erase-all with docker compose
   test "/instances/:instance_id/erase-all typical scenario" do
     set_dummy_secrets_to(LocationServer.all)
