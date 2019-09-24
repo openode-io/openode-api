@@ -1,9 +1,12 @@
 class InstancesController < ApplicationController
 
+  MINIMUM_CLI_VERSION = "2.0.15"
+
   before_action :authorize
   before_action :populate_website
   before_action :populate_website_location
   before_action :prepare_runner
+  before_action :check_minimum_cli_version
   after_action :record_website_event
   before_action only: [:logs, :cmd] do
     requires_status_of("online")
@@ -176,6 +179,15 @@ class InstancesController < ApplicationController
       @location = Location.find_by! str_id: params["location_str_id"]
       @website_location = @website.website_locations.find_by! location_id: @location.id
       @location_server = @website_location.location_server
+    end
+  end
+
+  def check_minimum_cli_version
+    if params["version"]
+      unless Gem::Version.new(params["version"]) >= Gem::Version.new(MINIMUM_CLI_VERSION)
+        cmd = "Deprecated CLI version, please upgrade with npm i -g openode"
+        raise ApplicationRecord::ValidationError.new(cmd)
+      end
     end
   end
 

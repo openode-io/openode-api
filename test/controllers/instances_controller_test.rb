@@ -26,6 +26,27 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body[0]["domains"], []
   end
 
+  test "/instances/ with valid API version (equal to)" do
+    InstancesController::MINIMUM_CLI_VERSION = "2.0.1"
+    get "/instances/?version=2.0.1", as: :json, headers: default_headers_auth
+
+    assert_response :success
+  end
+
+  test "/instances/ with valid API version (greater than)" do
+    InstancesController::MINIMUM_CLI_VERSION = "2.0.1"
+    get "/instances/?version=2.2.2", as: :json, headers: default_headers_auth
+
+    assert_response :success
+  end
+
+  test "/instances/ with deprecated api version" do
+    InstancesController::MINIMUM_CLI_VERSION = "2.0.1"
+    get "/instances/?version=1.0.1", as: :json, headers: default_headers_auth
+
+    assert_response :bad_request
+  end
+
   test "/instances/:instance_id with valid site name" do
     get "/instances/testsite", as: :json, headers: default_headers_auth
 
