@@ -1,6 +1,6 @@
 class InstancesController < ApplicationController
 
-  MINIMUM_CLI_VERSION = "2.0.15"
+  MINIMUM_CLI_VERSION = "2.0.14"
 
   before_action :authorize
   before_action :populate_website
@@ -165,12 +165,20 @@ class InstancesController < ApplicationController
 
   def restart
 
+    puts "website ? restart #{@website.inspect}"
+
+    # TODO init deployment model
+
+    # run in background:
     @runner.execute([
-      { cmd_name: "pre_verification", options: { is_complex_cmd: true } },
+      { cmd_name: "pre_repository_verification", options: { is_complex: true, website: @website } },
       { cmd_name: "ensure_remote_repository", options: { path: @website.repo_dir } }
     ])
 
     json_res({ result: "success", deploymentId: 1234567 })
+
+  rescue => ex
+    json_res({  })
   end
 
   protected

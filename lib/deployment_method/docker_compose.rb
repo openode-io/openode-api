@@ -16,11 +16,23 @@ module DeploymentMethod
       "docker exec #{container_id} docker-compose logs --tail=#{options[:nb_lines]}"
     end
 
-    def pre_repo_verification(options = {})
-      #assert options[:repo_dir]
-      #assert options[:file]
+    def get_file(options = {})
+      assert options[:repo_dir]
+      assert options[:file]
 
       "cat #{options[:repo_dir]}#{options[:file]}"
+    end
+
+    def pre_repository_verification(options = {})
+      assert options[:website]
+      website, = options.values_at(:website)
+      puts "options = #{website.inspect}"
+
+      docker_compose_content = self.ex_stdout("get_file", { 
+        repo_dir: website.repo_dir, file: "docker-compose.yml" 
+      })
+      DockerCompose.validate_docker_compose!(docker_compose_content)
+      
     end
 
     def custom_cmd(options = {})
@@ -97,11 +109,23 @@ services:
 "
     end
 
+    def self.validate_docker_compose!(docker_compose_str)
+      yml_docker_compose = YAML.load(docker_compose_str)
+
+      if ! yml_docker_compose || ! yml_docker_compose["services"]
+        return
+      end
+
+      yml_docker_compose["services"].each do |service_name, service|
+        if service.keys.include?("privileged")
+          raise ApplicationRecord::ValidationError.new("privileged now allowed")
+        end
+      end
+    end
+
     protected
     def exec_begin(container_id)
       "docker exec #{container_id} docker-compose exec -T "
     end
-
   end
-
 end

@@ -19,10 +19,13 @@ module Remote
       if @@conn_test
         results = Ssh.ssh_exec_commands(@@conn_test, cmds)
       else
-        Net::SSH.start(opts[:host], opts[:user], :password => opts[:password],
-          :non_interactive => true) do |ssh|
-          results = Ssh.ssh_exec_commands(ssh, cmds)
-        end
+
+        # TODO keep the connection https://net-ssh.github.io/ssh/v1/chapter-2.html
+
+        ssh = Net::SSH.start(opts[:host], opts[:user], :password => opts[:password],
+          :non_interactive => true)
+        results = Ssh.ssh_exec_commands(ssh, cmds)
+        ssh.close
       end
 
       results

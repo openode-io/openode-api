@@ -37,8 +37,11 @@ module DeploymentMethod
 
     def execute_ssh(cmds)
       generated_commands = cmds.map do |cmd|
-        @deployment_method.send(cmd[:cmd_name], cmd[:options])
+        result = @deployment_method.send(cmd[:cmd_name], cmd[:options])
+
+        cmd[:options][:is_complex] ? nil : result
       end
+      .select { |gen_cmd| gen_cmd.present? }
 
       if generated_commands.length > 0
         Remote::Ssh.exec(generated_commands, self.ssh_configs)
@@ -48,12 +51,17 @@ module DeploymentMethod
     end
 
     def get_deployment_method()
-      case @type
+      dep_method = case @type
       when "docker"
         DeploymentMethod::DockerCompose.new
       else
         nil
       end
+
+      # for convenience, to call back the runner from any dep method
+      dep_method.runner = self
+
+      dep_method
     end
 
     def get_cloud_provider()

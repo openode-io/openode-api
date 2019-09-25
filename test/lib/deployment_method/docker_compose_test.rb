@@ -76,4 +76,31 @@ class DockerComposeTest < ActiveSupport::TestCase
     assert_equal result, "rm -rf \"/home/4/test.txt\" ; rm -rf \"/home/what/isthat\" ; "
   end
 
+  test "validate_docker_compose! with default docker compose" do
+    begin
+      dock_compose_str = DeploymentMethod::DockerCompose.default_docker_compose_file
+      DeploymentMethod::DockerCompose.validate_docker_compose!(dock_compose_str)
+    rescue
+      assert false
+    end
+  end
+
+  test "validate_docker_compose! with invalid docker compose" do
+    begin
+      dock_compose_str = "version: '3'
+services:
+  www:
+
+    volumes:
+      - /opt/app/:/opt/app/
+    privileged: true
+    ports:
+      - '80:80'
+    build:
+      context: ."
+      DeploymentMethod::DockerCompose.validate_docker_compose!(dock_compose_str)
+      assert false
+    rescue
+    end
+  end
 end
