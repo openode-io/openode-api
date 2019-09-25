@@ -70,17 +70,83 @@ module CloudProvider
       self.calc_cost_per_month(ram) * 100 # 1 cent per credit
     end
 
+    def calc_cost_per_hour(ram)
+      self.calc_cost_per_month(ram) / (31.0*24.0)
+    end
+
+    def calc_cost_per_minute(ram)
+      self.calc_cost_per_hour(ram) / 60.0
+    end
+
     def plans
-      [
+      list = [
+        {
+          id: "sandbox",
+          internal_id: "free",
+          name: "Sandbox",
+          ram: 100,
+          storage: 1000,
+          bandwidth: 10
+        },
         {
           id: "50-MB",
+          internal_id: "first",
           name: "50MB Memory",
-          short_name: "50-MB",
           ram: 50,
           storage: 1000,
           bandwidth: 100
+        },
+        {
+          id: "100-MB",
+          internal_id: "second",
+          name: "100MB Memory",
+          ram: 100,
+          storage: 1000,
+          bandwidth: 200
+        },
+        {
+          id: "200-MB",
+          internal_id: "third",
+          name: "200MB Memory",
+          ram: 200,
+          storage: 1000,
+          bandwidth: 400
+        },
+        {
+          id: "500-MB",
+          internal_id: "fourth",
+          name: "500MB Memory",
+          ram: 500,
+          storage: 1000,
+          bandwidth: 1000
+        },
+        {
+          id: "1-GB",
+          internal_id: "fifth",
+          name: "1GB Memory",
+          ram: 1024,
+          storage: 1000,
+          bandwidth: 2000
+        },
+        {
+          id: "2-GB",
+          internal_id: "sixth",
+          name: "2GB Memory",
+          ram: 2048,
+          storage: 1000,
+          bandwidth: 4000
         }
       ]
+
+      list.map do |plan|
+        plan[:short_name] = plan[:id]
+        plan[:human_id] = plan[:id]
+        plan[:cost_per_minute] = self.calc_cost_per_minute(plan[:ram])
+        plan[:cost_per_hour] = self.calc_cost_per_hour(plan[:ram])
+        plan[:cost_per_month] = self.calc_cost_per_month(plan[:ram])
+
+        plan
+      end
     end
 
     protected
