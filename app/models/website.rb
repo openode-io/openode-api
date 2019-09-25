@@ -122,6 +122,12 @@ class Website < ApplicationRecord
     "#{Website::REPOS_BASE_DIR}#{self.user_id}/#{self.site_name}/"
   end
 
+  def has_credits?
+
+    # TODO
+
+  end
+
   def add_storage_area(storage_area)
     self.storage_areas ||= []
     self.storage_areas << storage_area
@@ -131,6 +137,20 @@ class Website < ApplicationRecord
   def remove_storage_area(storage_area)
     self.storage_areas ||= []
     self.storage_areas.delete(storage_area)
+  end
+
+  # true/false, msg
+  def can_deploy_to?(website_location)
+    puts "usss #{user.inspect}"
+    unless user.activated?
+      return false, "*** User account not yet activated. Please make sure to click the activation link in your registration email."
+    end
+
+    if user.suspended?
+      return false, "*** User suspended"
+    end
+
+    return true, "hello"
   end
 
   def normalized_storage_areas

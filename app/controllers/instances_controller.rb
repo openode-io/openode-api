@@ -6,6 +6,7 @@ class InstancesController < ApplicationController
   before_action :populate_website
   before_action :populate_website_location
   before_action :prepare_runner
+  after_action :terminate_runner
 
   before_action only: [:restart] do
     requires_minimum_cli_version
@@ -244,6 +245,10 @@ class InstancesController < ApplicationController
     if @website_location
       @runner = @website_location.prepare_runner
     end
+  end
+
+  def terminate_runner
+    @runner.terminate if @runner.present?
   end
 
   def record_website_event

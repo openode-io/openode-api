@@ -51,6 +51,38 @@ module CloudProvider
       end
     end
 
+    def calc_cost_per_month(ram)
+      amount_ram_server = 2000
+      cost_server = 5.16 # in $
+
+      nb_possible_instances = amount_ram_server.to_f / ram.to_f
+      base_cost = cost_server / nb_possible_instances
+
+      charge = base_cost * 1.50
+      price = charge * 2.6
+
+      degressive_saving = 2.0 * ram * 0.001
+
+      price - degressive_saving
+    end
+
+    def credits_per_month(ram)
+      self.calc_cost_per_month(ram) * 100 # 1 cent per credit
+    end
+
+    def plans
+      [
+        {
+          id: "50-MB",
+          name: "50MB Memory",
+          short_name: "50-MB",
+          ram: 50,
+          storage: 1000,
+          bandwidth: 100
+        }
+      ]
+    end
+
     protected
 
   end

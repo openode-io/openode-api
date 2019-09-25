@@ -9,6 +9,12 @@ module DeploymentMethod
       @cloud_provider = self.get_cloud_provider()
     end
 
+    def terminate
+      # will close the SSH connection if any
+      @ssh.close if @ssh
+      @ssh = nil
+    end
+
     def ssh_configs
       {
         host: @configs[:host],
@@ -44,7 +50,8 @@ module DeploymentMethod
       .select { |gen_cmd| gen_cmd.present? }
 
       if generated_commands.length > 0
-        Remote::Ssh.exec(generated_commands, self.ssh_configs)
+        @ssh ||= Remote::Ssh.new(self.ssh_configs)
+        @ssh.exec(generated_commands)
       else
         []
       end
@@ -59,7 +66,7 @@ module DeploymentMethod
       end
 
       # for convenience, to call back the runner from any dep method
-      dep_method.runner = self
+      dep_method.runner = self if dep_method
 
       dep_method
     end

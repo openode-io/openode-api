@@ -12,35 +12,53 @@ module Remote
       @@conn_test
     end
 
-    # opts: { host, user, password,  }
-    def self.exec(cmds, opts = {})
+    def initialize(opts = {})
+      @opts = opts
+
+      unless @@conn_test
+        @ssh = Net::SSH.start(opts[:host], opts[:user], :password => opts[:password],
+            :non_interactive => true)
+      end
+
+      ObjectSpace.define_finalizer( self, self.class.finalize(@ssh) )
+    end
+
+    def close
+      @ssh.close if @ssh
+      @ssh = nil
+    end
+
+    def self.finalize(ssh)
+      proc do
+        if ssh.present?
+          ssh.close
+        end
+      end
+    end
+
+    def exec(cmds)
       results = []
 
       if @@conn_test
-        results = Ssh.ssh_exec_commands(@@conn_test, cmds)
+        @ssh = @@conn_test
+        results = self.ssh_exec_commands(cmds)
       else
-
-        # TODO keep the connection https://net-ssh.github.io/ssh/v1/chapter-2.html
-
-        ssh = Net::SSH.start(opts[:host], opts[:user], :password => opts[:password],
-          :non_interactive => true)
-        results = Ssh.ssh_exec_commands(ssh, cmds)
-        ssh.close
+        results = self.ssh_exec_commands(cmds)
       end
 
       results
     end
 
-    def self.ssh_exec_commands(ssh, cmds)
-      cmds.map { |cmd| Ssh.ssh_exec!(ssh, cmd) }
+    def ssh_exec_commands(cmds)
+      cmds.map { |cmd| self.ssh_exec!(cmd) }
     end
 
-    def self.ssh_exec!(ssh, command)
+    def ssh_exec!(command)
       stdout_data = ""
       stderr_data = ""
       exit_code = nil
 
-      ssh.open_channel do |channel|
+      @ssh.open_channel do |channel|
         channel.exec(command) do |ch, success|
           unless success
             raise "FAILED: couldn't execute command (ssh.channel.exec)"
@@ -59,7 +77,7 @@ module Remote
         end
       end
 
-      ssh.loop
+      @ssh.loop
 
       {
         stdout: stdout_data,

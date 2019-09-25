@@ -13,7 +13,9 @@ class RemoteSshTest < ActiveSupport::TestCase
 
     assert_scripted do
       begin_ssh
-      result = Remote::Ssh.exec(["ls"], {})
+      ssh = Remote::Ssh.new({})
+      result = ssh.exec(["ls"])
+      ssh = nil
 
       assert_equal result[0][:stdout], "root what"
     end
@@ -25,7 +27,9 @@ class RemoteSshTest < ActiveSupport::TestCase
 
     assert_scripted do
       begin_ssh
-      result = Remote::Ssh.exec(["ls", "cat toto"], {})
+      ssh = Remote::Ssh.new({})
+      result = ssh.exec(["ls", "cat toto"])
+      ssh = nil
       assert_equal result[0][:stdout], "root what"
       assert_equal result[1][:stdout], "big content"
     end
