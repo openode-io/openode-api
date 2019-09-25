@@ -16,12 +16,18 @@ module DeploymentMethod
       "docker exec #{container_id} docker-compose logs --tail=#{options[:nb_lines]}"
     end
 
-    def custom_cmd(options = {})
-      puts "custom options #{options.inspect}"
-      require_fields([:container_id, :service, :cmd], options)
-      container_id, service, cmd = options.values_at(:container_id, :service, :cmd)
+    def pre_repo_verification(options = {})
+      #assert options[:repo_dir]
+      #assert options[:file]
 
-      "#{self.exec_begin(options[:container_id])} #{service} #{cmd}"
+      "cat #{options[:repo_dir]}#{options[:file]}"
+    end
+
+    def custom_cmd(options = {})
+      require_fields([:website, :service, :cmd], options)
+      website, service, cmd = options.values_at(:website, :service, :cmd)
+
+      "#{self.exec_begin(website.container_id)} #{service} #{cmd}"
     end
 
     def erase_repository_files(options = {})

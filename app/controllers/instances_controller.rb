@@ -6,10 +6,20 @@ class InstancesController < ApplicationController
   before_action :populate_website
   before_action :populate_website_location
   before_action :prepare_runner
+
+  before_action only: [:restart] do
+    requires_minimum_cli_version
+  end
+
   before_action :check_minimum_cli_version
   after_action :record_website_event
+
   before_action only: [:logs, :cmd] do
-    requires_status_of("online")
+    requires_status_in [Website::STATUS_ONLINE]
+  end
+
+  before_action only: [:restart] do
+    requires_status_in [Website::STATUS_ONLINE, Website::STATUS_OFFLINE]
   end
 
   def index
@@ -85,7 +95,7 @@ class InstancesController < ApplicationController
     result = @runner.execute([
       {
         cmd_name: "custom_cmd", options: {
-          container_id: @website.container_id,
+          website: @website.clone,
           cmd: Io::Cmd.sanitize_input_cmd(params["cmd"]),
           service: Io::Cmd.sanitize_input_cmd(params["service"]),
         } 
@@ -93,6 +103,26 @@ class InstancesController < ApplicationController
     ]).first
 
     json_res({ result: result })
+  end
+
+  def stop
+
+    # TODO
+
+
+    @runner.execute([
+      {
+        cmd_name: "stop", options: {
+          website: @website.clone
+        } 
+      }
+    ])
+
+    # change the status
+    @website.status = Website::STATUS_OFFLINE
+    @website.save
+
+    json_res({ result: "success" })
   end
 
   def docker_compose
@@ -135,6 +165,11 @@ class InstancesController < ApplicationController
 
   def restart
 
+    @runner.execute([
+      { cmd_name: "pre_verification", options: { is_complex_cmd: true } },
+      { cmd_name: "ensure_remote_repository", options: { path: @website.repo_dir } }
+    ])
+
     json_res({ result: "success", deploymentId: 1234567 })
   end
 
@@ -146,9 +181,9 @@ class InstancesController < ApplicationController
     end
   end
 
-  def requires_status_of(status)
-    if @website.status != status
-      msg = "The instance must be in status #{status}."
+  def requires_status_in(statuses)
+    unless statuses.include?(@website.status)
+      msg = "The instance must be in status #{statuses}."
       raise ApplicationRecord::ValidationError.new(msg)
     end
   end
@@ -179,6 +214,12 @@ class InstancesController < ApplicationController
       @location = Location.find_by! str_id: params["location_str_id"]
       @website_location = @website.website_locations.find_by! location_id: @location.id
       @location_server = @website_location.location_server
+    end
+  end
+
+  def requires_minimum_cli_version
+    unless params["version"].present?
+      params["version"] = "0.0.0" # dummy low version
     end
   end
 

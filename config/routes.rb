@@ -36,13 +36,14 @@ Rails.application.routes.draw do
     post '/:site_name/sendCompressedFile', to: 'instances#send_compressed_file'
     delete '/:site_name/deleteFiles', to: 'instances#delete_files'
     post '/:site_name/cmd', to: 'instances#cmd'
+    post '/:site_name/stop', to: 'instances#stop' # TODO not finished
     post '/:site_name/restart', to: 'instances#restart'
     get '/:site_name/logs', to: 'instances#logs'
     post '/:site_name/erase-all', to: 'instances#erase_all'
 
     get '/:site_name/storage-areas', to: 'storage_areas#index'
     post '/:site_name/add-storage-area', to: 'storage_areas#add'
-    post '/:site_name/del-storage-area', to: 'storage_areas#remove' # todo refactor
+    post '/:site_name/del-storage-area', to: 'storage_areas#remove' # to refactor
 
     get '/:site_name/snapshots/:id', to: 'snapshots#show'
     post '/:site_name/snapshots/create', to: 'snapshots#create'

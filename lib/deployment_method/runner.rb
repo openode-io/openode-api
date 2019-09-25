@@ -40,7 +40,11 @@ module DeploymentMethod
         @deployment_method.send(cmd[:cmd_name], cmd[:options])
       end
 
-      Remote::Ssh.exec(generated_commands, self.ssh_configs)
+      if generated_commands.length > 0
+        Remote::Ssh.exec(generated_commands, self.ssh_configs)
+      else
+        []
+      end
     end
 
     def get_deployment_method()
