@@ -3,6 +3,7 @@ require_relative '../config/environment'
 require 'rails/test_help'
 require 'net/ssh/test'
 require 'net/sftp'
+require 'webmock/minitest'
 
 require 'simplecov'
 SimpleCov.start
@@ -12,6 +13,11 @@ class ActiveSupport::TestCase
 
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   fixtures :all
+
+  setup do
+    stub_request(:get, "https://api.vultr.com/v1/plans/list").
+      to_return(status: 200, body: "", headers: {})
+  end
 
   def set_dummy_secrets_to(servers)
     servers.each do |server|
@@ -63,6 +69,8 @@ class ActiveSupport::TestCase
       "x-auth-token": "1234s56789"
     }
   end
+
+
 
   # Add more helper methods to be used by all tests here...
 end

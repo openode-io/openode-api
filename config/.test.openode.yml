@@ -24,3 +24,5 @@ application:
               cpus: 2
               disk_gb: 200
     - type: dummy
+    - type: vultr
+      api_key: xxxxx # TODO REMOVE

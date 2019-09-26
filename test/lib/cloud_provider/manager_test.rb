@@ -21,11 +21,11 @@ class ManagerTest < ActiveSupport::TestCase
 
   test "available locations" do
     locations = CloudProvider::Manager.instance.available_locations
+    assert_equal locations.length >= 3, true
 
-    assert_equal locations.length, 3
-    assert_equal locations[0][:id], "canada"
-    assert_equal locations[1][:id], "canada2"
-    assert_equal locations[2][:id], "usa"
+    assert_equal locations.find { |l| l[:id] == "canada" }[:id], "canada"
+    assert_equal locations.find { |l| l[:id] == "canada2" }[:id], "canada2"
+    assert_equal locations.find { |l| l[:id] == "usa" }[:id], "usa"
   end
 
   test "should create internal location server and secret properly" do

@@ -2,8 +2,6 @@ require 'test_helper'
 
 class InternalTest < ActiveSupport::TestCase
 
-	# calc_cost_per_month
-
 	test "calc_cost_per_month" do
 		internal_provider = CloudProvider::Manager.instance.first_of_type("internal")
 

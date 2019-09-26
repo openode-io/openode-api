@@ -144,6 +144,7 @@ module CloudProvider
         plan[:cost_per_minute] = self.calc_cost_per_minute(plan[:ram])
         plan[:cost_per_hour] = self.calc_cost_per_hour(plan[:ram])
         plan[:cost_per_month] = self.calc_cost_per_month(plan[:ram])
+        plan[:type] = "cloud"
 
         plan
       end
