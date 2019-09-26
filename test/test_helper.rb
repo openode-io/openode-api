@@ -15,8 +15,30 @@ class ActiveSupport::TestCase
   fixtures :all
 
   setup do
-    stub_request(:get, "https://api.vultr.com/v1/plans/list").
-      to_return(status: 200, body: "", headers: {})
+    http_stubs = [
+      {
+        url: "https://api.vultr.com/v1/plans/list",
+        method: :get,
+        content_type: "application/json",
+        response_status: 200,
+        response_path: "test/fixtures/http/cloud_provider/vultr/plans_list.json"
+      },
+      {
+        url: "https://api.vultr.com/v1/regions/list",
+        method: :get,
+        content_type: "application/json",
+        response_status: 200,
+        response_path: "test/fixtures/http/cloud_provider/vultr/regions_list.json"
+      }
+    ]
+
+    http_stubs.each do |http_stub|
+      stub_request(http_stub[:method], http_stub[:url]).
+        to_return(status: http_stub[:response_status], 
+          body: IO.read(http_stub[:response_path]), 
+          headers: { content_type: http_stub[:content_type] })
+    end
+
   end
 
   def set_dummy_secrets_to(servers)

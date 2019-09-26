@@ -6,6 +6,8 @@ Vultr.api_key = ENV[""]
 module CloudProvider
   class Vultr < Base
 
+    TYPE = "private-cloud"
+
     def initialize(configs)
       ::Vultr.api_key = configs["api_key"]
 
@@ -42,9 +44,8 @@ module CloudProvider
     end
 
     def plans
-      res = ::Vultr::Plans.list
-      puts res
       return @plans if @plans
+
       @plans = ::Vultr::Plans.list[:result]
         .map do |key, plan|
 
@@ -67,10 +68,10 @@ module CloudProvider
             VPSPLANID: plan["VPSPLANID"],
             name: plan["name"],
             vcpu_count: plan["vcpu_count"],
-            ram: plan["ram"],
-            disk: plan["disk"],
-            bandwidth: plan["bandwidth"],
-            bandwidth_gb: plan["bandwidth_gb"],
+            ram: plan["ram"].to_i,
+            disk: plan["disk"].to_f,
+            bandwidth: plan["bandwidth"].to_f,
+            bandwidth_gb: plan["bandwidth_gb"].to_f,
             plan_type: plan["plan_type"],
             windows: plan["windows"],
             available_locations: plan["available_locations"]
