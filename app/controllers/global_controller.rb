@@ -21,6 +21,12 @@ class GlobalController < ApplicationController
     json_res(CloudProvider::Manager.instance.available_plans)
   end
 
+  def available_plans_at
+    manager = CloudProvider::Manager.instance
+
+    json_res(manager.available_plans_of_type_at(params["type"], params["location_str_id"]))
+  end
+
   def available_configs
     json_res(Website::CONFIG_VARIABLES)
   end

@@ -20,4 +20,23 @@ class CloudProviderVultrTest < ActiveSupport::TestCase
 
 		assert_equal plans[7][:id], "98304-MB-208"
 	end
+
+	test "plans_at with existing" do
+		provider = CloudProvider::Manager.instance.first_of_type("vultr")
+		provider.initialize_locations
+
+		location = Location.find_by str_id: "singapore-40"
+
+		plans = provider.plans_at(location.str_id)
+
+		assert_equal plans.length, 7
+
+		find_one = plans.find { |plan| plan[:id] == "1024-MB-201" }
+
+		assert_equal find_one[:id], "1024-MB-201"
+
+		plans.each do |plan|
+			assert_equal plan[:type], CloudProvider::Vultr::TYPE
+		end
+	end
 end

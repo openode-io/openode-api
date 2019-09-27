@@ -18,6 +18,10 @@ module CloudProvider
       "ssh"
     end
 
+    def type
+      Vultr::TYPE
+    end
+
     def available_locations
       # string.parameterize
       regions = ::Vultr::Regions.list
@@ -78,6 +82,13 @@ module CloudProvider
           }
         end
         .select { |plan| plan[:plan_type] == "SSD" }
+    end
+
+    def plans_at(location_str_id)
+      location_id = location_str_id.split("-").last.to_i
+
+      self.plans
+        .select { |plan| plan[:available_locations].include?(location_id) }
     end
 
   end

@@ -5,6 +5,10 @@ module CloudProvider
     def initialize(configs)
     end
 
+    def type
+      "dummy"
+    end
+
     def available_locations
       [
         {
@@ -32,6 +36,10 @@ module CloudProvider
           type: "dummy"
         }
       ]
+    end
+
+    def plans_at(location_str_id)
+      self.plans
     end
 
   end

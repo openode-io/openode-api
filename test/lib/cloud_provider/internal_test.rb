@@ -39,4 +39,19 @@ class InternalTest < ActiveSupport::TestCase
 		assert_equal plans[0][:cost_per_hour], internal_provider.calc_cost_per_hour(100)
 		assert_equal plans[0][:cost_per_month], internal_provider.calc_cost_per_month(100)
 	end
+
+	test "plans_at with existing" do
+		provider = CloudProvider::Manager.instance.first_of_type("internal")
+		provider.initialize_locations
+
+		location = Location.find_by str_id: "canada"
+
+		plans = provider.plans_at(location.str_id)
+
+		assert_equal plans.length, 7
+
+		plans.each do |plan|
+			assert_equal plan[:type], CloudProvider::Internal::TYPE
+		end
+	end
 end

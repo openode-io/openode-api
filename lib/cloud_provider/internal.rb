@@ -14,6 +14,10 @@ module CloudProvider
       "ssh"
     end
 
+    def type
+      Internal::TYPE
+    end
+
     def available_locations
       raise "Missing locations" unless @configs["locations"]
 
@@ -149,6 +153,10 @@ module CloudProvider
 
         plan
       end
+    end
+
+    def plans_at(any_location)
+      self.plans
     end
 
     protected

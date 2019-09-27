@@ -26,6 +26,12 @@ module CloudProvider
       cloud ? cloud["instance"] : nil
     end
 
+    def first_of_internal_type(type)
+      cloud = @clouds.find { |c| c["instance"].type == type }
+
+      cloud ? cloud["instance"] : nil
+    end
+
     def self.instance
       unless @@instance
         openode_path =
@@ -56,6 +62,11 @@ module CloudProvider
       @clouds
         .map { |cloud| cloud["instance"].plans }
         .flatten
+    end
+
+    def available_plans_of_type_at(type, location_str_id)
+      provider = self.first_of_internal_type(type)
+      provider.plans_at(location_str_id)
     end
 
     # for tests
