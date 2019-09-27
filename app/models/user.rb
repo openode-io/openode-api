@@ -88,4 +88,8 @@ class User < ApplicationRecord
     self.save
   end
 
+  def has_credits?
+    self.credits > 0
+  end
+
 end

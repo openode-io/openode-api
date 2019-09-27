@@ -23,4 +23,46 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
     assert_includes response.parsed_body["error"], "The instance must be in status"
   end
 
+  test "/instances/:instance_id/restart should not allow when no credit" do
+    website = Website.find_by! site_name: "testsite"
+    website.user.credits = 0
+    website.user.save
+
+    post "/instances/testsite/restart", 
+      as: :json, 
+      params: base_params,
+      headers: default_headers_auth
+
+    assert_response :bad_request
+    assert_includes response.parsed_body["error"], "No credit available"
+  end
+
+  test "/instances/:instance_id/restart should not allow when user not activated" do
+    website = Website.find_by! site_name: "testsite"
+    website.user.activated = false
+    website.user.save
+
+    post "/instances/testsite/restart", 
+      as: :json, 
+      params: base_params,
+      headers: default_headers_auth
+
+    assert_response :bad_request
+    assert_includes response.parsed_body["error"], "User account not yet activated"
+  end
+
+  test "/instances/:instance_id/restart should not allow when user suspended" do
+    website = Website.find_by! site_name: "testsite"
+    website.user.suspended = true
+    website.user.save
+
+    post "/instances/testsite/restart", 
+      as: :json, 
+      params: base_params,
+      headers: default_headers_auth
+
+    assert_response :bad_request
+    assert_includes response.parsed_body["error"], "User suspended"
+  end
+
 end

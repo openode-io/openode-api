@@ -118,7 +118,6 @@ class InstancesController < ApplicationController
 
     # TODO
 
-
     @runner.execute([
       {
         cmd_name: "stop", options: {
@@ -173,13 +172,14 @@ class InstancesController < ApplicationController
   end
 
   def restart
-
-    puts "website ? restart #{@website.inspect}"
-
     # TODO init deployment model
 
     # run in background:
     @runner.execute([
+      {
+        cmd_name: "verify_can_deploy", 
+        options: { is_complex: true, website: @website, website_location: @website_location } 
+      },
       { cmd_name: "pre_repository_verification", options: { is_complex: true, website: @website } },
       { cmd_name: "ensure_remote_repository", options: { path: @website.repo_dir } }
     ])
@@ -187,7 +187,8 @@ class InstancesController < ApplicationController
     json({ result: "success", deploymentId: 1234567 })
 
   rescue => ex
-    json({  })
+    logger.error("Issue deploying, #{ex}")
+    raise ex
   end
 
   protected

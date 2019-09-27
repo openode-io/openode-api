@@ -147,16 +147,23 @@ class Website < ApplicationRecord
 
   # true/false, msg
   def can_deploy_to?(website_location)
-    puts "usss #{user.inspect}"
     unless user.activated?
-      return false, "*** User account not yet activated. Please make sure to click the activation link in your registration email."
+      msg = "User account not yet activated. Please make sure to click the " +
+        "activation link in your registration email."
+      return false, "*** #{msg}"
     end
 
     if user.suspended?
       return false, "*** User suspended"
     end
 
-    return true, "hello"
+    unless user.has_credits?
+      msg = "No credit available. Please make sure to buy credits via the Administration " +
+        "dashboard in Billing - https://www.openode.io/admin/billing"
+      return false, "*** #{msg}"
+    end
+
+    return true, ""
   end
 
   def normalized_storage_areas

@@ -86,6 +86,13 @@ class ActiveSupport::TestCase
     User.find_by email: "myadmin@thisisit.com"
   end
 
+  def base_params
+    {
+      version: InstancesController::MINIMUM_CLI_VERSION,
+      location_str_id: "canada"
+    }
+  end
+
   def default_headers_auth
     {
       "x-auth-token": "1234s56789"

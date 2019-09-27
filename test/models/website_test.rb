@@ -139,5 +139,17 @@ class WebsiteTest < ActiveSupport::TestCase
       assert_equal can_deploy, false
       assert_includes msg, "suspended"
     end
+
+    test "can_deploy_to? can't if user does not have any credit" do
+      website = Website.find_by(site_name: "testsite")
+      website.user.credits = 0
+      website.user.save!
+      website.user.reload
+
+      can_deploy, msg = website.can_deploy_to?(website.website_locations.first)
+
+      assert_equal can_deploy, false
+      assert_includes msg, "No credit available"
+    end
   end
 end

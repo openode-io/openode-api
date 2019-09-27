@@ -26,13 +26,12 @@ module DeploymentMethod
     def pre_repository_verification(options = {})
       assert options[:website]
       website, = options.values_at(:website)
-      puts "options = #{website.inspect}"
 
       docker_compose_content = self.ex_stdout("get_file", { 
         repo_dir: website.repo_dir, file: "docker-compose.yml" 
       })
+
       DockerCompose.validate_docker_compose!(docker_compose_content)
-      
     end
 
     def custom_cmd(options = {})
