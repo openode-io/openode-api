@@ -31,6 +31,10 @@ class InstancesController < ApplicationController
     json_res(@website)
   end
 
+  def plan
+    json_res(@website.plan)
+  end
+
   def changes
     raise ApplicationRecord::ValidationError.new("Missing files") unless params["files"]
     files_client = JSON.parse(params["files"])

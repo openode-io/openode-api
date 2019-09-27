@@ -214,4 +214,17 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
       assert_equal website.events[0].obj["title"], "Repository cleared (erase-all)"
     end
   end
+
+  # /plan 
+  test "/instances/:instance_id/plan second" do
+    website = Website.find_by! site_name: "testsite"
+
+    get "/instances/testsite/plan?location_str_id=canada", 
+        as: :json, 
+        headers: default_headers_auth
+
+    assert_response :success
+    assert_equal response.parsed_body["id"], "100-MB"
+    assert_equal response.parsed_body["name"], "100MB Memory"
+  end
 end

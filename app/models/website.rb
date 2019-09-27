@@ -122,6 +122,12 @@ class Website < ApplicationRecord
     "#{Website::REPOS_BASE_DIR}#{self.user_id}/#{self.site_name}/"
   end
 
+  def plan
+    plans = CloudProvider::Manager.instance.available_plans
+
+    plans.find { |p| [p[:id], p[:internal_id]].include?(self.account_type) }
+  end
+
   def has_credits?
 
     # TODO
