@@ -52,6 +52,12 @@ module CloudProvider
       end
     end
 
+    def available_plans
+      @clouds
+        .map { |cloud| cloud["instance"].plans }
+        .flatten
+    end
+
     # for tests
     def self.clear_instance
       @@instance = nil

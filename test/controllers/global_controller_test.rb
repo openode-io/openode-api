@@ -41,6 +41,25 @@ class GlobalControllerTest < ActionDispatch::IntegrationTest
     assert_equal usa["country_fullname"], "United States"
   end
 
+  test "/global/available-plans" do
+    get "/global/available-plans", as: :json
+
+    assert_response :success
+
+    puts "bodd #{response.parsed_body.inspect}"
+
+    assert_equal response.parsed_body.length, 16
+    dummy = response.parsed_body.find { |l| l["id"] == "DUMMY-PLAN" }
+    assert_equal dummy["id"], "DUMMY-PLAN"
+
+    cloud = response.parsed_body.find { |l| l["id"] == "100-MB" }
+    assert_equal cloud["id"], "100-MB"
+
+    private_cloud = response.parsed_body.find { |l| l["id"] == "1024-MB-201" }
+    assert_equal private_cloud["id"], "1024-MB-201"
+
+  end
+
   test "/global/version" do
     get "/global/version", as: :json
 

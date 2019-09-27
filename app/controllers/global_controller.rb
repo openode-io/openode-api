@@ -17,6 +17,10 @@ class GlobalController < ApplicationController
     json_res(CloudProvider::Manager.instance.available_locations)
   end
 
+  def available_plans
+    json_res(CloudProvider::Manager.instance.available_plans)
+  end
+
   def available_configs
     json_res(Website::CONFIG_VARIABLES)
   end
