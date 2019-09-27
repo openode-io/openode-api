@@ -1,7 +1,7 @@
 class StorageAreasController < InstancesController
 
   def index
-    json_res(@website.storage_areas)
+    json(@website.storage_areas)
   end
 
   def add
@@ -24,7 +24,7 @@ class StorageAreasController < InstancesController
       path: storage_area,
     }
 
-    json_res({
+    json({
       "result": "success",
       "storageAreas": @website.reload.storage_areas
     })

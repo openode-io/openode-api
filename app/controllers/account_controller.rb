@@ -6,7 +6,7 @@ class AccountController < ApplicationController
 
     user.verify_authentication params["password"]
 
-    json_res("\"#{user.token}\"")
+    json("\"#{user.token}\"")
   end
 
   def register
@@ -14,7 +14,7 @@ class AccountController < ApplicationController
 
     UserMailer.with(user: user).registration.deliver_now
 
-    json_res({
+    json({
       id: user.id,
       email: user.email,
       token: user.token

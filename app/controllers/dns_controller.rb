@@ -9,7 +9,7 @@ class DnsController < InstancesController
 
     dns = @website_location.compute_dns({ with_auto_a: true })
 
-    json_res(dns)
+    json(dns)
   end
 
   protected

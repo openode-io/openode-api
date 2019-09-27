@@ -227,4 +227,17 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body["id"], "100-MB"
     assert_equal response.parsed_body["name"], "100MB Memory"
   end
+
+  # /plans
+  test "/instances/:instance_id/plans cloud" do
+    website = Website.find_by! site_name: "testsite"
+
+    get "/instances/testsite/plans?location_str_id=canada", 
+        as: :json, 
+        headers: default_headers_auth
+
+    assert_response :success
+    assert_equal response.parsed_body.length, 7
+    assert_equal response.parsed_body[0]["id"], "sandbox"
+  end
 end

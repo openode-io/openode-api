@@ -24,15 +24,19 @@ class InstancesController < ApplicationController
   end
 
   def index
-    json_res(@user.websites)
+    json(@user.websites)
   end
 
   def show
-    json_res(@website)
+    json(@website)
   end
 
   def plan
-    json_res(@website.plan)
+    json(@website.plan)
+  end
+
+  def plans
+    json(@website_location.available_plans)
   end
 
   def changes
@@ -46,7 +50,7 @@ class InstancesController < ApplicationController
 
     @website_event_obj = { title: "sync-changes", changes: changes }
 
-    json_res(changes)
+    json(changes)
   end
 
   def send_compressed_file
@@ -69,7 +73,7 @@ class InstancesController < ApplicationController
       }
     ])
 
-    json_res({ result: "success" })
+    json({ result: "success" })
   end
 
   def delete_files
@@ -90,7 +94,7 @@ class InstancesController < ApplicationController
 
     @website_event_obj = { title: "delete-files", files: files }
 
-    json_res({ result: "success" })
+    json({ result: "success" })
   end
 
   def cmd
@@ -107,7 +111,7 @@ class InstancesController < ApplicationController
       }
     ]).first
 
-    json_res({ result: result })
+    json({ result: result })
   end
 
   def stop
@@ -127,7 +131,7 @@ class InstancesController < ApplicationController
     @website.status = Website::STATUS_OFFLINE
     @website.save
 
-    json_res({ result: "success" })
+    json({ result: "success" })
   end
 
   def docker_compose
@@ -139,14 +143,14 @@ class InstancesController < ApplicationController
       DeploymentMethod::DockerCompose.default_docker_compose_file
     end
 
-    json_res({
+    json({
       content: content
     })
   end
 
   def erase_all
     if ! @website_location || ! @website_location.has_location_server?
-      return json_res({ result: "success" }) 
+      return json({ result: "success" }) 
     end
 
     logs = @runner.execute([
@@ -156,7 +160,7 @@ class InstancesController < ApplicationController
 
     @website_event_obj = { title: "Repository cleared (erase-all)" }
 
-    json_res({ result: "success" }) 
+    json({ result: "success" }) 
   end
 
   def logs
@@ -165,7 +169,7 @@ class InstancesController < ApplicationController
     cmds = [{ cmd_name: "logs", options: { website: @website, nb_lines: nb_lines } }]
     logs = @runner.execute(cmds)
 
-    json_res({ logs: logs.first[:stdout] })
+    json({ logs: logs.first[:stdout] })
   end
 
   def restart
@@ -180,10 +184,10 @@ class InstancesController < ApplicationController
       { cmd_name: "ensure_remote_repository", options: { path: @website.repo_dir } }
     ])
 
-    json_res({ result: "success", deploymentId: 1234567 })
+    json({ result: "success", deploymentId: 1234567 })
 
   rescue => ex
-    json_res({  })
+    json({  })
   end
 
   protected

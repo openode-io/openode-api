@@ -172,4 +172,15 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert WebsiteLocation.root_domain("dev.api.abnbouw.nl") == "abnbouw.nl"
   end
 
+  # available_plans
+  test "available plans cloud" do
+    expected_plans = CloudProvider::Manager.instance.first_of_type("internal").plans
+    w = Website.find_by site_name: "testsite"
+    website_location = w.website_locations.first  
+
+    plans = website_location.available_plans
+
+    assert_equal plans.length, expected_plans.length
+    assert_equal plans[0][:id], "sandbox"
+  end
 end

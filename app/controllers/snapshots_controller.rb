@@ -5,7 +5,7 @@ class SnapshotsController < InstancesController
   def show
     snapshot = @website.snapshots.find_by! id: params["id"]
 
-    json_res(snapshot)
+    json(snapshot)
   end
 
   def create
@@ -19,7 +19,7 @@ class SnapshotsController < InstancesController
 
     @website_event_obj = { title: "snapshot-initiated", name: name }
 
-    json_res({
+    json({
       result: "success",
       description: "The snapshot will start transferring"
     })

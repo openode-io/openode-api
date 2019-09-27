@@ -34,7 +34,7 @@ class StoragesController < InstancesController
     @website_location.change_storage!(gb_to_change)
     @website_location.reload
 
-    json_res({
+    json({
       result: "success",
       "Extra Storage (GB)": @website_location.extra_storage
     })

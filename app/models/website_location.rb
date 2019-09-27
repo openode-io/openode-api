@@ -29,6 +29,12 @@ class WebsiteLocation < ApplicationRecord
     location_server.present?
   end
 
+  def available_plans
+    manager = CloudProvider::Manager.instance
+
+    manager.available_plans_of_type_at(website.cloud_type, location.str_id)
+  end
+
   # main domain used internally
   def main_domain
     send "domain_#{self.website.domain_type}"

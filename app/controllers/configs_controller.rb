@@ -3,7 +3,7 @@ class ConfigsController < InstancesController
   before_action :extract_variable
 
   def get_config
-    json_res({
+    json({
       result: "success",
       value: @website.configs[@var_name]
     })
@@ -29,7 +29,7 @@ class ConfigsController < InstancesController
       value: value
     }
 
-    json_res({
+    json({
       result: "success",
       configs: @website.reload.configs
     })

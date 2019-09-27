@@ -9,7 +9,7 @@ class LocationsController < InstancesController
         }
       end
 
-    json_res(result)
+    json(result)
   end
 
   protected

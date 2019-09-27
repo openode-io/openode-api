@@ -4,39 +4,39 @@ require 'vultr'
 class GlobalController < ApplicationController
 
   def test
-    json_res({})
+    json({})
   end
 
   def version
-    json_res({
+    json({
       version: File.read(".version").strip
     })
   end
 
   def available_locations
-    json_res(CloudProvider::Manager.instance.available_locations)
+    json(CloudProvider::Manager.instance.available_locations)
   end
 
   def available_plans
-    json_res(CloudProvider::Manager.instance.available_plans)
+    json(CloudProvider::Manager.instance.available_plans)
   end
 
   def available_plans_at
     manager = CloudProvider::Manager.instance
 
-    json_res(manager.available_plans_of_type_at(params["type"], params["location_str_id"]))
+    json(manager.available_plans_of_type_at(params["type"], params["location_str_id"]))
   end
 
   def available_configs
-    json_res(Website::CONFIG_VARIABLES)
+    json(Website::CONFIG_VARIABLES)
   end
 
   def services
-    json_res(Status.all)
+    json(Status.all)
   end
 
   def services_down
-    json_res(Status.with_status("down"))
+    json(Status.with_status("down"))
   end
 
   private
