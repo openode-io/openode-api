@@ -18,6 +18,21 @@ module DeploymentMethod
       end
     end
 
+    def mark_accessed(options = {})
+      assert options[:website]
+      website = options[:website]
+      website.last_access_at = Time.now
+      website.save
+    end
+
+    def initialization(options = {})
+      assert options[:website]
+      website = options[:website]
+
+      self.mark_accessed(options)
+      website.change_status!(Website::STATUS_STARTING)
+    end
+
   	protected
   	def ex(cmd, options = {})
   		self.runner.execute([{ cmd_name: cmd, options: options }]).first

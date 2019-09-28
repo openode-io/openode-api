@@ -127,8 +127,7 @@ class InstancesController < ApplicationController
     ])
 
     # change the status
-    @website.status = Website::STATUS_OFFLINE
-    @website.save
+    @website.change_status!(Website::STATUS_OFFLINE)
 
     json({ result: "success" })
   end
@@ -174,14 +173,17 @@ class InstancesController < ApplicationController
   def restart
     # TODO init deployment model
 
+
     # run in background:
     @runner.execute([
       {
         cmd_name: "verify_can_deploy", 
         options: { is_complex: true, website: @website, website_location: @website_location } 
       },
-      { cmd_name: "pre_repository_verification", options: { is_complex: true, website: @website } },
-      { cmd_name: "ensure_remote_repository", options: { path: @website.repo_dir } }
+      {
+        cmd_name: "initialization", options: { is_complex: true, website: @website }
+      },
+      { cmd_name: "pre_repository_verification", options: { is_complex: true, website: @website } }
     ])
 
     json({ result: "success", deploymentId: 1234567 })

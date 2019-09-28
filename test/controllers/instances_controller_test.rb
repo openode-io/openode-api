@@ -180,8 +180,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
   test "/instances/:instance_id/cmd fail if offline" do
     set_dummy_secrets_to(LocationServer.all)
     website = Website.find_by! site_name: "testsite"
-    website.status = Website::STATUS_OFFLINE
-    website.save!
+    
+    website.change_status!(Website::STATUS_OFFLINE)
 
     assert_scripted do
       begin_ssh

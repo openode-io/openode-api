@@ -67,6 +67,26 @@ class WebsiteTest < ActiveSupport::TestCase
       assert_equal w.repo_dir, "#{Website::REPOS_BASE_DIR}#{w.user_id}/#{w.site_name}/"
     end
 
+    # change status
+    test "change status with valid status" do
+      w = Website.where(site_name: "testsite").first
+      w.change_status!(Website::STATUS_OFFLINE)
+      w.reload
+      assert_equal w.status, Website::STATUS_OFFLINE
+    end
+
+    test "change status with invalid status" do
+      begin
+        w = Website.where(site_name: "testsite").first
+        w.change_status!("what")
+      rescue => ex
+        assert_includes "#{ex}", "Wrong status"
+        w.reload
+        assert_equal w.status, Website::STATUS_ONLINE
+      end
+
+    end
+
     # storage area validation
 
     test "storage area validate with valid ones" do

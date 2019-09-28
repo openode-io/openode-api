@@ -128,6 +128,13 @@ class Website < ApplicationRecord
     plans.find { |p| [p[:id], p[:internal_id]].include?(self.account_type) }
   end
 
+  def change_status!(new_status)
+    logger.info("website #{site_name} changing status to #{new_status}")
+    raise "Wrong status #{new_status}" unless STATUSES.include?(new_status)
+    self.status = new_status
+    self.save!
+  end
+
   def has_credits?
 
     # TODO

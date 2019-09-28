@@ -12,8 +12,7 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
 
   test "/instances/:instance_id/restart should not be starting" do
   	website = Website.find_by! site_name: "testsite"
-  	website.status = Website::STATUS_STARTING
-  	website.save
+    website.change_status!(Website::STATUS_STARTING)
 
     post "/instances/testsite/restart?version=#{InstancesController::MINIMUM_CLI_VERSION}", 
     	as: :json, 
@@ -63,6 +62,20 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
     assert_includes response.parsed_body["error"], "User suspended"
+  end
+
+  test "/instances/:instance_id/restart" do
+    #set_dummy_secrets_to(LocationServer.all)
+
+    #website = Website.find_by! site_name: "testsite"
+
+    #post "/instances/testsite/restart", 
+    #  as: :json, 
+    #  params: base_params,
+    #  headers: default_headers_auth
+
+    #assert_response :success
+    #assert_includes response.parsed_body["error"], "User suspended"
   end
 
 end

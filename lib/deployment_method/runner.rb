@@ -25,11 +25,8 @@ module DeploymentMethod
     end
 
     def execute(cmds)
-      puts "execute1"
       protocol = @cloud_provider.deployment_protocol
-      puts "execute2"
       logs = self.send("execute_#{protocol}", cmds)
-      puts "execute3"
 
       Rails.logger.info("Execute cmds=#{cmds.inspect}, result=#{logs.inspect}")
 
@@ -46,9 +43,7 @@ module DeploymentMethod
 
     def execute_ssh(cmds)
       generated_commands = cmds.map do |cmd|
-        puts "cmdd to do #{cmd.inspect}"
         result = @deployment_method.send(cmd[:cmd_name], cmd[:options])
-        puts "done cmd"
 
         cmd[:options][:is_complex] ? nil : result
       end
