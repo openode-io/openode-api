@@ -103,4 +103,83 @@ services:
     rescue
     end
   end
+
+  test "port_info_for_new_deployment first time" do
+    website = default_website
+    web_loc = website.website_locations.first
+    web_loc.allocate_ports!
+    dep_method = DeploymentMethod::DockerCompose.new
+
+    result = dep_method.port_info_for_new_deployment(web_loc)
+
+    assert_equal result[:port], web_loc.port
+    assert_equal result[:attribute], "port"
+    assert_equal result[:suffix_container_name], ""
+  end
+
+  test "port_info_for_new_deployment running on first port" do
+    website = default_website
+    web_loc = website.website_locations.first
+    web_loc.allocate_ports!
+    web_loc.running_port = web_loc.port
+    web_loc.save!
+    dep_method = DeploymentMethod::DockerCompose.new
+
+    result = dep_method.port_info_for_new_deployment(web_loc)
+
+    assert_equal result[:port], web_loc.second_port
+    assert_equal result[:attribute], "second_port"
+    assert_equal result[:suffix_container_name], "--2"
+  end
+
+  test "port_info_for_new_deployment running on second port" do
+    website = default_website
+    web_loc = website.website_locations.first
+    web_loc.allocate_ports!
+    web_loc.running_port = web_loc.second_port
+    web_loc.save!
+    dep_method = DeploymentMethod::DockerCompose.new
+
+    result = dep_method.port_info_for_new_deployment(web_loc)
+
+    assert_equal result[:port], web_loc.port
+    assert_equal result[:attribute], "port"
+    assert_equal result[:suffix_container_name], ""
+  end
+
+  test "send crontab without crontab provided" do
+    set_dummy_secrets_to(LocationServer.all)
+    website = default_website
+    website.crontab = ""
+    website.save!
+    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
+
+    begin_sftp
+    runner.execute([
+      {
+        cmd_name: "send_crontab", options: { is_complex: true, website: website }
+      }
+    ])
+    
+    assert_equal Remote::Sftp.get_test_uploaded_files.length, 0
+  end
+
+  test "parse_global_containers" do
+    set_dummy_secrets_to(LocationServer.all)
+    website = default_website
+    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
+    dep_method = runner.get_deployment_method
+
+    cmd = "docker ps --format \"{{.ID}};{{.Image}};{{.Command}};{{.CreatedAt}};{{.RunningFor}};{{.Ports}};{{.Status}};{{.Size}};{{.Names}};{{.Labels}};{{.Mounts}}\""
+    prepare_ssh_session(cmd, IO.read("test/fixtures/docker/global_containers.txt"))
+
+    assert_scripted do
+      begin_ssh
+      result = dep_method.parse_global_containers
+
+      assert_equal result.length, 33
+      assert_equal result[10][:ID], "b3621dd9d4dd"
+      assert_equal result[10][:Ports], "2375-2376/tcp, 127.0.0.1:33121->80/tcp"
+    end
+  end
 end

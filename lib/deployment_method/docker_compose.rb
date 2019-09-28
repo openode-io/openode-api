@@ -134,6 +134,57 @@ services:
       end
     end
 
+    def port_info_for_new_deployment(website_location)
+      if website_location.running_port == website_location.port
+        {
+          port: website_location.second_port,
+          attribute: "second_port",
+          suffix_container_name: "--2"
+        }
+      else
+        {
+          port: website_location.port,
+          attribute: "port",
+          suffix_container_name: ""
+        }
+      end
+    end
+
+    def global_containers(options = {})
+      "docker ps --format " +
+        "\"{{.ID}};{{.Image}};{{.Command}};{{.CreatedAt}};{{.RunningFor}};{{.Ports}};" +
+        "{{.Status}};{{.Size}};{{.Names}};{{.Labels}};{{.Mounts}}\""
+    end
+
+    def parse_global_containers(options = {})
+      containers_list = self.ex_stdout("global_containers")
+
+      containers_list
+        .split("\n")
+        .map do |line|
+          return nil unless line
+
+          parts = line.split(";")
+
+          return nil if ! parts || parts.length != 11
+
+          {
+            ID: parts[0],
+            Image: parts[1],
+            Command: parts[2],
+            CreatedAt: parts[3],
+            RunningFor: parts[4],
+            Ports: parts[5],
+            Status: parts[6],
+            Size: parts[7],
+            Names: parts[8],
+            Labels: parts[9],
+            Mounts: parts[10]
+          }
+        end
+        .select { |line| line.present? }
+    end
+
     protected
     def exec_begin(container_id)
       "docker exec #{container_id} docker-compose exec -T "
