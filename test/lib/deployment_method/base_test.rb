@@ -26,8 +26,9 @@ class DeploymentMethodBaseTest < ActiveSupport::TestCase
     website.last_access_at = nil
     website.save!
     website.change_status!(Website::STATUS_OFFLINE)
+    website_location = website.website_locations.first
 
-    base_dep_method.initialization({ website: website })
+    base_dep_method.initialization({ website: website, website_location: website_location })
     website.reload
 
     assert_equal Time.now - website.last_access_at <= 5, true

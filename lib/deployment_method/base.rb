@@ -28,10 +28,13 @@ module DeploymentMethod
 
     def initialization(options = {})
       assert options[:website]
+      assert options[:website_location]
       website = options[:website]
+      website_location = options[:website_location]
 
       self.mark_accessed(options)
       website.change_status!(Website::STATUS_STARTING)
+      website_location.allocate_ports!
     end
 
   	protected

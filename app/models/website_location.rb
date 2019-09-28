@@ -113,10 +113,37 @@ class WebsiteLocation < ApplicationRecord
     result
   end
 
+  def allocate_ports!
+    return if self.port && self.second_port
+
+    ports_used =
+      WebsiteLocation.where(location_server_id: self.location_server_id).pluck(:port, :running_port, :second_port)
+      .flatten
+
+    self.port = self.generate_port(5000, 65534, ports_used)
+    self.second_port = self.generate_port(5000, 65534, ports_used + [self.port])
+    self.running_port = nil
+    self.save!
+  end
+
   def cmd(str_cmd, opts = {})
 
   end
 
   protected
+
+  def generate_port(min, max, other_reserved = [])
+    reserved_ports = [3306, 6379, 27017, 27018, 27019] + other_reserved
+    port = nil
+
+    while ! port || reserved_ports.include?(port) do
+      port = rand(min..max)
+    end
+
+    return port
+  end
+
+  private
+  
 
 end

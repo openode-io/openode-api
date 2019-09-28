@@ -180,7 +180,14 @@ class InstancesController < ApplicationController
         cmd_name: "verify_can_deploy", 
         options: { is_complex: true, website: @website, website_location: @website_location } 
       },
-      { cmd_name: "initialization", options: { is_complex: true, website: @website } },
+      { 
+        cmd_name: "initialization", 
+        options: { 
+          is_complex: true, 
+          website: @website,
+          website_location: @website_location
+        } 
+      },
       { cmd_name: "send_crontab", options: { is_complex: true, website: @website } },
       { cmd_name: "pre_repository_verification", options: { is_complex: true, website: @website } }
     ])

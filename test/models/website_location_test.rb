@@ -183,4 +183,30 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert_equal plans.length, expected_plans.length
     assert_equal plans[0][:id], "sandbox"
   end
+
+  # allocate_ports!
+  test "allocate ports" do
+    w = Website.find_by site_name: "testsite2"
+    website_location = w.website_locations.first
+
+    website_location.port = nil
+    website_location.second_port = nil
+    website_location.save
+
+    website_location.allocate_ports!
+    website_location.reload
+
+    port = website_location.port
+    second_port = website_location.second_port
+
+    assert_equal port.between?(5000, 65534), true
+    assert_equal second_port.between?(5000, 65534), true
+
+    website_location.allocate_ports!
+    website_location.reload
+
+    assert_equal website_location.port, port
+    assert_equal website_location.second_port, second_port
+  end
+
 end
