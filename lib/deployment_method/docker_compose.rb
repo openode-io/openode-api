@@ -34,6 +34,18 @@ module DeploymentMethod
       DockerCompose.validate_docker_compose!(docker_compose_content)
     end
 
+    def send_crontab(options = {})
+      assert options[:website]
+      website = options[:website]
+
+      if website.crontab && ! website.crontab.empty?
+        Rails.logger.info("updating crontab")
+        @runner.upload_content_to(website.crontab, "#{website.repo_dir}#{Base::DEFAULT_CRONTAB_FILENAME}")
+      else
+        Rails.logger.info("skipping crontab update (empty)")
+      end
+    end
+
     def custom_cmd(options = {})
       require_fields([:website, :service, :cmd], options)
       website, service, cmd = options.values_at(:website, :service, :cmd)

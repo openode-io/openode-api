@@ -82,6 +82,20 @@ class ActiveSupport::TestCase
     Remote::Ssh.set_conn_test(connection)
   end
 
+  def default_website
+    Website.find_by site_name: "testsite"
+  end
+
+  def dummy_ssh_configs
+    {
+      host: "test.com",
+      secret: {
+        user: "user",
+        password: "123456"
+      }
+    }
+  end
+
   def default_user
     User.find_by email: "myadmin@thisisit.com"
   end

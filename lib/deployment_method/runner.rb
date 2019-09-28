@@ -41,6 +41,14 @@ module DeploymentMethod
       Remote::Sftp.transfer(files, self.ssh_configs)
     end
 
+    def upload_content_to(content, remote_path)
+      files = [{
+        content: content,
+        remote_file_path: remote_path
+      }]
+      Remote::Sftp.transfer(files, self.ssh_configs)
+    end
+
     def execute_ssh(cmds)
       generated_commands = cmds.map do |cmd|
         result = @deployment_method.send(cmd[:cmd_name], cmd[:options])

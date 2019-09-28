@@ -5,6 +5,7 @@ module DeploymentMethod
   	attr_accessor :runner
 
   	REMOTE_PATH_API_LIB = "/root/openode-www/api/lib"
+    DEFAULT_CRONTAB_FILENAME = ".openode.cron"
 
     def verify_can_deploy(options = {})
       assert options[:website]
