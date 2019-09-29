@@ -233,4 +233,51 @@ services:
     assert_includes cmd, "docker build -f "
     assert_includes cmd, "-t dind-with-docker-compose ."
   end
+
+  test "front_crontainer_name" do
+    website = default_website
+    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
+    dep_method = runner.get_deployment_method
+
+    cmd = dep_method.front_crontainer_name({ website: website, port_info: { suffix_container_name: "--2" } })
+    assert_equal cmd, "#{website.user_id}--#{website.site_name}--2"
+  end
+
+  test "front_crontainer_cmd without resources limit" do
+    website = default_website
+    website_location = website.website_locations.first
+    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
+    dep_method = runner.get_deployment_method
+
+    options = {
+      website: website,
+      website_location: website_location,
+      in_port: 80,
+      limit_resources: false
+    }
+    cmd = dep_method.front_container_cmd(options)
+    expected_cmd = 
+      "docker run -w=/opt/app/ -d -v #{website.repo_dir}:/opt/app/ --name " +
+      "#{website.user_id}--#{website.site_name} -p 127.0.0.1:11003:80  --privileged dind-with-docker-compose:latest"
+    assert_equal cmd, expected_cmd
+  end
+
+  test "front_crontainer_cmd with resources limit" do
+    website = default_website
+    website_location = website.website_locations.first
+    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
+    dep_method = runner.get_deployment_method
+
+    options = {
+      website: website,
+      website_location: website_location,
+      in_port: 80,
+      limit_resources: true
+    }
+    cmd = dep_method.front_container_cmd(options)
+    expected_cmd = 
+      "docker run -w=/opt/app/ -d -v #{website.repo_dir}:/opt/app/ --name " +
+      "#{website.user_id}--#{website.site_name} -p 127.0.0.1:11003:80  -m 350MB --cpus=1  --privileged dind-with-docker-compose:latest"
+    assert_equal cmd, expected_cmd
+  end
 end

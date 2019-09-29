@@ -3,6 +3,8 @@ module DeploymentMethod
 
   class DockerCompose < Base
 
+    EXTRA_MANAGEMENT_RAM = 250 # MB
+
     def initialize
     end
 
@@ -76,6 +78,36 @@ module DeploymentMethod
       website, website_location = options.values_at(:website, :website_location)
 
       port_info = self.port_info_for_new_deployment(website_location)
+    end
+
+    def front_crontainer_name(options = {})
+      assert options[:website]
+      assert options[:port_info]
+      website, port_info = options.values_at(:website, :port_info)
+
+      "#{website.user_id}--#{website.site_name}#{port_info[:suffix_container_name]}"
+    end
+
+    def front_container_cmd(options = {})
+      assert options[:in_port]
+      assert options[:website]
+      assert options[:website_location]
+      website = options[:website]
+      website_location = options[:website_location]
+
+      port_info = self.port_info_for_new_deployment(website_location)
+      plan = website.plan
+
+      resources = if ! options[:limit_resources]
+        ""
+      else
+        " -m #{plan[:ram] + EXTRA_MANAGEMENT_RAM}MB --cpus=#{website_location.nb_cpus || 1} "
+      end
+
+      "docker run -w=/opt/app/ -d -v #{website.repo_dir}:/opt/app/ " +
+      "--name #{self.front_crontainer_name({ website: website, port_info: port_info })} " +
+      "-p 127.0.0.1:#{port_info[:port]}:#{options[:in_port]} " +
+      "#{resources} --privileged dind-with-docker-compose:latest"
     end
 
     def port_info_for_new_deployment(website_location)
