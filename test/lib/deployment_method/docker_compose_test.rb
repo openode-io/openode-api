@@ -223,5 +223,14 @@ services:
     end
   end
 
-  
+  test "prepare_dind_compose_image" do
+    set_dummy_secrets_to(LocationServer.all)
+    website = default_website
+    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
+    dep_method = runner.get_deployment_method
+
+    cmd = dep_method.prepare_dind_compose_image({})
+    assert_includes cmd, "docker build -f "
+    assert_includes cmd, "-t dind-with-docker-compose ."
+  end
 end

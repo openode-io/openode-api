@@ -182,14 +182,20 @@ class InstancesController < ApplicationController
       },
       { 
         cmd_name: "initialization", 
-        options: { 
+        options: {
           is_complex: true, 
           website: @website,
           website_location: @website_location
-        } 
+        }
       },
-      { cmd_name: "send_crontab", options: { is_complex: true, website: @website } },
-      { cmd_name: "pre_repository_verification", options: { is_complex: true, website: @website } }
+      {
+        cmd_name: "launch", 
+        options: {
+          is_complex: true, 
+          website: @website,
+          website_location: @website_location
+        }
+      }
     ])
 
     json({ result: "success", deploymentId: 1234567 })

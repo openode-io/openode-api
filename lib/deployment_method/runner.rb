@@ -26,9 +26,12 @@ module DeploymentMethod
 
     def execute(cmds)
       protocol = @cloud_provider.deployment_protocol
+      time_begin = Time.now
+
       logs = self.send("execute_#{protocol}", cmds)
 
-      Rails.logger.info("Execute cmds=#{cmds.inspect}, result=#{logs.inspect}")
+      Rails.logger.info("Execute cmds=#{cmds.to_yaml}, result=#{logs.to_yaml}, " +
+        "duration=#{Time.now - time_begin}")
 
       logs
     end
