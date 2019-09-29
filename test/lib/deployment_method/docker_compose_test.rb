@@ -170,7 +170,7 @@ services:
     runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
     dep_method = runner.get_deployment_method
 
-    cmd = "docker ps --format \"{{.ID}};{{.Image}};{{.Command}};{{.CreatedAt}};{{.RunningFor}};{{.Ports}};{{.Status}};{{.Size}};{{.Names}};{{.Labels}};{{.Mounts}}\""
+    cmd = dep_method.global_containers({})
     prepare_ssh_session(cmd, IO.read("test/fixtures/docker/global_containers.txt"))
 
     assert_scripted do
@@ -182,4 +182,46 @@ services:
       assert_equal result[10][:Ports], "2375-2376/tcp, 127.0.0.1:33121->80/tcp"
     end
   end
+
+  test "find_containers_by_ports" do
+    set_dummy_secrets_to(LocationServer.all)
+    website = default_website
+    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
+    dep_method = runner.get_deployment_method
+
+    cmd = dep_method.global_containers({})
+    prepare_ssh_session(cmd, IO.read("test/fixtures/docker/global_containers.txt"))
+
+    assert_scripted do
+      begin_ssh
+      result = dep_method.find_containers_by_ports({ ports: [33121, 47877] })
+
+      assert_equal result.length, 2
+      assert_equal result[0][:ID], "b3621dd9d4dd"
+      assert_equal result[1][:ID], "b5f9d6f40129"
+    end
+  end
+
+  test "kill_global_containers_by_ports" do
+    set_dummy_secrets_to(LocationServer.all)
+    website = default_website
+    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
+    dep_method = runner.get_deployment_method
+
+    cmd = dep_method.global_containers({})
+    prepare_ssh_session(cmd, IO.read("test/fixtures/docker/global_containers.txt"))
+    prepare_ssh_session(dep_method.kill_global_container({ id: "b3621dd9d4dd" }), "killed b3621dd9d4dd")
+    prepare_ssh_session(dep_method.kill_global_container({ id: "b5f9d6f40129" }), "killed b5f9d6f40129")
+
+    assert_scripted do
+      begin_ssh
+      result = dep_method.kill_global_containers_by_ports({ ports: [33121, 47877] })
+
+      assert_equal result.length, 2
+      assert_equal result[0], "killed b3621dd9d4dd"
+      assert_equal result[1], "killed b5f9d6f40129"
+    end
+  end
+
+  
 end

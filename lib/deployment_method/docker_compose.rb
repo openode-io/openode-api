@@ -185,6 +185,38 @@ services:
         .select { |line| line.present? }
     end
 
+
+
+    def find_containers_by_ports(options = {})
+      assert options[:ports]
+      ports = options[:ports]
+
+      strs_to_find = ports.map { |port| ":#{port}->" }
+
+      self.parse_global_containers
+        .select { |container| container && strs_to_find.any? { |s| container[:Ports].include?(s) } }
+    end
+
+    def kill_global_container(options = {})
+      assert options[:id]
+      id = options[:id]
+
+      "docker exec #{id} docker-compose down ; docker rm -f #{id}"
+    end
+
+    def kill_global_containers_by_ports(options = {})
+      assert options[:ports]
+      ports = options[:ports]
+
+      containers = self.find_containers_by_ports(options)
+
+      containers.map do |container|
+        self.ex_stdout("kill_global_container", { 
+          id: container[:ID]
+        })
+      end
+    end
+
     protected
     def exec_begin(container_id)
       "docker exec #{container_id} docker-compose exec -T "
