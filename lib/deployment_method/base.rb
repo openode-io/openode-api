@@ -1,11 +1,16 @@
 module DeploymentMethod
 
   class Base
+    RuntimeError = Class.new(StandardError)
 
   	attr_accessor :runner
 
   	REMOTE_PATH_API_LIB = "/root/openode-www/api/lib"
     DEFAULT_CRONTAB_FILENAME = ".openode.cron"
+
+    def error!(msg)
+      raise RuntimeError.new(msg)
+    end
 
     def verify_can_deploy(options = {})
       assert options[:website]
@@ -39,7 +44,15 @@ module DeploymentMethod
 
   	protected
   	def ex(cmd, options = {})
-  		self.runner.execute([{ cmd_name: cmd, options: options }]).first
+  		result = self.runner.execute([{ cmd_name: cmd, options: options }]).first
+
+      if options[:ensure_exit_code].present?
+        if result && result[:exit_code] != options[:ensure_exit_code]
+          self.error!("Failed to run #{cmd}, result=#{result.inspect}")
+        end
+      end
+
+      result
   	end
 
   	def ex_stdout(cmd, options = {})

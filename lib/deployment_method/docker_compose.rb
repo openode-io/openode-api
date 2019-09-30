@@ -78,6 +78,27 @@ module DeploymentMethod
       website, website_location = options.values_at(:website, :website_location)
 
       port_info = self.port_info_for_new_deployment(website_location)
+
+      # make sure to kill the container on target port
+      self.kill_global_containers_by_ports({ ports: [ port_info[:port] ] })
+
+      options_front_container = { 
+        in_port: 80,
+        website: website,
+        website_location: website_location,
+        ensure_exit_code: 0
+      }
+
+      ex("front_container", options_front_container)
+
+      front_container = find_containers_by_ports({ ports: [ port_info[:port] ] }).first
+
+      if ! front_container || ! front_container[:ID]
+        self.error!("Can't find the built container... exiting.")
+      end
+
+      sleep 2
+
     end
 
     def front_crontainer_name(options = {})
@@ -88,7 +109,7 @@ module DeploymentMethod
       "#{website.user_id}--#{website.site_name}#{port_info[:suffix_container_name]}"
     end
 
-    def front_container_cmd(options = {})
+    def front_container(options = {})
       assert options[:in_port]
       assert options[:website]
       assert options[:website_location]
@@ -108,6 +129,12 @@ module DeploymentMethod
       "--name #{self.front_crontainer_name({ website: website, port_info: port_info })} " +
       "-p 127.0.0.1:#{port_info[:port]}:#{options[:in_port]} " +
       "#{resources} --privileged dind-with-docker-compose:latest"
+    end
+
+    def docker_compose(options = {})
+      assert options[:front_container_id]
+
+      "docker exec #{options[:front_container_id]} docker-compose up -d"
     end
 
     def port_info_for_new_deployment(website_location)

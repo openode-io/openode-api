@@ -1,6 +1,7 @@
 
 module DeploymentMethod
   class Runner
+
     def initialize(type, cloud_type, configs = {})
       @type = type
       @cloud_type = cloud_type
