@@ -27,13 +27,14 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
     website.user.credits = 0
     website.user.save
 
-    post "/instances/testsite/restart", 
-      as: :json, 
+    post "/instances/testsite/restart",
+      as: :json,
       params: base_params,
       headers: default_headers_auth
 
     assert_response :bad_request
     assert_includes response.parsed_body["error"], "No credit available"
+    assert_includes response.parsed_body["error"], "https://www.openode.io/admin/billing"
   end
 
   test "/instances/:instance_id/restart should not allow when user not activated" do

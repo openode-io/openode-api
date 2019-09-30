@@ -166,7 +166,8 @@ class Website < ApplicationRecord
 
     unless user.has_credits?
       msg = "No credit available. Please make sure to buy credits via the Administration " +
-        "dashboard in Billing - https://www.openode.io/admin/billing"
+        "dashboard in Billing - " +
+        "https://www.#{CloudProvider::Manager.instance.base_hostname}/admin/billing"
       return false, "*** #{msg}"
     end
 

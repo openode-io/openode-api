@@ -20,6 +20,20 @@ module CloudProvider
       end
     end
 
+    def base_hostname
+      @application["base_hostname"] || "http://unknown/"
+    end
+
+    def internal_domains
+      domains = [@application["base_hostname"]]
+
+      domains
+    end
+
+    def application
+      @application
+    end
+
     def first_of_type(type)
       cloud = @clouds.find { |c| c["type"] == type }
 

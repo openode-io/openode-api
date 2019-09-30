@@ -1,4 +1,7 @@
 application:
+  base_hostname: openode.io
+  hostname_private_cloud: openode.dev
+  main_email: info@openode.io
   clouds:
     - type: internal
       locations:

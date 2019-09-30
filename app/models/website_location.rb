@@ -23,7 +23,9 @@ class WebsiteLocation < ApplicationRecord
     @runner
   end
 
-  INTERNAL_DOMAINS = ["openode.io", "openode.dev"]
+  INTERNAL_DOMAINS = [CloudProvider::Manager.instance.base_hostname]
+
+  #if 
 
   def has_location_server?
     location_server.present?

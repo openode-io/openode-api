@@ -1,4 +1,4 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: 'info@openode.io' # todo
+  default from: CloudProvider::Manager.instance.application["main_email"]
   layout 'mailer'
 end
