@@ -209,4 +209,11 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert_equal website_location.second_port, second_port
   end
 
+  # internal domains
+  test "INTERNAL_DOMAINS" do
+    assert_equal WebsiteLocation.internal_domains().length, 2
+    assert_includes WebsiteLocation.internal_domains, "openode.io"
+    assert_includes WebsiteLocation.internal_domains, "openode.dev"
+  end
+
 end

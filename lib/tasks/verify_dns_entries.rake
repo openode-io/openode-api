@@ -13,7 +13,7 @@ namespace :verify_dns do
     dns_entries = Vultr::DNS.list[:result]
 
     dns_entries.each do |dns_entry|
-      next if WebsiteLocation::INTERNAL_DOMAINS.include? dns_entry["domain"]
+      next if WebsiteLocation.internal_domains().include? dns_entry["domain"]
 
       site_names_found = site_names.select do |name|
         WebsiteLocation.root_domain(name) == dns_entry["domain"]

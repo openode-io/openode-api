@@ -27,6 +27,10 @@ module CloudProvider
     def internal_domains
       domains = [@application["base_hostname"]]
 
+      if @application["hostname_private_cloud"]
+        domains << @application["hostname_private_cloud"]
+      end
+
       domains
     end
 

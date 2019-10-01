@@ -183,7 +183,7 @@ class InstancesController < ApplicationController
       { 
         cmd_name: "initialization", 
         options: {
-          is_complex: true, 
+          is_complex: true,
           website: @website,
           website_location: @website_location
         }

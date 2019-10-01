@@ -67,4 +67,16 @@ class ManagerTest < ActiveSupport::TestCase
     assert_nil manager.first_of_type("external")
   end
 
+  test "base application hostname" do
+    manager = CloudProvider::Manager.instance
+
+    assert_equal manager.base_hostname, "openode.io"
+  end
+
+  test "get config application" do
+    manager = CloudProvider::Manager.instance
+
+    assert_equal manager.application["hostname_private_cloud"], "openode.dev"
+  end
+
 end

@@ -35,4 +35,6 @@ class DeploymentMethodBaseTest < ActiveSupport::TestCase
     assert_equal website.status, Website::STATUS_STARTING
   end
 
+  # TODO verify_can_deploy
+
 end

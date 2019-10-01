@@ -11,6 +11,10 @@ class WebsiteLocation < ApplicationRecord
     less_than_or_equal_to: 10
   }
 
+  def self.internal_domains
+    CloudProvider::Manager.instance.internal_domains
+  end
+
   def prepare_runner
     configs = {
       host: location_server.ip,
@@ -22,10 +26,6 @@ class WebsiteLocation < ApplicationRecord
 
     @runner
   end
-
-  INTERNAL_DOMAINS = [CloudProvider::Manager.instance.base_hostname]
-
-  #if 
 
   def has_location_server?
     location_server.present?

@@ -13,7 +13,8 @@ module DeploymentMethod
     def verify_can_deploy(options = {})
       super(options)
 
-      ex("pre_repository_verification", options)
+      #ex("pre_repository_verification", options)
+      self.pre_repository_verification(options)
     end
 
     def pre_repository_verification(options = {})
@@ -97,8 +98,19 @@ module DeploymentMethod
         self.error!("Can't find the built container... exiting.")
       end
 
+      Rails.logger.info("Front container for #{website.site_name} is #{front_container.inspect}")
+
       sleep 2
 
+      options_docker_compose = { 
+        front_container_id: front_container[:ID],
+        retry: {
+          nb_max_trials: 15,
+          interval_between_trials: 2
+        }
+      }
+
+      ex("docker_compose", options_docker_compose)
     end
 
     def front_crontainer_name(options = {})

@@ -290,4 +290,10 @@ services:
     cmd = dep_method.docker_compose({ front_container_id: "123456789" })
     assert_includes cmd, "docker exec 123456789 docker-compose up -d"
   end
+
+  # TODO verify_can_deploy
+
+  # TODO initialization
+
+  # TODO launch
 end

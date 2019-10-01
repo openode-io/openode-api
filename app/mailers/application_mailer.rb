@@ -1,4 +1,4 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: CloudProvider::Manager.instance.application["main_email"]
+  default from: ENV["DEFAULT_EMAIL"]
   layout 'mailer'
 end

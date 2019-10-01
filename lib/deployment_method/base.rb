@@ -44,11 +44,26 @@ module DeploymentMethod
 
   	protected
   	def ex(cmd, options = {})
-  		result = self.runner.execute([{ cmd_name: cmd, options: options }]).first
+      Rails.logger.info("Deployment Method ex #{cmd}, options=#{options.inspect}")
+      result = nil
 
-      if options[:ensure_exit_code].present?
-        if result && result[:exit_code] != options[:ensure_exit_code]
-          self.error!("Failed to run #{cmd}, result=#{result.inspect}")
+      max_trials = options[:retry] ? options[:retry][:nb_max_trials] : 1
+
+      (1..max_trials).each do |trial_i|
+        Rails.logger.info("Execute #{cmd} trial ##{trial_i}")
+        result = self.runner.execute([{ cmd_name: cmd, options: options }]).first
+
+        if options[:ensure_exit_code].present?
+          if result && result[:exit_code] != options[:ensure_exit_code]
+            self.error!("Failed to run #{cmd}, result=#{result.inspect}")
+          end
+        end
+
+        break if result && result[:exit_code] == 0
+
+        if options[:retry]
+          Rails.logger.info("Waiting for #{options[:retry][:interval_between_trials]}")
+          sleep options[:retry][:interval_between_trials]
         end
       end
 
