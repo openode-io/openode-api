@@ -145,20 +145,24 @@ module DeploymentMethod
       "docker exec #{options[:front_container_id]} docker-compose up -d"
     end
 
-    def port_info_for_new_deployment(website_location)
-      if website_location.running_port == website_location.port
-        {
-          port: website_location.second_port,
-          attribute: "second_port",
-          suffix_container_name: "--2"
-        }
-      else
-        {
-          port: website_location.port,
-          attribute: "port",
-          suffix_container_name: ""
-        }
-      end
+    def ps(options = {})
+      assert options[:front_container_id]
+
+      "docker exec #{options[:front_container_id]} docker-compose ps"
+    end
+
+    def node_active?(options = {})
+      assert options[:website]
+      website = options[:website]
+
+      options_ps = {
+        front_container_id: website.container_id
+      }
+
+      result = ex("ps", options_ps)
+
+      result && result[:exit_code] == 0 && result[:stdout].include?("Up") && 
+        result[:stdout].include?("80->80")
     end
 
     def global_containers(options = {})

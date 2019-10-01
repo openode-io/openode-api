@@ -59,4 +59,12 @@ class DeploymentMethodBaseTest < ActiveSupport::TestCase
     end
   end
 
+  test "curl_local_site" do
+    base_dep_method = DeploymentMethod::Base.new
+
+    cmd = base_dep_method.curl_local_site({ website_location: default_website_location })
+    assert_includes cmd, "curl "
+    assert_includes cmd, "http://localhost:#{default_website_location.port}/"
+  end
+
 end

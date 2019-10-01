@@ -38,7 +38,37 @@ module DeploymentMethod
       website_location.allocate_ports!
     end
 
+    def curl_local_site(options = {})
+      require_fields([:website_location], options)
+      website_location = options[:website_location]
+
+      port_info = port_info_for_new_deployment(website_location)
+      url = "http://localhost:#{port_info[:port]}/"
+      "curl --insecure --max-time 15 --connect-timeout 5 #{url} "
+    end
+
+    def node_active?(options = {})
+      raise "node_active? must be defined in the child class"
+    end
+
     def verify_instance_up(options = {})
+
+    end
+
+    def port_info_for_new_deployment(website_location)
+      if website_location.running_port == website_location.port
+        {
+          port: website_location.second_port,
+          attribute: "second_port",
+          suffix_container_name: "--2"
+        }
+      else
+        {
+          port: website_location.port,
+          attribute: "port",
+          suffix_container_name: ""
+        }
+      end
     end
 
   	protected
@@ -82,6 +112,13 @@ module DeploymentMethod
       fields.each do |field|
         assert options[field]
       end
+    end
+
+    def get_website_fields(options = {})
+      assert options[:website]
+      assert options[:website_location]
+
+      [options[:website], options[:website_location]]
     end
 
     def get_website_fields(options = {})

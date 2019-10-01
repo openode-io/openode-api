@@ -358,4 +358,21 @@ services:
       assert_equal website.container_id, "cc2304677be0"
     end
   end
+
+  test "node_active?" do
+    website = default_website
+    website.container_id = "cc2304677be0"
+    website.save
+    dep_method = docker_compose_method
+
+    prepare_ssh_session(dep_method.ps( { front_container_id: "cc2304677be0" }), 
+      IO.read("test/fixtures/docker/docker-compose-ps.txt"))
+
+    assert_scripted do
+      begin_ssh
+      result = dep_method.node_active?({ website: website })
+
+      assert_equal result, true
+    end
+  end
 end
