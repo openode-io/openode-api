@@ -13,7 +13,6 @@ module DeploymentMethod
     def verify_can_deploy(options = {})
       super(options)
 
-      #ex("pre_repository_verification", options)
       self.pre_repository_verification(options)
     end
 

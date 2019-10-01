@@ -51,11 +51,12 @@ class ActiveSupport::TestCase
     end
   end
 
-  def prepare_ssh_session(cmd, output)
+  def prepare_ssh_session(cmd, output, exit_code = 0)
     story do |session|
       channel = session.opens_channel
       channel.sends_exec cmd
       channel.gets_data output
+      channel.gets_exit_status(exit_code)
       channel.gets_close
       channel.sends_close
     end
@@ -84,6 +85,10 @@ class ActiveSupport::TestCase
 
   def default_website
     Website.find_by site_name: "testsite"
+  end
+
+  def default_website_location
+    default_website.website_locations.first
   end
 
   def dummy_ssh_configs

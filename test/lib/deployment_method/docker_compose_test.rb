@@ -106,7 +106,7 @@ services:
 
   test "port_info_for_new_deployment first time" do
     website = default_website
-    web_loc = website.website_locations.first
+    web_loc = default_website_location
     web_loc.allocate_ports!
     dep_method = DeploymentMethod::DockerCompose.new
 
@@ -119,7 +119,7 @@ services:
 
   test "port_info_for_new_deployment running on first port" do
     website = default_website
-    web_loc = website.website_locations.first
+    web_loc = default_website_location
     web_loc.allocate_ports!
     web_loc.running_port = web_loc.port
     web_loc.save!
@@ -134,7 +134,7 @@ services:
 
   test "port_info_for_new_deployment running on second port" do
     website = default_website
-    web_loc = website.website_locations.first
+    web_loc = default_website_location
     web_loc.allocate_ports!
     web_loc.running_port = web_loc.second_port
     web_loc.save!
@@ -164,14 +164,18 @@ services:
     assert_equal Remote::Sftp.get_test_uploaded_files.length, 0
   end
 
+  def expect_global_container(dep_method)
+    cmd = dep_method.global_containers({})
+    prepare_ssh_session(cmd, IO.read("test/fixtures/docker/global_containers.txt"))
+  end
+
   test "parse_global_containers" do
     set_dummy_secrets_to(LocationServer.all)
     website = default_website
     runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
     dep_method = runner.get_deployment_method
 
-    cmd = dep_method.global_containers({})
-    prepare_ssh_session(cmd, IO.read("test/fixtures/docker/global_containers.txt"))
+    expect_global_container(dep_method)
 
     assert_scripted do
       begin_ssh
@@ -223,11 +227,15 @@ services:
     end
   end
 
+  def docker_compose_method
+    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
+    runner.get_deployment_method
+  end
+
   test "prepare_dind_compose_image" do
     set_dummy_secrets_to(LocationServer.all)
     website = default_website
-    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
-    dep_method = runner.get_deployment_method
+    dep_method = docker_compose_method
 
     cmd = dep_method.prepare_dind_compose_image({})
     assert_includes cmd, "docker build -f "
@@ -236,8 +244,7 @@ services:
 
   test "front_crontainer_name" do
     website = default_website
-    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
-    dep_method = runner.get_deployment_method
+    dep_method = docker_compose_method
 
     cmd = dep_method.front_crontainer_name({ website: website, port_info: { suffix_container_name: "--2" } })
     assert_equal cmd, "#{website.user_id}--#{website.site_name}--2"
@@ -245,9 +252,8 @@ services:
 
   test "front_crontainer without resources limit" do
     website = default_website
-    website_location = website.website_locations.first
-    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
-    dep_method = runner.get_deployment_method
+    website_location = default_website_location
+    dep_method = docker_compose_method
 
     options = {
       website: website,
@@ -264,9 +270,8 @@ services:
 
   test "front_crontainer with resources limit" do
     website = default_website
-    website_location = website.website_locations.first
-    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
-    dep_method = runner.get_deployment_method
+    website_location = default_website_location
+    dep_method = docker_compose_method
 
     options = {
       website: website,
@@ -283,17 +288,66 @@ services:
 
   test "docker_compose" do
     website = default_website
-    website_location = website.website_locations.first
-    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
-    dep_method = runner.get_deployment_method
+    website_location = default_website_location
+    dep_method = docker_compose_method
     
     cmd = dep_method.docker_compose({ front_container_id: "123456789" })
     assert_includes cmd, "docker exec 123456789 docker-compose up -d"
   end
 
-  # TODO verify_can_deploy
+  test "verify_can_deploy" do
+    website = default_website
+    website_location = default_website_location
+    dep_method = docker_compose_method
+    
+    cmd_get_docker_compose = dep_method.get_file({ repo_dir: website.repo_dir, file: "docker-compose.yml"})
+    basic_docker_compose = IO.read("test/fixtures/docker/docker-compose.txt")
+    prepare_ssh_session(cmd_get_docker_compose, basic_docker_compose)
 
-  # TODO initialization
+    assert_scripted do
+      begin_ssh
+      dep_method.verify_can_deploy({ website: website, website_location: website_location })
+    end
+  end
 
-  # TODO launch
+  test "initialization without crontab" do
+    website = default_website
+    website.crontab = ""
+    website.save
+    website_location = default_website_location
+    dep_method = docker_compose_method
+    
+    cmd_get_docker_compose = dep_method.get_file({ repo_dir: website.repo_dir, file: "docker-compose.yml"})
+    prepare_ssh_session(dep_method.prepare_dind_compose_image, "empty")
+    prepare_ssh_session("true", "empty")
+
+    assert_scripted do
+      begin_ssh
+      dep_method.initialization({ website: website, website_location: website_location })
+    end
+  end
+
+  test "launch" do
+    website = default_website
+    website.crontab = ""
+    website.save
+    website_location = default_website_location
+    dep_method = docker_compose_method
+    
+    cmd_get_docker_compose = dep_method.get_file({ repo_dir: website.repo_dir, file: "docker-compose.yml"})
+    expect_global_container(dep_method)
+    puts "11"
+    prepare_ssh_session(dep_method.kill_global_container({ id: "cc2304677be0" }), "good")
+
+    cmd_front_container = 
+      dep_method.front_container({ website: website, website_location: website_location, in_port: 80 })
+    prepare_ssh_session(cmd_front_container, "ok")
+    expect_global_container(dep_method)
+    prepare_ssh_session(dep_method.docker_compose({ front_container_id: "cc2304677be0" }), "ok")
+
+    assert_scripted do
+      begin_ssh
+      dep_method.launch({ website: website, website_location: website_location })
+    end
+  end
 end

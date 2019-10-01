@@ -35,6 +35,28 @@ class DeploymentMethodBaseTest < ActiveSupport::TestCase
     assert_equal website.status, Website::STATUS_STARTING
   end
 
-  # TODO verify_can_deploy
+  test "verify_can_deploy without failure" do
+    website = default_website
+    website_location = website.website_locations.first
+    base_dep_method = DeploymentMethod::Base.new
+
+    base_dep_method.verify_can_deploy({ website: website, website_location: website_location })
+  end
+
+  test "verify_can_deploy with failure" do
+    website = default_website
+    website_location = website.website_locations.first
+    base_dep_method = DeploymentMethod::Base.new
+
+    website.user.activated = false
+    website.user.save
+
+    begin
+      base_dep_method.verify_can_deploy({ website: website, website_location: website_location })
+      assert_equal true, false
+    rescue => ex
+      assert_equal ex.class, ApplicationRecord::ValidationError
+    end
+  end
 
 end
