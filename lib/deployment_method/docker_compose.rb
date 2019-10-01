@@ -72,10 +72,7 @@ module DeploymentMethod
     # launch
 
     def launch(options = {})
-      assert options[:website]
-      assert options[:website_location]
-
-      website, website_location = options.values_at(:website, :website_location)
+      website, website_location = get_website_fields(options)
 
       port_info = self.port_info_for_new_deployment(website_location)
 
@@ -110,6 +107,9 @@ module DeploymentMethod
       }
 
       ex("docker_compose", options_docker_compose)
+
+      website.container_id = front_container[:ID]
+      website.save!
     end
 
     def front_crontainer_name(options = {})
@@ -122,10 +122,7 @@ module DeploymentMethod
 
     def front_container(options = {})
       assert options[:in_port]
-      assert options[:website]
-      assert options[:website_location]
-      website = options[:website]
-      website_location = options[:website_location]
+      website, website_location = get_website_fields(options)
 
       port_info = self.port_info_for_new_deployment(website_location)
       plan = website.plan

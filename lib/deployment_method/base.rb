@@ -9,13 +9,12 @@ module DeploymentMethod
     DEFAULT_CRONTAB_FILENAME = ".openode.cron"
 
     def error!(msg)
+      Rails.logger.error(msg)
       raise RuntimeError.new(msg)
     end
 
     def verify_can_deploy(options = {})
-      assert options[:website]
-      assert options[:website_location]
-      website, website_location = options.values_at(:website, :website_location)
+      website, website_location = get_website_fields(options)
 
       can_deploy, msg = website.can_deploy_to?(website_location)
 
@@ -32,14 +31,14 @@ module DeploymentMethod
     end
 
     def initialization(options = {})
-      assert options[:website]
-      assert options[:website_location]
-      website = options[:website]
-      website_location = options[:website_location]
+      website, website_location = get_website_fields(options)
 
       self.mark_accessed(options)
       website.change_status!(Website::STATUS_STARTING)
       website_location.allocate_ports!
+    end
+
+    def verify_instance_up(options = {})
     end
 
   	protected
@@ -65,6 +64,10 @@ module DeploymentMethod
           Rails.logger.info("Waiting for #{options[:retry][:interval_between_trials]}")
           sleep options[:retry][:interval_between_trials]
         end
+
+        if options[:retry] && trial_i == options[:retry][:nb_max_trials]
+          self.error!("Max trial reached (#{options[:retry][:nb_max_trials]})... terminating")
+        end
       end
 
       result
@@ -79,6 +82,13 @@ module DeploymentMethod
       fields.each do |field|
         assert options[field]
       end
+    end
+
+    def get_website_fields(options = {})
+      assert options[:website]
+      assert options[:website_location]
+
+      [options[:website], options[:website_location]]
     end
 
   end

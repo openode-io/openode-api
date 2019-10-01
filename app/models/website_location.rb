@@ -17,6 +17,8 @@ class WebsiteLocation < ApplicationRecord
 
   def prepare_runner
     configs = {
+      website: website,
+      website_location: self,
       host: location_server.ip,
       secret: location_server.secret
     }

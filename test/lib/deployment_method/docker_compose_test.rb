@@ -227,14 +227,19 @@ services:
     end
   end
 
-  def docker_compose_method
-    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
+  def docker_compose_method(website = default_website, website_location = default_website_location)
+    configs = dummy_ssh_configs
+    puts "website ? #{default_website}"
+    configs[:website] = website
+    configs[:website_location] = website_location
+    puts "configs #{configs.inspect}"
+
+    runner = DeploymentMethod::Runner.new("docker", "cloud", configs)
     runner.get_deployment_method
   end
 
   test "prepare_dind_compose_image" do
     set_dummy_secrets_to(LocationServer.all)
-    website = default_website
     dep_method = docker_compose_method
 
     cmd = dep_method.prepare_dind_compose_image({})
@@ -244,7 +249,7 @@ services:
 
   test "front_crontainer_name" do
     website = default_website
-    dep_method = docker_compose_method
+    dep_method = docker_compose_method(website)
 
     cmd = dep_method.front_crontainer_name({ website: website, port_info: { suffix_container_name: "--2" } })
     assert_equal cmd, "#{website.user_id}--#{website.site_name}--2"
@@ -336,7 +341,6 @@ services:
     
     cmd_get_docker_compose = dep_method.get_file({ repo_dir: website.repo_dir, file: "docker-compose.yml"})
     expect_global_container(dep_method)
-    puts "11"
     prepare_ssh_session(dep_method.kill_global_container({ id: "cc2304677be0" }), "good")
 
     cmd_front_container = 
@@ -348,6 +352,10 @@ services:
     assert_scripted do
       begin_ssh
       dep_method.launch({ website: website, website_location: website_location })
+
+      website.reload
+
+      assert_equal website.container_id, "cc2304677be0"
     end
   end
 end

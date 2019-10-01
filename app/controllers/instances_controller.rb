@@ -177,24 +177,16 @@ class InstancesController < ApplicationController
     # run in background:
     @runner.execute([
       {
-        cmd_name: "verify_can_deploy", 
-        options: { is_complex: true, website: @website, website_location: @website_location } 
+        cmd_name: "verify_can_deploy", options: { is_complex: true }
       },
       { 
-        cmd_name: "initialization", 
-        options: {
-          is_complex: true,
-          website: @website,
-          website_location: @website_location
-        }
+        cmd_name: "initialization", options: { is_complex: true }
       },
       {
-        cmd_name: "launch", 
-        options: {
-          is_complex: true, 
-          website: @website,
-          website_location: @website_location
-        }
+        cmd_name: "launch", options: { is_complex: true }
+      },
+      {
+        cmd_name: "verify_instance_up", options: { is_complex: true }
       }
     ])
 

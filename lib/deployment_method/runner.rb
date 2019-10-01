@@ -6,6 +6,8 @@ module DeploymentMethod
       @type = type
       @cloud_type = cloud_type
       @configs = configs
+      @website = @configs[:website]
+      @website_location = @configs[:website_location]
       @deployment_method = self.get_deployment_method()
       @cloud_provider = self.get_cloud_provider()
     end
@@ -28,6 +30,12 @@ module DeploymentMethod
     def execute(cmds)
       protocol = @cloud_provider.deployment_protocol
       time_begin = Time.now
+
+      cmds.each do |cmd|
+        cmd[:options] ||= {}
+        cmd[:options][:website] ||= @website if @website
+        cmd[:options][:website_location] ||= @website_location if @website_location
+      end
 
       logs = self.send("execute_#{protocol}", cmds)
 
