@@ -471,4 +471,28 @@ services:
       assert_equal result, false
     end
   end
+
+  test "verify_instance_up without skip port check, instance up" do
+    website = default_website
+    website.container_id = "cc2304677be0"
+    website.valid = false
+    website.save
+    dep_method = docker_compose_method
+
+    prepare_ssh_session(dep_method.ps( { front_container_id: "cc2304677be0" }), 
+      IO.read("test/fixtures/docker/docker-compose-ps.txt"))
+    cmd_instance_up = dep_method.instance_up_cmd( { website_location: default_website_location })
+    prepare_ssh_session(cmd_instance_up, "ok")
+
+    assert_scripted do
+      begin_ssh
+      dep_method.verify_instance_up({ website: website, website_location: default_website_location })
+
+      website.reload
+
+      assert_equal website.valid, true
+    end
+  end
+
+  # TODO add finalize test
 end

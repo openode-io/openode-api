@@ -67,4 +67,67 @@ class DeploymentMethodBaseTest < ActiveSupport::TestCase
     assert_includes cmd, "http://localhost:#{default_website_location.port}/"
   end
 
+  test "finalize when success, nothing running" do
+    website = default_website
+    website_location = default_website_location
+    base_dep_method = DeploymentMethod::Base.new
+
+    website.status = Website::STATUS_ONLINE
+    website.save!
+    website_location.port = 11500
+    website_location.second_port = 11501
+    website_location.running_port = nil
+    website_location.save
+
+    base_dep_method.finalize({ website: website, website_location: website_location })
+    
+    website_location.reload
+    website.reload
+
+    assert_equal website_location.running_port, 11500
+    assert_equal website.status, Website::STATUS_ONLINE
+  end
+
+  test "finalize when success, one existing running" do
+    website = default_website
+    website_location = default_website_location
+    base_dep_method = DeploymentMethod::Base.new
+
+    website.status = Website::STATUS_ONLINE
+    website.save!
+    website_location.port = 11500
+    website_location.second_port = 11501
+    website_location.running_port = 11500
+    website_location.save
+
+    base_dep_method.finalize({ website: website, website_location: website_location })
+    
+    website_location.reload
+    website.reload
+
+    assert_equal website_location.running_port, 11501
+    assert_equal website.status, Website::STATUS_ONLINE
+  end
+
+  test "finalize when failure, nothing running" do
+    website = default_website
+    website_location = default_website_location
+    base_dep_method = DeploymentMethod::Base.new
+
+    website.status = Website::STATUS_STARTING
+    website.save!
+    website_location.port = 11500
+    website_location.second_port = 11501
+    website_location.running_port = nil
+    website_location.save!
+
+    base_dep_method.finalize({ website: website, website_location: website_location })
+    
+    website_location.reload
+    website.reload
+
+    assert_equal website_location.running_port, nil
+    assert_equal website.status, Website::STATUS_OFFLINE
+  end
+
 end

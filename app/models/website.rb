@@ -147,6 +147,10 @@ class Website < ApplicationRecord
     self.save!
   end
 
+  def online?
+    self.status == STATUS_ONLINE
+  end
+
   def has_credits?
 
     # TODO

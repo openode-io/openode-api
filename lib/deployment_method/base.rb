@@ -38,6 +38,10 @@ module DeploymentMethod
       website_location.allocate_ports!
     end
 
+    def launch(options = {})
+      raise "must be implemented in child class"
+    end
+
     def instance_up_cmd(options = {})
       require_fields([:website_location], options)
       website_location = options[:website_location]
@@ -77,6 +81,8 @@ module DeploymentMethod
           is_up = instance_up?(options)
           break if is_up
         end
+
+        self.error!("Max build duration reached (#{max_build_duration})") unless is_up
       rescue => ex
         Rails.logger.info("Issue to verify instance up #{ex}")
         is_up = false
@@ -85,6 +91,7 @@ module DeploymentMethod
       website.valid = is_up
       website.http_port_available = is_up
       website.save!
+      website.change_status!(Website::STATUS_ONLINE)
     end
 
     def port_info_for_new_deployment(website_location)
@@ -101,6 +108,25 @@ module DeploymentMethod
           suffix_container_name: ""
         }
       end
+    end
+
+    def finalize(options = {})
+      website, website_location = get_website_fields(options)
+      website.reload
+      website_location.reload
+
+      port_info = port_info_for_new_deployment(website_location)
+
+      if website.online?
+        puts "is online.. "
+        website_location.running_port = port_info[:port]
+      else
+        puts "is offline.. "
+        website.change_status!(Website::STATUS_OFFLINE)
+        website_location.running_port = nil
+      end
+
+      website_location.save
     end
 
   	protected

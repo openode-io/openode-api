@@ -112,6 +112,19 @@ module DeploymentMethod
       website.save!
     end
 
+    # must be run independently (single step)
+    def finalize(options = {})
+      website, website_location = get_website_fields(options)
+      super(options)
+      website.reload
+
+      # remove the dead containers
+      ports_to_remove = [website.port, website.second_port] - [website.running_port]
+      kill_global_containers_by_ports({ ports: ports_to_remove })
+
+      # TODO add dock compose logs
+    end
+
     def front_crontainer_name(options = {})
       assert options[:website]
       assert options[:port_info]
