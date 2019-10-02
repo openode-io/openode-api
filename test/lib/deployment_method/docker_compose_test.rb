@@ -359,7 +359,7 @@ services:
     end
   end
 
-  test "node_active?" do
+  test "node_available?" do
     website = default_website
     website.container_id = "cc2304677be0"
     website.save
@@ -370,9 +370,105 @@ services:
 
     assert_scripted do
       begin_ssh
-      result = dep_method.node_active?({ website: website })
+      result = dep_method.node_available?({ website: website })
 
       assert_equal result, true
+    end
+  end
+
+  test "verify_instance_up" do
+    website = default_website
+    website.container_id = "cc2304677be0"
+    website.save
+    dep_method = docker_compose_method
+
+    dep_method.verify_instance_up({ website: website, website_location: default_website_location })
+
+
+    #prepare_ssh_session(dep_method.ps( { front_container_id: "cc2304677be0" }), 
+    #  IO.read("test/fixtures/docker/docker-compose-ps.txt"))
+
+    #assert_scripted do
+    #  begin_ssh
+    #  result = dep_method.verify_can_deploy({ website: website, website_location: default_website_location })
+
+    #  assert_equal result, true
+    #end
+  end
+
+  test "instance_up? with skip port check" do
+    website = default_website
+    website.configs ||= {}
+    website.configs["SKIP_PORT_CHECK"] = true
+    website.container_id = "cc2304677be0"
+    website.save
+    dep_method = docker_compose_method
+
+    prepare_ssh_session(dep_method.ps( { front_container_id: "cc2304677be0" }), 
+      IO.read("test/fixtures/docker/docker-compose-ps.txt"))
+
+    assert_scripted do
+      begin_ssh
+      result = dep_method.instance_up?({ website: website, website_location: default_website_location })
+
+      assert_equal result, true
+    end
+  end
+
+  test "instance_up? with skip port check, but down containers" do
+    website = default_website
+    website.configs ||= {}
+    website.configs["SKIP_PORT_CHECK"] = true
+    website.container_id = "cc2304677be0"
+    website.save
+    dep_method = docker_compose_method
+
+    prepare_ssh_session(dep_method.ps( { front_container_id: "cc2304677be0" }), 
+      "down")
+
+    assert_scripted do
+      begin_ssh
+      result = dep_method.instance_up?({ website: website, website_location: default_website_location })
+
+      assert_equal result, false
+    end
+  end
+
+  test "instance_up? without skip port check, instance up" do
+    website = default_website
+    website.container_id = "cc2304677be0"
+    website.save
+    dep_method = docker_compose_method
+
+    prepare_ssh_session(dep_method.ps( { front_container_id: "cc2304677be0" }), 
+      IO.read("test/fixtures/docker/docker-compose-ps.txt"))
+    cmd_instance_up = dep_method.instance_up_cmd( { website_location: default_website_location })
+    prepare_ssh_session(cmd_instance_up, "ok")
+
+    assert_scripted do
+      begin_ssh
+      result = dep_method.instance_up?({ website: website, website_location: default_website_location })
+
+      assert_equal result, true
+    end
+  end
+
+  test "instance_up? without skip port check, instance down" do
+    website = default_website
+    website.container_id = "cc2304677be0"
+    website.save
+    dep_method = docker_compose_method
+
+    prepare_ssh_session(dep_method.ps( { front_container_id: "cc2304677be0" }), 
+      IO.read("test/fixtures/docker/docker-compose-ps.txt"))
+    cmd_instance_up = dep_method.instance_up_cmd( { website_location: default_website_location })
+    prepare_ssh_session(cmd_instance_up, "ok", 7)
+
+    assert_scripted do
+      begin_ssh
+      result = dep_method.instance_up?({ website: website, website_location: default_website_location })
+
+      assert_equal result, false
     end
   end
 end

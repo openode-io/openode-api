@@ -151,7 +151,7 @@ module DeploymentMethod
       "docker exec #{options[:front_container_id]} docker-compose ps"
     end
 
-    def node_active?(options = {})
+    def node_available?(options = {})
       assert options[:website]
       website = options[:website]
 

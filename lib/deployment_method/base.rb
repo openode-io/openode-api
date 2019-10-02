@@ -38,7 +38,7 @@ module DeploymentMethod
       website_location.allocate_ports!
     end
 
-    def curl_local_site(options = {})
+    def instance_up_cmd(options = {})
       require_fields([:website_location], options)
       website_location = options[:website_location]
 
@@ -47,12 +47,44 @@ module DeploymentMethod
       "curl --insecure --max-time 15 --connect-timeout 5 #{url} "
     end
 
-    def node_active?(options = {})
-      raise "node_active? must be defined in the child class"
+    def node_available?(options = {})
+      raise "node_available? must be defined in the child class"
+    end
+
+    def instance_up?(options = {})
+      website = options[:website]
+
+      if website.has_skip_port_check?
+        node_available?(options)
+      else
+        return false unless node_available?(options)
+
+        result_up_cmd = ex("instance_up_cmd", options)
+
+        result_up_cmd && result_up_cmd[:exit_code] == 0
+      end
     end
 
     def verify_instance_up(options = {})
+      website, website_location = get_website_fields(options)
+      is_up = false
 
+      begin
+        t_started = Time.now
+        max_build_duration = website.max_build_duration
+
+        while Time.now - t_started < max_build_duration
+          is_up = instance_up?(options)
+          break if is_up
+        end
+      rescue => ex
+        Rails.logger.info("Issue to verify instance up #{ex}")
+        is_up = false
+      end
+
+      website.valid = is_up
+      website.http_port_available = is_up
+      website.save!
     end
 
     def port_info_for_new_deployment(website_location)

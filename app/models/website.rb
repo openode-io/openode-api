@@ -116,6 +116,18 @@ class Website < ApplicationRecord
       .include? var_name
   end
 
+  def has_skip_port_check?
+    configs && [true, "true"].include?(configs["SKIP_PORT_CHECK"])
+  end
+
+  def max_build_duration
+    [
+      (configs["MAX_BUILD_DURATION"] || Website.config_def("MAX_BUILD_DURATION")[:default]).to_i,
+      Website.config_def("MAX_BUILD_DURATION")[:max]
+    ]
+    .min
+  end
+
   def repo_dir
     return "/invalid/repository/" if ! self.user_id || ! self.site_name
 

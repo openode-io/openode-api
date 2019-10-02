@@ -171,5 +171,16 @@ class WebsiteTest < ActiveSupport::TestCase
       assert_equal can_deploy, false
       assert_includes msg, "No credit available"
     end
+
+    # max build duration
+    test "max build duration with default" do
+      website = Website.find_by(site_name: "testsite")
+      website.configs ||= {}
+      website.configs["MAX_BUILD_DURATION"] = 150
+      website.save!
+      website.reload
+
+      assert_equal website.max_build_duration, 150
+    end
   end
 end
