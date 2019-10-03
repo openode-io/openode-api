@@ -119,7 +119,8 @@ module DeploymentMethod
       website.reload
 
       # remove the dead containers
-      ports_to_remove = [website.port, website.second_port] - [website.running_port]
+      ports_to_remove = 
+        [website_location.port, website_location.second_port] - [website_location.running_port]
       kill_global_containers_by_ports({ ports: ports_to_remove })
 
       # TODO add dock compose logs
@@ -179,7 +180,7 @@ module DeploymentMethod
     end
 
     def global_containers(options = {})
-      "docker ps --format " +
+      "docker ps -a --format " +
         "\"{{.ID}};{{.Image}};{{.Command}};{{.CreatedAt}};{{.RunningFor}};{{.Ports}};" +
         "{{.Status}};{{.Size}};{{.Names}};{{.Labels}};{{.Mounts}}\""
     end

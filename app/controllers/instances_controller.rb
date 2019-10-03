@@ -183,10 +183,16 @@ class InstancesController < ApplicationController
         cmd_name: "initialization", options: { is_complex: true }
       },
       {
-        cmd_name: "launch", options: { is_complex: true, catch_exception: true }
+        cmd_name: "launch", options: { is_complex: true }
       },
       {
-        cmd_name: "verify_instance_up", options: { is_complex: true, catch_exception: true }
+        cmd_name: "verify_instance_up", options: { is_complex: true }
+      }
+    ])
+
+    @runner.execute([
+      {
+        cmd_name: "finalize", options: { is_complex: true }
       }
     ])
 

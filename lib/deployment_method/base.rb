@@ -80,6 +80,7 @@ module DeploymentMethod
         while Time.now - t_started < max_build_duration
           is_up = instance_up?(options)
           break if is_up
+          sleep 2
         end
 
         self.error!("Max build duration reached (#{max_build_duration})") unless is_up
@@ -118,10 +119,8 @@ module DeploymentMethod
       port_info = port_info_for_new_deployment(website_location)
 
       if website.online?
-        puts "is online.. "
         website_location.running_port = port_info[:port]
       else
-        puts "is offline.. "
         website.change_status!(Website::STATUS_OFFLINE)
         website_location.running_port = nil
       end

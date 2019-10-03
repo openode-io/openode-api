@@ -494,5 +494,33 @@ services:
     end
   end
 
-  # TODO add finalize test
+  test "finalize " do
+    set_dummy_secrets_to(LocationServer.all)
+    website = default_website
+    website_location = default_website_location
+    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
+    dep_method = runner.get_deployment_method
+
+    website.status = Website::STATUS_ONLINE
+    website.save!
+    website_location.port = 33120
+    website_location.second_port = 33121
+    website_location.running_port = 33121
+    website_location.save!
+
+    cmd = dep_method.global_containers({})
+    prepare_ssh_session(cmd, IO.read("test/fixtures/docker/global_containers.txt"))
+    prepare_ssh_session(dep_method.kill_global_container({ id: "b3621dd9d4dd" }), "killed b3621dd9d4dd")
+
+    assert_scripted do
+      begin_ssh
+      result = dep_method.finalize({ website: website, website_location: website_location })
+
+      assert_equal result.length, 1
+      assert_equal result[0], "killed b3621dd9d4dd"
+
+      assert_equal website.online?, true
+      assert_equal website_location.running_port, 33120
+    end
+  end
 end
