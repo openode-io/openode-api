@@ -177,8 +177,6 @@ class InstancesController < ApplicationController
     # run in background:
     DeploymentMethod::Deployer.delay.run(@website_location, @runner)
 
-    sleep 1
-
     json({ result: "success", deploymentId: 1234567 })
 
   rescue => ex
