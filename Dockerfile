@@ -27,6 +27,8 @@ RUN apk add --no-cache build-base \
 RUN echo 'echo bundle install' >> /boot.sh
 RUN echo 'bundle install --jobs 20 --retry 5 --without development test' >> /boot.sh
 
+# RACK_ENV=development RAILS_ENV=development bin/delayed_job -n 5 start
+
 # todo: migration?
 
 # launch the application

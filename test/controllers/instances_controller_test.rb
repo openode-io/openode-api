@@ -1,6 +1,9 @@
 require 'test_helper'
 
 class InstancesControllerTest < ActionDispatch::IntegrationTest
+
+  include ActiveJob::TestHelper
+
   test "/instances/ with param token" do
     user = default_user
 

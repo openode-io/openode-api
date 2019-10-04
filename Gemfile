@@ -28,6 +28,8 @@ gem 'net-ssh'
 gem 'net-sftp'
 gem 'solid_assert'
 gem 'public_suffix'
+gem 'delayed_job_active_record'
+gem "daemons"
 gem 'mailgun-ruby', '~>1.2.0'
 
 # Use ActiveStorage variant

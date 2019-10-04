@@ -175,26 +175,9 @@ class InstancesController < ApplicationController
 
 
     # run in background:
-    @runner.execute([
-      {
-        cmd_name: "verify_can_deploy", options: { is_complex: true }
-      },
-      { 
-        cmd_name: "initialization", options: { is_complex: true }
-      },
-      {
-        cmd_name: "launch", options: { is_complex: true }
-      },
-      {
-        cmd_name: "verify_instance_up", options: { is_complex: true }
-      }
-    ])
+    DeploymentMethod::Deployer.delay.run(@website_location, @runner)
 
-    @runner.execute([
-      {
-        cmd_name: "finalize", options: { is_complex: true }
-      }
-    ])
+    sleep 1
 
     json({ result: "success", deploymentId: 1234567 })
 

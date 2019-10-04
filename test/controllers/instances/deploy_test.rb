@@ -3,8 +3,17 @@ require 'test_helper'
 
 class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
 
+  def run_deployer_job()
+    job = Delayed::Job.where("handler LIKE ?", "%#{"DeploymentMethod::Deployer"}%").first
+
+    job.invoke_job
+  end
+
+  
   test "/instances/:instance_id/restart requires minimum CLI version" do
     post "/instances/testsite/restart", as: :json, headers: default_headers_auth
+
+
 
     assert_response :bad_request
     assert_includes response.parsed_body["error"], "Deprecated"
@@ -66,14 +75,18 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
   end
 
   test "/instances/:instance_id/restart" do
-    #set_dummy_secrets_to(LocationServer.all)
+    set_dummy_secrets_to(LocationServer.all)
 
-    #website = Website.find_by! site_name: "testsite"
+    website = default_website
 
-    #post "/instances/testsite/restart", 
-    #  as: :json, 
-    #  params: base_params,
-    #  headers: default_headers_auth
+    post "/instances/#{website.site_name}/restart", 
+      as: :json, 
+      params: base_params,
+      headers: default_headers_auth
+
+    #job = Delayed::Job.where("handler LIKE ?", "%#{"DeploymentMethod::Deployer"}%").first
+
+    #Delayed::Job.last.invoke_job
 
     #assert_response :success
     #assert_includes response.parsed_body["error"], "User suspended"

@@ -43,6 +43,9 @@ module OpenodeApi
     config.action_cable.disable_request_forgery_protection = true
 
     config.secret_key_base = ENV["SECRET_KEY_BASE"]
+
+    config.active_job.queue_adapter = :delayed_job
+
   end
 end
 
@@ -72,8 +75,13 @@ puts "Env: #{ENV["RAILS_ENV"]}"
 
 # Relational db connection verification
 
-puts "Verifying database connection..."
 require "./config/environment.rb"
-ActiveRecord::Base.establish_connection # Establishes connection
-ActiveRecord::Base.connection # Calls connection object
-puts "database connection valid"
+
+unless ENV["SKIP_BOOT_DB_CHECK"]
+  puts "Verifying database connection..."
+
+  ActiveRecord::Base.establish_connection # Establishes connection
+  ActiveRecord::Base.connection # Calls connection object
+
+  puts "database connection valid"
+end
