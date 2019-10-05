@@ -4,6 +4,7 @@ class WebsiteLocation < ApplicationRecord
   belongs_to :website
   belongs_to :location
   belongs_to :location_server
+  has_many :deployments
 
   validates :extra_storage, numericality: {
     only_integer: true,

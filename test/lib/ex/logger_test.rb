@@ -17,4 +17,12 @@ class ExLoggerTest < ActiveSupport::TestCase
   	end
   end
 
+  test "error exception without msg" do
+  	begin
+  		raise "what"
+  	rescue => ex
+	  	Ex::Logger.error(ex)
+  	end
+  end
+
 end

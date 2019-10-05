@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  website: one
+  website_location: one
+  status: success
+
+two:
+  website: two
+  website_location: two
+  status: failed
