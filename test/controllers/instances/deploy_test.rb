@@ -12,7 +12,7 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
   test "/instances/:instance_id/restart requires minimum CLI version" do
     post "/instances/testsite/restart", as: :json, headers: default_headers_auth
 
-    assert_response :success
+    assert_response :bad_request
     # assert_includes response.parsed_body["error"], "Deprecated"
   end
 
@@ -24,8 +24,9 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
     	as: :json, 
     	headers: default_headers_auth
 
-    assert_response :success
-    # assert_includes response.parsed_body["error"], "The instance must be in status"
+    puts "parsed body #{response.parsed_body.inspect}"
+    assert_response :bad_request
+    assert_includes response.parsed_body["error"], "The instance must be in status"
   end
 
   test "/instances/:instance_id/restart should not allow when no credit" do
@@ -83,6 +84,7 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
 
     #job = Delayed::Job.where("handler LIKE ?", "%#{"DeploymentMethod::Deployer"}%").first
 
+    #puts "job ? #{job.inspect}"
     #Delayed::Job.last.invoke_job
 
     #assert_response :success

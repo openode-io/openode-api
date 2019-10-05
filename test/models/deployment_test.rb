@@ -17,6 +17,19 @@ class DeploymentTest < ActiveSupport::TestCase
     dep.save!
   end
 
+  test "default status should be running" do
+    website = default_website
+    website_location = default_website_location
+    dep = Deployment.create!({
+      website: website,
+      website_location: website_location,
+      status: Deployment::STATUS_RUNNING
+    })
+
+    assert_equal dep.status, Deployment::STATUS_RUNNING
+    assert_equal dep.result["steps"], []
+  end
+
   test "Create fails with invalid status" do
   	website = default_website
   	website_location = default_website_location

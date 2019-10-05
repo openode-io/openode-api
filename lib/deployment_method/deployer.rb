@@ -2,9 +2,12 @@ module DeploymentMethod
   class Deployer
 
   	def self.run(website_location, runner)
+  		assert runner
+  		assert runner.deployment
   		website = website_location.website
 
-  		Rails.logger.info("Starting deployment for #{website.site_name}...")
+  		Rails.logger.info("Starting deployment for #{website.site_name}, " +
+  			"deployment-id = #{runner.deployment.id}...")
 
   		begin
 			runner.execute([

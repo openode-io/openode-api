@@ -44,7 +44,7 @@ class InstancesController < ApplicationController
     files_client = JSON.parse(params["files"])
     files_server = JSON.parse(@runner.execute([
       { cmd_name: "files_listing", options: { path: @website.repo_dir } }
-    ]).first[:stdout])
+    ]).first[:result][:stdout])
 
     changes = Io::Dir.diff(files_client, files_server, @website.normalized_storage_areas)
 
@@ -109,7 +109,7 @@ class InstancesController < ApplicationController
           service: Io::Cmd.sanitize_input_cmd(params["service"]),
         } 
       }
-    ]).first
+    ]).first[:result]
 
     json({ result: result })
   end
@@ -167,20 +167,24 @@ class InstancesController < ApplicationController
     cmds = [{ cmd_name: "logs", options: { website: @website, nb_lines: nb_lines } }]
     logs = @runner.execute(cmds)
 
-    json({ logs: logs.first[:stdout] })
+    json({ logs: logs.first[:result][:stdout] })
   end
 
   def restart
-    # TODO init deployment model
-
+    deployment = Deployment.create!({
+      website: @website,
+      website_location: @website_location,
+      status: Deployment::STATUS_RUNNING
+    })
 
     # run in background:
+    @runner.deployment = deployment
     DeploymentMethod::Deployer.delay.run(@website_location, @runner)
 
-    json({ result: "success", deploymentId: 1234567 })
+    json({ result: "success", deploymentId: deployment.id })
 
   rescue => ex
-    logger.error("Issue deploying, #{ex}")
+    logger.error("Issue starting deploying, #{ex}")
     raise ex
   end
 

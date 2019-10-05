@@ -137,7 +137,7 @@ module DeploymentMethod
 
       (1..max_trials).each do |trial_i|
         Rails.logger.info("Execute #{cmd} trial ##{trial_i}")
-        result = self.runner.execute([{ cmd_name: cmd, options: options }]).first
+        result = self.runner.execute([{ cmd_name: cmd, options: options }]).first[:result]
 
         if options[:ensure_exit_code].present?
           if result && result[:exit_code] != options[:ensure_exit_code]
@@ -161,7 +161,7 @@ module DeploymentMethod
   	end
 
   	def ex_stdout(cmd, options = {})
-  		self.runner.execute([{ cmd_name: cmd, options: options }]).first[:stdout]
+  		self.runner.execute([{ cmd_name: cmd, options: options }]).first[:result][:stdout]
   	end
 
     private

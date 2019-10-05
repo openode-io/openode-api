@@ -1,6 +1,7 @@
 
 module DeploymentMethod
   class Runner
+    attr_accessor :deployment
 
     def initialize(type, cloud_type, configs = {})
       @type = type
@@ -37,12 +38,12 @@ module DeploymentMethod
         cmd[:options][:website_location] ||= @website_location if @website_location
       end
 
-      logs = self.send("execute_#{protocol}", cmds)
+      results = self.send("execute_#{protocol}", cmds)
 
-      Rails.logger.info("Execute cmds=#{cmds.to_yaml}, result=#{logs.to_yaml}, " +
+      Rails.logger.info("Execute cmds=#{cmds.to_yaml}, result=#{results.to_yaml}, " +
         "duration=#{Time.now - time_begin}")
 
-      logs
+      results
     end
 
     def upload(local_path, remote_path)
@@ -62,19 +63,43 @@ module DeploymentMethod
     end
 
     def execute_ssh(cmds)
+      results = []
+
       generated_commands = cmds.map do |cmd|
         result = @deployment_method.send(cmd[:cmd_name], cmd[:options])
 
-        cmd[:options][:is_complex] ? nil : result
+        if cmd[:options][:is_complex]
+          results << {
+            cmd_name: cmd[:cmd_name],
+            result: 'done'
+          }
+
+          # ret nil to skip it as a remote cmd
+          nil
+        else
+          # it's the command to execute remotely:
+          {
+            cmd_name: cmd[:cmd_name],
+            result: result
+          }
+        end
       end
       .select { |gen_cmd| gen_cmd.present? }
 
       if generated_commands.length > 0
         @ssh ||= Remote::Ssh.new(self.ssh_configs)
-        @ssh.exec(generated_commands)
-      else
-        []
+        results_generated_commands = @ssh.exec(generated_commands.map { |c| c[:result] })
+
+        results = results + 
+          generated_commands.map.with_index(0) do |gen_cmd, index|
+            {
+              cmd_name: gen_cmd[:cmd_name],
+              result: results_generated_commands[index]
+            }
+          end
       end
+
+      results
     end
 
     def get_deployment_method()
