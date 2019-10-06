@@ -521,6 +521,8 @@ services:
 
       assert_equal website.online?, true
       assert_equal website_location.running_port, 33120
+
+      # should also have a deployment 
     end
   end
 end

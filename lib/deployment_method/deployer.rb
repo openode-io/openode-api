@@ -25,7 +25,8 @@ module DeploymentMethod
 			  }
 			])
 		rescue => ex
-			Rails.logger.info("Issue deploying #{website.site_name}, #{ex.backtrace}")
+			Ex::logger.info(ex, "Issue deploying #{website.site_name}")
+			runner.deployment.add_error!(ex)
 		end
 
 		begin
@@ -35,7 +36,8 @@ module DeploymentMethod
 			  }
 			])
 		rescue => ex
-			Rails.logger.info("Issue finalizing deployment #{website.site_name}, #{ex.backtrace}")
+			Ex::logger.info(ex, "Issue finalizing deployment #{website.site_name}")
+			runner.deployment.add_error!(ex)
 		end
 
   		Rails.logger.info("Finished deployment for #{website.site_name}...")

@@ -28,6 +28,7 @@ class DeploymentTest < ActiveSupport::TestCase
 
     assert_equal dep.status, Deployment::STATUS_RUNNING
     assert_equal dep.result["steps"], []
+    assert_equal dep.result["errors"], []
   end
 
   test "Create fails with invalid status" do

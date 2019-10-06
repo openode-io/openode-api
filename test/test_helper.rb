@@ -97,7 +97,21 @@ class ActiveSupport::TestCase
       secret: {
         user: "user",
         password: "123456"
-      }
+      },
+      website: default_website,
+      website_location: default_website_location
+    }
+  end
+
+  def default_runner_configs
+    {
+      host: "test.com",
+      secret: {
+        user: "user",
+        password: "123456"
+      },
+      website: default_website,
+      website_location: default_website_location
     }
   end
 

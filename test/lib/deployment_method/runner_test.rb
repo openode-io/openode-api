@@ -7,31 +7,31 @@ class RunnerTest < ActiveSupport::TestCase
   end
 
   test "get deployment method with valid" do
-    runner = DeploymentMethod::Runner.new("docker", "cloud", {})
+    runner = DeploymentMethod::Runner.new("docker", "cloud", default_runner_configs)
 
     assert_equal runner.get_deployment_method.class.name, "DeploymentMethod::DockerCompose"
   end
 
   test "get deployment method with invalid" do
-    runner = DeploymentMethod::Runner.new("docker2", "cloud", {})
+    runner = DeploymentMethod::Runner.new("docker2", "cloud", default_runner_configs)
 
     assert_nil runner.get_deployment_method rescue nil
   end
 
   test "get cloud provider internal" do
-    runner = DeploymentMethod::Runner.new("docker", "cloud", {})
+    runner = DeploymentMethod::Runner.new("docker", "cloud", default_runner_configs)
 
     assert_equal runner.get_cloud_provider.class.name, "CloudProvider::Internal"
   end
 
   test "get cloud provider dummy" do
-    runner = DeploymentMethod::Runner.new("docker", "dummy", {})
+    runner = DeploymentMethod::Runner.new("docker", "dummy", default_runner_configs)
 
     assert_equal runner.get_cloud_provider.class.name, "CloudProvider::Dummy"
   end
 
   test "get cloud provider invalid" do
-    runner = DeploymentMethod::Runner.new("docker", "dummy2", {})
+    runner = DeploymentMethod::Runner.new("docker", "dummy2", default_runner_configs)
 
     assert_nil runner.get_cloud_provider rescue nil
   end
@@ -41,7 +41,7 @@ class RunnerTest < ActiveSupport::TestCase
     website = default_website
     website.crontab = "* * * * * ls -la"
     website.save!
-    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
+    runner = DeploymentMethod::Runner.new("docker", "cloud", default_runner_configs)
 
     begin_sftp
     runner.execute([

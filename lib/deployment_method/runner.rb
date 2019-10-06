@@ -11,6 +11,12 @@ module DeploymentMethod
       @website_location = @configs[:website_location]
       @deployment_method = self.get_deployment_method()
       @cloud_provider = self.get_cloud_provider()
+
+      self.deployment = Deployment.create!({
+        website: @website,
+        website_location: @website_location,
+        status: Deployment::STATUS_RUNNING
+      })
     end
 
     def terminate
@@ -28,6 +34,12 @@ module DeploymentMethod
       }
     end
 
+    def record_deployment_steps(results)
+      #self.deployment.result["steps"] = results
+      #self.deployment.save
+      self.deployment.save_result(results)
+    end
+
     def execute(cmds)
       protocol = @cloud_provider.deployment_protocol
       time_begin = Time.now
@@ -42,6 +54,8 @@ module DeploymentMethod
 
       Rails.logger.info("Execute cmds=#{cmds.to_yaml}, result=#{results.to_yaml}, " +
         "duration=#{Time.now - time_begin}")
+
+      record_deployment_steps(results)
 
       results
     end

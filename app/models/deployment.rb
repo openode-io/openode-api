@@ -13,10 +13,30 @@ class Deployment < ApplicationRecord
 
   validates_inclusion_of :status, :in => STATUSES
 
+  def add_error!(ex)
+  	result["errors"] ||= []
+
+  	result["errors"] << {
+		"title" => ex.message ? ex.message : "Global exception",
+		"exception" => ex
+	}
+
+	self.save
+  end
+
+  def save_result(results)
+  	self.result = results.map do |current_result|
+  		Str::Encode.strip_invalid_chars(current_result)
+  	end
+
+  	self.save
+  end
+
   def initialize_status
   	self.status = STATUS_RUNNING
   	self.result ||= {}
   	self.result["steps"] = []
+  	self.result["errors"] = []
   end
 
 end
