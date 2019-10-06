@@ -13,7 +13,7 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
     post "/instances/testsite/restart", as: :json, headers: default_headers_auth
 
     assert_response :bad_request
-    # assert_includes response.parsed_body["error"], "Deprecated"
+    assert_includes response.parsed_body["error"], "Deprecated"
   end
 
   test "/instances/:instance_id/restart should not be starting" do
@@ -24,24 +24,41 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
     	as: :json, 
     	headers: default_headers_auth
 
-    puts "parsed body #{response.parsed_body.inspect}"
     assert_response :bad_request
     assert_includes response.parsed_body["error"], "The instance must be in status"
   end
 
   test "/instances/:instance_id/restart should not allow when no credit" do
-    website = Website.find_by! site_name: "testsite"
+    dep_method = prepare_default_deployment_method
+
+    website = default_website
     website.user.credits = 0
     website.user.save
 
+    prepare_default_ports
+    
     post "/instances/testsite/restart",
       as: :json,
       params: base_params,
       headers: default_headers_auth
 
     assert_response :success
-    #assert_includes response.parsed_body["error"], "No credit available"
-    #assert_includes response.parsed_body["error"], "https://www.openode.io/admin/billing"
+
+    prepare_default_kill_all(dep_method)
+
+    assert_scripted do
+      begin_ssh
+      run_deployer_job
+      
+      deployment = website.deployments.last
+      website.reload
+
+      assert_equal website.status, Website::STATUS_OFFLINE
+      assert_equal deployment.status, Deployment::STATUS_FAILED
+      assert_equal deployment.result["steps"].length, 4 # global, 2 kills, finalize
+
+      assert_includes deployment.result["errors"][0]["title"], "No credit"
+    end
   end
 
   test "/instances/:instance_id/restart should not allow when user not activated" do

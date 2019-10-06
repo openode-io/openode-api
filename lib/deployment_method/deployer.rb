@@ -25,8 +25,10 @@ module DeploymentMethod
 			  }
 			])
 		rescue => ex
-			Ex::logger.info(ex, "Issue deploying #{website.site_name}")
+			Ex::Logger.info(ex, "Issue deploying #{website.site_name}")
 			runner.deployment.add_error!(ex)
+			runner.deployment.failed!
+			website.change_status!(Website::STATUS_OFFLINE)
 		end
 
 		begin
@@ -36,8 +38,9 @@ module DeploymentMethod
 			  }
 			])
 		rescue => ex
-			Ex::logger.info(ex, "Issue finalizing deployment #{website.site_name}")
+			Ex::Logger.info(ex, "Issue finalizing deployment #{website.site_name}")
 			runner.deployment.add_error!(ex)
+			runner.deployment.failed!
 		end
 
   		Rails.logger.info("Finished deployment for #{website.site_name}...")

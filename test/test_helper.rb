@@ -115,6 +115,27 @@ class ActiveSupport::TestCase
     }
   end
 
+  def prepare_default_deployment_method
+    set_dummy_secrets_to(LocationServer.all)
+    runner = DeploymentMethod::Runner.new("docker", "cloud", default_runner_configs)
+    runner.get_deployment_method
+  end
+
+  def prepare_default_ports
+    website_location = default_website_location
+    website_location.port = 33129
+    website_location.second_port = 33121
+    website_location.running_port = 33129
+    website_location.save!
+  end
+
+  def prepare_default_kill_all(dep_method)
+    cmd = dep_method.global_containers({})
+    prepare_ssh_session(cmd, IO.read("test/fixtures/docker/global_containers.txt"))
+    prepare_ssh_session(dep_method.kill_global_container({ id: "b3621dd9d4dd" }), "killed b3621dd9d4dd")
+    prepare_ssh_session(dep_method.kill_global_container({ id: "32bfe26a2712" }), "killed 32bfe26a2712")
+  end
+
   def default_user
     User.find_by email: "myadmin@thisisit.com"
   end

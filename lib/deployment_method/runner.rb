@@ -35,9 +35,7 @@ module DeploymentMethod
     end
 
     def record_deployment_steps(results)
-      #self.deployment.result["steps"] = results
-      #self.deployment.save
-      self.deployment.save_result(results)
+      self.deployment.save_steps(results)
     end
 
     def execute(cmds)

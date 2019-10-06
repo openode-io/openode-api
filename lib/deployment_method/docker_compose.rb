@@ -121,6 +121,7 @@ module DeploymentMethod
       # remove the dead containers
       ports_to_remove = 
         [website_location.port, website_location.second_port] - [website_location.running_port]
+      puts "ports to remove = #{ports_to_remove}"
       kill_global_containers_by_ports({ ports: ports_to_remove })
 
       # TODO add dock compose logs
@@ -236,8 +237,10 @@ module DeploymentMethod
       ports = options[:ports]
 
       containers = self.find_containers_by_ports(options)
+      puts "containrs found #{containers.inspect}, #{containers.length}"
 
       containers.map do |container|
+        puts "cur container delete.. #{container}"
         self.ex_stdout("kill_global_container", { 
           id: container[:ID]
         })
