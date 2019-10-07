@@ -18,6 +18,10 @@ module CloudProvider
       Internal::TYPE
     end
 
+    def limit_resources?
+      true
+    end
+
     def available_locations
       raise "Missing locations" unless @configs["locations"]
 

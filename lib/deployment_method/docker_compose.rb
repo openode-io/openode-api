@@ -47,7 +47,7 @@ module DeploymentMethod
       super(options)
 
       self.ex_stdout("prepare_dind_compose_image")
-      self.ex("send_crontab", options)
+      self.send_crontab(options)
     end
 
     def prepare_dind_compose_image(options = {})
@@ -73,6 +73,8 @@ module DeploymentMethod
 
     def launch(options = {})
       website, website_location = get_website_fields(options)
+      require_fields([:limit_resources], options)
+      limit_resources = options[:limit_resources]
 
       port_info = self.port_info_for_new_deployment(website_location)
 
@@ -83,7 +85,8 @@ module DeploymentMethod
         in_port: 80,
         website: website,
         website_location: website_location,
-        ensure_exit_code: 0
+        ensure_exit_code: 0,
+        limit_resources: limit_resources
       }
 
       ex("front_container", options_front_container)
@@ -192,25 +195,27 @@ module DeploymentMethod
       containers_list
         .split("\n")
         .map do |line|
-          return nil unless line
+          if ! line
+            nil
+          elsif line.split(";").length != 11
+            nil
+          else
+            parts = line.split(";")
 
-          parts = line.split(";")
-
-          return nil if ! parts || parts.length != 11
-
-          {
-            ID: parts[0],
-            Image: parts[1],
-            Command: parts[2],
-            CreatedAt: parts[3],
-            RunningFor: parts[4],
-            Ports: parts[5],
-            Status: parts[6],
-            Size: parts[7],
-            Names: parts[8],
-            Labels: parts[9],
-            Mounts: parts[10]
-          }
+            {
+              ID: parts[0],
+              Image: parts[1],
+              Command: parts[2],
+              CreatedAt: parts[3],
+              RunningFor: parts[4],
+              Ports: parts[5],
+              Status: parts[6],
+              Size: parts[7],
+              Names: parts[8],
+              Labels: parts[9],
+              Mounts: parts[10]
+            }
+          end
         end
         .select { |line| line.present? }
     end
@@ -237,10 +242,8 @@ module DeploymentMethod
       ports = options[:ports]
 
       containers = self.find_containers_by_ports(options)
-      puts "containrs found #{containers.inspect}, #{containers.length}"
 
       containers.map do |container|
-        puts "cur container delete.. #{container}"
         self.ex_stdout("kill_global_container", { 
           id: container[:ID]
         })

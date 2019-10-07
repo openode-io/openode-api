@@ -136,6 +136,34 @@ class ActiveSupport::TestCase
     prepare_ssh_session(dep_method.kill_global_container({ id: "32bfe26a2712" }), "killed 32bfe26a2712")
   end
 
+  def prepare_get_docker_compose(dep_method, website)
+    cmd_get_docker_compose = dep_method.get_file({ repo_dir: website.repo_dir, file: "docker-compose.yml"})
+    basic_docker_compose = IO.read("test/fixtures/docker/docker-compose.txt")
+    prepare_ssh_session(cmd_get_docker_compose, basic_docker_compose)
+  end
+
+  def prepare_front_container(dep_method, website, website_location, response = "")
+    options = { 
+      in_port: 80,
+      website: website,
+      website_location: website_location,
+      ensure_exit_code: 0,
+      limit_resources: true
+    }
+
+    prepare_ssh_session(dep_method.front_container(options), response)
+  end
+
+  def prepare_docker_compose(dep_method, front_container_id, response = "")
+    cmd = dep_method.docker_compose({ front_container_id: front_container_id })
+    prepare_ssh_session(cmd, response)
+  end
+
+  def expect_global_container(dep_method)
+    cmd = dep_method.global_containers({})
+    prepare_ssh_session(cmd, IO.read("test/fixtures/docker/global_containers.txt"))
+  end
+
   def default_user
     User.find_by email: "myadmin@thisisit.com"
   end

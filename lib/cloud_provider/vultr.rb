@@ -18,6 +18,10 @@ module CloudProvider
       "ssh"
     end
 
+    def limit_resources?
+      false
+    end
+
     def type
       Vultr::TYPE
     end

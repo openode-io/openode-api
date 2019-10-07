@@ -62,50 +62,114 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
   end
 
   test "/instances/:instance_id/restart should not allow when user not activated" do
-    website = Website.find_by! site_name: "testsite"
+    dep_method = prepare_default_deployment_method
+
+    website = default_website
     website.user.activated = false
     website.user.save
 
+    prepare_default_ports
+
     post "/instances/testsite/restart", 
       as: :json, 
       params: base_params,
       headers: default_headers_auth
 
     assert_response :success
-    # assert_includes response.parsed_body["error"], "User account not yet activated"
+
+    prepare_default_kill_all(dep_method)
+
+    assert_scripted do
+      begin_ssh
+      run_deployer_job
+
+      deployment = website.deployments.last
+      website.reload
+
+      assert_equal website.status, Website::STATUS_OFFLINE
+      assert_equal deployment.status, Deployment::STATUS_FAILED
+      assert_equal deployment.result["steps"].length, 4 # global, 2 kills, finalize
+
+      assert_includes deployment.result["errors"][0]["title"], "User account not yet activated"
+    end
   end
 
   test "/instances/:instance_id/restart should not allow when user suspended" do
-    website = Website.find_by! site_name: "testsite"
+    dep_method = prepare_default_deployment_method
+
+    website = default_website
     website.user.suspended = true
     website.user.save
+
+    prepare_default_ports
 
     post "/instances/testsite/restart", 
       as: :json, 
       params: base_params,
       headers: default_headers_auth
 
-    assert_response :success
-    # assert_includes response.parsed_body["error"], "User suspended"
+    prepare_default_kill_all(dep_method)
+
+    assert_scripted do
+      begin_ssh
+      run_deployer_job
+
+      deployment = website.deployments.last
+      website.reload
+
+      assert_equal website.status, Website::STATUS_OFFLINE
+      assert_equal deployment.status, Deployment::STATUS_FAILED
+      assert_equal deployment.result["steps"].length, 4 # global, 2 kills, finalize
+
+      assert_includes deployment.result["errors"][0]["title"], "User suspended"
+    end
   end
 
-  test "/instances/:instance_id/restart" do
-    set_dummy_secrets_to(LocationServer.all)
-
+  test "/instances/:instance_id/restart - happy path" do
+    dep_method = prepare_default_deployment_method
     website = default_website
+    website.crontab = ""
+    website.save
+    website_location = default_website_location
 
-    post "/instances/#{website.site_name}/restart", 
+    prepare_default_ports
+    website.reload
+    website_location.reload
+
+    post "/instances/testsite/restart", 
       as: :json, 
       params: base_params,
       headers: default_headers_auth
 
-    #job = Delayed::Job.where("handler LIKE ?", "%#{"DeploymentMethod::Deployer"}%").first
+    prepare_get_docker_compose(dep_method, website)
+    prepare_ssh_session(dep_method.prepare_dind_compose_image, "empty")
+    expect_global_container(dep_method)
+    prepare_ssh_session(dep_method.kill_global_container({ id: "b3621dd9d4dd" }), "killed b3621dd9d4dd")
+    prepare_front_container(dep_method, website, website_location, "")
+    expect_global_container(dep_method)
 
-    #puts "job ? #{job.inspect}"
-    #Delayed::Job.last.invoke_job
+    prepare_docker_compose(dep_method, "b3621dd9d4dd", "")
+    prepare_ssh_session(dep_method.ps( { front_container_id: "b3621dd9d4dd" }), 
+      IO.read("test/fixtures/docker/docker-compose-ps.txt"))
 
-    #assert_response :success
-    #assert_includes response.parsed_body["error"], "User suspended"
+    #prepare_ssh_session(dep_method.instance_up_cmd({ website_location: website_location }), "")
+    
+    expect_global_container(dep_method)
+    prepare_ssh_session(dep_method.kill_global_container({ id: "32bfe26a2712" }), "killed 32bfe26a2712")
+
+    assert_scripted do
+      begin_ssh
+      run_deployer_job
+
+      deployment = website.deployments.last
+      website.reload
+
+      assert_equal website.status, Website::STATUS_ONLINE
+      assert_equal deployment.status, Deployment::STATUS_SUCCESS
+      assert_equal deployment.result["steps"].length, 16 # global, 2 kills, finalize
+
+      assert_equal deployment.result["errors"].length, 0
+    end
   end
 
 end

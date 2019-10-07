@@ -18,7 +18,10 @@ module DeploymentMethod
 			    cmd_name: "initialization", options: { is_complex: true }
 			  },
 			  {
-			    cmd_name: "launch", options: { is_complex: true }
+			    cmd_name: "launch", options: {
+			    	is_complex: true,
+			    	limit_resources: runner.cloud_provider.limit_resources?
+			    }
 			  },
 			  {
 			    cmd_name: "verify_instance_up", options: { is_complex: true }

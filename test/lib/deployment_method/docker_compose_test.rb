@@ -164,11 +164,6 @@ services:
     assert_equal Remote::Sftp.get_test_uploaded_files.length, 0
   end
 
-  def expect_global_container(dep_method)
-    cmd = dep_method.global_containers({})
-    prepare_ssh_session(cmd, IO.read("test/fixtures/docker/global_containers.txt"))
-  end
-
   test "parse_global_containers" do
     set_dummy_secrets_to(LocationServer.all)
     website = default_website
@@ -229,10 +224,8 @@ services:
 
   def docker_compose_method(website = default_website, website_location = default_website_location)
     configs = dummy_ssh_configs
-    puts "website ? #{default_website}"
     configs[:website] = website
     configs[:website_location] = website_location
-    puts "configs #{configs.inspect}"
 
     runner = DeploymentMethod::Runner.new("docker", "cloud", configs)
     runner.get_deployment_method
@@ -305,9 +298,7 @@ services:
     website_location = default_website_location
     dep_method = docker_compose_method
     
-    cmd_get_docker_compose = dep_method.get_file({ repo_dir: website.repo_dir, file: "docker-compose.yml"})
-    basic_docker_compose = IO.read("test/fixtures/docker/docker-compose.txt")
-    prepare_ssh_session(cmd_get_docker_compose, basic_docker_compose)
+    prepare_get_docker_compose(dep_method, website)
 
     assert_scripted do
       begin_ssh
@@ -324,7 +315,6 @@ services:
     
     cmd_get_docker_compose = dep_method.get_file({ repo_dir: website.repo_dir, file: "docker-compose.yml"})
     prepare_ssh_session(dep_method.prepare_dind_compose_image, "empty")
-    prepare_ssh_session("true", "empty")
 
     assert_scripted do
       begin_ssh
@@ -344,14 +334,15 @@ services:
     prepare_ssh_session(dep_method.kill_global_container({ id: "cc2304677be0" }), "good")
 
     cmd_front_container = 
-      dep_method.front_container({ website: website, website_location: website_location, in_port: 80 })
+      dep_method.front_container({ website: website, website_location: website_location, 
+        in_port: 80, limit_resources: true })
     prepare_ssh_session(cmd_front_container, "ok")
     expect_global_container(dep_method)
     prepare_ssh_session(dep_method.docker_compose({ front_container_id: "cc2304677be0" }), "ok")
 
     assert_scripted do
       begin_ssh
-      dep_method.launch({ website: website, website_location: website_location })
+      dep_method.launch({ website: website, website_location: website_location, limit_resources: true })
 
       website.reload
 
@@ -374,26 +365,6 @@ services:
 
       assert_equal result, true
     end
-  end
-
-  test "verify_instance_up" do
-    website = default_website
-    website.container_id = "cc2304677be0"
-    website.save
-    dep_method = docker_compose_method
-
-    dep_method.verify_instance_up({ website: website, website_location: default_website_location })
-
-
-    #prepare_ssh_session(dep_method.ps( { front_container_id: "cc2304677be0" }), 
-    #  IO.read("test/fixtures/docker/docker-compose-ps.txt"))
-
-    #assert_scripted do
-    #  begin_ssh
-    #  result = dep_method.verify_can_deploy({ website: website, website_location: default_website_location })
-
-    #  assert_equal result, true
-    #end
   end
 
   test "instance_up? with skip port check" do

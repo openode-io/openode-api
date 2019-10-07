@@ -19,6 +19,14 @@ module DeploymentMethod
       })
     end
 
+    def deployment_method
+      @deployment_method
+    end
+
+    def cloud_provider
+      @cloud_provider
+    end
+
     def terminate
       # will close the SSH connection if any
       @ssh.close if @ssh

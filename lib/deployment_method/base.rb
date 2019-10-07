@@ -48,6 +48,7 @@ module DeploymentMethod
 
       port_info = port_info_for_new_deployment(website_location)
       url = "http://localhost:#{port_info[:port]}/"
+      
       "curl --insecure --max-time 15 --connect-timeout 5 #{url} "
     end
 
@@ -63,6 +64,7 @@ module DeploymentMethod
       else
         return false unless node_available?(options)
 
+        puts "what instance up"
         result_up_cmd = ex("instance_up_cmd", options)
 
         result_up_cmd && result_up_cmd[:exit_code] == 0
@@ -150,6 +152,7 @@ module DeploymentMethod
           end
         end
 
+        puts "result -> #{result.inspect}"
         break if result && result[:exit_code] == 0
 
         if options[:retry]
