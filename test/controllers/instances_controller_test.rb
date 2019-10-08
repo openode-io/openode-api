@@ -219,6 +219,31 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # reload with docker compose internal
+  test "/instances/:instance_id/reload with internal" do
+    dep_method = prepare_default_deployment_method
+    set_dummy_secrets_to(LocationServer.all)
+    prepare_default_ports
+
+    prepare_ssh_session(dep_method.down({ front_container_id: "123456789" }), "123456789")
+    prepare_ssh_session(dep_method.docker_compose({ front_container_id: "123456789" }), "123456789")
+
+    assert_scripted do
+      begin_ssh
+
+      post "/instances/testsite/reload?location_str_id=canada", 
+        as: :json,
+        params: { },
+        headers: default_headers_auth
+
+      Delayed::Job.first.invoke_job
+
+      assert_response :success
+      assert_equal response.parsed_body["result"], "success"
+      assert_equal Deployment.last.status, Deployment::STATUS_SUCCESS
+    end
+  end
+
   # /erase-all with docker compose
   test "/instances/:instance_id/erase-all typical scenario" do
     set_dummy_secrets_to(LocationServer.all)

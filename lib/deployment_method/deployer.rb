@@ -10,7 +10,7 @@ module DeploymentMethod
   			"deployment-id = #{runner.deployment.id}...")
 
   		begin
-			runner.execute([
+			runner.multi_steps.execute([
 			  {
 			    cmd_name: "verify_can_deploy", options: { is_complex: true }
 			  },

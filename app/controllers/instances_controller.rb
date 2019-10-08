@@ -15,7 +15,7 @@ class InstancesController < ApplicationController
   before_action :check_minimum_cli_version
   after_action :record_website_event
 
-  before_action only: [:logs, :cmd] do
+  before_action only: [:logs, :cmd, :reload] do
     requires_status_in [Website::STATUS_ONLINE]
   end
 
@@ -118,6 +118,13 @@ class InstancesController < ApplicationController
     @runner.execute([{ cmd_name: "stop", options: { is_complex: true } }])
 
     json({ result: "success" })
+  end
+
+  def reload
+    @runner.delay.execute([{ cmd_name: "reload", options: { is_complex: true } }])
+    @website_event_obj = { title: "instance-reload" }
+
+    json({ result: "success", msg: "operation in progress" })
   end
 
   def docker_compose

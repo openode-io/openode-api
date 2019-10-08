@@ -17,6 +17,9 @@ module DeploymentMethod
         website_location: @website_location,
         status: Deployment::STATUS_RUNNING
       })
+
+      self.deployment.status = Deployment::STATUS_SUCCESS
+      self.deployment.save
     end
 
     def deployment_method
@@ -25,6 +28,13 @@ module DeploymentMethod
 
     def cloud_provider
       @cloud_provider
+    end
+
+    def multi_steps
+      self.deployment.status = Deployment::STATUS_RUNNING
+      self.deployment.save
+
+      self
     end
 
     def terminate

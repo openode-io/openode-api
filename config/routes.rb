@@ -38,7 +38,8 @@ Rails.application.routes.draw do
     post '/:site_name/sendCompressedFile', to: 'instances#send_compressed_file'
     delete '/:site_name/deleteFiles', to: 'instances#delete_files'
     post '/:site_name/cmd', to: 'instances#cmd'
-    post '/:site_name/stop', to: 'instances#stop' # TODO not finished
+    post '/:site_name/stop', to: 'instances#stop'
+    post '/:site_name/reload', to: 'instances#reload'
     post '/:site_name/restart', to: 'instances#restart'
     get '/:site_name/logs', to: 'instances#logs'
     post '/:site_name/erase-all', to: 'instances#erase_all'

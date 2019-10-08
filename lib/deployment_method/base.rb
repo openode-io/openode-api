@@ -45,7 +45,7 @@ module DeploymentMethod
     def stop(options = {})
       website, website_location = get_website_fields(options)
 
-      self.runner.deployment_method.stop(options)
+      self.runner.deployment_method.do_stop(options)
 
       website.change_status!(Website::STATUS_OFFLINE)
     end

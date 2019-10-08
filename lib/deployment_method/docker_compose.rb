@@ -131,11 +131,20 @@ module DeploymentMethod
     end
 
     # stop
-    def stop(options = {})
+    def do_stop(options = {})
       website, website_location = get_website_fields(options)
 
       kill_global_containers_by_ports({ ports: website_location.ports })
+    end
 
+    # reload
+    def reload(options = {})
+      website, website_location = get_website_fields(options)
+
+      docker_compose_options = { front_container_id: website.container_id }
+
+      ex("down", docker_compose_options)
+      ex("docker_compose", docker_compose_options)
     end
 
     def front_crontainer_name(options = {})
@@ -169,6 +178,12 @@ module DeploymentMethod
       assert options[:front_container_id]
 
       "docker exec #{options[:front_container_id]} docker-compose up -d"
+    end
+
+    def down(options = {})
+      assert options[:front_container_id]
+
+      "docker exec #{options[:front_container_id]} docker-compose down"
     end
 
     def ps(options = {})
