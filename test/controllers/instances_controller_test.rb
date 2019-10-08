@@ -166,7 +166,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
   test "/instances/:instance_id/cmd with subdomain" do
     set_dummy_secrets_to(LocationServer.all)
 
-    prepare_ssh_session("docker exec 123456789 docker-compose exec -T  www ls\\ -la", "hellooutput")
+    prepare_ssh_session("docker exec 123456789 docker-compose exec -T  www ls -la", "hellooutput")
 
     assert_scripted do
       begin_ssh

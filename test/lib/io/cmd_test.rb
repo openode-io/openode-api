@@ -5,6 +5,10 @@ class LibIoCmdTest < ActiveSupport::TestCase
     assert_equal Io::Cmd.sanitize_input_cmd("hell'oworld"), "hell\\\'oworld"
   end
 
+  test "sanitize input, allow spaces" do
+    assert_equal Io::Cmd.sanitize_input_cmd("hell oworld"), "hell oworld"
+  end
+
   test "sanitize input cmd with double quote" do
     assert_equal Io::Cmd.sanitize_input_cmd("hell\"\"oworld"), "hell\\\"\\\"oworld"
   end
