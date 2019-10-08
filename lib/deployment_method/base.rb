@@ -58,14 +58,14 @@ module DeploymentMethod
 
     def instance_up?(options = {})
       website = options[:website]
+      website_location = options[:website_location]
 
       if website.has_skip_port_check?
         node_available?(options)
       else
         return false unless node_available?(options)
 
-        puts "what instance up"
-        result_up_cmd = ex("instance_up_cmd", options)
+        result_up_cmd = ex("instance_up_cmd", { website_location: website_location })
 
         result_up_cmd && result_up_cmd[:exit_code] == 0
       end
@@ -80,21 +80,24 @@ module DeploymentMethod
         max_build_duration = website.max_build_duration
 
         while Time.now - t_started < max_build_duration
+          Rails.logger.info("deployment duration #{Time.now - t_started}/#{max_build_duration}")
+
           is_up = instance_up?(options)
           break if is_up
+          break if ENV["RAILS_ENV"] == "test"
           sleep 2
         end
 
         self.error!("Max build duration reached (#{max_build_duration})") unless is_up
       rescue => ex
-        Rails.logger.info("Issue to verify instance up #{ex}")
+        Ex::Logger.info(ex, "Issue to verify instance up")
         is_up = false
       end
 
       website.valid = is_up
       website.http_port_available = is_up
       website.save!
-      website.change_status!(Website::STATUS_ONLINE)
+      website.change_status!(Website::STATUS_ONLINE) if is_up
     end
 
     def port_info_for_new_deployment(website_location)

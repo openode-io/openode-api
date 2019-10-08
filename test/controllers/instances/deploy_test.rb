@@ -152,7 +152,7 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
     prepare_ssh_session(dep_method.ps( { front_container_id: "b3621dd9d4dd" }), 
       IO.read("test/fixtures/docker/docker-compose-ps.txt"))
 
-    #prepare_ssh_session(dep_method.instance_up_cmd({ website_location: website_location }), "")
+    prepare_ssh_session(dep_method.instance_up_cmd({ website_location: website_location }), "")
     
     expect_global_container(dep_method)
     prepare_ssh_session(dep_method.kill_global_container({ id: "32bfe26a2712" }), "killed 32bfe26a2712")
@@ -172,4 +172,96 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "/instances/:instance_id/restart - not listening on proper port" do
+    dep_method = prepare_default_deployment_method
+    website = default_website
+    website.crontab = ""
+    website.save
+    website_location = default_website_location
+
+    prepare_default_ports
+    website.reload
+    website_location.reload
+
+    post "/instances/testsite/restart", 
+      as: :json, 
+      params: base_params,
+      headers: default_headers_auth
+
+    prepare_get_docker_compose(dep_method, website)
+    prepare_ssh_session(dep_method.prepare_dind_compose_image, "empty")
+    expect_global_container(dep_method)
+    prepare_ssh_session(dep_method.kill_global_container({ id: "b3621dd9d4dd" }), "killed b3621dd9d4dd")
+    prepare_front_container(dep_method, website, website_location, "")
+    expect_global_container(dep_method)
+
+    prepare_docker_compose(dep_method, "b3621dd9d4dd", "")
+    prepare_ssh_session(dep_method.ps( { front_container_id: "b3621dd9d4dd" }), 
+      IO.read("test/fixtures/docker/docker-compose-ps.txt"))
+
+    prepare_ssh_session(dep_method.instance_up_cmd({ website_location: website_location }), "", 1)
+    
+    expect_global_container(dep_method)
+
+    prepare_ssh_session(dep_method.kill_global_container({ id: "b3621dd9d4dd" }), "killed b3621dd9d4dd")
+    prepare_ssh_session(dep_method.kill_global_container({ id: "32bfe26a2712" }), "killed 32bfe26a2712")
+
+    assert_scripted do
+      begin_ssh
+
+      run_deployer_job
+
+      deployment = website.deployments.last
+      website.reload
+
+      assert_equal website.status, Website::STATUS_OFFLINE
+      assert_equal deployment.status, Deployment::STATUS_FAILED
+    end
+  end
+
+  test "/instances/:instance_id/restart - SKIP_PORT_CHECK" do
+    dep_method = prepare_default_deployment_method
+    website = default_website
+    website.crontab = ""
+    website.configs = {}
+    website.configs["SKIP_PORT_CHECK"] = "true"
+    website.save
+    website_location = default_website_location
+
+    prepare_default_ports
+    website.reload
+    website_location.reload
+
+    post "/instances/testsite/restart", 
+      as: :json, 
+      params: base_params,
+      headers: default_headers_auth
+
+    prepare_get_docker_compose(dep_method, website)
+    prepare_ssh_session(dep_method.prepare_dind_compose_image, "empty")
+    expect_global_container(dep_method)
+    prepare_ssh_session(dep_method.kill_global_container({ id: "b3621dd9d4dd" }), "killed b3621dd9d4dd")
+    prepare_front_container(dep_method, website, website_location, "")
+    expect_global_container(dep_method)
+
+    prepare_docker_compose(dep_method, "b3621dd9d4dd", "")
+    prepare_ssh_session(dep_method.ps( { front_container_id: "b3621dd9d4dd" }), 
+      IO.read("test/fixtures/docker/docker-compose-ps.txt"))
+    
+    expect_global_container(dep_method)
+
+    prepare_ssh_session(dep_method.kill_global_container({ id: "32bfe26a2712" }), "killed 32bfe26a2712")
+
+    assert_scripted do
+      begin_ssh
+
+      run_deployer_job
+
+      deployment = website.deployments.last
+      website.reload
+
+      assert_equal website.status, Website::STATUS_ONLINE
+      assert_equal deployment.status, Deployment::STATUS_SUCCESS
+    end
+  end
 end

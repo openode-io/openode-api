@@ -46,7 +46,7 @@ module DeploymentMethod
 			runner.deployment.failed!
 		end
 
-  		Rails.logger.info("Finished deployment for #{website.site_name}...")
+  		Rails.logger.info("Finished deployment for #{website.site_name}, status=#{runner.deployment.status}...")
   	end
 
   end
