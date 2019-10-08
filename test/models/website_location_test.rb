@@ -209,6 +209,30 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert_equal website_location.second_port, second_port
   end
 
+  # ports
+  test "all ports, all defined" do
+    website_location = default_website_location
+
+    website_location.port = 12345
+    website_location.second_port = 12346
+    website_location.save
+
+    assert_equal website_location.ports.length, 2
+    assert_equal website_location.ports[0], 12345
+    assert_equal website_location.ports[1], 12346
+  end
+
+  test "all ports, second port missing" do
+    website_location = default_website_location
+
+    website_location.port = 12345
+    website_location.second_port = nil
+    website_location.save
+
+    assert_equal website_location.ports.length, 1
+    assert_equal website_location.ports[0], 12345
+  end
+
   # internal domains
   test "INTERNAL_DOMAINS" do
     assert_equal WebsiteLocation.internal_domains().length, 2

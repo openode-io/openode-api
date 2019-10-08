@@ -115,19 +115,7 @@ class InstancesController < ApplicationController
   end
 
   def stop
-
-    # TODO
-
-    @runner.execute([
-      {
-        cmd_name: "stop", options: {
-          website: @website.clone
-        } 
-      }
-    ])
-
-    # change the status
-    @website.change_status!(Website::STATUS_OFFLINE)
+    @runner.execute([{ cmd_name: "stop", options: { is_complex: true } }])
 
     json({ result: "success" })
   end

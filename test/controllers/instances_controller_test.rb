@@ -197,6 +197,28 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # stop with docker compose internal
+  test "/instances/:instance_id/stop with internal" do
+    dep_method = prepare_default_deployment_method
+    set_dummy_secrets_to(LocationServer.all)
+    prepare_default_ports
+
+    expect_global_container(dep_method)
+    prepare_ssh_session(dep_method.kill_global_container({ id: "b3621dd9d4dd" }), "killed b3621dd9d4dd")
+    prepare_ssh_session(dep_method.kill_global_container({ id: "32bfe26a2712" }), "killed 32bfe26a2712")
+
+    assert_scripted do
+      begin_ssh
+      post "/instances/testsite/stop?location_str_id=canada", 
+        as: :json,
+        params: { },
+        headers: default_headers_auth
+
+      assert_response :success
+      assert_equal response.parsed_body["result"], "success"
+    end
+  end
+
   # /erase-all with docker compose
   test "/instances/:instance_id/erase-all typical scenario" do
     set_dummy_secrets_to(LocationServer.all)

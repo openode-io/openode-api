@@ -130,6 +130,14 @@ module DeploymentMethod
       # TODO add dock compose logs
     end
 
+    # stop
+    def stop(options = {})
+      website, website_location = get_website_fields(options)
+
+      kill_global_containers_by_ports({ ports: website_location.ports })
+
+    end
+
     def front_crontainer_name(options = {})
       assert options[:website]
       assert options[:port_info]

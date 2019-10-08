@@ -131,6 +131,11 @@ class WebsiteLocation < ApplicationRecord
     self.save!
   end
 
+  def ports
+    [self.port, self.second_port]
+      .select { |p| p.present? }
+  end
+
   def cmd(str_cmd, opts = {})
 
   end

@@ -42,6 +42,14 @@ module DeploymentMethod
       raise "must be implemented in child class"
     end
 
+    def stop(options = {})
+      website, website_location = get_website_fields(options)
+
+      self.runner.deployment_method.stop(options)
+
+      website.change_status!(Website::STATUS_OFFLINE)
+    end
+
     def instance_up_cmd(options = {})
       require_fields([:website_location], options)
       website_location = options[:website_location]
