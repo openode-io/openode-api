@@ -33,7 +33,7 @@ class Website < ApplicationRecord
 
   validates_inclusion_of :type, :in => %w( nodejs docker )
   validates_inclusion_of :domain_type, :in => %w( subdomain custom_domain )
-  validates_inclusion_of :cloud_type, :in => %w( cloud "private-cloud" )
+  validates_inclusion_of :cloud_type, :in => %w( cloud private-cloud )
   validates_inclusion_of :status, :in => STATUSES
 
   def locations
@@ -141,6 +141,10 @@ class Website < ApplicationRecord
     plans.find { |p| [p[:id], p[:internal_id]].include?(self.account_type) }
   end
 
+  def has_free_sandbox?
+    self.account_type == "free"
+  end
+
   def change_status!(new_status)
     logger.info("website #{site_name} changing status to #{new_status}")
     raise "Wrong status #{new_status}" unless STATUSES.include?(new_status)
@@ -160,12 +164,6 @@ class Website < ApplicationRecord
 
   def online?
     self.status == STATUS_ONLINE
-  end
-
-  def has_credits?
-
-    # TODO
-
   end
 
   def add_storage_area(storage_area)

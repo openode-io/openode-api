@@ -6,11 +6,22 @@ class WebsiteLocation < ApplicationRecord
   belongs_to :location_server
   has_many :deployments
 
+  validate :validate_nb_cpus
+
   validates :extra_storage, numericality: {
     only_integer: true,
     greater_than_or_equal_to: 0,
     less_than_or_equal_to: 10
   }
+
+  def validate_nb_cpus
+    max_cpus = (self.location_server.cpus * 0.75).to_i
+    max_cpus = 1 if max_cpus < 1
+
+    if self.nb_cpus <= 0 || nb_cpus > max_cpus
+      errors.add(:nb_cpus, "Invalid value, valid ones: [1..#{max_cpus}]")
+    end
+  end
 
   def self.internal_domains
     CloudProvider::Manager.instance.internal_domains

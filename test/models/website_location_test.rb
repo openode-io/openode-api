@@ -240,4 +240,32 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert_includes WebsiteLocation.internal_domains, "openode.dev"
   end
 
+  # nb cpus
+  test "nb_cpus invalid if < 1" do
+    wl = default_website_location
+
+    wl.nb_cpus = 0
+    wl.save
+
+    assert_equal wl.valid?, false
+  end
+
+  test "nb_cpus invalid if > 0.75 of location server cpus" do
+    wl = default_website_location
+
+    wl.nb_cpus = 7
+    wl.save
+
+    assert_equal wl.valid?, false
+  end
+
+  test "nb_cpus valid if < 0.75 of location server cpus" do
+    wl = default_website_location
+
+    wl.nb_cpus = 5
+    wl.save
+
+    assert_equal wl.valid?, true
+  end
+
 end

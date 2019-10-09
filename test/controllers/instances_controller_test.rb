@@ -336,4 +336,48 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
       assert_response :bad_request
     end
   end
+
+  # set cpus
+  test "/instances/:instance_id/set-cpus happy path" do
+    website = default_website
+    website_location = default_website_location
+
+    post "/instances/testsite/set-cpus?location_str_id=canada", 
+          as: :json,
+          params: { nb_cpus: "2" },
+          headers: default_headers_auth
+
+    website_location.reload
+
+    assert_response :success
+    assert_equal website_location.nb_cpus, 2
+    assert_equal Delayed::Job.first != nil, true
+  end
+
+  test "/instances/:instance_id/set-cpus fail if free instance" do
+    website = default_website
+    website.account_type = "free"
+    website.save!
+    website_location = default_website_location
+
+    post "/instances/testsite/set-cpus?location_str_id=canada", 
+          as: :json,
+          params: { nb_cpus: "2" },
+          headers: default_headers_auth
+
+    assert_response :bad_request
+  end
+
+  test "/instances/:instance_id/set-cpus fail if non cloud instance" do
+    website = default_website
+    website.cloud_type = "private-cloud"
+    website.save!
+
+    post "/instances/testsite/set-cpus?location_str_id=canada", 
+          as: :json,
+          params: { nb_cpus: "2" },
+          headers: default_headers_auth
+
+    assert_response :bad_request
+  end
 end
