@@ -148,6 +148,16 @@ class Website < ApplicationRecord
     self.save!
   end
 
+  def change_plan!(account_type)
+    logger.info("website #{site_name} changing plan to #{account_type}")
+    self.account_type = account_type
+
+    # to refactor
+    self.cloud_type = account_type.include?("-") ? "private-cloud" : "cloud"
+
+    self.save!
+  end
+
   def online?
     self.status == STATUS_ONLINE
   end

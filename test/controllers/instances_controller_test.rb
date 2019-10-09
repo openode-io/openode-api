@@ -290,4 +290,50 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body.length, 7
     assert_equal response.parsed_body[0]["id"], "sandbox"
   end
+
+  # /set-plan
+  test "/instances/:instance_id/set-plan to a new one" do
+    dep_method = prepare_default_deployment_method
+    set_dummy_secrets_to(LocationServer.all)
+    prepare_default_ports
+
+    website = default_website
+
+    expect_global_container(dep_method)
+    prepare_ssh_session(dep_method.kill_global_container({ id: "b3621dd9d4dd" }), "killed b3621dd9d4dd")
+    prepare_ssh_session(dep_method.kill_global_container({ id: "32bfe26a2712" }), "killed 32bfe26a2712")
+
+    assert_scripted do
+      begin_ssh
+      post "/instances/testsite/set-plan?location_str_id=canada", 
+          as: :json,
+          params: { plan: "100-MB" },
+          headers: default_headers_auth
+
+      assert_response :success
+
+      Delayed::Job.first.invoke_job
+      website.reload
+      assert_equal website.account_type, "second"
+      assert_equal website.cloud_type, "cloud"
+    end
+  end
+
+  test "/instances/:instance_id/set-plan to an invalid one should fail" do
+    dep_method = prepare_default_deployment_method
+    set_dummy_secrets_to(LocationServer.all)
+    prepare_default_ports
+
+    website = default_website
+
+    assert_scripted do
+      begin_ssh
+      post "/instances/testsite/set-plan?location_str_id=canada", 
+          as: :json,
+          params: { plan: "100000-MB" },
+          headers: default_headers_auth
+
+      assert_response :bad_request
+    end
+  end
 end

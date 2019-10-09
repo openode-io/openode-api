@@ -39,6 +39,22 @@ class InstancesController < ApplicationController
     json(@website_location.available_plans)
   end
 
+  def set_plan
+    plan_id = params["plan"]
+
+    all_plans = @website_location.available_plans
+    plan = all_plans.find { |p| [p[:id], p[:internal_id]].include?(plan_id) }
+    raise ApplicationRecord::ValidationError.new("Unavailable plan") unless plan
+
+    @website.change_plan!(plan[:internal_id])
+
+    @website_event_obj = { title: "change-plan", new_value: plan[:id], original_value: @website.account_type }
+
+    @runner.delay.execute([{ cmd_name: "stop", options: { is_complex: true } }])
+
+    json({ result: "success", msg: "Instance will stop, make sure to redeploy it" })
+  end
+
   def changes
     raise ApplicationRecord::ValidationError.new("Missing files") unless params["files"]
     files_client = JSON.parse(params["files"])
