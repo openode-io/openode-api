@@ -99,7 +99,7 @@ module DeploymentMethod
 
       Rails.logger.info("Front container for #{website.site_name} is #{front_container.inspect}")
 
-      sleep 2
+      sleep 2 if ENV["RAILS_ENV"] != "test"
 
       options_docker_compose = { 
         front_container_id: front_container[:ID],
@@ -327,6 +327,12 @@ module DeploymentMethod
     def ensure_remote_repository(options = {})
       require_fields([:path], options)
       "mkdir -p #{options[:path]}"
+    end
+
+    def clear_repository(options = {})
+      require_fields([:website], options)
+
+      "rm -rf #{options[:website].repo_dir}"
     end
 
     def uncompress_remote_archive(options = {})

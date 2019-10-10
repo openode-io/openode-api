@@ -39,6 +39,21 @@ class InstancesController < ApplicationController
     json(@website)
   end
 
+  def destroy
+    @website.website_locations.each do |website_location|
+      runner = website_location.prepare_runner
+
+      runner.execute([
+        { cmd_name: "stop", options: { is_complex: true } },
+        { cmd_name: "clear_repository" }
+      ])
+    end
+
+    @website.destroy
+
+    json({ result: "success" })
+  end
+
   def plan
     json(@website.plan)
   end

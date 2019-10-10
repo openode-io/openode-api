@@ -380,4 +380,35 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
   end
+
+  # DELETE /sitename
+  test "DEL /instances/:instance_id/" do
+    dep_method = prepare_default_deployment_method
+    set_dummy_secrets_to(LocationServer.all)
+    prepare_default_ports
+
+    website = default_website
+    website_location = default_website_location
+
+    expect_global_container(dep_method)
+    prepare_ssh_session(dep_method.kill_global_container({ id: "b3621dd9d4dd" }), "killed b3621dd9d4dd")
+    prepare_ssh_session(dep_method.kill_global_container({ id: "32bfe26a2712" }), "killed 32bfe26a2712")
+    prepare_ssh_session(dep_method.clear_repository({ website: website }), "")
+
+    assert_scripted do
+      begin_ssh
+
+      website_id = website.id
+      website_location_id = website_location.id
+
+      delete "/instances/testsite/?location_str_id=canada", 
+          as: :json,
+          headers: default_headers_auth
+
+      assert_response :success
+
+      assert_nil Website.find_by(id: website_id)
+      assert_nil WebsiteLocation.find_by(id: website_location_id)
+    end
+  end
 end
