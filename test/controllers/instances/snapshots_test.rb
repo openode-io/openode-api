@@ -3,7 +3,7 @@ require 'test_helper'
 
 class SnapshotsTest < ActionDispatch::IntegrationTest
 
-  test "/instances/:instance_id/storage-areas" do
+  test "/instances/:instance_id/snapshots/id" do
     w = Website.find_by site_name: "testsite"
     snapshot = w.snapshots.first
 
@@ -16,6 +16,21 @@ class SnapshotsTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body["name"], snapshot.name
     expected_url = "https://127.0.0.1/snapshots/testsite/#{snapshot.id}.tar.gz"
     assert_equal response.parsed_body["url"], expected_url
+  end
+
+  test "/instances/:instance_id/snapshots/ listing" do
+    website = default_website
+    snapshot = website.snapshots.first
+
+    get "/instances/testsite/snapshots",
+      as: :json,
+      headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body.length, 1
+    assert_equal response.parsed_body[0]["id"], snapshot.id
+    assert_equal response.parsed_body[0]["name"], snapshot.name
   end
 
   test "POST /instances/:instance_id/snapshots/create" do

@@ -2,10 +2,12 @@ class SnapshotsController < InstancesController
 
   before_action :requires_cloud_plan, only: [:create]
 
-  def show
-    snapshot = @website.snapshots.find_by! id: params["id"]
+  def index
+    json(@website.snapshots.order(created_at: :desc).limit(100))
+  end
 
-    json(snapshot)
+  def show
+    json(@website.snapshots.find_by! id: params["id"])
   end
 
   def create

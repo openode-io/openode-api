@@ -49,6 +49,7 @@ Rails.application.routes.draw do
     post '/:site_name/add-storage-area', to: 'storage_areas#add'
     post '/:site_name/del-storage-area', to: 'storage_areas#remove' # to refactor
 
+    get '/:site_name/snapshots/', to: 'snapshots#index'
     get '/:site_name/snapshots/:id', to: 'snapshots#show'
     post '/:site_name/snapshots/create', to: 'snapshots#create'
 
