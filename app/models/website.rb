@@ -4,6 +4,7 @@ class Website < ApplicationRecord
   serialize :configs, JSON
   serialize :dns, JSON
   serialize :storage_areas, JSON
+  serialize :data, JSON
 
   self.inheritance_column = :_type
 
@@ -197,6 +198,11 @@ class Website < ApplicationRecord
     end
 
     return true, ""
+  end
+
+  # credits related task updates and calculations
+  def spend_credits
+    
   end
 
   def normalized_storage_areas

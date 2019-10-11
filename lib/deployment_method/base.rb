@@ -45,7 +45,11 @@ module DeploymentMethod
     def stop(options = {})
       website, website_location = get_website_fields(options)
 
+      # stop based on the deployment method (ex. docker compose)
       self.runner.deployment_method.do_stop(options)
+
+      # stop based on the cloud provider
+      self.runner.cloud_provider.stop(options)
 
       website.change_status!(Website::STATUS_OFFLINE)
     end

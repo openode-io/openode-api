@@ -26,6 +26,22 @@ module CloudProvider
       Vultr::TYPE
     end
 
+    def stop(options = {})
+      # stopping an instance requires to kill the machine
+
+      website = options[:website]
+      website_location = options[:website_location]
+
+      instance_info = website.andand.data["privateCloudInfo"]
+
+      # make sure to destroy the machine:
+      if instance_info
+        sub_id = instance_info["SUBID"]
+
+        ::Vultr::Server.destroy(SUBID: sub_id)
+      end
+    end
+
     def available_locations
       # string.parameterize
       regions = ::Vultr::Regions.list

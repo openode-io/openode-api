@@ -22,6 +22,10 @@ module CloudProvider
       true
     end
 
+    def stop(options = {})
+      # nothing special to do
+    end
+
     def available_locations
       raise "Missing locations" unless @configs["locations"]
 

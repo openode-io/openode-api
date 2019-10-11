@@ -3,8 +3,10 @@ class ApplicationRecord < ActiveRecord::Base
 
   ValidationError = Class.new(StandardError)
 
+  before_destroy :destroy_secret!
+
   def vault
-    Vault.find_by ref_id: self.id
+    Vault.find_by ref_id: self.id, entity_type: self.class.name
   end
 
   def save_secret!(hash)
@@ -27,5 +29,11 @@ class ApplicationRecord < ActiveRecord::Base
     return nil unless self.vault
 
     JSON.parse(self.vault.data, :symbolize_names => true)
+  end
+
+  def destroy_secret!
+    existing_vault = self.vault
+
+    existing_vault.destroy if existing_vault
   end
 end

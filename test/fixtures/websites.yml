@@ -3,7 +3,6 @@
 one:
   user: one
   site_name: testsite
-  data: MyText
   pm2_info: MyText
   valid: false
   last_access_at: 2019-08-10 14:24:22
@@ -28,7 +27,6 @@ one:
 two:
   user: two
   site_name: testsite2
-  data: MyText
   pm2_info: MyText
   valid: false
   last_access_at: 2019-08-10 14:24:22
@@ -53,7 +51,6 @@ two:
 three:
   user: two
   site_name: www.what.is
-  data: MyText
   pm2_info: MyText
   valid: false
   last_access_at: 2019-08-10 14:24:22
@@ -78,7 +75,6 @@ three:
 with_private_cloud:
   user: one
   site_name: testprivatecloud
-  data: MyText
   pm2_info: MyText
   valid: false
   last_access_at: 2019-08-10 14:24:22
