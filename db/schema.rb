@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_10_05_013627) do
+ActiveRecord::Schema.define(version: 2019_10_11_133635) do
 
   create_table "collaborators", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "website_id"
@@ -21,15 +21,16 @@ ActiveRecord::Schema.define(version: 2019_10_05_013627) do
     t.index ["website_id"], name: "website_id_collaborators"
   end
 
-  create_table "credit_actions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
-    t.integer "user_id"
-    t.integer "website_id"
-    t.string "action_type", limit: 100
-    t.float "credits", limit: 53
-    t.timestamp "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.timestamp "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.index ["user_id"], name: "credit_actions_user_id"
-    t.index ["website_id"], name: "credit_actions_website_id"
+  create_table "credit_actions", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "website_id", null: false
+    t.string "action_type"
+    t.float "credits_spent"
+    t.float "credits_remaining"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_credit_actions_on_user_id"
+    t.index ["website_id"], name: "index_credit_actions_on_website_id"
   end
 
   create_table "delayed_jobs", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|

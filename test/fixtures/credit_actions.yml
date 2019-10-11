@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  website: one
+  action_type: consume
+  credits_spent: 1.5
+  credits_remaining: 1.5
+
+two:
+  user: two
+  website: two
+  action_type: consume
+  credits_spent: 1.5
+  credits_remaining: 1.5
