@@ -9,6 +9,15 @@ canada1:
   docker_snapshot: empty
   cloud_type: cloud
 
+canada-private-cloud:
+  location: canada
+  ip: 127.0.0.3
+  ram_mb: 10000
+  cpus: 8
+  disk_gb: 2000
+  docker_snapshot: empty
+  cloud_type: private-cloud
+
 usa1:
   location: usa
   ip: 127.0.0.2

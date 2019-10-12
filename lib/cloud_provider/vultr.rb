@@ -33,6 +33,8 @@ module CloudProvider
       website = options[:website]
       website_location = options[:website_location]
 
+      return unless website.data
+
       instance_info = website.andand.data["privateCloudInfo"]
 
       # make sure to destroy the machine:
@@ -54,6 +56,15 @@ module CloudProvider
 
         website.data.delete "privateCloudInfo"
         website.save
+      end
+
+      # destroy the server in the models
+      if website_location.location_server
+        location_server = website_location.location_server
+        website_location.location_server = nil
+        website_location.save
+        
+        location_server.destroy
       end
     end
 

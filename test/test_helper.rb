@@ -19,6 +19,9 @@ class ActiveSupport::TestCase
       {
         url: "https://api.vultr.com/v1/plans/list",
         method: :get,
+        with: {
+          body: {}
+        },
         content_type: "application/json",
         response_status: 200,
         response_path: "test/fixtures/http/cloud_provider/vultr/plans_list.json"
@@ -26,14 +29,38 @@ class ActiveSupport::TestCase
       {
         url: "https://api.vultr.com/v1/regions/list",
         method: :get,
+        with: {
+          body: {}
+        },
         content_type: "application/json",
         response_status: 200,
         response_path: "test/fixtures/http/cloud_provider/vultr/regions_list.json"
+      },
+      {
+        url: "https://api.vultr.com/v1/server/destroy",
+        method: :post,
+        with: {
+          body: {"SUBID"=>"mysubid1"}
+        },
+        content_type: "application/json",
+        response_status: 200,
+        response_path: "test/fixtures/http/cloud_provider/vultr/empty.json"
+      },
+      {
+        url: "https://api.vultr.com/v1/sshkey/destroy",
+        method: :post,
+        with: {
+          body: {"SSHKEYID"=>"mysshkeyid"}
+        },
+        content_type: "application/json",
+        response_status: 200,
+        response_path: "test/fixtures/http/cloud_provider/vultr/empty.json"
       }
     ]
 
     http_stubs.each do |http_stub|
       stub_request(http_stub[:method], http_stub[:url]).
+        with(body: http_stub[:with][:body]).
         to_return(status: http_stub[:response_status], 
           body: IO.read(http_stub[:response_path]), 
           headers: { content_type: http_stub[:content_type] })

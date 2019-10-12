@@ -3,7 +3,7 @@ require 'public_suffix'
 class WebsiteLocation < ApplicationRecord
   belongs_to :website
   belongs_to :location
-  belongs_to :location_server
+  belongs_to :location_server, optional: true
   has_many :deployments
 
   validate :validate_nb_cpus
@@ -15,10 +15,12 @@ class WebsiteLocation < ApplicationRecord
   }
 
   def validate_nb_cpus
+    return unless self.location_server
+
     max_cpus = (self.location_server.cpus * 0.75).to_i
     max_cpus = 1 if max_cpus < 1
 
-    if self.nb_cpus <= 0 || nb_cpus > max_cpus
+    if self.nb_cpus <= 0 || self.nb_cpus > max_cpus
       errors.add(:nb_cpus, "Invalid value, valid ones: [1..#{max_cpus}]")
     end
   end
