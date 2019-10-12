@@ -4,11 +4,10 @@ class CreditAction < ApplicationRecord
 
   validate :verify_enough_credits
 
-  TYPE_CONSUME = "consume"
   TYPE_CONSUME_PLAN = "consume-plan"
   TYPE_CONSUME_STORAGE = "consume-storage"
   TYPE_CONSUME_CPU = "consume-cpu"
-  ACTION_TYPES = [TYPE_CONSUME, TYPE_CONSUME_PLAN, TYPE_CONSUME_STORAGE, TYPE_CONSUME_CPU]
+  ACTION_TYPES = [TYPE_CONSUME_PLAN, TYPE_CONSUME_STORAGE, TYPE_CONSUME_CPU]
 
   validates_inclusion_of :action_type, :in => ACTION_TYPES
 
@@ -23,7 +22,6 @@ class CreditAction < ApplicationRecord
   		user: website.user,
   		website: website,
   		action_type: action_type,
-  		
   		credits_spent: credits_spent
   	})
 

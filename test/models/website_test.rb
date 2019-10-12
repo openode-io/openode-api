@@ -182,5 +182,60 @@ class WebsiteTest < ActiveSupport::TestCase
 
       assert_equal website.max_build_duration, 150
     end
+
+    # extra storage
+    test "extra storage with extra storage" do
+      website = default_website
+      wl = default_website_location
+      wl.extra_storage = 2
+      wl.save!
+
+      assert_equal website.total_extra_storage, 2
+      assert_equal website.has_extra_storage?, true
+      assert_equal website.extra_storage_credits_cost_per_hour, 2 * 100 * CloudProvider::Internal::COST_EXTRA_STORAGE_GB_PER_HOUR
+    end
+
+    test "extra storage without extra storage" do
+      website = default_website
+      wl = default_website_location
+      wl.extra_storage = 0
+      wl.save!
+
+      assert_equal website.total_extra_storage, 0
+      assert_equal website.has_extra_storage?, false
+      assert_equal website.extra_storage_credits_cost_per_hour, 0
+    end
+
+    # extra cpus
+    test "extra cpus with extra cpus" do
+      website = default_website
+      wl = default_website_location
+      wl.nb_cpus = 3
+      wl.save!
+
+      assert_equal website.total_extra_cpus, 2
+      assert_equal website.extra_cpus_credits_cost_per_hour, 2 * 100 * CloudProvider::Internal::COST_EXTRA_CPU_PER_HOUR
+    end
+
+    # spend credits
+    test "spend credits - plan only" do
+      website = default_website
+      website.credit_actions.destroy_all
+      wl = default_website_location
+      wl.nb_cpus = 1
+      wl.extra_storage = 0
+      wl.save!
+
+      website.spend_credits
+
+      cloud_provider = CloudProvider::Manager.instance.first_of_type("internal")
+      plan = website.plan
+
+      assert_equal website.credit_actions.reload.length, 1
+      ca = website.credit_actions.first
+
+      assert_equal ca.credits_spent.to_f.round(4), (plan[:cost_per_hour] * 100.0).to_f.round(4)
+      assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
+    end
   end
 end

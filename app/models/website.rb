@@ -13,6 +13,7 @@ class Website < ApplicationRecord
   has_many :events, foreign_key: :ref_id, class_name: :WebsiteEvent, dependent: :destroy
   has_many :snapshots
   has_many :deployments
+  has_many :credit_actions
 
   scope :custom_domain, -> { where(domain_type: "custom_domain") }
 
@@ -208,7 +209,7 @@ class Website < ApplicationRecord
     self.total_extra_storage > 0
   end
 
-  def extra_storage_cost_per_hour
+  def extra_storage_credits_cost_per_hour
     Website.cost_price_to_credits(
       total_extra_storage * CloudProvider::Internal::COST_EXTRA_STORAGE_GB_PER_HOUR
     )
@@ -218,8 +219,10 @@ class Website < ApplicationRecord
     self.website_locations.sum { |wl| (wl.nb_cpus || 1) - 1 }
   end
 
-  def extra_cpus_cost_per_hour
-    self.total_extra_cpus * CloudProvider::Internal::COST_EXTRA_CPU_PER_HOUR * 100
+  def extra_cpus_credits_cost_per_hour
+    Website.cost_price_to_credits(
+      self.total_extra_cpus * CloudProvider::Internal::COST_EXTRA_CPU_PER_HOUR
+    )
   end
 
   def self.cost_price_to_credits(price)
@@ -232,7 +235,29 @@ class Website < ApplicationRecord
 
     return unless current_plan
 
-    plan_credits_cost_per_hour = Website.cost_price_to_credits(current_plan[:cost_per_hour])
+    spendings = [
+      {
+        action_type: CreditAction::TYPE_CONSUME_PLAN,
+        credits_cost: Website.cost_price_to_credits(current_plan[:cost_per_hour])
+      },
+      {
+        action_type: CreditAction::TYPE_CONSUME_STORAGE,
+        credits_cost: self.extra_storage_credits_cost_per_hour
+      },
+      {
+        action_type: CreditAction::TYPE_CONSUME_CPU,
+        credits_cost: self.extra_cpus_credits_cost_per_hour
+      }
+    ]
+    
+    website, action_type, credits_spent, opts = {}
+
+    spendings.each do |spending|
+      if spending[:credits_cost] != 0
+        CreditAction.consume!(self, spending[:action_type], 
+          spending[:credits_cost], { with_user_update: true })
+      end
+    end
   end
 
   def normalized_storage_areas
