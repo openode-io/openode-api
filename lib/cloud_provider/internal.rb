@@ -3,6 +3,10 @@ module CloudProvider
   class Internal < Base
 
     TYPE = "cloud"
+    COST_EXTRA_STORAGE_GB_PER_MONTH = 0.13
+    COST_EXTRA_STORAGE_GB_PER_HOUR = COST_EXTRA_STORAGE_GB_PER_MONTH / (24*31)
+    COST_EXTRA_CPU = 5.00
+    COST_EXTRA_CPU_PER_HOUR = COST_EXTRA_CPU / (24 * 31)
 
     def initialize(configs = nil)
       @configs = configs

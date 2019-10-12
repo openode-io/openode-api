@@ -200,9 +200,39 @@ class Website < ApplicationRecord
     return true, ""
   end
 
+  def total_extra_storage
+    self.website_locations.sum { |wl| wl.extra_storage || 0 }
+  end
+
+  def has_extra_storage?
+    self.total_extra_storage > 0
+  end
+
+  def extra_storage_cost_per_hour
+    Website.cost_price_to_credits(
+      total_extra_storage * CloudProvider::Internal::COST_EXTRA_STORAGE_GB_PER_HOUR
+    )
+  end
+
+  def total_extra_cpus
+    self.website_locations.sum { |wl| (wl.nb_cpus || 1) - 1 }
+  end
+
+  def extra_cpus_cost_per_hour
+    self.total_extra_cpus * CloudProvider::Internal::COST_EXTRA_CPU_PER_HOUR * 100
+  end
+
+  def self.cost_price_to_credits(price)
+    price * 100.0
+  end
+
   # credits related task updates and calculations
   def spend_credits
-    
+    current_plan = self.plan
+
+    return unless current_plan
+
+    plan_credits_cost_per_hour = Website.cost_price_to_credits(current_plan[:cost_per_hour])
   end
 
   def normalized_storage_areas
