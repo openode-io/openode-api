@@ -226,7 +226,7 @@ class WebsiteTest < ActiveSupport::TestCase
       wl.extra_storage = 0
       wl.save!
 
-      website.spend_hourly_credits
+      website.spend_hourly_credits!
 
       cloud_provider = CloudProvider::Manager.instance.first_of_type("internal")
       plan = website.plan
