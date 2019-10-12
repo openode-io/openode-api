@@ -218,7 +218,7 @@ class WebsiteTest < ActiveSupport::TestCase
     end
 
     # spend credits
-    test "spend credits - plan only" do
+    test "spend hourly credits - plan only" do
       website = default_website
       website.credit_actions.destroy_all
       wl = default_website_location
@@ -226,7 +226,7 @@ class WebsiteTest < ActiveSupport::TestCase
       wl.extra_storage = 0
       wl.save!
 
-      website.spend_credits
+      website.spend_hourly_credits
 
       cloud_provider = CloudProvider::Manager.instance.first_of_type("internal")
       plan = website.plan
@@ -236,6 +236,28 @@ class WebsiteTest < ActiveSupport::TestCase
 
       assert_equal ca.credits_spent.to_f.round(4), (plan[:cost_per_hour] * 100.0).to_f.round(4)
       assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
+    end
+
+    test "spend hourly credits - with extra services" do
+      website = default_website
+      website.credit_actions.destroy_all
+      wl = default_website_location
+      wl.nb_cpus = 2
+      wl.extra_storage = 2
+      wl.save!
+
+      website.spend_hourly_credits!
+
+      cloud_provider = CloudProvider::Manager.instance.first_of_type("internal")
+      plan = website.plan
+
+      assert_equal website.credit_actions.reload.length, 3
+      credits_actions = website.credit_actions
+
+      assert_equal credits_actions[0].credits_spent.to_f.round(4), (plan[:cost_per_hour] * 100.0).to_f.round(4)
+      assert_equal credits_actions[0].action_type, CreditAction::TYPE_CONSUME_PLAN
+      assert_equal credits_actions[1].action_type, CreditAction::TYPE_CONSUME_STORAGE
+      assert_equal credits_actions[2].action_type, CreditAction::TYPE_CONSUME_CPU
     end
   end
 end

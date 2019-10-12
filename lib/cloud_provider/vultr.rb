@@ -26,8 +26,9 @@ module CloudProvider
       Vultr::TYPE
     end
 
+    # TODO add tests
     def stop(options = {})
-      # stopping an instance requires to kill the machine
+      # stopping an instance requires to kill the machine and remove ssh keys
 
       website = options[:website]
       website_location = options[:website_location]
@@ -37,8 +38,22 @@ module CloudProvider
       # make sure to destroy the machine:
       if instance_info
         sub_id = instance_info["SUBID"]
+        ssh_key_id = instance_info["SSHKEYID"]
 
-        ::Vultr::Server.destroy(SUBID: sub_id)
+        if sub_id
+          ::Vultr::Server.destroy(SUBID: sub_id)
+          website.data["privateCloudInfo"]["SUBID"] = nil
+          website.save
+        end
+
+        if ssh_key_id
+          ::Vultr::SSHKey.destroy(SSHKEYID: ssh_key_id)
+          website.data["privateCloudInfo"]["SSHKEYID"] = nil
+          website.save
+        end
+
+        website.data.delete "privateCloudInfo"
+        website.save
       end
     end
 

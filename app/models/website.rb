@@ -230,7 +230,7 @@ class Website < ApplicationRecord
   end
 
   # credits related task updates and calculations
-  def spend_credits
+  def spend_hourly_credits!
     current_plan = self.plan
 
     return unless current_plan
