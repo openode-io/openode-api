@@ -39,4 +39,19 @@ class CloudProviderVultrTest < ActiveSupport::TestCase
 			assert_equal plan[:type], CloudProvider::Vultr::TYPE
 		end
 	end
+
+	test "os_list" do
+		provider = CloudProvider::Manager.instance.first_of_type("vultr")
+		oses = provider.os_list
+
+		assert_equal oses.length, 25
+		assert_equal oses[0]["name"], "CentOS 6 x64"
+	end
+
+	test "find_os" do
+		provider = CloudProvider::Manager.instance.first_of_type("vultr")
+		os = provider.find_os("Debian 9", "x64")
+
+		assert_equal os["name"], "Debian 9 x64 (stretch)"
+	end
 end

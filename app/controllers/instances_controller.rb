@@ -256,6 +256,13 @@ class InstancesController < ApplicationController
     end
   end
 
+  def requires_private_cloud_plan
+    unless @website.is_private_cloud?
+      msg = "The instance must be private cloud-based for this operation."
+      raise ApplicationRecord::ValidationError.new(msg)
+    end
+  end
+
   private
 
   def authorize

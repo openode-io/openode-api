@@ -26,7 +26,6 @@ module CloudProvider
       Vultr::TYPE
     end
 
-    # TODO add tests
     def stop(options = {})
       # stopping an instance requires to kill the machine and remove ssh keys
 
@@ -66,6 +65,26 @@ module CloudProvider
         
         location_server.destroy
       end
+    end
+
+    def result_to_array(result)
+      result[:result].keys
+        .map { |key| result[:result][key] }
+    end
+
+    # TODO test
+    def os_list
+      result_to_array(::Vultr::OS.list)
+    end
+
+    # TODO test
+    def find_os(name, platform)
+      self.os_list
+        .find { |os| os["name"].include?(name) && os["name"].include?(platform) }
+    end
+
+    def allocate(options = {})
+      os = self.find_os("Debian 9", "x64")
     end
 
     def available_locations
