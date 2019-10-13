@@ -79,7 +79,7 @@ module DeploymentMethod
       port_info = self.port_info_for_new_deployment(website_location)
 
       # make sure to kill the container on target port
-      self.kill_global_containers_by_ports({ ports: [ port_info[:port] ] })
+      self.kill_global_containers_by({ ports: [ port_info[:port] ], names: [port_info[:name]] })
 
       options_front_container = { 
         in_port: 80,
@@ -91,7 +91,7 @@ module DeploymentMethod
 
       ex("front_container", options_front_container)
 
-      front_container = find_containers_by_ports({ ports: [ port_info[:port] ] }).first
+      front_container = find_containers_by({ ports: [ port_info[:port] ] }).first
 
       if ! front_container || ! front_container[:ID]
         self.error!("Can't find the built container... exiting.")
@@ -124,8 +124,8 @@ module DeploymentMethod
       # remove the dead containers
       ports_to_remove = 
         [website_location.port, website_location.second_port] - [website_location.running_port]
-      puts "ports to remove = #{ports_to_remove}"
-      kill_global_containers_by_ports({ ports: ports_to_remove })
+      
+      kill_global_containers_by({ ports: ports_to_remove })
 
       # TODO add dock compose logs
     end
@@ -134,7 +134,7 @@ module DeploymentMethod
     def do_stop(options = {})
       website, website_location = get_website_fields(options)
 
-      kill_global_containers_by_ports({ ports: website_location.ports })
+      kill_global_containers_by({ ports: website_location.ports })
     end
 
     # reload
@@ -243,14 +243,19 @@ module DeploymentMethod
         .select { |line| line.present? }
     end
 
-    def find_containers_by_ports(options = {})
-      assert options[:ports]
-      ports = options[:ports]
+    def find_containers_by(options = {})
+      ports = options[:ports] || []
+      names = options[:names] ? options[:names] : []
 
-      strs_to_find = ports.map { |port| ":#{port}->" }
+      str_ports_to_find = ports.map { |port| ":#{port}->" }
 
       self.parse_global_containers
-        .select { |container| container && strs_to_find.any? { |s| container[:Ports].include?(s) } }
+        .select do |container|
+          container && (
+            str_ports_to_find.any? { |s| container[:Ports].include?(s) } ||
+            names.any? { |s| container[:Names].include?(s) }
+          )
+        end
     end
 
     def kill_global_container(options = {})
@@ -260,11 +265,12 @@ module DeploymentMethod
       "docker exec #{id} docker-compose down ; docker rm -f #{id}"
     end
 
-    def kill_global_containers_by_ports(options = {})
-      assert options[:ports]
+    def kill_global_containers_by(options = {})
       ports = options[:ports]
+      name = options[:name]
+      assert name || ports
 
-      containers = self.find_containers_by_ports(options)
+      containers = self.find_containers_by(options)
 
       containers.map do |container|
         self.ex_stdout("kill_global_container", { 

@@ -27,6 +27,20 @@ class SnapshotsController < InstancesController
     })
   end
 
+  def destroy
+    snapshot = @website.snapshots.find_by! id: params["id"]
+
+    if ["to_delete", "deleted"].include?(snapshot.status)
+      raise ApplicationRecord::ValidationError.new("Snapshot already deleted")
+    end
+
+    @website_event_obj = { title: "snapshot-deleted", id: snapshot.id }
+
+    snapshot.change_status!("to_delete")
+
+    json({ result: "success", description: "The snapshot will be removed shortly" })
+  end
+
   protected
 
 end

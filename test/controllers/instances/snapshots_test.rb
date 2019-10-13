@@ -60,4 +60,42 @@ class SnapshotsTest < ActionDispatch::IntegrationTest
     assert_response :bad_request
   end
 
+  test "DELETE /instances/:instance_id/snapshots/:id should change the status properly" do
+    website = default_website
+
+    post "/instances/testsite/snapshots/create",
+      as: :json,
+      params: { name: "Hello snaps" },
+      headers: default_headers_auth
+
+    snapshot = website.snapshots.find_by name: "Hello snaps"
+
+    delete "/instances/testsite/snapshots/#{snapshot.id}",
+      as: :json,
+      headers: default_headers_auth
+
+    snapshot.reload
+
+    assert_response :success
+    assert_equal snapshot.status, "to_delete"
+  end
+
+  test "DELETE /instances/:instance_id/snapshots/:id should fail if already deleted" do
+    website = default_website
+
+    post "/instances/testsite/snapshots/create",
+      as: :json,
+      params: { name: "Hello snaps" },
+      headers: default_headers_auth
+
+    snapshot = website.snapshots.find_by name: "Hello snaps"
+    snapshot.change_status!("deleted")
+
+    delete "/instances/testsite/snapshots/#{snapshot.id}",
+      as: :json,
+      headers: default_headers_auth
+
+    assert_response :bad_request
+  end
+
 end

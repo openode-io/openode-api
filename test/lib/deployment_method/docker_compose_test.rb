@@ -182,7 +182,7 @@ services:
     end
   end
 
-  test "find_containers_by_ports" do
+  test "find_containers_by ports" do
     set_dummy_secrets_to(LocationServer.all)
     website = default_website
     runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
@@ -193,7 +193,7 @@ services:
 
     assert_scripted do
       begin_ssh
-      result = dep_method.find_containers_by_ports({ ports: [33121, 47877] })
+      result = dep_method.find_containers_by({ ports: [33121, 47877] })
 
       assert_equal result.length, 2
       assert_equal result[0][:ID], "b3621dd9d4dd"
@@ -201,7 +201,25 @@ services:
     end
   end
 
-  test "kill_global_containers_by_ports" do
+  test "find_containers_by name" do
+    set_dummy_secrets_to(LocationServer.all)
+    website = default_website
+    runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
+    dep_method = runner.get_deployment_method
+
+    cmd = dep_method.global_containers({})
+    prepare_ssh_session(cmd, IO.read("test/fixtures/docker/global_containers.txt"))
+
+    assert_scripted do
+      begin_ssh
+      result = dep_method.find_containers_by({ names: ["9327--eyegazegamesdev--2"] })
+
+      assert_equal result.length, 1
+      assert_equal result[0][:ID], "4607ee7a9105"
+    end
+  end
+
+  test "kill_global_containers_by ports" do
     set_dummy_secrets_to(LocationServer.all)
     website = default_website
     runner = DeploymentMethod::Runner.new("docker", "cloud", dummy_ssh_configs)
@@ -214,7 +232,7 @@ services:
 
     assert_scripted do
       begin_ssh
-      result = dep_method.kill_global_containers_by_ports({ ports: [33121, 47877] })
+      result = dep_method.kill_global_containers_by({ ports: [33121, 47877] })
 
       assert_equal result.length, 2
       assert_equal result[0], "killed b3621dd9d4dd"

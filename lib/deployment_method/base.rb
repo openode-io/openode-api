@@ -117,13 +117,15 @@ module DeploymentMethod
         {
           port: website_location.second_port,
           attribute: "second_port",
-          suffix_container_name: "--2"
+          suffix_container_name: "--2",
+          name: "#{website_location.website.user_id}--#{website_location.website.site_name}--2"
         }
       else
         {
           port: website_location.port,
           attribute: "port",
-          suffix_container_name: ""
+          suffix_container_name: "",
+          name: "#{website_location.website.user_id}--#{website_location.website.site_name}"
         }
       end
     end

@@ -52,6 +52,7 @@ Rails.application.routes.draw do
     get '/:site_name/snapshots/', to: 'snapshots#index'
     get '/:site_name/snapshots/:id', to: 'snapshots#show'
     post '/:site_name/snapshots/create', to: 'snapshots#create'
+    delete '/:site_name/snapshots/:id', to: 'snapshots#destroy'
 
     post '/:site_name/increase-storage', to: 'storages#increase'
     post '/:site_name/decrease-storage', to: 'storages#decrease'

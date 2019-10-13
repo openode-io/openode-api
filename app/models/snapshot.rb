@@ -2,7 +2,8 @@ class Snapshot < ApplicationRecord
   belongs_to :user
   belongs_to :website
 
-  validates_inclusion_of :status, :in => %w( pending transferring active deleted to_delete )
+  STATUSES = %w( pending transferring active deleted to_delete )
+  validates_inclusion_of :status, :in => STATUSES
 
   def as_json(options = {})
     opts = { :methods => [:url] }
@@ -18,6 +19,11 @@ class Snapshot < ApplicationRecord
       Rails.logger.error "Issue building snapshot url #{ex}"
       ""
     end
+  end
+
+  def change_status!(st)
+    self.status = st
+    self.save!
   end
 
 end
