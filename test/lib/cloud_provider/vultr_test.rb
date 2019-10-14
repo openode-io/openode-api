@@ -48,10 +48,18 @@ class CloudProviderVultrTest < ActiveSupport::TestCase
 		assert_equal oses[0]["name"], "CentOS 6 x64"
 	end
 
-	test "find_os" do
+	test "find startup script" do
 		provider = CloudProvider::Manager.instance.first_of_type("vultr")
-		os = provider.find_os("Debian 9", "x64")
+		script = provider.find_startup_script("init base debian")
 
-		assert_equal os["name"], "Debian 9 x64 (stretch)"
+		assert_equal script["name"], "init base debian"
 	end
+
+	test "find firewall" do
+		provider = CloudProvider::Manager.instance.first_of_type("vultr")
+		firewall = provider.find_firewall_group("base")
+
+		assert_equal firewall["description"], "base"
+	end
+
 end

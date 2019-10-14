@@ -47,6 +47,26 @@ class ActiveSupport::TestCase
         response_path: "test/fixtures/http/cloud_provider/vultr/os_list.json"
       },
       {
+        url: "https://api.vultr.com/v1/startupscript/list",
+        method: :get,
+        with: {
+          body: {}
+        },
+        content_type: "application/json",
+        response_status: 200,
+        response_path: "test/fixtures/http/cloud_provider/vultr/startup_scripts_list.json"
+      },
+      {
+        url: "https://api.vultr.com/v1/firewall/group_list",
+        method: :get,
+        with: {
+          body: {}
+        },
+        content_type: "application/json",
+        response_status: 200,
+        response_path: "test/fixtures/http/cloud_provider/vultr/firewall_group_list.json"
+      },
+      {
         url: "https://api.vultr.com/v1/server/destroy",
         method: :post,
         with: {

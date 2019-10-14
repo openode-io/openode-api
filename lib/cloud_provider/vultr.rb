@@ -72,19 +72,39 @@ module CloudProvider
         .map { |key| result[:result][key] }
     end
 
-    # TODO test
     def os_list
       result_to_array(::Vultr::OS.list)
     end
 
-    # TODO test
     def find_os(name, platform)
       self.os_list
         .find { |os| os["name"].include?(name) && os["name"].include?(platform) }
     end
 
+    def startup_scripts_list
+      result_to_array(::Vultr::StartupScript.list)
+    end
+
+    def find_startup_script(name)
+      self.startup_scripts_list
+        .find { |script| script["name"] == name }
+    end
+
+    def find_firewall_group(description)
+      result_to_array(::Vultr::Firewall.group_list).find { |f| f["description"] == description }
+    end
+
     def allocate(options = {})
-      os = self.find_os("Debian 9", "x64")
+      assert options[:website]
+      website = options[:website]
+
+      os = self.find_os("Debian 9", "x64") # TODO: make it a parameter
+      script = self.find_startup_script("website-#{website.id}") ||
+        self.find_startup_script("init base debian") # TODO: +parameter
+
+      firewall = self.find_firewall_group("base") # TODO: +parameter
+
+      # os["OSID"]
     end
 
     def available_locations
