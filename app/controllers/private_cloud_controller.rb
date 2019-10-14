@@ -13,8 +13,15 @@ class PrivateCloudController < InstancesController
 			raise ApplicationRecord::ValidationError.new("No credit available")
 		end
 
-		cloud_provider = CloudProvider::Manager.instance.first_of_type(CloudProvider::Vultr::TYPE)
+		cloud_provider = CloudProvider::Manager.instance.first_of_internal_type(CloudProvider::Vultr::TYPE)
 
-		json({})
+		cloud_provider.allocate({
+			website: @website,
+			website_location: @website_location
+		})
+
+		json({
+			status: "Instance creating..."
+		})
 	end
 end
