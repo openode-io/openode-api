@@ -85,7 +85,27 @@ class ActiveSupport::TestCase
         content_type: "application/json",
         response_status: 200,
         response_path: "test/fixtures/http/cloud_provider/vultr/empty.json"
-      }
+      },
+      {
+        url: "https://api.vultr.com/v1/sshkey/create",
+        method: :post,
+        with: {
+          body: {}
+        },
+        content_type: "application/json",
+        response_status: 200,
+        response_path: "test/fixtures/http/cloud_provider/vultr/ssh_key_create.json"
+      },
+      {
+        url: "https://api.vultr.com/v1/server/create",
+        method: :post,
+        with: {
+          body: {}
+        },
+        content_type: "application/json",
+        response_status: 200,
+        response_path: "test/fixtures/http/cloud_provider/vultr/server_create.json"
+      },
     ]
 
     http_stubs.each do |http_stub|

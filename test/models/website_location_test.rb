@@ -268,4 +268,14 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert_equal wl.valid?, true
   end
 
+  # gen_ssh_key!
+  test "gen_ssh_key" do
+    wl = default_website_location
+    wl.gen_ssh_key!
+    wl.reload
+
+    assert_equal wl.secret[:public_key].include?("ssh-rsa"), true
+    assert_equal wl.secret[:private_key].include?("PRIVATE KEY"), true
+  end
+
 end

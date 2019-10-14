@@ -111,6 +111,17 @@ class WebsiteLocation < ApplicationRecord
       .uniq { |r| r["id"] }
   end
 
+  def gen_ssh_key!
+    k = SSHKey.generate
+
+    self.save_secret!({
+      public_key: k.ssh_public_key,
+      private_key: k.private_key
+    })
+
+    self.secret
+  end
+
   ### storage
   def change_storage!(amount_gb)
     self.extra_storage += amount_gb

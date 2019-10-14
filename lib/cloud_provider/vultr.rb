@@ -94,9 +94,19 @@ module CloudProvider
       result_to_array(::Vultr::Firewall.group_list).find { |f| f["description"] == description }
     end
 
+    def create_ssh_key!(name, public_key)
+      ::Vultr::SSHKey.create({name: name, ssh_key: public_key})[:result]["SSHKEYID"]
+    end
+
+    def self.get_entity_id(str, delimiter = "-")
+      str.split(delimiter).last
+    end
+
     def allocate(options = {})
       assert options[:website]
+      assert options[:website_location]
       website = options[:website]
+      website_location = options[:website_location]
 
       os = self.find_os("Debian 9", "x64") # TODO: make it a parameter
       script = self.find_startup_script("website-#{website.id}") ||
@@ -104,7 +114,27 @@ module CloudProvider
 
       firewall = self.find_firewall_group("base") # TODO: +parameter
 
-      # os["OSID"]
+      ssh_key = website_location.gen_ssh_key!
+      vultr_ssh_key_id = create_ssh_key!("website-#{website.site_name}-#{website.id}", ssh_key[:public_key])
+      
+      server = {
+        DCID: Vultr.get_entity_id(website_location.location.str_id),
+        VPSPLANID: Vultr.get_entity_id(website.account_type),
+        OSID: os["OSID"],
+        SCRIPTID: script["SCRIPTID"],
+        label: website_location.root_domain,
+        hostname: website_location.root_domain,
+        notify_activate: "yes",
+        FIREWALLGROUPID: firewall["FIREWALLGROUPID"],
+        SSHKEYID: vultr_ssh_key_id
+      }
+
+      result = ::Vultr::Server.create(server)[:result]
+      result["SSHKEYID"] = vultr_ssh_key_id
+
+      website.data ||= {}
+      website.data["privateCloudInfo"] = result
+      website.save
     end
 
     def available_locations

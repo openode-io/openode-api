@@ -62,4 +62,33 @@ class CloudProviderVultrTest < ActiveSupport::TestCase
 		assert_equal firewall["description"], "base"
 	end
 
+	test "create ssh key" do
+		website_location = default_website_location
+		website_location.gen_ssh_key!
+		provider = CloudProvider::Manager.instance.first_of_type("vultr")
+		firewall = provider.find_firewall_group("base")
+
+		provider.create_ssh_key!("hello-world", website_location.secret[:public_key])
+	end
+
+	test "allocate" do
+		website = default_website
+		website.account_type = "plan-201"
+		website.site_name = "thisisatest.com"
+		website.domains = ["thisisatest.com"]
+		website.domain_type = "custom_domain"
+		website.save
+		website_location = website.website_locations.first
+		website_location.location.str_id = "alaska-6"
+		website_location.location.save
+
+		provider = CloudProvider::Manager.instance.first_of_type("vultr")
+
+		provider.allocate({ website: website, website_location: website_location })
+
+		website.reload
+
+		assert_equal website.data["privateCloudInfo"]["SUBID"], "30303641"
+		assert_equal website.data["privateCloudInfo"]["SSHKEYID"], "5da3d3a1affa7"
+	end
 end
