@@ -1,6 +1,6 @@
-class CreateDeployments < ActiveRecord::Migration[6.0]
+class CreateExecutions < ActiveRecord::Migration[6.0]
   def change
-    create_table :deployments do |t|
+    create_table :executions do |t|
       t.references :website, null: false
       t.references :website_location, null: false
       t.string :status

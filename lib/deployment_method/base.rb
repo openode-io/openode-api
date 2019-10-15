@@ -144,9 +144,9 @@ module DeploymentMethod
         website_location.running_port = nil
       end
 
-      if self.runner.andand.deployment
-        self.runner.deployment.status = website.online? ? Deployment::STATUS_SUCCESS : Deployment::STATUS_FAILED
-        self.runner.deployment.save
+      if self.runner.andand.execution
+        self.runner.execution.status = website.online? ? Execution::STATUS_SUCCESS : Execution::STATUS_FAILED
+        self.runner.execution.save
       end
 
       website_location.save

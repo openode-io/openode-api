@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_10_11_133635) do
+ActiveRecord::Schema.define(version: 2019_10_14_223950) do
 
   create_table "collaborators", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "website_id"
@@ -48,17 +48,6 @@ ActiveRecord::Schema.define(version: 2019_10_11_133635) do
     t.index ["priority", "run_at"], name: "delayed_jobs_priority"
   end
 
-  create_table "deployments", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
-    t.bigint "website_id", null: false
-    t.bigint "website_location_id", null: false
-    t.string "status"
-    t.text "result", size: :medium
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["website_id"], name: "index_deployments_on_website_id"
-    t.index ["website_location_id"], name: "index_deployments_on_website_location_id"
-  end
-
   create_table "docs", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "title", limit: 500
     t.text "content", size: :medium
@@ -66,6 +55,18 @@ ActiveRecord::Schema.define(version: 2019_10_11_133635) do
     t.timestamp "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.string "type", limit: 50, default: "news"
     t.string "short", limit: 500, default: ""
+  end
+
+  create_table "executions", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.bigint "website_id", null: false
+    t.bigint "website_location_id", null: false
+    t.string "status"
+    t.text "result", size: :medium
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "type", default: "Deployment"
+    t.index ["website_id"], name: "index_executions_on_website_id"
+    t.index ["website_location_id"], name: "index_executions_on_website_location_id"
   end
 
   create_table "histories", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|

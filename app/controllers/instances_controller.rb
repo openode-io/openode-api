@@ -218,12 +218,13 @@ class InstancesController < ApplicationController
 
   def restart
     # run in background:
+    @runner.init_execution!("Deployment")
     DeploymentMethod::Deployer.delay.run(@website_location, @runner)
 
-    json({ result: "success", deploymentId: @runner.deployment.id })
+    json({ result: "success", deploymentId: @runner.execution.id })
 
   rescue => ex
-    logger.error("Issue starting deploying, #{ex}")
+    Ex::Logger.error(ex, "Issue starting deploying")
     raise ex
   end
 

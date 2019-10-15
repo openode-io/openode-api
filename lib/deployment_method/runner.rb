@@ -1,7 +1,7 @@
 
 module DeploymentMethod
   class Runner
-    attr_accessor :deployment
+    attr_accessor :execution
 
     def initialize(type, cloud_type, configs = {})
       @type = type
@@ -11,15 +11,6 @@ module DeploymentMethod
       @website_location = @configs[:website_location]
       @deployment_method = self.get_deployment_method()
       @cloud_provider = self.get_cloud_provider()
-
-      self.deployment = Deployment.create!({
-        website: @website,
-        website_location: @website_location,
-        status: Deployment::STATUS_RUNNING
-      })
-
-      self.deployment.status = Deployment::STATUS_SUCCESS
-      self.deployment.save
     end
 
     def deployment_method
@@ -30,9 +21,21 @@ module DeploymentMethod
       @cloud_provider
     end
 
+    def init_execution!(type)
+      self.execution = Execution.create!({
+        website: @website,
+        website_location: @website_location,
+        status: Execution::STATUS_RUNNING,
+        type: type
+      })
+
+      self.execution.status = Execution::STATUS_SUCCESS
+      self.execution.save
+    end
+
     def multi_steps
-      self.deployment.status = Deployment::STATUS_RUNNING
-      self.deployment.save
+      self.execution.status = Deployment::STATUS_RUNNING
+      self.execution.save
 
       self
     end
@@ -52,11 +55,16 @@ module DeploymentMethod
       }
     end
 
-    def record_deployment_steps(results)
-      self.deployment.save_steps(results)
+    def record_execution_steps(results)
+      self.execution.save_steps(results)
     end
 
-    def execute(cmds)
+    def execute(cmds, options = {})
+
+      if ! self.execution || options[:execution_type]
+        self.init_execution!(options[:execution_type] || "Task")
+      end
+
       protocol = @cloud_provider.deployment_protocol
       time_begin = Time.now
 
@@ -71,7 +79,7 @@ module DeploymentMethod
       Rails.logger.info("Execute cmds=#{cmds.to_yaml}, result=#{results.to_yaml}, " +
         "duration=#{Time.now - time_begin}")
 
-      record_deployment_steps(results)
+      record_execution_steps(results)
 
       results
     end

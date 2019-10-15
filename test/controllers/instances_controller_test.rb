@@ -202,6 +202,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     dep_method = prepare_default_deployment_method
     set_dummy_secrets_to(LocationServer.all)
     prepare_default_ports
+    website = default_website
 
     expect_global_container(dep_method)
     prepare_ssh_session(dep_method.kill_global_container({ id: "b3621dd9d4dd" }), "killed b3621dd9d4dd")
@@ -216,6 +217,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
       assert_response :success
       assert_equal response.parsed_body["result"], "success"
+
+      assert_equal website.executions.last.type, "Task"
     end
   end
 

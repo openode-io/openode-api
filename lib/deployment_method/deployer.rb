@@ -1,13 +1,18 @@
 module DeploymentMethod
   class Deployer
 
-  	def self.run(website_location, runner)
+  	def self.run(website_location, runner, options = {})
   		assert runner
-  		assert runner.deployment
+
+  		if options[:execution_type]
+  			runner.init_execution!(options[:execution_type])
+  		end
+
+  		assert runner.execution
   		website = website_location.website
 
-  		Rails.logger.info("Starting deployment for #{website.site_name}, " +
-  			"deployment-id = #{runner.deployment.id}...")
+  		Rails.logger.info("Starting execution for #{website.site_name}, " +
+  			"execution-id = #{runner.execution.id}...")
 
   		begin
 			runner.multi_steps.execute([
@@ -29,8 +34,8 @@ module DeploymentMethod
 			])
 		rescue => ex
 			Ex::Logger.info(ex, "Issue deploying #{website.site_name}")
-			runner.deployment.add_error!(ex)
-			runner.deployment.failed!
+			runner.execution.add_error!(ex)
+			runner.execution.failed!
 			website.change_status!(Website::STATUS_OFFLINE)
 		end
 
@@ -41,12 +46,12 @@ module DeploymentMethod
 			  }
 			])
 		rescue => ex
-			Ex::Logger.info(ex, "Issue finalizing deployment #{website.site_name}")
-			runner.deployment.add_error!(ex)
-			runner.deployment.failed!
+			Ex::Logger.info(ex, "Issue finalizing execution #{website.site_name}")
+			runner.execution.add_error!(ex)
+			runner.execution.failed!
 		end
 
-  		Rails.logger.info("Finished deployment for #{website.site_name}, status=#{runner.deployment.status}...")
+  		Rails.logger.info("Finished execution for #{website.site_name}, status=#{runner.execution.status}...")
   	end
 
   end

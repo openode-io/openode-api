@@ -13,6 +13,7 @@ class Website < ApplicationRecord
   has_many :events, foreign_key: :ref_id, class_name: :WebsiteEvent, dependent: :destroy
   has_many :snapshots
   has_many :deployments
+  has_many :executions
   has_many :credit_actions
 
   scope :custom_domain, -> { where(domain_type: "custom_domain") }
