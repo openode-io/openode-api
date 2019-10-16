@@ -2,21 +2,35 @@ require 'test_helper'
 
 class WebsiteLocationTest < ActiveSupport::TestCase
   test "first website location" do
-    website = Website.find_by site_name: "testsite"
+    website = default_website
     wl = website.website_locations[0]
 
     assert wl.location.str_id == "canada"
   end
 
+  test "fail if two times the same location for a given website" do
+    website = default_website
+
+    begin
+      WebsiteLocation.create!({
+        website: website,
+        location: Location.find_by!(str_id: "canada")
+      })
+      raise "invalid"
+    rescue => ex
+      assert_includes "#{ex.inspect}", "already exists"
+    end
+  end
+
   test "extra storage valid" do
-    website = Website.find_by site_name: "testsite"
+    website = default_website
     wl = website.website_locations[0]
     wl.extra_storage = 5
     wl.save!
   end
 
   test "extra storage too high" do
-    website = Website.find_by site_name: "testsite"
+    website = default_website
     wl = website.website_locations[0]
     wl.extra_storage = 11
     wl.save
@@ -25,7 +39,7 @@ class WebsiteLocationTest < ActiveSupport::TestCase
   end
 
   test "extra storage too low" do
-    website = Website.find_by site_name: "testsite"
+    website = default_website
     wl = website.website_locations[0]
     wl.extra_storage = -1
     wl.save
@@ -34,7 +48,7 @@ class WebsiteLocationTest < ActiveSupport::TestCase
   end
 
   test "domain with canada subdomain" do
-    website = Website.find_by site_name: "testsite"
+    website = default_website
     wl = website.website_locations[0]
 
     assert wl.main_domain() == "testsite.openode.io"

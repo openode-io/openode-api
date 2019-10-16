@@ -43,6 +43,27 @@ class Website < ApplicationRecord
     self.website_locations.map { |wl| wl.location }
   end
 
+  def location_exists?(str_id)
+    self.locations.any? { |location| location.str_id == str_id }
+  end
+
+  def add_location(location)
+    if location.str_id.include?("-") && self.domain_type != "custom_domain"
+      # to refactor (-)
+      msg = "This location is available only for custom domains for now (not subdomains). " +
+        "Only the following locations (ids) are available for subdomains: canada, usa, france."
+      raise ValidationError.new(msg)
+    end
+
+    location_server = location.location_servers.first
+
+    WebsiteLocation.create!({
+      website: self,
+      location: location,
+      location_server: location_server
+    })
+  end
+
   def is_private_cloud?
     self.cloud_type == "private-cloud"
   end

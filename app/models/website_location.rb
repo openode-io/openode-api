@@ -6,7 +6,11 @@ class WebsiteLocation < ApplicationRecord
   belongs_to :location_server, optional: true
   has_many :deployments
 
+  validates :location, presence: true
+  validates :website, presence: true
+
   validate :validate_nb_cpus
+  validate :unique_location_per_website
 
   validates :extra_storage, numericality: {
     only_integer: true,
@@ -22,6 +26,12 @@ class WebsiteLocation < ApplicationRecord
 
     if self.nb_cpus <= 0 || self.nb_cpus > max_cpus
       errors.add(:nb_cpus, "Invalid value, valid ones: [1..#{max_cpus}]")
+    end
+  end
+
+  def unique_location_per_website
+    if website.website_locations.any? { |wl| wl.id != self.id && wl.location_id == self.location_id }
+      errors.add(:location, "already exists for this site")
     end
   end
 

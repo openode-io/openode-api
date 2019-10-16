@@ -67,7 +67,8 @@ class InstancesController < ApplicationController
 
     all_plans = @website_location.available_plans
     plan = all_plans.find { |p| [p[:id], p[:internal_id]].include?(plan_id) }
-    raise ApplicationRecord::ValidationError.new("Unavailable plan") unless plan
+
+    self.validation_error!("Unavailable plan") unless plan
 
     @website.change_plan!(plan[:internal_id])
 
@@ -91,7 +92,7 @@ class InstancesController < ApplicationController
   end
 
   def changes
-    raise ApplicationRecord::ValidationError.new("Missing files") unless params["files"]
+    self.validation_error!("Missing files") unless params["files"]
     files_client = JSON.parse(params["files"])
     files_server = JSON.parse(@runner.execute([
       { cmd_name: "files_listing", options: { path: @website.repo_dir } }
@@ -238,29 +239,25 @@ class InstancesController < ApplicationController
 
   def requires_status_in(statuses)
     unless statuses.include?(@website.status)
-      msg = "The instance must be in status #{statuses}."
-      raise ApplicationRecord::ValidationError.new(msg)
+      self.validation_error!("The instance must be in status #{statuses}.")
     end
   end
 
   def requires_paid_instance
     if @website.has_free_sandbox?
-      msg = "This feature can't be used with a free sandbox."
-      raise ApplicationRecord::ValidationError.new(msg)
+      self.validation_error!("This feature can't be used with a free sandbox.")
     end
   end
 
   def requires_cloud_plan
     if @website.is_private_cloud?
-      msg = "The instance must be cloud-based for this operation."
-      raise ApplicationRecord::ValidationError.new(msg)
+      self.validation_error!("The instance must be cloud-based for this operation.")
     end
   end
 
   def requires_private_cloud_plan
     unless @website.is_private_cloud?
-      msg = "The instance must be private cloud-based for this operation."
-      raise ApplicationRecord::ValidationError.new(msg)
+      self.validation_error!("The instance must be private cloud-based for this operation.")
     end
   end
 
@@ -295,8 +292,7 @@ class InstancesController < ApplicationController
   def check_minimum_cli_version
     if params["version"]
       unless Gem::Version.new(params["version"]) >= Gem::Version.new(MINIMUM_CLI_VERSION)
-        cmd = "Deprecated CLI version, please upgrade with npm i -g openode"
-        raise ApplicationRecord::ValidationError.new(cmd)
+        self.validation_error!("Deprecated CLI version, please upgrade with npm i -g openode")
       end
     end
   end

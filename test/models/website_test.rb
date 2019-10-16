@@ -115,6 +115,27 @@ class WebsiteTest < ActiveSupport::TestCase
       assert_equal w.locations[0].str_id, "canada"
     end
 
+    # location exists
+    test "location exists" do
+      website = default_website
+      assert_equal website.location_exists?("canada"), true
+    end
+
+    # add_location
+    test "add location fail if subdomain and private server" do
+      website = default_website
+      CloudProvider::Manager.clear_instance
+      CloudProvider::Manager.instance # populate locations
+      location = Location.find_by str_id: "miami-39"
+      
+      begin
+        website.add_location(location)
+        raise "invalid"
+      rescue => ex
+        assert_includes "#{ex.inspect}", "This location is available only for custom domains"
+      end
+    end
+
     # normalize_storage_areas
     test "normalized_storage_areas with two areas" do
       w = Website.where(site_name: "testsite").first

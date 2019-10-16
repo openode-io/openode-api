@@ -11,4 +11,27 @@ class LocationsTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body[0]["id"], "canada"
   end
 
+  test "/instances/:instance_id/add-location fail if already exists" do
+  	w = default_website
+
+    post "/instances/testsite/add-location", 
+    	as: :json, 
+    	params: { str_id: "canada" },
+    	headers: default_headers_auth
+
+    assert_response :bad_request
+  end
+
+  test "/instances/:instance_id/add-location fail already have a location" do
+  	w = default_website
+
+    post "/instances/testsite/add-location", 
+    	as: :json, 
+    	params: { str_id: "usa" },
+    	headers: default_headers_auth
+
+    assert_response :bad_request
+    assert_includes response.parsed_body["error"], "Multi location is not currently supported"
+  end
+
 end
