@@ -57,11 +57,13 @@ class Website < ApplicationRecord
 
     location_server = location.location_servers.first
 
-    WebsiteLocation.create!({
+    website_location = WebsiteLocation.create!({
       website: self,
       location: location,
       location_server: location_server
     })
+
+    website_location.allocate_ports! if location_server
   end
 
   def is_private_cloud?

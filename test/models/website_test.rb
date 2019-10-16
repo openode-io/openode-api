@@ -136,6 +136,16 @@ class WebsiteTest < ActiveSupport::TestCase
       end
     end
 
+    test "add location happy path" do
+      website = default_website
+      website.website_locations.destroy_all
+      location = Location.find_by str_id: "canada"
+      
+      website.add_location(location)
+
+      assert_equal website.website_locations.reload[0].location.str_id, "canada"
+    end
+
     # normalize_storage_areas
     test "normalized_storage_areas with two areas" do
       w = Website.where(site_name: "testsite").first
