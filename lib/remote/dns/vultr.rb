@@ -8,16 +8,23 @@ module Remote
 			def initialize
 			end
 
+			def wait_api
+				sleep 0.5
+			end
+
 			def all_root_domains
+				wait_api
 				list = ::Vultr::DNS.list[:result]
 				list.map { |entry| entry["domain"] }
 			end
 
 			def add_root_domain(domain, default_server_ip)
+				wait_api
 				::Vultr::DNS.create_domain({domain: domain, serverip: default_server_ip})[:result]
 			end
 
 			def domain_records(domain)
+				wait_api
 				::Vultr::DNS.records(domain: domain)[:result]
 					.map do |record|
 						record["value"] = record["data"]
@@ -27,6 +34,7 @@ module Remote
 			end
 
 			def add_record(root_domain, name, type, value, priority)
+				wait_api
 				::Vultr::DNS.create_record({
 					domain: root_domain,
 					name: name,
@@ -35,10 +43,6 @@ module Remote
 					priority: priority
 				})[:result]
 			end
-
-			#def update(root_domain, main_domain, domains, dns)
-			#	raise "missing implementation"
-			#end
 		end
 	end
 end
