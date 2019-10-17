@@ -27,6 +27,26 @@ class ActiveSupport::TestCase
         response_path: "test/fixtures/http/cloud_provider/vultr/plans_list.json"
       },
       {
+        url: "https://api.vultr.com/v1/dns/list",
+        method: :get,
+        with: {
+          body: {}
+        },
+        content_type: "application/json",
+        response_status: 200,
+        response_path: "test/fixtures/http/cloud_provider/vultr/dns_list.json"
+      },
+      {
+        url: "https://api.vultr.com/v1/dns/records?domain=openode.io",
+        method: :get,
+        with: {
+          body: {}
+        },
+        content_type: "application/json",
+        response_status: 200,
+        response_path: "test/fixtures/http/cloud_provider/vultr/domain_records_openode.json"
+      },
+      {
         url: "https://api.vultr.com/v1/regions/list",
         method: :get,
         with: {
@@ -75,6 +95,26 @@ class ActiveSupport::TestCase
         content_type: "application/json",
         response_status: 200,
         response_path: "test/fixtures/http/cloud_provider/vultr/empty.json"
+      },
+      {
+        url: "https://api.vultr.com/v1/dns/create_domain",
+        method: :post,
+        with: {
+          body: {}
+        },
+        content_type: "application/json",
+        response_status: 200,
+        response_path: "test/fixtures/http/cloud_provider/vultr/empty_str.json"
+      },
+      {
+        url: "https://api.vultr.com/v1/dns/create_record",
+        method: :post,
+        with: {
+          body: {}
+        },
+        content_type: "application/json",
+        response_status: 200,
+        response_path: "test/fixtures/http/cloud_provider/vultr/empty_str.json"
       },
       {
         url: "https://api.vultr.com/v1/sshkey/destroy",

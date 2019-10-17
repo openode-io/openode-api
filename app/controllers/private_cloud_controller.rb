@@ -20,6 +20,8 @@ class PrivateCloudController < InstancesController
 			website_location: @website_location
 		})
 
+    	@website_event_obj = { title: "allocate" }
+
 		json({
 			status: "Instance creating..."
 		})
