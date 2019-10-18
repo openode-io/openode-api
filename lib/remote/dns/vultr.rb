@@ -43,6 +43,14 @@ module Remote
 					priority: priority
 				})[:result]
 			end
+
+			def delete_record(root_domain, record)
+				wait_api
+				::Vultr::DNS.delete_record({
+					domain: root_domain,
+					RECORDID: record["RECORDID"]
+				})[:result]
+			end
 		end
 	end
 end

@@ -36,10 +36,16 @@ class RemoteDnsVultrTest < ActiveSupport::TestCase
   	assert_equal result, ""
   end
 
+  test "delete record" do
+  	dns = Remote::Dns::Base.instance
+  	result = dns.delete_record("openode.io", { "RECORDID" => "123456" })
+
+  	assert_equal result, ""
+  end
+
   test "update record with new subdomain" do
   	dns = Remote::Dns::Base.instance
 
-  	domains = []
   	dns_entries = [
   		{
   			"domainName"=>"wsnewapp.us.openode.io",
@@ -52,9 +58,27 @@ class RemoteDnsVultrTest < ActiveSupport::TestCase
   			"value"=>"127.0.0.1"
   		}
   	]
-  	result = dns.update("openode.io", "1234.openode.io", domains, dns_entries, "127.0.0.1")
+  	result = dns.update("openode.io", "1234.openode.io", dns_entries, "127.0.0.1")
 
   	assert_equal result[:created].length, 1
   	assert_equal result[:created][0]["domainName"], "what.us.openode.io"
+  end
+
+  test "update record with entry to delete, one to create" do
+  	dns = Remote::Dns::Base.instance
+
+  	dns_entries = [
+  		{
+  			"domainName"=>"what.wsnewapp.us.openode.io",
+  			"type"=>"A", 
+  			"value"=>"127.0.0.2"
+  		}
+  	]
+  	result = dns.update("openode.io", "wsnewapp.us.openode.io", dns_entries, "127.0.0.1")
+
+  	assert_equal result[:created].length, 1
+  	assert_equal result[:deleted].length, 1
+  	assert_equal result[:created][0]["domainName"], "what.wsnewapp.us.openode.io"
+  	assert_equal result[:deleted][0]["domainName"], "wsnewapp.us.openode.io"
   end
 end

@@ -22,18 +22,43 @@ module Remote
 				raise "missing implementation"
 			end
 
+			def delete_record(root_domain, record)
+				raise "missing implementation"
+			end
+
+			def entries_match(entry1, entry2)
+				entry1["domainName"] == entry2["domainName"] && 
+				entry1["type"] == entry2["type"] &&
+				entry1["value"] == entry2["value"]
+			end
+
 			def dns_entry_exists?(root_domain, existing_records, dns_entry)
 				existing_records.any? do |record|
 					first_part_domain = record["name"] ? "#{record["name"]}." : ""
+					record_domain_name = "#{first_part_domain}#{root_domain}"
+					record["domainName"] = record_domain_name
 
-					"#{first_part_domain}#{root_domain}" == dns_entry["domainName"] &&
-						"#{record["type"]}" == dns_entry["type"] &&
-						"#{record["value"]}" == dns_entry["value"]
+					entries_match(record, dns_entry)
+				end
+			end
+
+			# deprecated entries - should be removed
+			def dns_entry_deprecated?(root_domain, main_domain, existing_record, dns_entries)
+				record = existing_record
+
+				first_part_domain = record["name"] ? "#{record["name"]}." : ""
+				record_domain_name = "#{first_part_domain}#{root_domain}"
+				record["domainName"] = record_domain_name
+
+				if main_domain != root_domain && record_domain_name != main_domain
+					false
+				else
+					! dns_entries.any? { |dns_entry| entries_match(dns_entry, record) }
 				end
 			end
 
 			# returns the ones created, the ones deleted
-			def update(root_domain, main_domain, domains, dns_entries, main_ip)
+			def update(root_domain, main_domain, dns_entries, main_ip)
 				result = {
 					created: [],
 					deleted: []
@@ -51,6 +76,13 @@ module Remote
 						self.add_record(root_domain, dns_entry["name"],
 							dns_entry["type"], dns_entry["value"], dns_entry["priority"])
 						result[:created] << dns_entry
+					end
+				end
+
+				records.each do |record|
+					if dns_entry_deprecated?(root_domain, main_domain, record, dns_entries)
+						self.delete_record(root_domain, record)
+						result[:deleted] << record
 					end
 				end
 
