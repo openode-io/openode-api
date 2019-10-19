@@ -1,1 +1,1 @@
-[{"type":"A", "name":"wsnewapp.us", "data":"173.208.152.130", "priority":0, "RECORDID":16754248, "ttl":300}]
+[{"type":"A", "name":"wsnewapp.us", "data":"173.208.152.130", "priority":0, "RECORDID":16754248, "ttl":300},{"type":"A", "name":"testsite", "data":"127.0.0.10", "priority":0, "RECORDID":16754249, "ttl":300}]

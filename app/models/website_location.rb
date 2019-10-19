@@ -170,8 +170,17 @@ class WebsiteLocation < ApplicationRecord
       .select { |p| p.present? }
   end
 
-  def cmd(str_cmd, opts = {})
+  def update_remote_dns(opts = {})
+    actions_done = Remote::Dns::Base.instance.update(
+      self.root_domain,
+      self.main_domain,
+      opts[:dns_entries] || self.compute_dns({ with_auto_a: opts[:with_auto_a] }),
+      self.location_server.ip
+    )
 
+    self.website.create_event({ title: 'DNS update', updates: actions_done })
+
+    actions_done
   end
 
   protected

@@ -30,7 +30,8 @@ Rails.application.routes.draw do
     post '/:site_name/set-config', to: 'configs#set_config'
 
     get '/:site_name/locations', to: 'locations#index'
-    post '/:site_name/add-location', to: 'locations#add'
+    post '/:site_name/add-location', to: 'locations#add_location'
+    post '/:site_name/remove-location', to: 'locations#remove_location'
 
     get '/:site_name/docker-compose', to: 'instances#docker_compose'
 

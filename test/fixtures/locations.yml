@@ -6,6 +6,12 @@ canada:
   country_fullname: Canada
   cloud_provider: internal
 
+canada2:
+  str_id: canada2
+  full_name: Montreal (Canada2)
+  country_fullname: Canada2
+  cloud_provider: vultr
+
 usa:
   str_id: usa
   full_name: New York (USA)

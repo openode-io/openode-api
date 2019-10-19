@@ -12,8 +12,8 @@ class LocationsController < InstancesController
     json(result)
   end
 
-  def add
-    str_id = params["str_id"]
+  def add_location
+    str_id = params["location_str_id"]
 
     if @website.location_exists?(str_id)
       self.validation_error!("Location already added")
@@ -29,6 +29,20 @@ class LocationsController < InstancesController
     @website.add_location(Location.find_by!(str_id: str_id))
 
     @website_event_obj = { title: "add-location", location_id: str_id }
+
+    json({ result: "success" })
+  end
+
+  def remove_location
+    str_id = params["location_str_id"]
+
+    unless @website.location_exists?(str_id)
+      self.validation_error!("This instance does not have that location.")
+    end
+
+    @website.remove_location(Location.find_by!(str_id: str_id))
+
+    @website_event_obj = { title: "remove-location", location_id: str_id }
 
     json({ result: "success" })
   end

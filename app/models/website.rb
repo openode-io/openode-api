@@ -44,7 +44,11 @@ class Website < ApplicationRecord
   end
 
   def location_exists?(str_id)
-    self.locations.any? { |location| location.str_id == str_id }
+    self.locations.to_a.any? { |location| location.str_id == str_id }
+  end
+
+  def create_event(obj)
+    WebsiteEvent.create({ ref_id: self.id, obj: obj })
   end
 
   def add_location(location)
@@ -63,7 +67,19 @@ class Website < ApplicationRecord
       location_server: location_server
     })
 
-    website_location.allocate_ports! if location_server
+    if location_server
+      website_location.allocate_ports!
+      website_location.update_remote_dns({ with_auto_a: true })
+    end
+  end
+
+  def remove_location(location)
+    website_location = self.website_locations.to_a.find { |wl| wl.location_id == location.id }
+
+    if website_location
+      website_location.update_remote_dns({ dns_entries: [] })
+      website_location.destroy
+    end
   end
 
   def is_private_cloud?

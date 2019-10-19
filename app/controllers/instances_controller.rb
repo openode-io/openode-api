@@ -4,7 +4,9 @@ class InstancesController < ApplicationController
 
   before_action :authorize
   before_action :populate_website
-  before_action :populate_website_location
+  before_action except: [:add_location] do
+    populate_website_location       
+  end
   before_action :prepare_runner
   after_action :terminate_runner
 
@@ -277,8 +279,18 @@ class InstancesController < ApplicationController
 
   def populate_website_location
     if params["location_str_id"]
-      @location = Location.find_by! str_id: params["location_str_id"]
-      @website_location = @website.website_locations.find_by! location_id: @location.id
+      @location = Location.find_by str_id: params["location_str_id"]
+
+      unless @location
+        self.validation_error!("That location does not exist.")
+      end
+
+      @website_location = @website.website_locations.find_by location_id: @location.id
+
+      unless @website_location
+        self.validation_error!("That location does not exist for this instance.")
+      end
+
       @location_server = @website_location.location_server
     end
   end
@@ -309,7 +321,7 @@ class InstancesController < ApplicationController
 
   def record_website_event
     if @website_event_obj
-      WebsiteEvent.create({ ref_id: @website.id, obj: @website_event_obj })
+      @website.create_event(@website_event_obj)
     end
   end
 end

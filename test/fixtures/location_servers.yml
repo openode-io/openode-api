@@ -10,7 +10,7 @@ canada1:
   cloud_type: cloud
 
 canada-private-cloud:
-  location: canada
+  location: canada2
   ip: 127.0.0.3
   ram_mb: 10000
   cpus: 8
