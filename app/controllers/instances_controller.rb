@@ -263,6 +263,18 @@ class InstancesController < ApplicationController
     end
   end
 
+  def requires_location_server
+    unless @website_location.andand.location_server
+      self.validation_error!("This feature requires a server already allocated.")
+    end
+  end
+
+  def requires_custom_domain
+    unless @website.domain_type == "custom_domain"
+      self.validation_error!("This feature requires a custom domain.")
+    end
+  end
+
   private
 
   def authorize

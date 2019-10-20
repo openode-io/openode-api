@@ -13,6 +13,12 @@ module Remote
 				raise "missing implementation"
 			end
 
+			def add_root_domain_if_not_exists(root_domain, main_ip)
+				unless self.all_root_domains.include?(root_domain)
+					self.add_root_domain(root_domain, main_ip)
+				end
+			end
+
 			# return [ { name, type, value } ]
 			def domain_records(domain)
 				raise "missing implementation"
@@ -20,6 +26,17 @@ module Remote
 
 			def add_record(root_domain, name, type, value, priority)
 				raise "missing implementation"
+			end
+
+			# name.root_domain
+			def get_name_from_domain_name(root_domain, domain_name)
+				root_domain != domain_name ? domain_name.split(".#{root_domain}")[0] : ""
+			end
+
+			def add_domain_name_record(root_domain, domain_name, type, value, priority)
+				name = get_name_from_domain_name(root_domain, domain_name)
+
+				add_record(root_domain, name, type, value, priority)
 			end
 
 			def delete_record(root_domain, record)
@@ -64,9 +81,7 @@ module Remote
 					deleted: []
 				}
 
-				unless self.all_root_domains.include?(root_domain)
-					self.add_root_domain(root_domain, main_ip)
-				end
+				self.
 
 				records = self.domain_records(root_domain)
 

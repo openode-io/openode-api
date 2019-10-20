@@ -33,6 +33,7 @@ class Website < ApplicationRecord
 
   validate :configs_must_comply
   validate :storage_areas_must_be_secure
+  validate :validate_dns
 
   validates_inclusion_of :type, :in => %w( nodejs docker )
   validates_inclusion_of :domain_type, :in => %w( subdomain custom_domain )
@@ -116,6 +117,26 @@ class Website < ApplicationRecord
 
       if ! Io::Path.is_secure?(self.repo_dir, cur_dir)
         errors.add(:storage_areas, "Invalid storage area path #{cur_dir}")
+      end
+    end
+  end
+
+  def validate_dns
+    return if domain_type == "subdomain"
+
+    self.dns ||= []
+
+    self.dns.each do |dns_entry|
+      unless self.domains.include?(dns_entry["domainName"])
+        errors.add(:dns, "Invalid domain (#{dns_entry["domainName"]}), available domains: #{self.domains.inspect}")
+      end
+
+      valid_types = [
+        "A", "CNAME", "TXT", "AAAA", "MX", "CAA", "NS", "SRV", "SSHFP", "TXT"
+      ]
+      
+      unless valid_types.include?(dns_entry["type"])
+        errors.add(:dns, "Invalid type (#{dns_entry["type"]}), available types: #{valid_types.inspect}")
       end
     end
   end
