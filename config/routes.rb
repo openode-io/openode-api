@@ -35,6 +35,8 @@ Rails.application.routes.draw do
 
     get '/:site_name/docker-compose', to: 'instances#docker_compose'
 
+    post '/:site_name/add-alias', to: 'dns#add_alias'
+
     get '/:site_name/list-dns', to: 'dns#list_dns'
     post '/:site_name/add-dns', to: 'dns#add_dns'
     delete '/:site_name/del-dns', to: 'dns#del_dns'

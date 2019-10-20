@@ -9,6 +9,8 @@ class DnsTest < ActionDispatch::IntegrationTest
     assert_response :bad_request
   end
 
+  # list dns
+
   test "/instances/:instance_id/list-dns with custom domain" do
     w = Website.find_by site_name: "www.what.is"
     w.domains = ["www.what.is"]
@@ -22,6 +24,8 @@ class DnsTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body[0]["type"], "A"
     assert_equal response.parsed_body[0]["id"].present?, true
   end
+
+  # add dns
 
   test "/instances/:instance_id/add-dns with subdomain should fail" do
     w = Website.find_by site_name: "testsite"
@@ -71,6 +75,8 @@ class DnsTest < ActionDispatch::IntegrationTest
     assert_equal w.dns[0]["value"], "127.0.0.4"
   end
 
+  # del dns
+
   test "/instances/:instance_id/del-dns with custom domain" do
     w = Website.find_by site_name: "www.what.is"
     w.domains = ["www.what.is", "www2.www.what.is"]
@@ -103,6 +109,31 @@ class DnsTest < ActionDispatch::IntegrationTest
     assert_equal w.events[0].obj["updates"]["deleted"][0]["type"], "A"
     assert_equal w.events[0].obj["updates"]["deleted"][0]["value"], "127.0.0.4"
     assert_equal w.events[1].obj["title"], "Remove DNS entry"
+  end
+
+  # add alias
+
+  test "/instances/:instance_id/add-alias with custom domain" do
+    w = Website.find_by site_name: "www.what.is"
+    w.domains = ["www.what.is", "www2.www.what.is"]
+    w.dns = []
+    w.save!
+
+    post "/instances/www.what.is/add-alias", 
+      as: :json,
+      params: { hostname: "www3.www.what.is" },
+      headers: default_headers_auth
+
+    w.reload
+
+    assert_response :success
+    assert_equal w.domains.length, 3
+    assert_equal w.domains[2], "www3.www.what.is"
+
+    assert_equal w.events.length, 2
+    nb_created = w.events[0].obj["updates"]["created"].length
+    assert_equal w.events[0].obj["updates"]["created"][nb_created-1]["domainName"], "www3.www.what.is"
+    assert_equal w.events[1].obj["title"], "Add domain alias"
   end
 
 end

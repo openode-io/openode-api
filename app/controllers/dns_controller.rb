@@ -69,6 +69,20 @@ class DnsController < InstancesController
   	list_dns
   end
 
+  def add_alias
+  	domain = Website.clean_domain(params["hostname"])
+
+  	@website.domains ||= []
+  	@website.domains << domain
+  	@website.save!
+
+  	@website_location.update_remote_dns({ with_auto_a: true })
+
+  	@website.create_event({ title: "Add domain alias", domain: domain })
+
+  	json({ result: "success" })
+  end
+
   private
 
 

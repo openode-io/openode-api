@@ -43,6 +43,15 @@ class WebsiteTest < ActiveSupport::TestCase
       assert_equal w.domains[0], "www.what.is"
     end
 
+    test "domains validation should fail if different domain" do
+      w = Website.where(site_name: "www.what.is").first
+      w.domains ||= []
+      w.domains << "www3.www.what2.is"
+      w.save
+
+      assert_equal w.valid?, false
+    end
+
     test "get all custom domain websites" do
       custom_domain_sites = Website.custom_domain
 

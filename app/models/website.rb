@@ -34,6 +34,7 @@ class Website < ApplicationRecord
   validate :configs_must_comply
   validate :storage_areas_must_be_secure
   validate :validate_dns
+  validate :validate_domains
 
   validates_inclusion_of :type, :in => %w( nodejs docker )
   validates_inclusion_of :domain_type, :in => %w( subdomain custom_domain )
@@ -137,6 +138,24 @@ class Website < ApplicationRecord
       
       unless valid_types.include?(dns_entry["type"])
         errors.add(:dns, "Invalid type (#{dns_entry["type"]}), available types: #{valid_types.inspect}")
+      end
+    end
+  end
+
+  def self.clean_domain(domain)
+    domain.downcase.strip
+  end
+
+  # TODO add validation domain
+
+  def validate_domains
+    return if domain_type == "subdomain"
+
+    self.domains ||= []
+
+    self.domains.each do |domain|
+      unless domain.include?(self.site_name)
+        errors.add(:domains, "Invalid alias (#{domain}), must be a subdomain of #{site_name}")
       end
     end
   end
