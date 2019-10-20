@@ -121,6 +121,11 @@ class WebsiteLocation < ApplicationRecord
       .uniq { |r| r["id"] }
   end
 
+  def find_dns_entry_by_id(id)
+    compute_dns
+      .find { |entry| entry["id"] == id }    
+  end
+
   def gen_ssh_key!
     k = SSHKey.generate
 

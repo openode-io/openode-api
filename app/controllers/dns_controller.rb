@@ -2,22 +2,16 @@ class DnsController < InstancesController
 
   before_action :ensure_location
 
-  before_action only: [:add_dns] do
+  before_action only: [:list_dns, :add_dns, :del_dns] do
     requires_custom_domain
   end
 
-  before_action only: [:add_dns] do
+  before_action only: [:add_dns, :del_dns] do
     requires_location_server
   end
 
   def list_dns
-    if @website.domain_type != "custom_domain"
-      raise ApplicationRecord::ValidationError.new("DNS is for custom domains only.")
-    end
-
-    dns = @website_location.compute_dns({ with_auto_a: true })
-
-    json(dns)
+    json(@website_location.compute_dns({ with_auto_a: true }))
   end
 
   def add_dns
@@ -49,7 +43,30 @@ class DnsController < InstancesController
 
   	@website.create_event({ title: "Add DNS entry", entry: new_entry })
 
-  	json(@website_location.compute_dns({ with_auto_a: true }))
+  	list_dns
+  end
+
+  def del_dns
+  	dns_id = params["id"]
+
+  	manager = Remote::Dns::Base.instance
+
+  	entry = @website_location.find_dns_entry_by_id(dns_id)
+
+  	unless entry
+  		validation_error!("This entry does not exist.")
+  	end
+
+  	@website.remove_dns_entry(entry)
+  	@website.save!
+
+  	# update the remove DNS
+  	@website.reload
+  	@website_location.update_remote_dns({ with_auto_a: true })
+
+  	@website.create_event({ title: "Remove DNS entry", entry: entry })
+
+  	list_dns
   end
 
   private

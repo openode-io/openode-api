@@ -240,6 +240,18 @@ class Website < ApplicationRecord
     self.storage_areas.delete(storage_area)
   end
 
+  def remove_dns_entry(entry)
+    self.dns ||= []
+
+    entry_found = self.dns.find do |d|
+      d["domainName"] == entry["domainName"] &&
+      d["type"] == entry["type"] &&
+      d["value"] == entry["value"]
+    end
+
+    self.dns.delete(entry_found) if entry_found
+  end
+
   # true/false, msg
   def can_deploy_to?(website_location)
     unless user.activated?

@@ -67,7 +67,7 @@ module Remote
 				record_domain_name = "#{first_part_domain}#{root_domain}"
 				record["domainName"] = record_domain_name
 
-				if main_domain != root_domain && record_domain_name != main_domain
+				if main_domain != root_domain && ! record_domain_name.include?(main_domain)
 					false
 				else
 					! dns_entries.any? { |dns_entry| entries_match(dns_entry, record) }

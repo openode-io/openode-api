@@ -71,4 +71,38 @@ class DnsTest < ActionDispatch::IntegrationTest
     assert_equal w.dns[0]["value"], "127.0.0.4"
   end
 
+  test "/instances/:instance_id/del-dns with custom domain" do
+    w = Website.find_by site_name: "www.what.is"
+    w.domains = ["www.what.is", "www2.www.what.is"]
+    w.dns = []
+    w.save!
+
+    post "/instances/www.what.is/add-dns", 
+      as: :json,
+      params: { domainName: "www2.www.what.is", type: "A", value: "127.0.0.4" },
+      headers: default_headers_auth
+
+    w.events.destroy_all
+    w.reload
+    entry_added = w.website_locations.first.compute_dns.first
+
+    delete "/instances/www.what.is/del-dns?id=#{entry_added["id"]}", 
+      as: :json,
+      headers: default_headers_auth
+
+    w.reload
+    puts "events #{w.events.inspect}"
+
+    assert_response :success
+    assert_equal w.website_locations.first.compute_dns.length, 0
+
+    assert_equal w.events.length, 2
+    assert_equal w.events[0].obj["title"], "DNS update"
+    assert_equal w.events[0].obj["updates"]["deleted"].length, 1
+    assert_equal w.events[0].obj["updates"]["deleted"][0]["domainName"], "www2.www.what.is"
+    assert_equal w.events[0].obj["updates"]["deleted"][0]["type"], "A"
+    assert_equal w.events[0].obj["updates"]["deleted"][0]["value"], "127.0.0.4"
+    assert_equal w.events[1].obj["title"], "Remove DNS entry"
+  end
+
 end
