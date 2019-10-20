@@ -97,7 +97,6 @@ class DnsTest < ActionDispatch::IntegrationTest
       headers: default_headers_auth
 
     w.reload
-    puts "events #{w.events.inspect}"
 
     assert_response :success
     assert_equal w.website_locations.first.compute_dns.length, 0
@@ -134,6 +133,29 @@ class DnsTest < ActionDispatch::IntegrationTest
     nb_created = w.events[0].obj["updates"]["created"].length
     assert_equal w.events[0].obj["updates"]["created"][nb_created-1]["domainName"], "www3.www.what.is"
     assert_equal w.events[1].obj["title"], "Add domain alias"
+  end
+
+  # del alias
+  test "/instances/:instance_id/del-alias with custom domain" do
+    w = Website.find_by site_name: "www.what.is"
+    w.domains = ["www.what.is", "www2.www.what.is", "www3.www.what.is"]
+    w.dns = []
+    w.save!
+
+    post "/instances/www.what.is/del-alias", 
+      as: :json,
+      params: { hostname: "www3.www.what.is" },
+      headers: default_headers_auth
+
+    w.reload
+
+    assert_response :success
+    assert_equal w.domains.length, 2
+    assert_equal w.domains.include?("www3.www.what.is"), false
+
+    assert_equal w.events.length, 2
+    assert_equal w.events[0].obj["title"], "DNS update"
+    assert_equal w.events[1].obj["title"], "Delete domain alias"
   end
 
 end

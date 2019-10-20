@@ -83,6 +83,20 @@ class DnsController < InstancesController
   	json({ result: "success" })
   end
 
+  def del_alias
+  	domain = Website.clean_domain(params["hostname"])
+
+  	@website.domains ||= []
+  	@website.domains.delete(domain)
+  	@website.save!
+
+  	@website_location.update_remote_dns({ with_auto_a: true })
+
+  	@website.create_event({ title: "Delete domain alias", domain: domain })
+
+  	json({ result: "success" })
+  end
+
   private
 
 
