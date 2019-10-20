@@ -81,7 +81,7 @@ module Remote
 					deleted: []
 				}
 
-				self.
+				self.add_root_domain_if_not_exists(root_domain, main_ip)
 
 				records = self.domain_records(root_domain)
 
