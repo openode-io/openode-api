@@ -188,6 +188,10 @@ class ActiveSupport::TestCase
     end
   end
 
+  def prepare_cloud_provider_manager
+    CloudProvider::Manager.instance
+  end
+
   def prepare_ssh_session(cmd, output, exit_code = 0)
     story do |session|
       channel = session.opens_channel
