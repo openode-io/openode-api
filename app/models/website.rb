@@ -1,3 +1,4 @@
+
 class Website < ApplicationRecord
 
   serialize :domains, JSON
@@ -35,6 +36,7 @@ class Website < ApplicationRecord
   validate :storage_areas_must_be_secure
   validate :validate_dns
   validate :validate_domains
+  validate :validate_site_name
 
   validates_inclusion_of :type, :in => %w( nodejs docker )
   validates_inclusion_of :domain_type, :in => %w( subdomain custom_domain )
@@ -142,6 +144,32 @@ class Website < ApplicationRecord
     end
   end
 
+  def validate_site_name
+    errors.add(:site_name, "Missing sitename") unless self.site_name
+    return unless self.site_name
+    self.send("validate_site_name_#{self.domain_type}")
+  end
+
+  def validate_site_name_subdomain
+    if self.site_name.include?(".")
+      errors.add(:site_name, "The site name should not container a dot.")
+    end
+
+    unless Website.domain_valid?("#{self.site_name}.openode.io")
+      errors.add(:site_name, "Invalid subdomain #{self.site_name}")
+    end
+  end
+
+  def validate_site_name_custom_domain
+    unless Website.domain_valid?(self.site_name)
+      errors.add(:site_name, "Invalid domain #{self.site_name}")
+    end
+  end
+
+  def self.domain_valid?(domain)
+    (domain =~ /^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}(:[0-9]{1,5})?(\/.*)?$/) == 0
+  end
+
   def self.clean_domain(domain)
     domain.downcase.strip
   end
@@ -154,6 +182,10 @@ class Website < ApplicationRecord
     self.domains ||= []
 
     self.domains.each do |domain|
+      unless Website.domain_valid?(domain)
+        errors.add(:domains, "Invalid alias (#{domain}) format")
+      end
+
       unless domain.include?(self.site_name)
         errors.add(:domains, "Invalid alias (#{domain}), must be a subdomain of #{site_name}")
       end

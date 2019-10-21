@@ -6,6 +6,7 @@ module Remote
 		class Vultr < Base
 
 			def initialize
+		      # ::Vultr.api_key = configs["api_key"]
 			end
 
 			def wait_api

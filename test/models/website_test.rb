@@ -21,6 +21,32 @@ class WebsiteTest < ActiveSupport::TestCase
       assert w.save
     end
 
+    test "invalid site_name with subdomain" do
+      w = Website.new({
+        site_name: "thisisauniq.uesite",
+        cloud_type: "cloud",
+        user_id: User.first.id,
+        type: "docker",
+        status: "starting",
+        domain_type: "subdomain"
+        })
+
+      assert_equal w.save, false
+    end
+
+    test "invalid site_name with custom domain" do
+      w = Website.new({
+        site_name: "thisisauniq.--=uesite",
+        cloud_type: "cloud",
+        user_id: User.first.id,
+        type: "docker",
+        status: "starting",
+        domain_type: "subdomain"
+        })
+
+      assert_equal w.save, false
+    end
+
     # domains:
 
     test "getting empty domains" do
@@ -41,6 +67,14 @@ class WebsiteTest < ActiveSupport::TestCase
 
       assert_equal w.domains.length, 1
       assert_equal w.domains[0], "www.what.is"
+    end
+
+    test "fail with invalid domain" do
+      w = Website.where(site_name: "www.what.is").first
+      w.domains ||= []
+      w.domains << "www-what-is"
+
+      assert_equal w.save, false
     end
 
     test "domains validation should fail if different domain" do
