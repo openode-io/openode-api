@@ -6,8 +6,12 @@ module CloudProvider
 
     @@instance = nil
 
+    def self.get_config(file_path)
+      YAML.load_file(file_path)
+    end
+
     def initialize(file_path_configs)
-      @content = YAML.load_file(file_path_configs)
+      @content = Manager.get_config(file_path_configs)
 
       @application = @content["application"]
       @clouds = @application["clouds"]
@@ -50,10 +54,13 @@ module CloudProvider
       cloud ? cloud["instance"] : nil
     end
 
+    def self.config_path
+      File.join(Rails.root, "config", ".#{ENV["RAILS_ENV"]}.openode.yml")
+    end
+
     def self.instance
       unless @@instance
-        openode_path =
-          File.join(Rails.root, "config", ".#{ENV["RAILS_ENV"]}.openode.yml")
+        openode_path = Manager.config_path
 
         begin
           @@instance = Manager.new(openode_path)

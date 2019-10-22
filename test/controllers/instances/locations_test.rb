@@ -4,7 +4,7 @@ require 'test_helper'
 class LocationsTest < ActionDispatch::IntegrationTest
 
   setup do
-    prepare_cloud_provider_manager
+    
   end
 
   test "/instances/:instance_id/locations with subdomain" do

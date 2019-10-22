@@ -5,8 +5,8 @@ module Remote
 	module Dns
 		class Vultr < Base
 
-			def initialize
-		      # ::Vultr.api_key = configs["api_key"]
+			def initialize(configs)
+				::Vultr.api_key = configs["api_key"]
 			end
 
 			def wait_api

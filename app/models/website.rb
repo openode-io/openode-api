@@ -174,8 +174,6 @@ class Website < ApplicationRecord
     domain.downcase.strip
   end
 
-  # TODO add validation domain
-
   def validate_domains
     return if domain_type == "subdomain"
 

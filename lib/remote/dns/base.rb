@@ -2,7 +2,9 @@ module Remote
 	module Dns
 		class Base
 			def self.instance(type = "vultr")
-				"Remote::Dns::#{type.capitalize}".constantize.new
+				config_path = CloudProvider::Manager.config_path
+				config = CloudProvider::Manager.get_config(config_path)
+				"Remote::Dns::#{type.capitalize}".constantize.new(config["application"]["dns"])
 			end
 
 			def all_root_domains

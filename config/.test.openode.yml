@@ -1,6 +1,9 @@
 application:
   base_hostname: openode.io
   hostname_private_cloud: openode.dev
+  dns:
+    type: vultr
+    api_key: xxxxx
   clouds:
     - type: internal
       locations:
@@ -27,4 +30,4 @@ application:
               disk_gb: 200
     - type: dummy
     - type: vultr
-      api_key: xxxxx # TODO REMOVE
+      api_key: xxxxx
