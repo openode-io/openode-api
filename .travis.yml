@@ -2,7 +2,7 @@ language: ruby
 
 script:
   - bundle exec rubocop
-  - bundle exec bin/rails
+  - bundle exec bin/rails test
 
 services:
   - mysql
