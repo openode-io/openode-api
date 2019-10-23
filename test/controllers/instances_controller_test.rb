@@ -124,10 +124,9 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
     website = Website.find_by site_name: 'testsite'
 
-    cmd = DeploymentMethod::DockerCompose.new.delete_files(files: [
-                                                             "#{website.repo_dir}./test.txt",
-                                                             "#{website.repo_dir}./test2.txt"
-                                                           ])
+    docker_compose_instance = DeploymentMethod::DockerCompose.new
+    cmd = docker_compose_instance.delete_files(files: ["#{website.repo_dir}./test.txt",
+                                                       "#{website.repo_dir}./test2.txt"])
     prepare_ssh_session(cmd, '')
 
     assert_scripted do
@@ -152,11 +151,14 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
   test '/instances/:instance_id/logs with subdomain' do
     set_dummy_secrets_to(LocationServer.all)
 
-    prepare_ssh_session('docker exec 123456789 docker-compose logs --tail=100', 'hellooutput')
+    prepare_ssh_session('docker exec 123456789 docker-compose logs --tail=100',
+                        'hellooutput')
 
     assert_scripted do
       begin_ssh
-      get '/instances/testsite/logs?location_str_id=canada', as: :json, headers: default_headers_auth
+      get '/instances/testsite/logs?location_str_id=canada',
+          as: :json,
+          headers: default_headers_auth
 
       assert_response :success
       assert_equal response.parsed_body['logs'], 'hellooutput'
@@ -167,7 +169,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
   test '/instances/:instance_id/cmd with subdomain' do
     set_dummy_secrets_to(LocationServer.all)
 
-    prepare_ssh_session('docker exec 123456789 docker-compose exec -T  www ls -la', 'hellooutput')
+    prepare_ssh_session('docker exec 123456789 docker-compose exec -T  www ls -la',
+                        'hellooutput')
 
     assert_scripted do
       begin_ssh
@@ -206,8 +209,10 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     website = default_website
 
     expect_global_container(dep_method)
-    prepare_ssh_session(dep_method.kill_global_container(id: 'b3621dd9d4dd'), 'killed b3621dd9d4dd')
-    prepare_ssh_session(dep_method.kill_global_container(id: '32bfe26a2712'), 'killed 32bfe26a2712')
+    prepare_ssh_session(dep_method.kill_global_container(id: 'b3621dd9d4dd'),
+                        'killed b3621dd9d4dd')
+    prepare_ssh_session(dep_method.kill_global_container(id: '32bfe26a2712'),
+                        'killed 32bfe26a2712')
 
     assert_scripted do
       begin_ssh
@@ -226,7 +231,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
   # stop with docker compose internal
   test '/instances/:instance_id/stop with vultr cloud provider' do
     set_dummy_secrets_to(LocationServer.all)
-    runner = DeploymentMethod::Runner.new('docker', 'private-cloud', default_runner_configs)
+    runner = DeploymentMethod::Runner.new('docker', 'private-cloud',
+                                          default_runner_configs)
     dep_method = runner.get_deployment_method
 
     location_server = LocationServer.find_by ip: '127.0.0.3'
@@ -249,8 +255,10 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     prepare_default_ports
 
     expect_global_container(dep_method)
-    prepare_ssh_session(dep_method.kill_global_container(id: 'b3621dd9d4dd'), 'killed b3621dd9d4dd')
-    prepare_ssh_session(dep_method.kill_global_container(id: '32bfe26a2712'), 'killed 32bfe26a2712')
+    prepare_ssh_session(dep_method.kill_global_container(id: 'b3621dd9d4dd'),
+                        'killed b3621dd9d4dd')
+    prepare_ssh_session(dep_method.kill_global_container(id: '32bfe26a2712'),
+                        'killed 32bfe26a2712')
 
     assert_scripted do
       begin_ssh
@@ -276,7 +284,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     prepare_default_ports
 
     prepare_ssh_session(dep_method.down(front_container_id: '123456789'), '123456789')
-    prepare_ssh_session(dep_method.docker_compose(front_container_id: '123456789'), '123456789')
+    prepare_ssh_session(dep_method.docker_compose(front_container_id: '123456789'),
+                        '123456789')
 
     assert_scripted do
       begin_ssh
@@ -305,7 +314,9 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
     assert_scripted do
       begin_ssh
-      post '/instances/testsite/erase-all?location_str_id=canada', as: :json, headers: default_headers_auth
+      post '/instances/testsite/erase-all?location_str_id=canada',
+           as: :json,
+           headers: default_headers_auth
 
       assert_response :success
       assert_equal response.parsed_body['result'], 'success'
@@ -317,8 +328,6 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   # /plan
   test '/instances/:instance_id/plan second' do
-    website = Website.find_by! site_name: 'testsite'
-
     get '/instances/testsite/plan?location_str_id=canada',
         as: :json,
         headers: default_headers_auth
@@ -330,8 +339,6 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   # /plans
   test '/instances/:instance_id/plans cloud' do
-    website = Website.find_by! site_name: 'testsite'
-
     get '/instances/testsite/plans?location_str_id=canada',
         as: :json,
         headers: default_headers_auth
@@ -350,8 +357,10 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     website = default_website
 
     expect_global_container(dep_method)
-    prepare_ssh_session(dep_method.kill_global_container(id: 'b3621dd9d4dd'), 'killed b3621dd9d4dd')
-    prepare_ssh_session(dep_method.kill_global_container(id: '32bfe26a2712'), 'killed 32bfe26a2712')
+    prepare_ssh_session(dep_method.kill_global_container(id: 'b3621dd9d4dd'),
+                        'killed b3621dd9d4dd')
+    prepare_ssh_session(dep_method.kill_global_container(id: '32bfe26a2712'),
+                        'killed 32bfe26a2712')
 
     assert_scripted do
       begin_ssh
@@ -370,11 +379,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/set-plan to an invalid one should fail' do
-    dep_method = prepare_default_deployment_method
     set_dummy_secrets_to(LocationServer.all)
     prepare_default_ports
-
-    website = default_website
 
     assert_scripted do
       begin_ssh
@@ -389,7 +395,6 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   # set cpus
   test '/instances/:instance_id/set-cpus happy path' do
-    website = default_website
     website_location = default_website_location
 
     post '/instances/testsite/set-cpus?location_str_id=canada',
@@ -408,7 +413,6 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     website = default_website
     website.account_type = 'free'
     website.save!
-    website_location = default_website_location
 
     post '/instances/testsite/set-cpus?location_str_id=canada',
          as: :json,
@@ -441,8 +445,10 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     website_location = default_website_location
 
     expect_global_container(dep_method)
-    prepare_ssh_session(dep_method.kill_global_container(id: 'b3621dd9d4dd'), 'killed b3621dd9d4dd')
-    prepare_ssh_session(dep_method.kill_global_container(id: '32bfe26a2712'), 'killed 32bfe26a2712')
+    prepare_ssh_session(dep_method.kill_global_container(id: 'b3621dd9d4dd'),
+                        'killed b3621dd9d4dd')
+    prepare_ssh_session(dep_method.kill_global_container(id: '32bfe26a2712'),
+                        'killed 32bfe26a2712')
     prepare_ssh_session(dep_method.clear_repository(website: website), '')
 
     assert_scripted do

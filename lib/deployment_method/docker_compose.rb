@@ -58,7 +58,8 @@ module DeploymentMethod
 
       if website.crontab.present?
         Rails.logger.info('updating crontab')
-        @runner.upload_content_to(website.crontab, "#{website.repo_dir}#{Base::DEFAULT_CRONTAB_FILENAME}")
+        @runner.upload_content_to(website.crontab,
+                                  "#{website.repo_dir}#{Base::DEFAULT_CRONTAB_FILENAME}")
       else
         Rails.logger.info('skipping crontab update (empty)')
       end
@@ -127,14 +128,14 @@ module DeploymentMethod
 
     # stop
     def do_stop(options = {})
-      website, website_location = get_website_fields(options)
+      _, website_location = get_website_fields(options)
 
       kill_global_containers_by(ports: website_location.ports)
     end
 
     # reload
     def reload(options = {})
-      website, website_location = get_website_fields(options)
+      website, = get_website_fields(options)
 
       docker_compose_options = { front_container_id: website.container_id }
 
@@ -160,8 +161,9 @@ module DeploymentMethod
       resources = if !options[:limit_resources]
                     ''
                   else
-                    " -m #{plan[:ram] + EXTRA_MANAGEMENT_RAM}MB --cpus=#{website_location.nb_cpus || 1} "
-      end
+                    " -m #{plan[:ram] + EXTRA_MANAGEMENT_RAM}MB " \
+                    "--cpus=#{website_location.nb_cpus || 1} "
+                  end
 
       "docker run -w=/opt/app/ -d -v #{website.repo_dir}:/opt/app/ " \
         "--name #{front_crontainer_name(website: website, port_info: port_info)} " \
@@ -197,7 +199,7 @@ module DeploymentMethod
 
       result = ex('ps', options_ps)
 
-      result && result[:exit_code] == 0 && result[:stdout].include?('Up') &&
+      result && (result[:exit_code]).zero? && result[:stdout].include?('Up') &&
         result[:stdout].include?('80->80')
     end
 

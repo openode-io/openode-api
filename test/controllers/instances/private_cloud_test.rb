@@ -19,7 +19,7 @@ class PrivateCloudTest < ActionDispatch::IntegrationTest
   end
 
   test 'POST /instances/:instance_id/allocate' do
-    website, website_location = prepare_custom_domain_with_vultr
+    website, = prepare_custom_domain_with_vultr
 
     post '/instances/thisisatest.com/allocate?location_str_id=alaska-6',
          as: :json,
@@ -35,7 +35,7 @@ class PrivateCloudTest < ActionDispatch::IntegrationTest
   end
 
   test 'POST /instances/:instance_id/allocate fail if already allocated' do
-    website, website_location = prepare_custom_domain_with_vultr
+    website, = prepare_custom_domain_with_vultr
     website.data = { 'privateCloudInfo' => { 'SUBID' => 'asdf' } }
     website.save
 
@@ -49,7 +49,7 @@ class PrivateCloudTest < ActionDispatch::IntegrationTest
   end
 
   test 'POST /instances/:instance_id/allocate fail no credit' do
-    website, website_location = prepare_custom_domain_with_vultr
+    website, = prepare_custom_domain_with_vultr
     website.user.credits = 0
     website.user.save
 

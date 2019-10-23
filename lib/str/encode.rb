@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Str
+  # Encoding methods
   class Encode
     def self.strip_by(str, replacement = '')
       str.encode('UTF-8', invalid: :replace, undef: :replace, replace: replacement)
@@ -13,7 +14,7 @@ module Str
         end
       elsif obj.class.name == 'String'
         obj = Encode.strip_by(obj)
-        end
+      end
 
       obj
     end

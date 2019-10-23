@@ -7,7 +7,7 @@ module Io
     end
 
     def self.modified_or_created_files(files_client, files_server)
-      files_client.clone.map do |f|
+      result = files_client.clone.map do |f|
         f_server = Dir.find_file_in(f, files_server)
 
         if f_server
@@ -22,23 +22,24 @@ module Io
         else
           f['change'] = 'C' # Created
           f['modified'] = true
-         end
+        end
 
         f
       end
-                  .select { |f| f['modified'] }
+
+      result.select { |f| f['modified'] }
     end
 
-    def self.should_exclude?(f, dirs_to_exclude)
+    def self.should_exclude?(file, dirs_to_exclude)
       dirs_to_exclude.find do |dir_exclude|
-        f['path'].include?(dir_exclude) ||
-          dir_exclude.include?(f['path']) ||
-          "#{f['path']}/".include?(dir_exclude)
+        file['path'].include?(dir_exclude) ||
+          dir_exclude.include?(file['path']) ||
+          "#{file['path']}/".include?(dir_exclude)
       end
     end
 
     def self.deleted_files(files_client, files_server, dirs_to_exclude = [])
-      files_server.clone.map do |f|
+      result = files_server.clone.map do |f|
         if !Dir.find_file_in(f, files_client) && !Dir.should_exclude?(f, dirs_to_exclude)
           f['change'] = 'D' # Delete
           f['modified'] = true
@@ -46,7 +47,8 @@ module Io
 
         f
       end
-                  .select { |f| f['modified'] }
+
+      result.select { |f| f['modified'] }
     end
 
     # do the diff between client and server files

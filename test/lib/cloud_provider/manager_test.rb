@@ -30,7 +30,7 @@ class ManagerTest < ActiveSupport::TestCase
   end
 
   test 'should create internal location server and secret properly' do
-    locations = CloudProvider::Manager.instance
+    CloudProvider::Manager.instance
 
     ls = LocationServer.find_by! ip: '127.0.0.100'
 
@@ -43,7 +43,7 @@ class ManagerTest < ActiveSupport::TestCase
   end
 
   test 'should create internal location server and private key' do
-    locations = CloudProvider::Manager.instance
+    CloudProvider::Manager.instance
 
     ls = LocationServer.find_by! ip: '127.0.0.101'
 

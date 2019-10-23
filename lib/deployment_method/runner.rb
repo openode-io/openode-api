@@ -138,7 +138,7 @@ module DeploymentMethod
       dep_method = case @type
                    when 'docker'
                      DeploymentMethod::DockerCompose.new
-      end
+                   end
 
       # for convenience, to call back the runner from any dep method
       dep_method.runner = self if dep_method
@@ -159,7 +159,5 @@ module DeploymentMethod
 
       CloudProvider::Manager.instance.first_of_type(provider_type)
     end
-
-    private
   end
 end

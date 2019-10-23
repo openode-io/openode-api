@@ -15,8 +15,6 @@ class LocationsTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/add-location fail if already exists' do
-    w = default_website
-
     post '/instances/testsite/add-location',
          as: :json,
          params: { location_str_id: 'canada' },
@@ -26,8 +24,6 @@ class LocationsTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/add-location fail already have a location' do
-    w = default_website
-
     post '/instances/testsite/add-location',
          as: :json,
          params: { location_str_id: 'usa' },

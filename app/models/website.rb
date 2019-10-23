@@ -118,7 +118,7 @@ class Website < ApplicationRecord
     self.storage_areas.each do |storage_area|
       cur_dir = "#{repo_dir}#{storage_area}"
 
-      unless Io::Path.is_secure?(repo_dir, cur_dir)
+      unless Io::Path.secure?(repo_dir, cur_dir)
         errors.add(:storage_areas, "Invalid storage area path #{cur_dir}")
       end
     end

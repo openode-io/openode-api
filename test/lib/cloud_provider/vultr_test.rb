@@ -66,7 +66,6 @@ class CloudProviderVultrTest < ActiveSupport::TestCase
     website_location = default_website_location
     website_location.gen_ssh_key!
     provider = CloudProvider::Manager.instance.first_of_type('vultr')
-    firewall = provider.find_firewall_group('base')
 
     provider.create_ssh_key!('hello-world', website_location.secret[:public_key])
   end

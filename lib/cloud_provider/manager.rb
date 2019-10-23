@@ -37,8 +37,6 @@ module CloudProvider
       domains
     end
 
-    attr_reader :application
-
     def first_of_type(type)
       cloud = @clouds.find { |c| c['type'] == type }
 

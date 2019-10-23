@@ -3,6 +3,7 @@
 require 'net/sftp'
 
 module Remote
+  # Sftp
   class Sftp
     @@conn_test = nil
 

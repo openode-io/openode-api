@@ -114,7 +114,7 @@ class InstancesController < ApplicationController
     archive_filename = params['file'].original_filename
     remote_file = "#{@website.repo_dir}#{archive_filename}"
 
-    raise 'bad remote file' unless Io::Path.is_secure?(@website.repo_dir, remote_file)
+    raise 'bad remote file' unless Io::Path.secure?(@website.repo_dir, remote_file)
 
     @runner.execute([
                       { cmd_name: 'ensure_remote_repository', options: { path: @website.repo_dir } }

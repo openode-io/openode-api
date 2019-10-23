@@ -2,6 +2,7 @@
 
 module Remote
   module Dns
+    # Base dns
     class Base
       def self.instance(type = 'vultr')
         config_path = CloudProvider::Manager.config_path

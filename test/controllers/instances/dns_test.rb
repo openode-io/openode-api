@@ -104,7 +104,8 @@ class DnsTest < ActionDispatch::IntegrationTest
     assert_equal w.events.length, 2
     assert_equal w.events[0].obj['title'], 'DNS update'
     assert_equal w.events[0].obj['updates']['deleted'].length, 1
-    assert_equal w.events[0].obj['updates']['deleted'][0]['domainName'], 'www2.www.what.is'
+    assert_equal(w.events[0].obj['updates']['deleted'][0]['domainName'],
+                 'www2.www.what.is')
     assert_equal w.events[0].obj['updates']['deleted'][0]['type'], 'A'
     assert_equal w.events[0].obj['updates']['deleted'][0]['value'], '127.0.0.4'
     assert_equal w.events[1].obj['title'], 'Remove DNS entry'
@@ -131,7 +132,8 @@ class DnsTest < ActionDispatch::IntegrationTest
 
     assert_equal w.events.length, 2
     nb_created = w.events[0].obj['updates']['created'].length
-    assert_equal w.events[0].obj['updates']['created'][nb_created - 1]['domainName'], 'www3.www.what.is'
+    assert_equal(w.events[0].obj['updates']['created'][nb_created - 1]['domainName'],
+                 'www3.www.what.is')
     assert_equal w.events[1].obj['title'], 'Add domain alias'
   end
 

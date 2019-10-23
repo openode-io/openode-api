@@ -4,6 +4,7 @@ require 'vultr'
 
 module Remote
   module Dns
+    # Vultr dns implementation
     class Vultr < Base
       def initialize(configs)
         ::Vultr.api_key = configs['api_key']

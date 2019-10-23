@@ -3,6 +3,7 @@
 require 'net/ssh'
 
 module Remote
+  # Sshing
   class Ssh
     @@conn_test = nil
 
@@ -37,16 +38,9 @@ module Remote
     end
 
     def exec(cmds)
-      results = []
+      @ssh = @@conn_test if @@conn_test
 
-      if @@conn_test
-        @ssh = @@conn_test
-        results = ssh_exec_commands(cmds)
-      else
-        results = ssh_exec_commands(cmds)
-      end
-
-      results
+      ssh_exec_commands(cmds)
     end
 
     def ssh_exec_commands(cmds)

@@ -14,23 +14,24 @@ module DeploymentMethod
         "execution-id = #{runner.execution.id}...")
 
       begin
-      runner.multi_steps.execute([
-                                   {
-                                     cmd_name: 'verify_can_deploy', options: { is_complex: true }
-                                   },
-                                   {
-                                     cmd_name: 'initialization', options: { is_complex: true }
-                                   },
-                                   {
-                                     cmd_name: 'launch', options: {
-                                       is_complex: true,
-                                       limit_resources: runner.cloud_provider.limit_resources?
-                                     }
-                                   },
-                                   {
-                                     cmd_name: 'verify_instance_up', options: { is_complex: true }
-                                   }
-                                 ])
+      steps_to_execute = [
+        {
+          cmd_name: 'verify_can_deploy', options: { is_complex: true }
+        },
+        {
+          cmd_name: 'initialization', options: { is_complex: true }
+        },
+        {
+          cmd_name: 'launch', options: {
+            is_complex: true,
+            limit_resources: runner.cloud_provider.limit_resources?
+          }
+        },
+        {
+          cmd_name: 'verify_instance_up', options: { is_complex: true }
+        }
+      ]
+      runner.multi_steps.execute(steps_to_execute)
       rescue StandardError => e
         Ex::Logger.info(e, "Issue deploying #{website.site_name}")
         runner.execution.add_error!(e)
@@ -50,7 +51,8 @@ module DeploymentMethod
         runner.execution.failed!
       end
 
-      Rails.logger.info("Finished execution for #{website.site_name}, status=#{runner.execution.status}...")
+      Rails.logger.info("Finished execution for #{website.site_name}, " \
+                        "status=#{runner.execution.status}...")
     end
   end
 end

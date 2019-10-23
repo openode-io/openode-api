@@ -42,7 +42,7 @@ module DeploymentMethod
     end
 
     def stop(options = {})
-      website, website_location = get_website_fields(options)
+      website, = get_website_fields(options)
 
       # stop based on the deployment method (ex. docker compose)
       runner.deployment_method.do_stop(options)
@@ -78,12 +78,12 @@ module DeploymentMethod
 
         result_up_cmd = ex('instance_up_cmd', website_location: website_location)
 
-        result_up_cmd && result_up_cmd[:exit_code] == 0
+        result_up_cmd && (result_up_cmd[:exit_code]).zero?
       end
     end
 
     def verify_instance_up(options = {})
-      website, website_location = get_website_fields(options)
+      website, = get_website_fields(options)
       is_up = false
 
       begin
@@ -91,7 +91,8 @@ module DeploymentMethod
         max_build_duration = website.max_build_duration
 
         while Time.zone.now - t_started < max_build_duration
-          Rails.logger.info("deployment duration #{Time.zone.now - t_started}/#{max_build_duration}")
+          Rails.logger.info('deployment duration ' \
+            "#{Time.zone.now - t_started}/#{max_build_duration}")
 
           is_up = instance_up?(options)
           break if is_up
@@ -118,14 +119,16 @@ module DeploymentMethod
           port: website_location.second_port,
           attribute: 'second_port',
           suffix_container_name: '--2',
-          name: "#{website_location.website.user_id}--#{website_location.website.site_name}--2"
+          name: "#{website_location.website.user_id}--" \
+            "#{website_location.website.site_name}--2"
         }
       else
         {
           port: website_location.port,
           attribute: 'port',
           suffix_container_name: '',
-          name: "#{website_location.website.user_id}--#{website_location.website.site_name}"
+          name: "#{website_location.website.user_id}--" \
+            "#{website_location.website.site_name}"
         }
       end
     end
@@ -145,7 +148,12 @@ module DeploymentMethod
       end
 
       if runner.andand.execution
-        runner.execution.status = website.online? ? Execution::STATUS_SUCCESS : Execution::STATUS_FAILED
+        runner.execution.status = if website.online?
+                                    Execution::STATUS_SUCCESS
+                                  else
+                                    Execution::STATUS_FAILED
+        end
+
         runner.execution.save
       end
 
@@ -170,8 +178,7 @@ module DeploymentMethod
           end
         end
 
-        puts "result -> #{result.inspect}"
-        break if result && result[:exit_code] == 0
+        break if result && (result[:exit_code]).zero?
 
         if options[:retry]
           Rails.logger.info("Waiting for #{options[:retry][:interval_between_trials]}")
@@ -196,13 +203,6 @@ module DeploymentMethod
       fields.each do |field|
         assert options[field]
       end
-    end
-
-    def get_website_fields(options = {})
-      assert options[:website]
-      assert options[:website_location]
-
-      [options[:website], options[:website_location]]
     end
 
     def get_website_fields(options = {})
