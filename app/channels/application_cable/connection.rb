@@ -1,16 +1,17 @@
+# frozen_string_literal: true
+
 module ApplicationCable
   class Connection < ActionCable::Connection::Base
     identified_by :current_user
 
     def connect
-      puts "hello connect?"
-      self.current_user = 123456 #find_verified_user
-      #logger.add_tags current_user.name
+      puts 'hello connect?'
+      self.current_user = 123_456 # find_verified_user
+      # logger.add_tags current_user.name
     end
 
     def disconnect
-      puts "disconnected."
+      puts 'disconnected.'
     end
-
   end
 end

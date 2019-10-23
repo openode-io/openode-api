@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'net/ssh'
 
 module Remote
@@ -5,7 +7,7 @@ module Remote
     @@conn_test = nil
 
     def self.set_conn_test(conn)
-      @@conn_test = conn if ENV["RAILS_ENV"] == "test"
+      @@conn_test = conn if ENV['RAILS_ENV'] == 'test'
     end
 
     def self.get_conn_test
@@ -16,23 +18,21 @@ module Remote
       @opts = opts
 
       unless @@conn_test
-        @ssh = Net::SSH.start(opts[:host], opts[:user], :password => opts[:password],
-            :non_interactive => true)
+        @ssh = Net::SSH.start(opts[:host], opts[:user], password: opts[:password],
+                                                        non_interactive: true)
       end
 
-      ObjectSpace.define_finalizer( self, self.class.finalize(@ssh) )
+      ObjectSpace.define_finalizer(self, self.class.finalize(@ssh))
     end
 
     def close
-      @ssh.close if @ssh
+      @ssh&.close
       @ssh = nil
     end
 
     def self.finalize(ssh)
       proc do
-        if ssh.present?
-          ssh.close
-        end
+        ssh.close if ssh.present?
       end
     end
 
@@ -41,37 +41,36 @@ module Remote
 
       if @@conn_test
         @ssh = @@conn_test
-        results = self.ssh_exec_commands(cmds)
+        results = ssh_exec_commands(cmds)
       else
-        results = self.ssh_exec_commands(cmds)
+        results = ssh_exec_commands(cmds)
       end
 
       results
     end
 
     def ssh_exec_commands(cmds)
-      cmds.map { |cmd| self.ssh_exec!(cmd) }
+      cmds.map { |cmd| ssh_exec!(cmd) }
     end
 
     def ssh_exec!(command)
-      stdout_data = ""
-      stderr_data = ""
+      stdout_data = ''
+      stderr_data = ''
       exit_code = nil
 
       @ssh.open_channel do |channel|
-        channel.exec(command) do |ch, success|
-          unless success
-            raise "FAILED: couldn't execute command (ssh.channel.exec)"
-          end
-          channel.on_data do |ch,data|
+        channel.exec(command) do |_ch, success|
+          raise "FAILED: couldn't execute command (ssh.channel.exec)" unless success
+
+          channel.on_data do |_ch, data|
             stdout_data += data
           end
 
-          channel.on_extended_data do |ch,type,data|
+          channel.on_extended_data do |_ch, _type, data|
             stderr_data += data
           end
 
-          channel.on_request("exit-status") do |ch,data|
+          channel.on_request('exit-status') do |_ch, data|
             exit_code = data.read_long
           end
         end

@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 class Vault < ApplicationRecord
-  attr_encrypted :data, key: ENV["VAULT_SECRET"]
+  attr_encrypted :data, key: ENV['VAULT_SECRET']
 
   def model
-    self.entity_type.constantize.find_by! id: self.ref_id
+    entity_type.constantize.find_by! id: ref_id
   end
 end

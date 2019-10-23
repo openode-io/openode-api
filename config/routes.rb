@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Rails.application.routes.draw do
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 
@@ -21,7 +23,7 @@ Rails.application.routes.draw do
     get 'available-plans-at/:type/:location_str_id', to: 'global#available_plans_at'
   end
 
-  scope :instances, :constraints => {:site_name => /[^\/]+/} do
+  scope :instances, constraints: { site_name: %r{[^/]+} } do
     get '/', to: 'instances#index'
     get '/:site_name/', to: 'instances#show'
     delete '/:site_name/', to: 'instances#destroy'
@@ -71,7 +73,5 @@ Rails.application.routes.draw do
     post '/:site_name/set-plan', to: 'instances#set_plan'
 
     post '/:site_name/allocate', to: 'private_cloud#allocate'
-
   end
-
 end

@@ -1,14 +1,14 @@
-class Location < ApplicationRecord
+# frozen_string_literal: true
 
+class Location < ApplicationRecord
   has_many :location_servers
 
   validates :str_id, uniqueness: true
-  validates_inclusion_of :cloud_provider, :in => %w( internal vultr )
+  validates :cloud_provider, inclusion: { in: %w[internal vultr] }
 
   SUBDOMAIN = {
     canada: '',
     france: 'fr',
     usa: 'us'
-  }
-
+  }.freeze
 end

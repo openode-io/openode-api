@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 module CloudProvider
   class Manager
@@ -13,49 +14,45 @@ module CloudProvider
     def initialize(file_path_configs)
       @content = Manager.get_config(file_path_configs)
 
-      @application = @content["application"]
-      @clouds = @application["clouds"]
+      @application = @content['application']
+      @clouds = @application['clouds']
 
       if @clouds.present?
         @clouds.each do |cloud|
-          cloud["instance"] =
-            "CloudProvider::#{cloud["type"].capitalize}".constantize.new(cloud)
+          cloud['instance'] =
+            "CloudProvider::#{cloud['type'].capitalize}".constantize.new(cloud)
         end
       end
     end
 
     def base_hostname
-      @application["base_hostname"] || "http://unknown/"
+      @application['base_hostname'] || 'http://unknown/'
     end
 
     def internal_domains
-      domains = [@application["base_hostname"]]
+      domains = [@application['base_hostname']]
 
-      if @application["hostname_private_cloud"]
-        domains << @application["hostname_private_cloud"]
-      end
+      domains << @application['hostname_private_cloud'] if @application['hostname_private_cloud']
 
       domains
     end
 
-    def application
-      @application
-    end
+    attr_reader :application
 
     def first_of_type(type)
-      cloud = @clouds.find { |c| c["type"] == type }
+      cloud = @clouds.find { |c| c['type'] == type }
 
-      cloud ? cloud["instance"] : nil
+      cloud ? cloud['instance'] : nil
     end
 
     def first_of_internal_type(type)
-      cloud = @clouds.find { |c| c["instance"].type == type }
+      cloud = @clouds.find { |c| c['instance'].type == type }
 
-      cloud ? cloud["instance"] : nil
+      cloud ? cloud['instance'] : nil
     end
 
     def self.config_path
-      File.join(Rails.root, "config", ".#{ENV["RAILS_ENV"]}.openode.yml")
+      File.join(Rails.root, 'config', ".#{ENV['RAILS_ENV']}.openode.yml")
     end
 
     def self.instance
@@ -64,9 +61,9 @@ module CloudProvider
 
         begin
           @@instance = Manager.new(openode_path)
-        rescue => ex
-          Rails.logger.info "Unable to read #{openode_path}, #{ex}"
-          Rails.logger.info ex.inspect
+        rescue StandardError => e
+          Rails.logger.info "Unable to read #{openode_path}, #{e}"
+          Rails.logger.info e.inspect
         end
       end
 
@@ -85,12 +82,12 @@ module CloudProvider
 
     def available_plans
       @clouds
-        .map { |cloud| cloud["instance"].plans }
+        .map { |cloud| cloud['instance'].plans }
         .flatten
     end
 
     def available_plans_of_type_at(type, location_str_id)
-      provider = self.first_of_internal_type(type)
+      provider = first_of_internal_type(type)
       provider.plans_at(location_str_id)
     end
 
@@ -98,6 +95,5 @@ module CloudProvider
     def self.clear_instance
       @@instance = nil
     end
-
   end
 end

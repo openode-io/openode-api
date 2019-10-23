@@ -1,16 +1,16 @@
+# frozen_string_literal: true
 
 require 'vultr'
 
 class GlobalController < ApplicationController
-
   def test
     json({})
   end
 
   def version
-    json({
-      version: File.read(".version").strip
-    })
+    json(
+      version: File.read('.version').strip
+    )
   end
 
   def available_locations
@@ -24,7 +24,7 @@ class GlobalController < ApplicationController
   def available_plans_at
     manager = CloudProvider::Manager.instance
 
-    json(manager.available_plans_of_type_at(params["type"], params["location_str_id"]))
+    json(manager.available_plans_of_type_at(params['type'], params['location_str_id']))
   end
 
   def available_configs
@@ -36,9 +36,8 @@ class GlobalController < ApplicationController
   end
 
   def services_down
-    json(Status.with_status("down"))
+    json(Status.with_status('down'))
   end
 
   private
-
 end

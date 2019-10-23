@@ -1,13 +1,11 @@
+# frozen_string_literal: true
 
 module CloudProvider
   class Base
-
-    def initialize(configs = nil)
-
-    end
+    def initialize(configs = nil); end
 
     def initialize_locations
-      locations = self.available_locations
+      locations = available_locations
 
       locations.each do |l|
         unless Location.exists?(str_id: l[:str_id])

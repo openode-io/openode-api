@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'net/sftp'
 
 module Remote
@@ -5,8 +7,8 @@ module Remote
     @@conn_test = nil
 
     def self.set_conn_test(conn)
-      @@conn_test = conn if ENV["RAILS_ENV"] == "test"
-      @@test_uploaded_files = [] if ENV["RAILS_ENV"] == "test"
+      @@conn_test = conn if ENV['RAILS_ENV'] == 'test'
+      @@test_uploaded_files = [] if ENV['RAILS_ENV'] == 'test'
     end
 
     def self.get_conn_test
@@ -20,18 +22,18 @@ module Remote
     # opts: { host, user, password,  }
     def self.transfer(upload_files, opts = {})
       if @@conn_test
-        Rails.logger.info("Skipping SFTP transfer")
+        Rails.logger.info('Skipping SFTP transfer')
         @@test_uploaded_files = upload_files
       else
-        Net::SFTP.start(opts[:host], opts[:user], :password => opts[:password],
-          :non_interactive => true) do |sftp|
-        	Sftp.upload(sftp, upload_files)
+        Net::SFTP.start(opts[:host], opts[:user], password: opts[:password],
+                                                  non_interactive: true) do |sftp|
+          Sftp.upload(sftp, upload_files)
         end
       end
     end
 
     def self.content_to_tmp_file(content)
-      dir_tmp = "/tmp/"
+      dir_tmp = '/tmp/'
       file_tmp_path = "#{dir_tmp}#{SecureRandom.hex(32)}"
 
       File.write(file_tmp_path, content)
@@ -40,7 +42,7 @@ module Remote
     end
 
     def self.upload(sftp, files)
-  		files.each do |file|
+      files.each do |file|
         tmp_file_path = nil
 
         if file[:content]
@@ -50,13 +52,13 @@ module Remote
         end
 
         Rails.logger.info("Uploading #{file[:local_file_path]} to #{file[:remote_file_path]}")
-  			sftp.upload!(file[:local_file_path], file[:remote_file_path])
+        sftp.upload!(file[:local_file_path], file[:remote_file_path])
 
         if tmp_file_path.present?
           Rails.logger.info("Removing tmp upload file #{tmp_file_path}")
           File.delete(tmp_file_path)
         end
-  		end
+      end
     end
   end
 end

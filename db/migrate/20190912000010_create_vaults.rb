@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 class CreateVaults < ActiveRecord::Migration[6.0]
   def change
     begin
       drop_table :vaults
-    rescue => ex
-      puts "Error dropping table #{ex}"
+    rescue StandardError => e
+      puts "Error dropping table #{e}"
     end
 
     create_table :vaults do |t|

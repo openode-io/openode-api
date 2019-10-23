@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateCreditActions < ActiveRecord::Migration[6.0]
   def change
     create_table :credit_actions do |t|

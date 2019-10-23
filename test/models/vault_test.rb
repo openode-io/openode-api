@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 require 'test_helper'
 
 class VaultTest < ActiveSupport::TestCase
-  test "location server based vault" do
+  test 'location server based vault' do
     ls = LocationServer.first
 
-    private_key = """-----BEGIN RSA PRIVATE KEY-----
+    private_key = ''"-----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEAt920A6VTTmAaTxccbg/Bp/hb8eN9o0tttpsXy5gKVS79skPl
 inLz10ZUw6y4cmiewWufPUdOdlgjHyrt7YHBJ1EIVG8eBazT7UCJbDOOeF5ATkGh
 PIBDmA7e8PlWF7lvORFzT59EHPBHGxNYmuQNqcVobfp66IVq06ESmlUCXGQdKLzg
@@ -30,13 +32,13 @@ C5f+kyvX4svGnPw6CrcUjyfrpf9tT+DASpkuJ9fvPXgicqfJ8zs2xZzGRRzowUDP
 +ZSCWQKBgQCv4zXj8L1bF7eGy12CeusSWNP9wO9B/VPGgVYG/B6xVzRdkTelIMDu
 44M1g13K5F9LTD8Mz1rl/+oxXBss1go2tzsXO5Y+vjKlET9ynfZnJflojgaR0QHO
 qi2lhK9tNxxLDeOtdzBqTqEK9Sw+EUVEV/l+G8DIJah/0qhIBpx3mA==
------END RSA PRIVATE KEY-----"""
+-----END RSA PRIVATE KEY-----"''
 
-    created_vault = Vault.create!({
+    created_vault = Vault.create!(
       ref_id: ls.id,
-      entity_type: "LocationServer",
+      entity_type: 'LocationServer',
       data: private_key
-    })
+    )
 
     created_vault.reload
 
@@ -46,21 +48,20 @@ qi2lhK9tNxxLDeOtdzBqTqEK9Sw+EUVEV/l+G8DIJah/0qhIBpx3mA==
     assert_equal ls.vault.data, private_key
   end
 
-  test "model save-load hash secret" do
+  test 'model save-load hash secret' do
     ls = LocationServer.first
 
-    ls.save_secret!({ hello: "world", world: "hello" })
+    ls.save_secret!(hello: 'world', world: 'hello')
 
     result = ls.reload.secret
 
-    assert_equal result[:hello], "world"
-    assert_equal result[:world], "hello"
+    assert_equal result[:hello], 'world'
+    assert_equal result[:world], 'hello'
   end
 
-  test "model load missing secret" do
+  test 'model load missing secret' do
     ls = LocationServer.first
 
     assert_nil ls.secret
   end
-
 end

@@ -1,35 +1,37 @@
+# frozen_string_literal: true
+
 require 'test_helper'
 
 class WebsiteLocationTest < ActiveSupport::TestCase
-  test "first website location" do
+  test 'first website location' do
     website = default_website
     wl = website.website_locations[0]
 
-    assert wl.location.str_id == "canada"
+    assert wl.location.str_id == 'canada'
   end
 
-  test "fail if two times the same location for a given website" do
+  test 'fail if two times the same location for a given website' do
     website = default_website
 
     begin
-      WebsiteLocation.create!({
+      WebsiteLocation.create!(
         website: website,
-        location: Location.find_by!(str_id: "canada")
-      })
-      raise "invalid"
-    rescue => ex
-      assert_includes "#{ex.inspect}", "already exists"
+        location: Location.find_by!(str_id: 'canada')
+      )
+      raise 'invalid'
+    rescue StandardError => e
+      assert_includes e.inspect.to_s, 'already exists'
     end
   end
 
-  test "extra storage valid" do
+  test 'extra storage valid' do
     website = default_website
     wl = website.website_locations[0]
     wl.extra_storage = 5
     wl.save!
   end
 
-  test "extra storage too high" do
+  test 'extra storage too high' do
     website = default_website
     wl = website.website_locations[0]
     wl.extra_storage = 11
@@ -38,7 +40,7 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert_equal wl.valid?, false
   end
 
-  test "extra storage too low" do
+  test 'extra storage too low' do
     website = default_website
     wl = website.website_locations[0]
     wl.extra_storage = -1
@@ -47,72 +49,72 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert_equal wl.valid?, false
   end
 
-  test "domain with canada subdomain" do
+  test 'domain with canada subdomain' do
     website = default_website
     wl = website.website_locations[0]
 
-    assert wl.main_domain() == "testsite.openode.io"
+    assert wl.main_domain == 'testsite.openode.io'
   end
 
-  test "domain with usa subdomain" do
-    website = Website.find_by site_name: "testsite2"
+  test 'domain with usa subdomain' do
+    website = Website.find_by site_name: 'testsite2'
     wl = website.website_locations[0]
 
-    assert wl.main_domain() == "testsite2.us.openode.io"
+    assert wl.main_domain == 'testsite2.us.openode.io'
   end
 
-  test "domain with usa custom domain" do
-    website = Website.find_by site_name: "www.what.is"
+  test 'domain with usa custom domain' do
+    website = Website.find_by site_name: 'www.what.is'
     wl = website.website_locations[0]
 
-    assert wl.main_domain() == "www.what.is"
+    assert wl.main_domain == 'www.what.is'
   end
 
   # root domain of website location
-  test "root domain with usa custom domain" do
-    website = Website.find_by site_name: "www.what.is"
+  test 'root domain with usa custom domain' do
+    website = Website.find_by site_name: 'www.what.is'
     wl = website.website_locations[0]
 
-    assert wl.root_domain() == "what.is"
+    assert wl.root_domain == 'what.is'
   end
 
   # compute domains of website location
-  test "compute domains with usa custom domain" do
-    website = Website.find_by site_name: "www.what.is"
-    website.domains = ["www.what.is", "www2.www.what.is"]
+  test 'compute domains with usa custom domain' do
+    website = Website.find_by site_name: 'www.what.is'
+    website.domains = ['www.what.is', 'www2.www.what.is']
     website.save!
     wl = website.website_locations[0]
 
-    assert wl.compute_domains == ["www.what.is", "www2.www.what.is"]
+    assert wl.compute_domains == ['www.what.is', 'www2.www.what.is']
   end
 
-  test "compute domains with usa subdomain" do
-    website = Website.find_by site_name: "testsite2"
+  test 'compute domains with usa subdomain' do
+    website = Website.find_by site_name: 'testsite2'
     wl = website.website_locations[0]
 
-    assert wl.compute_domains == ["testsite2.us.openode.io"]
+    assert wl.compute_domains == ['testsite2.us.openode.io']
   end
 
-  test "compute_a_record_dns with two domains" do
-    server = LocationServer.find_by ip: "127.0.0.1"
+  test 'compute_a_record_dns with two domains' do
+    server = LocationServer.find_by ip: '127.0.0.1'
 
     result =
-      WebsiteLocation.compute_a_record_dns(server, ["google.com", "www.google.com"])
+      WebsiteLocation.compute_a_record_dns(server, ['google.com', 'www.google.com'])
 
     assert_equal result.length, 2
-    assert_equal result[0]["domainName"], "google.com"
-    assert_equal result[0]["type"], "A"
-    assert_equal result[0]["value"], "127.0.0.1"
+    assert_equal result[0]['domainName'], 'google.com'
+    assert_equal result[0]['type'], 'A'
+    assert_equal result[0]['value'], '127.0.0.1'
 
-    assert_equal result[1]["domainName"], "www.google.com"
-    assert_equal result[1]["type"], "A"
-    assert_equal result[1]["value"], "127.0.0.1"
+    assert_equal result[1]['domainName'], 'www.google.com'
+    assert_equal result[1]['type'], 'A'
+    assert_equal result[1]['value'], '127.0.0.1'
   end
 
   # compute_dns
-  test "compute dns with one domain and no dns entry" do
-    website = Website.find_by site_name: "www.what.is"
-    website.domains = ["www.what.is"]
+  test 'compute dns with one domain and no dns entry' do
+    website = Website.find_by site_name: 'www.what.is'
+    website.domains = ['www.what.is']
     website.dns = []
     website.save!
     wl = website.website_locations[0]
@@ -120,14 +122,14 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert wl.compute_dns == []
   end
 
-  test "compute dns with one domain and one dns entry" do
-    website = Website.find_by site_name: "www.what.is"
-    website.domains = ["www.what.is"]
+  test 'compute dns with one domain and one dns entry' do
+    website = Website.find_by site_name: 'www.what.is'
+    website.domains = ['www.what.is']
 
     entry1 = {
-      domainName: "www.what.is",
-      type: "A",
-      value: "127.0.0.10"
+      domainName: 'www.what.is',
+      type: 'A',
+      value: '127.0.0.10'
     }
 
     website.dns = [entry1]
@@ -135,23 +137,23 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     website.reload
     wl = website.website_locations[0]
 
-    result = wl.compute_dns()
+    result = wl.compute_dns
 
     assert_equal result.length, 1
-    assert_equal result[0]["domainName"], "www.what.is"
-    assert_equal result[0]["type"], "A"
-    assert_equal result[0]["value"], "127.0.0.10"
-    assert_equal result[0]["id"], WebsiteLocation.dns_entry_to_id(entry1)
+    assert_equal result[0]['domainName'], 'www.what.is'
+    assert_equal result[0]['type'], 'A'
+    assert_equal result[0]['value'], '127.0.0.10'
+    assert_equal result[0]['id'], WebsiteLocation.dns_entry_to_id(entry1)
   end
 
-  test "compute dns with one domain, one dns entry, and auto a" do
-    website = Website.find_by site_name: "www.what.is"
-    website.domains = ["www.what.is"]
+  test 'compute dns with one domain, one dns entry, and auto a' do
+    website = Website.find_by site_name: 'www.what.is'
+    website.domains = ['www.what.is']
 
     entry1 = {
-      domainName: "www.what.is",
-      type: "A",
-      value: "127.0.0.10"
+      domainName: 'www.what.is',
+      type: 'A',
+      value: '127.0.0.10'
     }
 
     website.dns = [entry1]
@@ -159,48 +161,48 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     website.reload
     wl = website.website_locations[0]
 
-    result = wl.compute_dns({ with_auto_a: true })
+    result = wl.compute_dns(with_auto_a: true)
 
     assert_equal result.length, 2
-    assert_equal result[0]["domainName"], "www.what.is"
-    assert_equal result[0]["type"], "A"
-    assert_equal result[0]["value"], "127.0.0.10"
-    assert_equal result[0]["id"], WebsiteLocation.dns_entry_to_id(entry1)
+    assert_equal result[0]['domainName'], 'www.what.is'
+    assert_equal result[0]['type'], 'A'
+    assert_equal result[0]['value'], '127.0.0.10'
+    assert_equal result[0]['id'], WebsiteLocation.dns_entry_to_id(entry1)
 
-    assert_equal result[1]["domainName"], "www.what.is"
-    assert_equal result[1]["type"], "A"
-    assert_equal result[1]["value"], wl.location_server.ip
-    assert_equal result[1]["id"], WebsiteLocation.dns_entry_to_id({
-      domainName: "www.what.is",
-      type: "A",
+    assert_equal result[1]['domainName'], 'www.what.is'
+    assert_equal result[1]['type'], 'A'
+    assert_equal result[1]['value'], wl.location_server.ip
+    assert_equal result[1]['id'], WebsiteLocation.dns_entry_to_id(
+      domainName: 'www.what.is',
+      type: 'A',
       value: wl.location_server.ip
-    })
+    )
   end
 
   # generic root domain
-  test "root domain of google" do
-    assert WebsiteLocation.root_domain("www.google.com") == "google.com"
+  test 'root domain of google' do
+    assert WebsiteLocation.root_domain('www.google.com') == 'google.com'
   end
 
-  test "root domain of .nl" do
-    assert WebsiteLocation.root_domain("dev.api.abnbouw.nl") == "abnbouw.nl"
+  test 'root domain of .nl' do
+    assert WebsiteLocation.root_domain('dev.api.abnbouw.nl') == 'abnbouw.nl'
   end
 
   # available_plans
-  test "available plans cloud" do
-    expected_plans = CloudProvider::Manager.instance.first_of_type("internal").plans
-    w = Website.find_by site_name: "testsite"
-    website_location = w.website_locations.first  
+  test 'available plans cloud' do
+    expected_plans = CloudProvider::Manager.instance.first_of_type('internal').plans
+    w = Website.find_by site_name: 'testsite'
+    website_location = w.website_locations.first
 
     plans = website_location.available_plans
 
     assert_equal plans.length, expected_plans.length
-    assert_equal plans[0][:id], "sandbox"
+    assert_equal plans[0][:id], 'sandbox'
   end
 
   # allocate_ports!
-  test "allocate ports" do
-    w = Website.find_by site_name: "testsite2"
+  test 'allocate ports' do
+    w = Website.find_by site_name: 'testsite2'
     website_location = w.website_locations.first
 
     website_location.port = nil
@@ -213,8 +215,8 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     port = website_location.port
     second_port = website_location.second_port
 
-    assert_equal port.between?(5000, 65534), true
-    assert_equal second_port.between?(5000, 65534), true
+    assert_equal port.between?(5000, 65_534), true
+    assert_equal second_port.between?(5000, 65_534), true
 
     website_location.allocate_ports!
     website_location.reload
@@ -224,38 +226,38 @@ class WebsiteLocationTest < ActiveSupport::TestCase
   end
 
   # ports
-  test "all ports, all defined" do
+  test 'all ports, all defined' do
     website_location = default_website_location
 
-    website_location.port = 12345
-    website_location.second_port = 12346
+    website_location.port = 12_345
+    website_location.second_port = 12_346
     website_location.save
 
     assert_equal website_location.ports.length, 2
-    assert_equal website_location.ports[0], 12345
-    assert_equal website_location.ports[1], 12346
+    assert_equal website_location.ports[0], 12_345
+    assert_equal website_location.ports[1], 12_346
   end
 
-  test "all ports, second port missing" do
+  test 'all ports, second port missing' do
     website_location = default_website_location
 
-    website_location.port = 12345
+    website_location.port = 12_345
     website_location.second_port = nil
     website_location.save
 
     assert_equal website_location.ports.length, 1
-    assert_equal website_location.ports[0], 12345
+    assert_equal website_location.ports[0], 12_345
   end
 
   # internal domains
-  test "INTERNAL_DOMAINS" do
-    assert_equal WebsiteLocation.internal_domains().length, 2
-    assert_includes WebsiteLocation.internal_domains, "openode.io"
-    assert_includes WebsiteLocation.internal_domains, "openode.dev"
+  test 'INTERNAL_DOMAINS' do
+    assert_equal WebsiteLocation.internal_domains.length, 2
+    assert_includes WebsiteLocation.internal_domains, 'openode.io'
+    assert_includes WebsiteLocation.internal_domains, 'openode.dev'
   end
 
   # nb cpus
-  test "nb_cpus invalid if < 1" do
+  test 'nb_cpus invalid if < 1' do
     wl = default_website_location
 
     wl.nb_cpus = 0
@@ -264,7 +266,7 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert_equal wl.valid?, false
   end
 
-  test "nb_cpus invalid if > 0.75 of location server cpus" do
+  test 'nb_cpus invalid if > 0.75 of location server cpus' do
     wl = default_website_location
 
     wl.nb_cpus = 7
@@ -273,7 +275,7 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert_equal wl.valid?, false
   end
 
-  test "nb_cpus valid if < 0.75 of location server cpus" do
+  test 'nb_cpus valid if < 0.75 of location server cpus' do
     wl = default_website_location
 
     wl.nb_cpus = 5
@@ -283,13 +285,12 @@ class WebsiteLocationTest < ActiveSupport::TestCase
   end
 
   # gen_ssh_key!
-  test "gen_ssh_key" do
+  test 'gen_ssh_key' do
     wl = default_website_location
     wl.gen_ssh_key!
     wl.reload
 
-    assert_equal wl.secret[:public_key].include?("ssh-rsa"), true
-    assert_equal wl.secret[:private_key].include?("PRIVATE KEY"), true
+    assert_equal wl.secret[:public_key].include?('ssh-rsa'), true
+    assert_equal wl.secret[:private_key].include?('PRIVATE KEY'), true
   end
-
 end

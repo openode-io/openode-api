@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 module DeploymentMethod
   class Runner
@@ -9,40 +10,37 @@ module DeploymentMethod
       @configs = configs
       @website = @configs[:website]
       @website_location = @configs[:website_location]
-      @deployment_method = self.get_deployment_method()
-      @cloud_provider = self.get_cloud_provider()
+      @deployment_method = get_deployment_method
+      @cloud_provider = get_cloud_provider
     end
 
-    def deployment_method
-      @deployment_method
-    end
+    attr_reader :deployment_method
 
-    def cloud_provider
-      @cloud_provider
-    end
+    attr_reader :cloud_provider
 
     def init_execution!(type)
-      self.execution = Execution.create!({
+      self.execution = Execution.create!(
         website: @website,
         website_location: @website_location,
         status: Execution::STATUS_RUNNING,
         type: type
-      })
+      )
 
-      self.execution.status = Execution::STATUS_SUCCESS
-      self.execution.save
+      execution.status = Execution::STATUS_SUCCESS
+      execution.save
     end
 
     def multi_steps
-      self.execution.status = Deployment::STATUS_RUNNING
-      self.execution.save
+      execution.status = Deployment::STATUS_RUNNING
+      execution.save
 
       self
     end
 
     def terminate
       # will close the SSH connection if any
-      @ssh.close if @ssh
+
+      @ssh&.close
       @ssh = nil
     end
 
@@ -56,17 +54,14 @@ module DeploymentMethod
     end
 
     def record_execution_steps(results)
-      self.execution.save_steps(results)
+      execution.save_steps(results)
     end
 
     def execute(cmds, options = {})
-
-      if ! self.execution || options[:execution_type]
-        self.init_execution!(options[:execution_type] || "Task")
-      end
+      init_execution!(options[:execution_type] || 'Task') if !execution || options[:execution_type]
 
       protocol = @cloud_provider.deployment_protocol
-      time_begin = Time.now
+      time_begin = Time.zone.now
 
       cmds.each do |cmd|
         cmd[:options] ||= {}
@@ -74,10 +69,10 @@ module DeploymentMethod
         cmd[:options][:website_location] ||= @website_location if @website_location
       end
 
-      results = self.send("execute_#{protocol}", cmds)
+      results = send("execute_#{protocol}", cmds)
 
-      Rails.logger.info("Execute cmds=#{cmds.to_yaml}, result=#{results.to_yaml}, " +
-        "duration=#{Time.now - time_begin}")
+      Rails.logger.info("Execute cmds=#{cmds.to_yaml}, result=#{results.to_yaml}, " \
+        "duration=#{Time.zone.now - time_begin}")
 
       record_execution_steps(results)
 
@@ -89,7 +84,7 @@ module DeploymentMethod
         local_file_path: local_path,
         remote_file_path: remote_path
       }]
-      Remote::Sftp.transfer(files, self.ssh_configs)
+      Remote::Sftp.transfer(files, ssh_configs)
     end
 
     def upload_content_to(content, remote_path)
@@ -97,7 +92,7 @@ module DeploymentMethod
         content: content,
         remote_file_path: remote_path
       }]
-      Remote::Sftp.transfer(files, self.ssh_configs)
+      Remote::Sftp.transfer(files, ssh_configs)
     end
 
     def execute_ssh(cmds)
@@ -122,30 +117,27 @@ module DeploymentMethod
           }
         end
       end
-      .select { |gen_cmd| gen_cmd.present? }
+                               .select(&:present?)
 
-      if generated_commands.length > 0
-        @ssh ||= Remote::Ssh.new(self.ssh_configs)
+      unless generated_commands.empty?
+        @ssh ||= Remote::Ssh.new(ssh_configs)
         results_generated_commands = @ssh.exec(generated_commands.map { |c| c[:result] })
 
-        results = results + 
-          generated_commands.map.with_index(0) do |gen_cmd, index|
-            {
-              cmd_name: gen_cmd[:cmd_name],
-              result: results_generated_commands[index]
-            }
-          end
+        results += generated_commands.map.with_index(0) do |gen_cmd, index|
+          {
+            cmd_name: gen_cmd[:cmd_name],
+            result: results_generated_commands[index]
+          }
+        end
       end
 
       results
     end
 
-    def get_deployment_method()
+    def get_deployment_method
       dep_method = case @type
-      when "docker"
-        DeploymentMethod::DockerCompose.new
-      else
-        nil
+                   when 'docker'
+                     DeploymentMethod::DockerCompose.new
       end
 
       # for convenience, to call back the runner from any dep method
@@ -154,16 +146,16 @@ module DeploymentMethod
       dep_method
     end
 
-    def get_cloud_provider()
+    def get_cloud_provider
       provider_type =
-      case @cloud_type
-      when "cloud" # refactor to internal
-        "internal"
-      when "private-cloud"
-        "vultr"
-      else
-        @cloud_type
-      end
+        case @cloud_type
+        when 'cloud' # refactor to internal
+          'internal'
+        when 'private-cloud'
+          'vultr'
+        else
+          @cloud_type
+        end
 
       CloudProvider::Manager.instance.first_of_type(provider_type)
     end

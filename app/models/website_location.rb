@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'public_suffix'
 
 class WebsiteLocation < ApplicationRecord
@@ -19,19 +21,19 @@ class WebsiteLocation < ApplicationRecord
   }
 
   def validate_nb_cpus
-    return unless self.location_server
+    return unless location_server
 
-    max_cpus = (self.location_server.cpus * 0.75).to_i
+    max_cpus = (location_server.cpus * 0.75).to_i
     max_cpus = 1 if max_cpus < 1
 
-    if self.nb_cpus <= 0 || self.nb_cpus > max_cpus
+    if nb_cpus <= 0 || nb_cpus > max_cpus
       errors.add(:nb_cpus, "Invalid value, valid ones: [1..#{max_cpus}]")
     end
   end
 
   def unique_location_per_website
-    if website.website_locations.any? { |wl| wl.id != self.id && wl.location_id == self.location_id }
-      errors.add(:location, "already exists for this site")
+    if website.website_locations.any? { |wl| wl.id != id && wl.location_id == location_id }
+      errors.add(:location, 'already exists for this site')
     end
   end
 
@@ -65,25 +67,25 @@ class WebsiteLocation < ApplicationRecord
 
   # main domain used internally
   def main_domain
-    send "domain_#{self.website.domain_type}"
+    send "domain_#{website.domain_type}"
   end
 
   def domain_subdomain
-    location_subdomain = Location::SUBDOMAIN[self.location.str_id.to_sym]
+    location_subdomain = Location::SUBDOMAIN[location.str_id.to_sym]
 
-    first_part = ""
+    first_part = ''
 
-    if location_subdomain && location_subdomain != ""
-      first_part = "#{self.website.site_name}.#{location_subdomain}"
-    else
-      first_part = "#{self.website.site_name}"
-    end
+    first_part = if location_subdomain && location_subdomain != ''
+                   "#{website.site_name}.#{location_subdomain}"
+                 else
+                   website.site_name.to_s
+                 end
 
     "#{first_part}.openode.io"
   end
 
   def domain_custom_domain
-    self.website.site_name
+    website.site_name
   end
 
   def self.root_domain(domain_name)
@@ -91,13 +93,13 @@ class WebsiteLocation < ApplicationRecord
   end
 
   def root_domain
-    WebsiteLocation.root_domain(self.main_domain)
+    WebsiteLocation.root_domain(main_domain)
   end
 
   def compute_domains
-    if website.domain_type == "subdomain"
-      [self.main_domain]
-    elsif website.domain_type == "custom_domain"
+    if website.domain_type == 'subdomain'
+      [main_domain]
+    elsif website.domain_type == 'custom_domain'
       website.domains
     end
   end
@@ -109,38 +111,38 @@ class WebsiteLocation < ApplicationRecord
   def compute_dns(opts = {})
     result = (website.dns || []).clone
 
-    if opts[:with_auto_a] && (opts[:location_server] || self.location_server)
-      server = opts[:location_server] || self.location_server
-      computed_domains = self.compute_domains
+    if opts[:with_auto_a] && (opts[:location_server] || location_server)
+      server = opts[:location_server] || location_server
+      computed_domains = compute_domains
 
       result += WebsiteLocation.compute_a_record_dns(server, computed_domains)
     end
 
     result
-      .map { |r| r["id"] = WebsiteLocation.dns_entry_to_id(r) ; r }
-      .uniq { |r| r["id"] }
+      .map { |r| r['id'] = WebsiteLocation.dns_entry_to_id(r); r }
+      .uniq { |r| r['id'] }
   end
 
   def find_dns_entry_by_id(id)
     compute_dns
-      .find { |entry| entry["id"] == id }    
+      .find { |entry| entry['id'] == id }
   end
 
   def gen_ssh_key!
     k = SSHKey.generate
 
-    self.save_secret!({
+    save_secret!(
       public_key: k.ssh_public_key,
       private_key: k.private_key
-    })
+    )
 
-    self.secret
+    secret
   end
 
   ### storage
   def change_storage!(amount_gb)
     self.extra_storage += amount_gb
-    self.save!
+    save!
   end
 
   def self.compute_a_record_dns(location_server, computed_domains)
@@ -148,9 +150,9 @@ class WebsiteLocation < ApplicationRecord
 
     computed_domains.each do |domain|
       result << {
-        "domainName" => domain,
-        "type" => "A",
-        "value" => location_server.ip
+        'domainName' => domain,
+        'type' => 'A',
+        'value' => location_server.ip
       }
     end
 
@@ -158,32 +160,32 @@ class WebsiteLocation < ApplicationRecord
   end
 
   def allocate_ports!
-    return if self.port && self.second_port
+    return if port && second_port
 
     ports_used =
-      WebsiteLocation.where(location_server_id: self.location_server_id).pluck(:port, :running_port, :second_port)
-      .flatten
+      WebsiteLocation.where(location_server_id: location_server_id).pluck(:port, :running_port, :second_port)
+                     .flatten
 
-    self.port = self.generate_port(5000, 65534, ports_used)
-    self.second_port = self.generate_port(5000, 65534, ports_used + [self.port])
+    self.port = generate_port(5000, 65_534, ports_used)
+    self.second_port = generate_port(5000, 65_534, ports_used + [port])
     self.running_port = nil
-    self.save!
+    save!
   end
 
   def ports
-    [self.port, self.second_port]
-      .select { |p| p.present? }
+    [port, second_port]
+      .select(&:present?)
   end
 
   def update_remote_dns(opts = {})
     actions_done = Remote::Dns::Base.instance.update(
-      self.root_domain,
-      self.main_domain,
-      opts[:dns_entries] || self.compute_dns({ with_auto_a: opts[:with_auto_a] }),
-      self.location_server.ip
+      root_domain,
+      main_domain,
+      opts[:dns_entries] || compute_dns(with_auto_a: opts[:with_auto_a]),
+      location_server.ip
     )
 
-    self.website.create_event({ title: 'DNS update', updates: actions_done })
+    website.create_event(title: 'DNS update', updates: actions_done)
 
     actions_done
   end
@@ -191,17 +193,13 @@ class WebsiteLocation < ApplicationRecord
   protected
 
   def generate_port(min, max, other_reserved = [])
-    reserved_ports = [3306, 6379, 27017, 27018, 27019] + other_reserved
+    reserved_ports = [3306, 6379, 27_017, 27_018, 27_019] + other_reserved
     port = nil
 
-    while ! port || reserved_ports.include?(port) do
-      port = rand(min..max)
-    end
+    port = rand(min..max) while !port || reserved_ports.include?(port)
 
-    return port
+    port
   end
 
   private
-  
-
 end

@@ -1,6 +1,6 @@
+# frozen_string_literal: true
 
 class Website < ApplicationRecord
-
   serialize :domains, JSON
   serialize :configs, JSON
   serialize :dns, JSON
@@ -17,14 +17,14 @@ class Website < ApplicationRecord
   has_many :executions
   has_many :credit_actions
 
-  scope :custom_domain, -> { where(domain_type: "custom_domain") }
+  scope :custom_domain, -> { where(domain_type: 'custom_domain') }
 
-  REPOS_BASE_DIR = "/home/"
+  REPOS_BASE_DIR = '/home/'
 
-  STATUS_ONLINE = "online"
-  STATUS_OFFLINE = "N/A"
-  STATUS_STARTING = "starting"
-  STATUSES = [STATUS_ONLINE, STATUS_OFFLINE, STATUS_STARTING]
+  STATUS_ONLINE = 'online'
+  STATUS_OFFLINE = 'N/A'
+  STATUS_STARTING = 'starting'
+  STATUSES = [STATUS_ONLINE, STATUS_OFFLINE, STATUS_STARTING].freeze
 
   validates :site_name, presence: true
   validates :site_name, uniqueness: true
@@ -38,56 +38,56 @@ class Website < ApplicationRecord
   validate :validate_domains
   validate :validate_site_name
 
-  validates_inclusion_of :type, :in => %w( nodejs docker )
-  validates_inclusion_of :domain_type, :in => %w( subdomain custom_domain )
-  validates_inclusion_of :cloud_type, :in => %w( cloud private-cloud )
-  validates_inclusion_of :status, :in => STATUSES
+  validates :type, inclusion: { in: %w[nodejs docker] }
+  validates :domain_type, inclusion: { in: %w[subdomain custom_domain] }
+  validates :cloud_type, inclusion: { in: %w[cloud private-cloud] }
+  validates :status, inclusion: { in: STATUSES }
 
   def locations
-    self.website_locations.map { |wl| wl.location }
+    website_locations.map(&:location)
   end
 
   def location_exists?(str_id)
-    self.locations.to_a.any? { |location| location.str_id == str_id }
+    locations.to_a.any? { |location| location.str_id == str_id }
   end
 
   def create_event(obj)
-    WebsiteEvent.create({ ref_id: self.id, obj: obj })
+    WebsiteEvent.create(ref_id: id, obj: obj)
   end
 
   def add_location(location)
-    if location.str_id.include?("-") && self.domain_type != "custom_domain"
+    if location.str_id.include?('-') && domain_type != 'custom_domain'
       # to refactor (-)
-      msg = "This location is available only for custom domains for now (not subdomains). " +
-        "Only the following locations (ids) are available for subdomains: canada, usa, france."
-      raise ValidationError.new(msg)
+      msg = 'This location is available only for custom domains for now (not subdomains). ' \
+            'Only the following locations (ids) are available for subdomains: canada, usa, france.'
+      raise ValidationError, msg
     end
 
     location_server = location.location_servers.first
 
-    website_location = WebsiteLocation.create!({
+    website_location = WebsiteLocation.create!(
       website: self,
       location: location,
       location_server: location_server
-    })
+    )
 
     if location_server
       website_location.allocate_ports!
-      website_location.update_remote_dns({ with_auto_a: true })
+      website_location.update_remote_dns(with_auto_a: true)
     end
   end
 
   def remove_location(location)
-    website_location = self.website_locations.to_a.find { |wl| wl.location_id == location.id }
+    website_location = website_locations.to_a.find { |wl| wl.location_id == location.id }
 
     if website_location
-      website_location.update_remote_dns({ dns_entries: [] })
+      website_location.update_remote_dns(dns_entries: [])
       website_location.destroy
     end
   end
 
   def is_private_cloud?
-    self.cloud_type == "private-cloud"
+    cloud_type == 'private-cloud'
   end
 
   def configs_must_comply
@@ -96,18 +96,18 @@ class Website < ApplicationRecord
     self.configs.each do |var_name, value|
       config = Website.config_def(var_name)
 
-      next if ! config
+      next unless config
 
-      if config[:enum] && ! config[:enum].include?(value)
+      if config[:enum] && !config[:enum].include?(value)
         errors.add(:configs, "Invalid value, valid ones: #{config[:enum]}")
       end
 
-      if config[:min] && config[:max]
-        parsed_val = value.to_f
+      next unless config[:min] && config[:max]
 
-        if ! (parsed_val.present? && parsed_val >= config[:min] && parsed_val <= config[:max])
-          errors.add(:configs, "Invalid value, , min = #{config[:min]}, max = #{config[:max]}")
-        end
+      parsed_val = value.to_f
+
+      unless parsed_val.present? && parsed_val >= config[:min] && parsed_val <= config[:max]
+        errors.add(:configs, "Invalid value, , min = #{config[:min]}, max = #{config[:max]}")
       end
     end
   end
@@ -116,58 +116,55 @@ class Website < ApplicationRecord
     self.storage_areas ||= []
 
     self.storage_areas.each do |storage_area|
-      cur_dir = "#{self.repo_dir}#{storage_area}"
+      cur_dir = "#{repo_dir}#{storage_area}"
 
-      if ! Io::Path.is_secure?(self.repo_dir, cur_dir)
+      unless Io::Path.is_secure?(repo_dir, cur_dir)
         errors.add(:storage_areas, "Invalid storage area path #{cur_dir}")
       end
     end
   end
 
   def validate_dns
-    return if domain_type == "subdomain"
+    return if domain_type == 'subdomain'
 
     self.dns ||= []
 
     self.dns.each do |dns_entry|
-      unless self.domains.include?(dns_entry["domainName"])
-        errors.add(:dns, "Invalid domain (#{dns_entry["domainName"]}), available domains: #{self.domains.inspect}")
+      unless domains.include?(dns_entry['domainName'])
+        errors.add(:dns, "Invalid domain (#{dns_entry['domainName']}), available domains: #{domains.inspect}")
       end
 
-      valid_types = [
-        "A", "CNAME", "TXT", "AAAA", "MX", "CAA", "NS", "SRV", "SSHFP", "TXT"
+      valid_types = %w[
+        A CNAME TXT AAAA MX CAA NS SRV SSHFP TXT
       ]
-      
-      unless valid_types.include?(dns_entry["type"])
-        errors.add(:dns, "Invalid type (#{dns_entry["type"]}), available types: #{valid_types.inspect}")
+
+      unless valid_types.include?(dns_entry['type'])
+        errors.add(:dns, "Invalid type (#{dns_entry['type']}), available types: #{valid_types.inspect}")
       end
     end
   end
 
   def validate_site_name
-    errors.add(:site_name, "Missing sitename") unless self.site_name
-    return unless self.site_name
-    self.send("validate_site_name_#{self.domain_type}")
+    errors.add(:site_name, 'Missing sitename') unless site_name
+    return unless site_name
+
+    send("validate_site_name_#{domain_type}")
   end
 
   def validate_site_name_subdomain
-    if self.site_name.include?(".")
-      errors.add(:site_name, "The site name should not container a dot.")
-    end
+    errors.add(:site_name, 'The site name should not container a dot.') if site_name.include?('.')
 
-    unless Website.domain_valid?("#{self.site_name}.openode.io")
-      errors.add(:site_name, "Invalid subdomain #{self.site_name}")
+    unless Website.domain_valid?("#{site_name}.openode.io")
+      errors.add(:site_name, "Invalid subdomain #{site_name}")
     end
   end
 
   def validate_site_name_custom_domain
-    unless Website.domain_valid?(self.site_name)
-      errors.add(:site_name, "Invalid domain #{self.site_name}")
-    end
+    errors.add(:site_name, "Invalid domain #{site_name}") unless Website.domain_valid?(site_name)
   end
 
   def self.domain_valid?(domain)
-    (domain =~ /^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}(:[0-9]{1,5})?(\/.*)?$/) == 0
+    (domain =~ %r{^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}(:[0-9]{1,5})?(/.*)?$}) == 0
   end
 
   def self.clean_domain(domain)
@@ -175,16 +172,14 @@ class Website < ApplicationRecord
   end
 
   def validate_domains
-    return if domain_type == "subdomain"
+    return if domain_type == 'subdomain'
 
     self.domains ||= []
 
     self.domains.each do |domain|
-      unless Website.domain_valid?(domain)
-        errors.add(:domains, "Invalid alias (#{domain}) format")
-      end
+      errors.add(:domains, "Invalid alias (#{domain}) format") unless Website.domain_valid?(domain)
 
-      unless domain.include?(self.site_name)
+      unless domain.include?(site_name)
         errors.add(:domains, "Invalid alias (#{domain}), must be a subdomain of #{site_name}")
       end
     end
@@ -192,30 +187,30 @@ class Website < ApplicationRecord
 
   CONFIG_VARIABLES = [
     {
-      variable: "SSL_CERTIFICATE_PATH",
-      description: "Certificate file. Example: certs/mysite.crt"
+      variable: 'SSL_CERTIFICATE_PATH',
+      description: 'Certificate file. Example: certs/mysite.crt'
     },
     {
-      variable: "SSL_CERTIFICATE_KEY_PATH",
-      description: "Private key generated. Example: certs/privatekey.key"
+      variable: 'SSL_CERTIFICATE_KEY_PATH',
+      description: 'Private key generated. Example: certs/privatekey.key'
     },
     {
-      variable: "REDIR_HTTP_TO_HTTPS",
-      description: "Will redirect HTTP traffic to HTTPS. An HTTPS server is required.",
-      type: "website",
-      enum: ["true", "false", ""]
+      variable: 'REDIR_HTTP_TO_HTTPS',
+      description: 'Will redirect HTTP traffic to HTTPS. An HTTPS server is required.',
+      type: 'website',
+      enum: ['true', 'false', '']
     },
     {
-      variable: "MAX_BUILD_DURATION",
-      description: "The build duration limit in seconds.",
+      variable: 'MAX_BUILD_DURATION',
+      description: 'The build duration limit in seconds.',
       min: 50,
       default: 100,
       max: 600
     },
     {
-      variable: "SKIP_PORT_CHECK",
-      description: "Skip the port verification while deploying.",
-      enum: ["true", "false", ""]
+      variable: 'SKIP_PORT_CHECK',
+      description: 'Skip the port verification while deploying.',
+      enum: ['true', 'false', '']
     }
   ].freeze
 
@@ -230,38 +225,39 @@ class Website < ApplicationRecord
   end
 
   def has_skip_port_check?
-    configs && [true, "true"].include?(configs["SKIP_PORT_CHECK"])
+    configs && [true, 'true'].include?(configs['SKIP_PORT_CHECK'])
   end
 
   def max_build_duration
     [
-      (configs["MAX_BUILD_DURATION"] || Website.config_def("MAX_BUILD_DURATION")[:default]).to_i,
-      Website.config_def("MAX_BUILD_DURATION")[:max]
+      (configs['MAX_BUILD_DURATION'] || Website.config_def('MAX_BUILD_DURATION')[:default]).to_i,
+      Website.config_def('MAX_BUILD_DURATION')[:max]
     ]
-    .min
+      .min
   end
 
   def repo_dir
-    return "/invalid/repository/" if ! self.user_id || ! self.site_name
+    return '/invalid/repository/' if !user_id || !site_name
 
-    "#{Website::REPOS_BASE_DIR}#{self.user_id}/#{self.site_name}/"
+    "#{Website::REPOS_BASE_DIR}#{user_id}/#{site_name}/"
   end
 
   def plan
     plans = CloudProvider::Manager.instance.available_plans
 
-    plans.find { |p| [p[:id], p[:internal_id]].include?(self.account_type) }
+    plans.find { |p| [p[:id], p[:internal_id]].include?(account_type) }
   end
 
   def has_free_sandbox?
-    self.account_type == "free"
+    account_type == 'free'
   end
 
   def change_status!(new_status)
     logger.info("website #{site_name} changing status to #{new_status}")
     raise "Wrong status #{new_status}" unless STATUSES.include?(new_status)
+
     self.status = new_status
-    self.save!
+    save!
   end
 
   def change_plan!(account_type)
@@ -269,13 +265,13 @@ class Website < ApplicationRecord
     self.account_type = account_type
 
     # to refactor
-    self.cloud_type = account_type.include?("-") ? "private-cloud" : "cloud"
+    self.cloud_type = account_type.include?('-') ? 'private-cloud' : 'cloud'
 
-    self.save!
+    save!
   end
 
   def online?
-    self.status == STATUS_ONLINE
+    status == STATUS_ONLINE
   end
 
   def add_storage_area(storage_area)
@@ -293,42 +289,40 @@ class Website < ApplicationRecord
     self.dns ||= []
 
     entry_found = self.dns.find do |d|
-      d["domainName"] == entry["domainName"] &&
-      d["type"] == entry["type"] &&
-      d["value"] == entry["value"]
+      d['domainName'] == entry['domainName'] &&
+        d['type'] == entry['type'] &&
+        d['value'] == entry['value']
     end
 
     self.dns.delete(entry_found) if entry_found
   end
 
   # true/false, msg
-  def can_deploy_to?(website_location)
+  def can_deploy_to?(_website_location)
     unless user.activated?
-      msg = "User account not yet activated. Please make sure to click the " +
-        "activation link in your registration email."
+      msg = 'User account not yet activated. Please make sure to click the ' \
+            'activation link in your registration email.'
       return false, "*** #{msg}"
     end
 
-    if user.suspended?
-      return false, "*** User suspended"
-    end
+    return false, '*** User suspended' if user.suspended?
 
     unless user.has_credits?
-      msg = "No credit available. Please make sure to buy credits via the Administration " +
-        "dashboard in Billing - " +
-        "https://www.#{CloudProvider::Manager.instance.base_hostname}/admin/billing"
+      msg = 'No credit available. Please make sure to buy credits via the Administration ' \
+            'dashboard in Billing - ' \
+            "https://www.#{CloudProvider::Manager.instance.base_hostname}/admin/billing"
       return false, "*** #{msg}"
     end
 
-    return true, ""
+    [true, '']
   end
 
   def total_extra_storage
-    self.website_locations.sum { |wl| wl.extra_storage || 0 }
+    website_locations.sum { |wl| wl.extra_storage || 0 }
   end
 
   def has_extra_storage?
-    self.total_extra_storage > 0
+    total_extra_storage > 0
   end
 
   def extra_storage_credits_cost_per_hour
@@ -338,12 +332,12 @@ class Website < ApplicationRecord
   end
 
   def total_extra_cpus
-    self.website_locations.sum { |wl| (wl.nb_cpus || 1) - 1 }
+    website_locations.sum { |wl| (wl.nb_cpus || 1) - 1 }
   end
 
   def extra_cpus_credits_cost_per_hour
     Website.cost_price_to_credits(
-      self.total_extra_cpus * CloudProvider::Internal::COST_EXTRA_CPU_PER_HOUR
+      total_extra_cpus * CloudProvider::Internal::COST_EXTRA_CPU_PER_HOUR
     )
   end
 
@@ -353,7 +347,7 @@ class Website < ApplicationRecord
 
   # credits related task updates and calculations
   def spend_hourly_credits!
-    current_plan = self.plan
+    current_plan = plan
 
     return unless current_plan
 
@@ -364,35 +358,35 @@ class Website < ApplicationRecord
       },
       {
         action_type: CreditAction::TYPE_CONSUME_STORAGE,
-        credits_cost: self.extra_storage_credits_cost_per_hour
+        credits_cost: extra_storage_credits_cost_per_hour
       },
       {
         action_type: CreditAction::TYPE_CONSUME_CPU,
-        credits_cost: self.extra_cpus_credits_cost_per_hour
+        credits_cost: extra_cpus_credits_cost_per_hour
       }
     ]
-    
+
     website, action_type, credits_spent, opts = {}
 
     spendings.each do |spending|
       if spending[:credits_cost] != 0
-        CreditAction.consume!(self, spending[:action_type], 
-          spending[:credits_cost], { with_user_update: true })
+        CreditAction.consume!(self, spending[:action_type],
+                              spending[:credits_cost], with_user_update: true)
       end
     end
   end
 
   def normalized_storage_areas
-    site_dir = self.repo_dir
+    site_dir = repo_dir
 
     (self.storage_areas || []).map do |storage_area|
       (site_dir + storage_area)
-        .gsub("//", "/")
-        .gsub(site_dir, "./")
-        .gsub("././", "./")
-        .gsub("//", "/")
+        .gsub('//', '/')
+        .gsub(site_dir, './')
+        .gsub('././', './')
+        .gsub('//', '/')
     end
-  rescue => e
+  rescue StandardError => e
     logger.info("Issue normalizing storage areas #{e.inspect}")
     []
   end

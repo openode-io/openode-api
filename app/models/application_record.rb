@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
 
@@ -6,18 +8,16 @@ class ApplicationRecord < ActiveRecord::Base
   before_destroy :destroy_secret!
 
   def vault
-    Vault.find_by ref_id: self.id, entity_type: self.class.name
+    Vault.find_by ref_id: id, entity_type: self.class.name
   end
 
   def save_secret!(hash)
-    secret_vault = self.vault
+    secret_vault = vault
 
-    unless secret_vault
-      secret_vault = Vault.create!({
-        ref_id: self.id,
-        entity_type: self.class.name
-      })
-    end
+    secret_vault ||= Vault.create!(
+      ref_id: id,
+      entity_type: self.class.name
+    )
 
     secret_vault.data = hash.to_json
     secret_vault.save!
@@ -26,14 +26,14 @@ class ApplicationRecord < ActiveRecord::Base
   end
 
   def secret
-    return nil unless self.vault
+    return nil unless vault
 
-    JSON.parse(self.vault.data, :symbolize_names => true)
+    JSON.parse(vault.data, symbolize_names: true)
   end
 
   def destroy_secret!
-    existing_vault = self.vault
+    existing_vault = vault
 
-    existing_vault.destroy if existing_vault
+    existing_vault&.destroy
   end
 end

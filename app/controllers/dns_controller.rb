@@ -1,104 +1,100 @@
-class DnsController < InstancesController
+# frozen_string_literal: true
 
+class DnsController < InstancesController
   before_action :ensure_location
 
-  before_action only: [:list_dns, :add_dns, :del_dns] do
+  before_action only: %i[list_dns add_dns del_dns] do
     requires_custom_domain
   end
 
-  before_action only: [:add_dns, :del_dns] do
+  before_action only: %i[add_dns del_dns] do
     requires_location_server
   end
 
   def list_dns
-    json(@website_location.compute_dns({ with_auto_a: true }))
+    json(@website_location.compute_dns(with_auto_a: true))
   end
 
   def add_dns
-  	domain = params["domainName"]
-  	type = params["type"]
-  	value = params["value"]
-  	priority = params["priority"]
+    domain = params['domainName']
+    type = params['type']
+    value = params['value']
+    priority = params['priority']
 
-  	manager = Remote::Dns::Base.instance
+    manager = Remote::Dns::Base.instance
 
-  	# make sure the root domain is created
-  	server = @website_location.location_server
-  	manager.add_root_domain_if_not_exists(@website_location.root_domain, server.ip)
+    # make sure the root domain is created
+    server = @website_location.location_server
+    manager.add_root_domain_if_not_exists(@website_location.root_domain, server.ip)
 
-  	# add the DNS entry
-  	manager.add_domain_name_record(
-  		@website_location.root_domain, 
-  		domain, 
-  		type, 
-  		value, 
-  		priority
-  	)
+    # add the DNS entry
+    manager.add_domain_name_record(
+      @website_location.root_domain,
+      domain,
+      type,
+      value,
+      priority
+    )
 
-  	new_entry = { "domainName" => domain, "type" => type, "value" => value, "priority" => priority }
+    new_entry = { 'domainName' => domain, 'type' => type, 'value' => value, 'priority' => priority }
 
-  	@website.dns ||= []
-  	@website.dns << new_entry
-  	@website.save!
+    @website.dns ||= []
+    @website.dns << new_entry
+    @website.save!
 
-  	@website.create_event({ title: "Add DNS entry", entry: new_entry })
+    @website.create_event(title: 'Add DNS entry', entry: new_entry)
 
-  	list_dns
+    list_dns
   end
 
   def del_dns
-  	dns_id = params["id"]
+    dns_id = params['id']
 
-  	manager = Remote::Dns::Base.instance
+    manager = Remote::Dns::Base.instance
 
-  	entry = @website_location.find_dns_entry_by_id(dns_id)
+    entry = @website_location.find_dns_entry_by_id(dns_id)
 
-  	unless entry
-  		validation_error!("This entry does not exist.")
-  	end
+    validation_error!('This entry does not exist.') unless entry
 
-  	@website.remove_dns_entry(entry)
-  	@website.save!
+    @website.remove_dns_entry(entry)
+    @website.save!
 
-  	# update the remove DNS
-  	@website.reload
-  	@website_location.update_remote_dns({ with_auto_a: true })
+    # update the remove DNS
+    @website.reload
+    @website_location.update_remote_dns(with_auto_a: true)
 
-  	@website.create_event({ title: "Remove DNS entry", entry: entry })
+    @website.create_event(title: 'Remove DNS entry', entry: entry)
 
-  	list_dns
+    list_dns
   end
 
   def add_alias
-  	domain = Website.clean_domain(params["hostname"])
+    domain = Website.clean_domain(params['hostname'])
 
-  	@website.domains ||= []
-  	@website.domains << domain
-  	@website.save!
+    @website.domains ||= []
+    @website.domains << domain
+    @website.save!
 
-  	@website_location.update_remote_dns({ with_auto_a: true })
+    @website_location.update_remote_dns(with_auto_a: true)
 
-  	@website.create_event({ title: "Add domain alias", domain: domain })
+    @website.create_event(title: 'Add domain alias', domain: domain)
 
-  	json({ result: "success" })
+    json(result: 'success')
   end
 
   def del_alias
-  	domain = Website.clean_domain(params["hostname"])
+    domain = Website.clean_domain(params['hostname'])
 
-  	@website.domains ||= []
-  	@website.domains.delete(domain)
-  	@website.save!
+    @website.domains ||= []
+    @website.domains.delete(domain)
+    @website.save!
 
-  	@website_location.update_remote_dns({ with_auto_a: true })
+    @website_location.update_remote_dns(with_auto_a: true)
 
-  	@website.create_event({ title: "Delete domain alias", domain: domain })
+    @website.create_event(title: 'Delete domain alias', domain: domain)
 
-  	json({ result: "success" })
+    json(result: 'success')
   end
 
   private
-
-
-
 end

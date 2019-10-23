@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
@@ -18,21 +20,23 @@ gem 'puma', '~> 4.1.0'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
 
-gem 'dotenv-rails'
-gem 'safe_attributes'
-gem "attr_encrypted", "~> 3.1.0"
-gem 'vultr'
-gem 'uptimerobot'
-gem 'countries'
-gem 'net-ssh'
-gem 'net-sftp'
-gem 'solid_assert'
-gem 'public_suffix'
 gem 'andand'
-gem 'sshkey'
+gem 'attr_encrypted', '~> 3.1.0'
+gem 'countries'
+gem 'daemons'
 gem 'delayed_job_active_record'
-gem "daemons"
+gem 'dotenv-rails'
 gem 'mailgun-ruby', '~>1.2.0'
+gem 'net-sftp'
+gem 'net-ssh'
+gem 'public_suffix'
+gem 'safe_attributes'
+gem 'solid_assert'
+gem 'sshkey'
+gem 'uptimerobot'
+gem 'vultr'
+
+gem 'rubocop-rails'
 
 # Use ActiveStorage variant
 # gem 'mini_magick', '~> 4.8'
@@ -48,7 +52,7 @@ gem 'bootsnap', '>= 1.1.0', require: false
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
-  gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
+  gem 'byebug', platforms: %i[mri mingw x64_mingw]
   gem 'simplecov'
   gem 'webmock'
 end
@@ -60,6 +64,5 @@ group :development do
   gem 'spring-watcher-listen', '~> 2.0.0'
 end
 
-
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
-gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
+gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]

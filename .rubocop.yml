@@ -1,0 +1,29 @@
+require: rubocop-rails
+
+#AllCops:
+#  Exclude:
+#    - 'path/to/excluded/file.rb'
+
+Metrics/LineLength:
+  Max: 100
+
+Lint/ImplicitStringConcatenation:
+  Enabled: false
+
+Naming/AccessorMethodName:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - 'test/**/*.rb'
+
+Metrics/ClassLength:
+  Exclude:
+    - 'test/**/*.rb'
+
+Lint/HandleExceptions:
+  Exclude:
+    - 'test/**/*.rb'

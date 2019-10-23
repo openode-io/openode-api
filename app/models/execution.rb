@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Execution < ApplicationRecord
   serialize :result, JSON
 
@@ -6,50 +8,49 @@ class Execution < ApplicationRecord
 
   before_create :initialize_status
 
-  STATUS_SUCCESS = "success"
-  STATUS_FAILED = "failed"
-  STATUS_RUNNING = "running"
-  STATUSES = [STATUS_SUCCESS, STATUS_FAILED, STATUS_RUNNING]
+  STATUS_SUCCESS = 'success'
+  STATUS_FAILED = 'failed'
+  STATUS_RUNNING = 'running'
+  STATUSES = [STATUS_SUCCESS, STATUS_FAILED, STATUS_RUNNING].freeze
 
-  validates_inclusion_of :status, :in => STATUSES
+  validates :status, inclusion: { in: STATUSES }
 
   def failed!
-  	self.status = STATUS_FAILED
-  	self.save
+    self.status = STATUS_FAILED
+    save
   end
 
   def succeed!
-  	self.status = STATUS_SUCCESS
-  	self.save
+    self.status = STATUS_SUCCESS
+    save
   end
 
   def add_error!(ex)
-  	result["errors"] ||= []
+    result['errors'] ||= []
 
-  	result["errors"] << {
-		"title" => ex.message ? ex.message : "Global exception",
-		"exception" => ex
-	}
+    result['errors'] << {
+      'title' => ex.message || 'Global exception',
+      'exception' => ex
+    }
 
-	self.save
+    save
   end
 
   def save_steps(results)
-  	self.result["steps"] ||= []
+    result['steps'] ||= []
 
-  	self.result["steps"] = result["steps"] + 
-	  	results.map do |current_result|
-	  		Str::Encode.strip_invalid_chars(current_result)
-	  	end
+    result['steps'] = result['steps'] +
+                      results.map do |current_result|
+                        Str::Encode.strip_invalid_chars(current_result)
+                      end
 
-  	self.save
+    save
   end
 
   def initialize_status
-  	self.status = STATUS_RUNNING
-  	self.result ||= {}
-  	self.result["steps"] = []
-  	self.result["errors"] = []
+    self.status = STATUS_RUNNING
+    self.result ||= {}
+    self.result['steps'] = []
+    self.result['errors'] = []
   end
-
 end

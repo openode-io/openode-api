@@ -1,103 +1,105 @@
+# frozen_string_literal: true
+
 require 'test_helper'
 
 class GlobalControllerTest < ActionDispatch::IntegrationTest
-  test "/global/test" do
-    get "/global/test", as: :json
+  test '/global/test' do
+    get '/global/test', as: :json
 
     assert_response :success
   end
 
-  test "/global/available-configs" do
-    get "/global/available-configs", as: :json
+  test '/global/available-configs' do
+    get '/global/available-configs', as: :json
 
     assert_response :success
 
-    expected_variables = [
-      "SSL_CERTIFICATE_PATH",
-      "SSL_CERTIFICATE_KEY_PATH",
-      "REDIR_HTTP_TO_HTTPS",
-      "MAX_BUILD_DURATION",
-      "SKIP_PORT_CHECK"
+    expected_variables = %w[
+      SSL_CERTIFICATE_PATH
+      SSL_CERTIFICATE_KEY_PATH
+      REDIR_HTTP_TO_HTTPS
+      MAX_BUILD_DURATION
+      SKIP_PORT_CHECK
     ]
 
     expected_variables.each do |var|
-      assert_equal response.parsed_body.any? { |v| v["variable"] == var }, true
+      assert_equal response.parsed_body.any? { |v| v['variable'] == var }, true
     end
   end
 
-  test "/global/available-locations" do
-    get "/global/available-locations", as: :json
+  test '/global/available-locations' do
+    get '/global/available-locations', as: :json
 
     assert_response :success
 
-    canada = response.parsed_body.find { |l| l["id"] == "canada" }
-    assert_equal canada["id"], "canada"
-    assert_equal canada["name"], "Montreal (Canada)"
-    assert_equal canada["country_fullname"], "Canada"
+    canada = response.parsed_body.find { |l| l['id'] == 'canada' }
+    assert_equal canada['id'], 'canada'
+    assert_equal canada['name'], 'Montreal (Canada)'
+    assert_equal canada['country_fullname'], 'Canada'
 
-    usa = response.parsed_body.find { |l| l["id"] == "usa" }
-    assert_equal usa["id"], "usa"
-    assert_equal usa["name"], "New York (USA)"
-    assert_equal usa["country_fullname"], "United States"
+    usa = response.parsed_body.find { |l| l['id'] == 'usa' }
+    assert_equal usa['id'], 'usa'
+    assert_equal usa['name'], 'New York (USA)'
+    assert_equal usa['country_fullname'], 'United States'
   end
 
-  test "/global/available-plans" do
-    get "/global/available-plans", as: :json
+  test '/global/available-plans' do
+    get '/global/available-plans', as: :json
 
     assert_response :success
 
     assert_equal response.parsed_body.length, 16
-    dummy = response.parsed_body.find { |l| l["id"] == "DUMMY-PLAN" }
-    assert_equal dummy["id"], "DUMMY-PLAN"
+    dummy = response.parsed_body.find { |l| l['id'] == 'DUMMY-PLAN' }
+    assert_equal dummy['id'], 'DUMMY-PLAN'
 
-    cloud = response.parsed_body.find { |l| l["id"] == "100-MB" }
-    assert_equal cloud["id"], "100-MB"
+    cloud = response.parsed_body.find { |l| l['id'] == '100-MB' }
+    assert_equal cloud['id'], '100-MB'
 
-    private_cloud = response.parsed_body.find { |l| l["id"] == "1024-MB-201" }
-    assert_equal private_cloud["id"], "1024-MB-201"
+    private_cloud = response.parsed_body.find { |l| l['id'] == '1024-MB-201' }
+    assert_equal private_cloud['id'], '1024-MB-201'
   end
 
-  test "/global/available-plans-at internal" do
-    get "/global/available-plans-at/cloud/canada", as: :json
+  test '/global/available-plans-at internal' do
+    get '/global/available-plans-at/cloud/canada', as: :json
 
     assert_response :success
 
     assert_equal response.parsed_body.length, 7
-    assert_equal response.parsed_body[0]["id"], "sandbox"
+    assert_equal response.parsed_body[0]['id'], 'sandbox'
   end
 
-  test "/global/available-plans-at vultr" do
-    provider = CloudProvider::Manager.instance.first_of_type("vultr")
+  test '/global/available-plans-at vultr' do
+    provider = CloudProvider::Manager.instance.first_of_type('vultr')
     provider.initialize_locations
-    get "/global/available-plans-at/private-cloud/singapore-40", as: :json
+    get '/global/available-plans-at/private-cloud/singapore-40', as: :json
 
     assert_response :success
 
     assert_equal response.parsed_body.length, 7
-    assert_equal response.parsed_body[0]["id"], "1024-MB-201"
+    assert_equal response.parsed_body[0]['id'], '1024-MB-201'
   end
 
-  test "/global/version" do
-    get "/global/version", as: :json
+  test '/global/version' do
+    get '/global/version', as: :json
 
     assert_response :success
-    assert response.parsed_body["version"].count("."), 2
+    assert response.parsed_body['version'].count('.'), 2
   end
 
-  test "/global/services" do
-    get "/global/services", as: :json
+  test '/global/services' do
+    get '/global/services', as: :json
 
     assert_response :success
     assert response.parsed_body.length, 2
-    assert response.parsed_body[0]["name"], "Mongodb"
-    assert response.parsed_body[1]["name"], "docker canada"
+    assert response.parsed_body[0]['name'], 'Mongodb'
+    assert response.parsed_body[1]['name'], 'docker canada'
   end
 
-  test "/global/services/down" do
-    get "/global/services/down", as: :json
+  test '/global/services/down' do
+    get '/global/services/down', as: :json
 
     assert_response :success
     assert response.parsed_body.length, 1
-    assert response.parsed_body[0]["name"], "docker canada"
+    assert response.parsed_body[0]['name'], 'docker canada'
   end
 end
