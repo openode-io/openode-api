@@ -1,5 +1,9 @@
 language: ruby
 
+script:
+  #- rails test
+  - bundle exec rubocop
+
 services:
   - mysql
 
