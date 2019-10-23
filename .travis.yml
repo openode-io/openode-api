@@ -1,8 +1,8 @@
 language: ruby
 
 script:
-  #- rails test
   - bundle exec rubocop
+  - bundle exec bin/rails
 
 services:
   - mysql
