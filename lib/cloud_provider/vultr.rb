@@ -59,13 +59,13 @@ module CloudProvider
       end
 
       # destroy the server in the models
-      if website_location.location_server
-        location_server = website_location.location_server
-        website_location.location_server = nil
-        website_location.save
+      return unless website_location.location_server
 
-        location_server.destroy
-      end
+      location_server = website_location.location_server
+      website_location.location_server = nil
+      website_location.save
+
+      location_server.destroy
     end
 
     def result_to_array(result)

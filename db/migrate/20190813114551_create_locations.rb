@@ -2,14 +2,14 @@
 
 class CreateLocations < ActiveRecord::Migration[5.2]
   def change
-    if ENV['DO_MIGRATIONS'] == 'true'
-      create_table :locations do |t|
-        t.string :str_id
-        t.string :full_name
-        t.string :country_fullname
+    return unless ENV['DO_MIGRATIONS'] == 'true'
 
-        t.timestamps
-      end
+    create_table :locations do |t|
+      t.string :str_id
+      t.string :full_name
+      t.string :country_fullname
+
+      t.timestamps
     end
   end
 end

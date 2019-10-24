@@ -11,8 +11,37 @@ AllCops:
 #  Exclude:
 #    - 'path/to/excluded/file.rb'
 
+Rails/Output:
+  Exclude:
+    - 'config/*.rb'
+
+Rails/InverseOf:
+  Enabled: false
+
+Rails/HasManyOrHasOneDependent:
+  Enabled: false
+
+Style/MixinUsage:
+  Exclude:
+    - 'bin/*'
+
+Style/MultilineBlockChain:
+  Enabled: false
+
+Style/GuardClause:
+  Enabled: false
+
+Rails/BulkChangeTable:
+  Enabled: false
+
+Rails/ReversibleMigration:
+  Enabled: false
+
 Metrics/LineLength:
   Max: 100
+  Exclude:
+    - 'db/schema.rb'
+    - 'db/migrate/*.rb'
 
 Lint/ImplicitStringConcatenation:
   Enabled: false
@@ -26,9 +55,12 @@ Style/ClassAndModuleChildren:
 Metrics/BlockLength:
   Exclude:
     - 'test/**/*.rb'
+    - 'db/schema.rb'
+    - 'db/migrate/*.rb'
+    - 'config/routes.rb'
 
 Metrics/ClassLength:
-  Max: 300
+  Max: 500
   Exclude:
     - 'test/**/*.rb'
 
@@ -43,11 +75,11 @@ Metrics/MethodLength:
     - 'lib/deployment_method/runner.rb' # to refactor
     - 'lib/deployment_method/deployer.rb'
     - 'lib/cloud_provider/vultr.rb'
+    - 'lib/cloud_provider/internal.rb'
+    - 'db/migrate/*.rb'
 
 Style/ClassVars:
-  Exclude:
-    - 'lib/remote/ssh.rb'
-    - 'lib/remote/sftp.rb'
+  Enabled: false
 
 Metrics/AbcSize:
   Max: 20
@@ -58,23 +90,29 @@ Metrics/AbcSize:
     - 'lib/deployment_method/deployer.rb'
     - 'lib/deployment_method/base.rb'
     - 'lib/cloud_provider/vultr.rb'
+    - 'db/migrate/*.rb'
+    - 'app/models/website.rb'
 
 Style/Documentation:
   Enabled: false
 
 Metrics/PerceivedComplexity:
+  Max: 15
   Exclude:
     - 'lib/io/dir.rb' # to refactor
     - 'lib/deployment_method/runner.rb' # to refactor
     - 'lib/deployment_method/base.rb'
     - 'lib/cloud_provider/vultr.rb'
+    - 'db/migrate/*.rb'
 
 Metrics/CyclomaticComplexity:
+  Max: 15
   Exclude:
     - 'lib/io/dir.rb' # to refactor
     - 'lib/deployment_method/runner.rb' # to refactor
     - 'lib/deployment_method/base.rb'
     - 'lib/cloud_provider/vultr.rb'
+    - 'db/migrate/*.rb'
 
 Naming/UncommunicativeMethodParamName:
   Exclude:

@@ -5,7 +5,7 @@ class CreateVaults < ActiveRecord::Migration[6.0]
     begin
       drop_table :vaults
     rescue StandardError => e
-      puts "Error dropping table #{e}"
+      Rails.logger.info("Error dropping table #{e}")
     end
 
     create_table :vaults do |t|

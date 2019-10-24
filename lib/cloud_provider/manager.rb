@@ -17,11 +17,11 @@ module CloudProvider
       @application = @content['application']
       @clouds = @application['clouds']
 
-      if @clouds.present?
-        @clouds.each do |cloud|
-          cloud['instance'] =
-            "CloudProvider::#{cloud['type'].capitalize}".constantize.new(cloud)
-        end
+      return if @clouds.blank?
+
+      @clouds.each do |cloud|
+        cloud['instance'] =
+          "CloudProvider::#{cloud['type'].capitalize}".constantize.new(cloud)
       end
     end
 
@@ -50,7 +50,7 @@ module CloudProvider
     end
 
     def self.config_path
-      File.join(Rails.root, 'config', ".#{ENV['RAILS_ENV']}.openode.yml")
+      Rails.root.join('config', ".#{ENV['RAILS_ENV']}.openode.yml")
     end
 
     def self.instance

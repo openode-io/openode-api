@@ -34,7 +34,7 @@ module OpenodeApi
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
-    config.eager_load_paths << "#{Rails.root}/lib"
+    config.eager_load_paths << Rails.root.join('lib')
 
     config.action_mailer.delivery_method = :mailgun
     config.action_mailer.mailgun_settings = {

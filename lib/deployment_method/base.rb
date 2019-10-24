@@ -71,7 +71,7 @@ module DeploymentMethod
       website = options[:website]
       website_location = options[:website_location]
 
-      if website.has_skip_port_check?
+      if website.skip_port_check?
         node_available?(options)
       else
         return false unless node_available?(options)

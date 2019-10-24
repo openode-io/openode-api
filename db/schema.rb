@@ -278,7 +278,8 @@ ActiveRecord::Schema.define(version: 20_191_014_223_950) do
 
   add_foreign_key 'location_servers', 'locations', name: 'location_servers_ibfk_1'
   add_foreign_key 'orders', 'users', name: 'orders_ibfk_1'
-  add_foreign_key 'website_locations', 'location_servers', name: 'website_locations_ibfk_3'
+  add_foreign_key 'website_locations', 'location_servers',
+                  name: 'website_locations_ibfk_3'
   add_foreign_key 'website_locations', 'locations', name: 'website_locations_ibfk_2'
   add_foreign_key 'website_locations', 'websites', name: 'website_locations_ibfk_1', on_delete: :cascade
 end

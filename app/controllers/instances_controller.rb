@@ -196,11 +196,18 @@ class InstancesController < ApplicationController
   end
 
   def erase_all
-    return json(result: 'success') if !@website_location || !@website_location.has_location_server?
+    return json(result: 'success') if !@website_location || @website_location.location_server.blank?
 
     logs = @runner.execute([
-                             { cmd_name: 'erase_repository_files', options: { path: @website.repo_dir } },
-                             { cmd_name: 'ensure_remote_repository', options: { path: @website.repo_dir } }
+                             {
+                               cmd_name: 'erase_repository_files',
+                               options: { path: @website.repo_dir }
+                             },
+
+                             {
+                               cmd_name: 'ensure_remote_repository',
+                               options: { path: @website.repo_dir }
+                             }
                            ])
 
     @website_event_obj = { title: 'Repository cleared (erase-all)' }
@@ -241,19 +248,17 @@ class InstancesController < ApplicationController
   end
 
   def requires_paid_instance
-    if @website.has_free_sandbox?
-      validation_error!("This feature can't be used with a free sandbox.")
-    end
+    validation_error!("This feature can't be used with a free sandbox.") if @website.free_sandbox?
   end
 
   def requires_cloud_plan
-    if @website.is_private_cloud?
+    if @website.private_cloud?
       validation_error!('The instance must be cloud-based for this operation.')
     end
   end
 
   def requires_private_cloud_plan
-    unless @website.is_private_cloud?
+    unless @website.private_cloud?
       validation_error!('The instance must be private cloud-based for this operation.')
     end
   end

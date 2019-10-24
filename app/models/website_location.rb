@@ -55,10 +55,6 @@ class WebsiteLocation < ApplicationRecord
     @runner
   end
 
-  def has_location_server?
-    location_server.present?
-  end
-
   def available_plans
     manager = CloudProvider::Manager.instance
 
@@ -72,8 +68,6 @@ class WebsiteLocation < ApplicationRecord
 
   def domain_subdomain
     location_subdomain = Location::SUBDOMAIN[location.str_id.to_sym]
-
-    first_part = ''
 
     first_part = if location_subdomain && location_subdomain != ''
                    "#{website.site_name}.#{location_subdomain}"
@@ -119,7 +113,10 @@ class WebsiteLocation < ApplicationRecord
     end
 
     result
-      .map { |r| r['id'] = WebsiteLocation.dns_entry_to_id(r); r }
+      .map do |r|
+        r['id'] = WebsiteLocation.dns_entry_to_id(r)
+        r
+      end
       .uniq { |r| r['id'] }
   end
 
@@ -163,7 +160,8 @@ class WebsiteLocation < ApplicationRecord
     return if port && second_port
 
     ports_used =
-      WebsiteLocation.where(location_server_id: location_server_id).pluck(:port, :running_port, :second_port)
+      WebsiteLocation.where(location_server_id: location_server_id)
+                     .pluck(:port, :running_port, :second_port)
                      .flatten
 
     self.port = generate_port(5000, 65_534, ports_used)
@@ -200,6 +198,4 @@ class WebsiteLocation < ApplicationRecord
 
     port
   end
-
-  private
 end

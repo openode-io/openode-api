@@ -48,7 +48,7 @@ class ConfigsTest < ActionDispatch::IntegrationTest
     w = Website.find_by site_name: 'testsite'
 
     assert_equal w.configs['SKIP_PORT_CHECK'], 'true'
-    assert_equal w.has_skip_port_check?, true
+    assert_equal w.skip_port_check?, true
   end
 
   test '/instances/:instance_id/set-config with valid variable' do

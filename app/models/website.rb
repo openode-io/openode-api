@@ -86,7 +86,7 @@ class Website < ApplicationRecord
     end
   end
 
-  def is_private_cloud?
+  def private_cloud?
     cloud_type == 'private-cloud'
   end
 
@@ -106,7 +106,8 @@ class Website < ApplicationRecord
 
       parsed_val = value.to_f
 
-      unless parsed_val.present? && parsed_val >= config[:min] && parsed_val <= config[:max]
+      unless parsed_val.present? && parsed_val >= config[:min] &&
+             parsed_val <= config[:max]
         errors.add(:configs, "Invalid value, , min = #{config[:min]}, max = #{config[:max]}")
       end
     end
@@ -131,7 +132,8 @@ class Website < ApplicationRecord
 
     self.dns.each do |dns_entry|
       unless domains.include?(dns_entry['domainName'])
-        errors.add(:dns, "Invalid domain (#{dns_entry['domainName']}), available domains: #{domains.inspect}")
+        errors.add(:dns, "Invalid domain (#{dns_entry['domainName']}), " \
+                          "available domains: #{domains.inspect}")
       end
 
       valid_types = %w[
@@ -139,7 +141,8 @@ class Website < ApplicationRecord
       ]
 
       unless valid_types.include?(dns_entry['type'])
-        errors.add(:dns, "Invalid type (#{dns_entry['type']}), available types: #{valid_types.inspect}")
+        errors.add(:dns, "Invalid type (#{dns_entry['type']}), " \
+                          "available types: #{valid_types.inspect}")
       end
     end
   end
@@ -164,7 +167,8 @@ class Website < ApplicationRecord
   end
 
   def self.domain_valid?(domain)
-    (domain =~ %r{^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}(:[0-9]{1,5})?(/.*)?$}) == 0
+    (domain =~ %r{^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}(:[0-9]{1,5})?(/.*)?$})
+      .andand.zero?
   end
 
   def self.clean_domain(domain)
@@ -224,7 +228,7 @@ class Website < ApplicationRecord
       .include? var_name
   end
 
-  def has_skip_port_check?
+  def skip_port_check?
     configs && [true, 'true'].include?(configs['SKIP_PORT_CHECK'])
   end
 
@@ -248,7 +252,7 @@ class Website < ApplicationRecord
     plans.find { |p| [p[:id], p[:internal_id]].include?(account_type) }
   end
 
-  def has_free_sandbox?
+  def free_sandbox?
     account_type == 'free'
   end
 
@@ -321,8 +325,8 @@ class Website < ApplicationRecord
     website_locations.sum { |wl| wl.extra_storage || 0 }
   end
 
-  def has_extra_storage?
-    total_extra_storage > 0
+  def extra_storage?
+    total_extra_storage.positive?
   end
 
   def extra_storage_credits_cost_per_hour
@@ -365,8 +369,6 @@ class Website < ApplicationRecord
         credits_cost: extra_cpus_credits_cost_per_hour
       }
     ]
-
-    website, action_type, credits_spent, opts = {}
 
     spendings.each do |spending|
       if spending[:credits_cost] != 0

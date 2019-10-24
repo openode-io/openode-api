@@ -87,6 +87,6 @@ class User < ApplicationRecord
   end
 
   def has_credits?
-    credits > 0
+    credits.positive?
   end
 end

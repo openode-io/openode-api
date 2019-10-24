@@ -70,7 +70,7 @@ module CloudProvider
       amount_ram_server = 2000
       cost_server = 5.16 # in $
 
-      nb_possible_instances = amount_ram_server.to_f / ram.to_f
+      nb_possible_instances = amount_ram_server.to_f / ram
       base_cost = cost_server / nb_possible_instances
 
       charge = base_cost * 1.50
@@ -168,7 +168,5 @@ module CloudProvider
     def plans_at(_any_location)
       plans
     end
-
-    protected
   end
 end

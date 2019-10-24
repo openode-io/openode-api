@@ -284,7 +284,7 @@ class WebsiteTest < ActiveSupport::TestCase
       wl.save!
 
       assert_equal website.total_extra_storage, 2
-      assert_equal website.has_extra_storage?, true
+      assert_equal website.extra_storage?, true
       assert_equal(website.extra_storage_credits_cost_per_hour,
                    2 * 100 * CloudProvider::Internal::COST_EXTRA_STORAGE_GB_PER_HOUR)
     end
@@ -296,7 +296,7 @@ class WebsiteTest < ActiveSupport::TestCase
       wl.save!
 
       assert_equal website.total_extra_storage, 0
-      assert_equal website.has_extra_storage?, false
+      assert_equal website.extra_storage?, false
       assert_equal website.extra_storage_credits_cost_per_hour, 0
     end
 

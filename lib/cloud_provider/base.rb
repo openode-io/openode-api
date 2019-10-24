@@ -14,7 +14,5 @@ module CloudProvider
         end
       end
     end
-
-    protected
   end
 end
