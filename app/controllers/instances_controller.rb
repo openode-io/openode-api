@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class InstancesController < ApplicationController
   MINIMUM_CLI_VERSION = '2.0.14'
 

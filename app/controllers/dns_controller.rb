@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class DnsController < InstancesController
   before_action :ensure_location
 

@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class ConfigsController < InstancesController
   before_action :extract_variable
 

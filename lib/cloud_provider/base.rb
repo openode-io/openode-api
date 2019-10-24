@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module CloudProvider
   class Base
     def initialize(configs = nil); end

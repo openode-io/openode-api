@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class PrivateCloudController < InstancesController
   before_action only: [:allocate] do
     requires_private_cloud_plan

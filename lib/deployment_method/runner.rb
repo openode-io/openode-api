@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module DeploymentMethod
   class Runner
     attr_accessor :execution

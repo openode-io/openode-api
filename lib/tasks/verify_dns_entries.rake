@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'vultr'
 
 namespace :verify_dns do

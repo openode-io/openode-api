@@ -87,6 +87,15 @@ Metrics/MethodLength:
 Style/ClassVars:
   Enabled: false
 
+Style/MutableConstant:
+  Enabled: false
+
+Layout/LeadingBlankLines:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
 Metrics/AbcSize:
   Max: 30
   Exclude:

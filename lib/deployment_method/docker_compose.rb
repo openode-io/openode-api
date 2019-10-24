@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module DeploymentMethod
   class DockerCompose < Base
     EXTRA_MANAGEMENT_RAM = 250 # MB

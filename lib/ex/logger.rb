@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Ex
   class Logger
     def self.out(level, exception, msg = nil)

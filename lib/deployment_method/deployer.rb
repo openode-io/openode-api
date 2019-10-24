@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module DeploymentMethod
   class Deployer
     def self.run(website_location, runner, options = {})

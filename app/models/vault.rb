@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class Vault < ApplicationRecord
   attr_encrypted :data, key: ENV['VAULT_SECRET']
 

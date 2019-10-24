@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Remote
   module Dns
     # Base dns

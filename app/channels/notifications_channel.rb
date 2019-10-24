@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class NotificationsChannel < ApplicationCable::Channel
   def subscribed
     # puts 'subscribed??'

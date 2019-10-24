@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class AccountController < ApplicationController
   # get a token given a login-passwd
   def get_token

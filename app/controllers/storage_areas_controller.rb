@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class StorageAreasController < InstancesController
   def index
     json(@website.storage_areas)

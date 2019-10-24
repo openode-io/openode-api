@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Io
   class Dir
     def self.find_file_in(f, list_files)

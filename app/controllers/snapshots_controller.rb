@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class SnapshotsController < InstancesController
   before_action :requires_cloud_plan, only: [:create]
 

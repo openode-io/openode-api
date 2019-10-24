@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class StoragesController < InstancesController
   before_action :requires_cloud_plan, only: %i[increase decrease]
 
