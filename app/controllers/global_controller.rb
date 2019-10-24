@@ -38,6 +38,4 @@ class GlobalController < ApplicationController
   def services_down
     json(Status.with_status('down'))
   end
-
-  private
 end

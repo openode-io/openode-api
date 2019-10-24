@@ -121,13 +121,13 @@ class UserTest < ActiveSupport::TestCase
     assert_not_equal token, user_changed.token
   end
 
-  test 'has_credits? when having credits' do
+  test 'credits? when having credits' do
     user = User.find_by email: 'myadmin@thisisit.com'
-    assert_equal user.has_credits?, true
+    assert_equal user.credits?, true
   end
 
   test 'has_credits? when no credit' do
     user = User.find_by email: 'myadmin2@thisisit.com'
-    assert_equal user.has_credits?, false
+    assert_equal user.credits?, false
   end
 end

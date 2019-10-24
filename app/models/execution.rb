@@ -25,12 +25,12 @@ class Execution < ApplicationRecord
     save
   end
 
-  def add_error!(ex)
+  def add_error!(exception)
     result['errors'] ||= []
 
     result['errors'] << {
-      'title' => ex.message || 'Global exception',
-      'exception' => ex
+      'title' => exception.message || 'Global exception',
+      'exception' => exception
     }
 
     save

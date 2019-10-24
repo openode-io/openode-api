@@ -45,6 +45,4 @@ class LocationsController < InstancesController
 
     json(result: 'success')
   end
-
-  protected
 end

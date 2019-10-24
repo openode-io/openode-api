@@ -311,7 +311,7 @@ class Website < ApplicationRecord
 
     return false, '*** User suspended' if user.suspended?
 
-    unless user.has_credits?
+    unless user.credits?
       msg = 'No credit available. Please make sure to buy credits via the Administration ' \
             'dashboard in Billing - ' \
             "https://www.#{CloudProvider::Manager.instance.base_hostname}/admin/billing"

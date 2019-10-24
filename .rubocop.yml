@@ -52,6 +52,12 @@ Naming/AccessorMethodName:
 Style/ClassAndModuleChildren:
   Enabled: false
 
+Style/IfUnlessModifier:
+  Enabled: false
+
+Naming/MemoizedInstanceVariableName:
+  Enabled: false
+
 Metrics/BlockLength:
   Exclude:
     - 'test/**/*.rb'
@@ -82,7 +88,7 @@ Style/ClassVars:
   Enabled: false
 
 Metrics/AbcSize:
-  Max: 20
+  Max: 30
   Exclude:
     - 'lib/io/dir.rb' # to refactor
     - 'lib/deployment_method/runner.rb' # to refactor

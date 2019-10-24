@@ -41,6 +41,4 @@ class SnapshotsController < InstancesController
 
     json(result: 'success', description: 'The snapshot will be removed shortly')
   end
-
-  protected
 end

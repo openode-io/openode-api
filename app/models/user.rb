@@ -86,7 +86,7 @@ class User < ApplicationRecord
     save
   end
 
-  def has_credits?
+  def credits?
     credits.positive?
   end
 end

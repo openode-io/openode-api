@@ -21,8 +21,8 @@ class Snapshot < ApplicationRecord
     ''
   end
 
-  def change_status!(st)
-    self.status = st
+  def change_status!(status)
+    self.status = status
     save!
   end
 end

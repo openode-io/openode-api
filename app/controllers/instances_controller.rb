@@ -75,7 +75,11 @@ class InstancesController < ApplicationController
 
     @website.change_plan!(plan[:internal_id])
 
-    @website_event_obj = { title: 'change-plan', new_value: plan[:id], original_value: @website.account_type }
+    @website_event_obj = {
+      title: 'change-plan',
+      new_value: plan[:id],
+      original_value: @website.account_type
+    }
 
     @runner.delay.execute([{ cmd_name: 'stop', options: { is_complex: true } }])
 
@@ -98,7 +102,10 @@ class InstancesController < ApplicationController
     validation_error!('Missing files') unless params['files']
     files_client = JSON.parse(params['files'])
     files_server = JSON.parse(@runner.execute([
-                                                { cmd_name: 'files_listing', options: { path: @website.repo_dir } }
+                                                {
+                                                  cmd_name: 'files_listing',
+                                                  options: { path: @website.repo_dir }
+                                                }
                                               ]).first[:result][:stdout])
 
     changes = Io::Dir.diff(files_client, files_server, @website.normalized_storage_areas)
@@ -132,8 +139,13 @@ class InstancesController < ApplicationController
 
   def delete_files
     assert params['filesInfo'].present?
+
     input_files =
-      params['filesInfo'].class.name == 'String' ? JSON.parse(params['filesInfo']) : params['filesInfo']
+      if params['filesInfo'].class.name == 'String'
+        JSON.parse(params['filesInfo'])
+      else
+        params['filesInfo']
+    end
 
     input_files = input_files.map { |file| "#{@website.repo_dir}#{file['path']}" }
     files = Io::Path.filter_secure(@website.repo_dir, input_files)
@@ -198,17 +210,17 @@ class InstancesController < ApplicationController
   def erase_all
     return json(result: 'success') if !@website_location || @website_location.location_server.blank?
 
-    logs = @runner.execute([
-                             {
-                               cmd_name: 'erase_repository_files',
-                               options: { path: @website.repo_dir }
-                             },
+    @runner.execute([
+                      {
+                        cmd_name: 'erase_repository_files',
+                        options: { path: @website.repo_dir }
+                      },
 
-                             {
-                               cmd_name: 'ensure_remote_repository',
-                               options: { path: @website.repo_dir }
-                             }
-                           ])
+                      {
+                        cmd_name: 'ensure_remote_repository',
+                        options: { path: @website.repo_dir }
+                      }
+                    ])
 
     @website_event_obj = { title: 'Repository cleared (erase-all)' }
 

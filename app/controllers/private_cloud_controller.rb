@@ -10,11 +10,10 @@ class PrivateCloudController < InstancesController
       return json(success: 'Instance already allocated')
     end
 
-    unless @website.user.has_credits?
-      raise ApplicationRecord::ValidationError, 'No credit available'
-    end
+    raise ApplicationRecord::ValidationError, 'No credit available' unless @website.user.credits?
 
-    cloud_provider = CloudProvider::Manager.instance.first_of_internal_type(CloudProvider::Vultr::TYPE)
+    cloud_manager = CloudProvider::Manager.instance
+    cloud_provider = cloud_manager.first_of_internal_type(CloudProvider::Vultr::TYPE)
 
     cloud_provider.allocate(
       website: @website,

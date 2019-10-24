@@ -14,7 +14,9 @@ class CreditAction < ApplicationRecord
   validates :action_type, inclusion: { in: ACTION_TYPES }
 
   def verify_enough_credits
-    errors.add(:credits, 'No credits remaining') unless user.credits - credits_spent > 0
+    unless (user.credits - credits_spent).positive?
+      errors.add(:credits, 'No credits remaining')
+    end
   end
 
   def self.consume!(website, action_type, credits_spent, opts = {})

@@ -50,8 +50,6 @@ class DnsController < InstancesController
   def del_dns
     dns_id = params['id']
 
-    manager = Remote::Dns::Base.instance
-
     entry = @website_location.find_dns_entry_by_id(dns_id)
 
     validation_error!('This entry does not exist.') unless entry
@@ -95,6 +93,4 @@ class DnsController < InstancesController
 
     json(result: 'success')
   end
-
-  private
 end
