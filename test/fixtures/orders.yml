@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  amount: 5
+  payment_status: Completed
+
+two:
+  user: one
+  amount: 10
+  payment_status: Completed

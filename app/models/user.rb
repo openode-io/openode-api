@@ -20,6 +20,7 @@ class User < ApplicationRecord
 
   has_many :websites
   has_many :snapshots
+  has_many :orders
 
   validates :email, uniqueness: true
   validates :email, presence: true
@@ -86,5 +87,9 @@ class User < ApplicationRecord
 
   def credits?
     credits.positive?
+  end
+
+  def can_create_new_website
+    orders.count.positive? || websites.count.zero?
   end
 end

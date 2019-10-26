@@ -130,4 +130,16 @@ class UserTest < ActiveSupport::TestCase
     user = User.find_by email: 'myadmin2@thisisit.com'
     assert_equal user.credits?, false
   end
+
+  # can create new website
+  test 'can create new website ' do
+    user = User.find_by email: 'myadmin@thisisit.com'
+    assert_equal user.can_create_new_website, true
+  end
+
+  test 'can create new website - cant if has website and no order' do
+    user = User.find_by email: 'myadmin2@thisisit.com'
+
+    assert_equal user.can_create_new_website, false
+  end
 end

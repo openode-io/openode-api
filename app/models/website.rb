@@ -15,6 +15,8 @@ class Website < ApplicationRecord
   has_many :executions
   has_many :credit_actions
 
+  before_create :prepare_new_site
+
   scope :custom_domain, -> { where(domain_type: 'custom_domain') }
 
   REPOS_BASE_DIR = '/home/'
@@ -23,6 +25,15 @@ class Website < ApplicationRecord
   STATUS_OFFLINE = 'N/A'
   STATUS_STARTING = 'starting'
   STATUSES = [STATUS_ONLINE, STATUS_OFFLINE, STATUS_STARTING].freeze
+
+  DOMAIN_TYPE_SUBDOMAIN = 'subdomain'
+  DOMAIN_TYPE_CUSTOM_DOMAIN = 'custom_domain'
+  DOMAIN_TYPES = [DOMAIN_TYPE_SUBDOMAIN, DOMAIN_TYPE_CUSTOM_DOMAIN].freeze
+
+  TYPE_DOCKER = 'docker'
+  TYPES = ['nodejs', TYPE_DOCKER].freeze
+
+  DEFAULT_ACCOUNT_TYPE = 'free'
 
   validates :site_name, presence: true
   validates :site_name, uniqueness: true
@@ -36,10 +47,39 @@ class Website < ApplicationRecord
   validate :validate_domains
   validate :validate_site_name
 
-  validates :type, inclusion: { in: %w[nodejs docker] }
-  validates :domain_type, inclusion: { in: %w[subdomain custom_domain] }
+  validates :type, inclusion: { in: TYPES }
+  validates :domain_type, inclusion: { in: DOMAIN_TYPES }
   validates :cloud_type, inclusion: { in: %w[cloud private-cloud] }
   validates :status, inclusion: { in: STATUSES }
+
+  def init_subdomain
+  end
+
+  def init_custom_domain
+  end
+
+  def prepare_new_site
+    unless user.can_create_new_website
+      errors.add(:site_name, 'Number of websites limit reached for a free user.')
+    end
+
+    self.account_type ||= DEFAULT_ACCOUNT_TYPE
+    self.site_name = site_name.downcase
+    self.domain_type = DOMAIN_TYPE_SUBDOMAIN
+    self.domains = []
+
+    if site_name.include?('.')
+      self.domain_type = DOMAIN_TYPE_CUSTOM_DOMAIN
+      domains << Website.clean_domain(site_name)
+    end
+
+    if site_name.include?('.openode.io')
+      self.domain_type = DOMAIN_TYPE_SUBDOMAIN
+      self.site_name = site_name.split('.openode.io').first
+    end
+    
+    send("init_#{self.domain_type}")
+  end
 
   def locations
     website_locations.map(&:location)
