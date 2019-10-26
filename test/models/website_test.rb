@@ -389,5 +389,54 @@ class WebsiteTest < ActiveSupport::TestCase
       assert_equal website.valid?, true
       assert_equal website2.valid?, false
     end
+
+    test 'create - invalid account type' do
+      user = User.first
+      user.orders.destroy_all
+      user.websites.destroy_all
+
+      website = Website.create(
+        site_name: 'helloWorld',
+        user_id: user.id,
+        account_type: 'second2'
+      )
+
+      assert_equal website.valid?, false
+    end
+
+    test 'create - custom domain' do
+      user = User.first
+      user.websites.destroy_all
+
+      website = Website.create!(
+        site_name: 'hello.World',
+        user_id: user.id
+      )
+
+      assert_equal website.site_name, 'hello.world'
+      assert_equal website.account_type, Website::DEFAULT_ACCOUNT_TYPE
+      assert_equal website.domain_type, Website::DOMAIN_TYPE_CUSTOM_DOMAIN
+      assert_equal website.domains, ['hello.world']
+    end
+
+    test 'create - custom domain - not allowed if root domain used' do
+      user = User.first
+      user.websites.destroy_all
+
+      user2 = User.last
+      user2.websites.destroy_all
+
+      Website.create!(
+        site_name: 'hello.World',
+        user_id: user.id
+      )
+
+      website2 = Website.create(
+        site_name: 'www.hello.World',
+        user_id: user2.id
+      )
+
+      assert_equal website2.valid?, false
+    end
   end
 end

@@ -33,7 +33,7 @@ two:
   type: docker
   http_port_available: false
   first_online_at: 2019-08-10 14:24:22
-  account_type: MyString
+  account_type: free
   credits_check_at: 2019-08-10 14:24:22
   domain_type: subdomain
   nb_launch_issues: 1
@@ -56,7 +56,7 @@ three:
   type: docker
   http_port_available: false
   first_online_at: 2019-08-10 14:24:22
-  account_type: MyString
+  account_type: free
   credits_check_at: 2019-08-10 14:24:22
   domain_type: custom_domain
   nb_launch_issues: 1
@@ -79,7 +79,7 @@ with_private_cloud:
   type: docker
   http_port_available: false
   first_online_at: 2019-08-10 14:24:22
-  account_type: MyString
+  account_type: free
   credits_check_at: 2019-08-10 14:24:22
   domain_type: subdomain
   nb_launch_issues: 1

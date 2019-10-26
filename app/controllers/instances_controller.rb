@@ -2,7 +2,11 @@ class InstancesController < ApplicationController
   MINIMUM_CLI_VERSION = '2.0.14'
 
   before_action :authorize
-  before_action :populate_website
+
+  before_action except: [:create_instance] do
+    populate_website
+  end
+
   before_action except: [:add_location] do
     populate_website_location
   end
@@ -38,6 +42,16 @@ class InstancesController < ApplicationController
 
   def show
     json(@website)
+  end
+
+  def create_instance
+    website = Website.create!(
+      site_name: params['site_name'],
+      account_type: params['account_type'],
+      user: @user
+    )
+
+    json(website)
   end
 
   def destroy

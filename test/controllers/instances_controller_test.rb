@@ -71,6 +71,41 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  # create
+  test '/instances/create with valid information' do
+    post '/instances/create',
+         params: { site_name: 'helloworld123', account_type: 'second' },
+         as: :json,
+         headers: default_headers_auth
+
+    assert_response :success
+    assert_equal !response.parsed_body['id'].nil?, true
+
+    website = Website.find(response.parsed_body['id'])
+
+    assert_equal website.id, response.parsed_body['id']
+    assert_equal website.site_name, 'helloworld123'
+    assert_equal website.domain_type, 'subdomain'
+  end
+
+  test '/instances/create with invalid' do
+    post '/instances/create',
+         params: { site_name: '..', account_type: 'second' },
+         as: :json,
+         headers: default_headers_auth
+
+    assert_response :unprocessable_entity
+  end
+
+  test '/instances/create with invalid account type' do
+    post '/instances/create',
+         params: { site_name: 'hello1234', account_type: 'second2' },
+         as: :json,
+         headers: default_headers_auth
+
+    assert_response :unprocessable_entity
+  end
+
   # /changes
   test '/instances/:instance_id/changes with one file deleted' do
     set_dummy_secrets_to(LocationServer.all)

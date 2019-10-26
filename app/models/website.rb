@@ -16,8 +16,6 @@ class Website < ApplicationRecord
   has_many :executions
   has_many :credit_actions
 
-  before_create :prepare_new_site
-
   scope :custom_domain, -> { where(domain_type: 'custom_domain') }
 
   REPOS_BASE_DIR = '/home/'
@@ -49,11 +47,14 @@ class Website < ApplicationRecord
   validate :validate_domains
   validate :validate_site_name
   validate :can_create_new_site, on: :create
+  validate :can_use_root_domain, on: :create
 
   validates :type, inclusion: { in: TYPES }
   validates :domain_type, inclusion: { in: DOMAIN_TYPES }
   validates :cloud_type, inclusion: { in: %w[cloud private-cloud] }
   validates :status, inclusion: { in: STATUSES }
+
+  before_validation :prepare_new_site, on: :create
 
   def init_subdomain; end
 
@@ -63,15 +64,6 @@ class Website < ApplicationRecord
     self.domains.unshift(site_name)
 
     self.domains = domains.uniq
-
-    # verify that the root domain is not already used by another user
-    # self.root_domain(domain_name)
-    root_domain = WebsiteLocation.root_domain(site_name)
-    root_domain_website = Website.find_by(site_name: root_domain)
-
-    if root_domain_website && root_domain_website.user_id != user_id
-      errors.add(:site_name, 'Site name already used')
-    end
   end
 
   def can_create_new_site
@@ -81,7 +73,12 @@ class Website < ApplicationRecord
   end
 
   def prepare_new_site
+    return unless site_name
+
     self.account_type ||= DEFAULT_ACCOUNT_TYPE
+
+    change_plan(account_type)
+
     self.site_name = site_name.downcase
     self.domain_type = DOMAIN_TYPE_SUBDOMAIN
     self.type = TYPE_DOCKER
@@ -208,11 +205,19 @@ class Website < ApplicationRecord
     end
   end
 
+  def can_use_root_domain
+    # verify that the root domain is not already used by another user
+    root_domain = WebsiteLocation.root_domain(site_name)
+    root_domain_website = Website.find_by(site_name: root_domain)
+
+    if root_domain_website && root_domain_website.user_id != user_id
+      errors.add(:site_name, 'Root domain already used')
+    end
+  end
+
   def validate_site_name
     errors.add(:site_name, 'Missing sitename') unless site_name
     return unless site_name
-
-    self.site_name = site_name.downcase
 
     send("validate_site_name_#{domain_type}")
   end
@@ -309,10 +314,14 @@ class Website < ApplicationRecord
     "#{Website::REPOS_BASE_DIR}#{user_id}/#{site_name}/"
   end
 
-  def plan
+  def self.plan_of(acc_type)
     plans = CloudProvider::Manager.instance.available_plans
 
-    plans.find { |p| [p[:id], p[:internal_id]].include?(account_type) }
+    plans.find { |p| [p[:id], p[:internal_id]].include?(acc_type) }
+  end
+
+  def plan
+    Website.plan_of(account_type)
   end
 
   def free_sandbox?
@@ -327,12 +336,19 @@ class Website < ApplicationRecord
     save!
   end
 
-  def change_plan!(account_type)
-    logger.info("website #{site_name} changing plan to #{account_type}")
-    self.account_type = account_type
+  def change_plan(acc_type)
+    found_plan = Website.plan_of(acc_type)
+    errors.add(:account_type, "Invalid plan #{acc_type}") unless found_plan
+
+    logger.info("website #{site_name} changing plan to #{acc_type}")
+    self.account_type = acc_type
 
     # to refactor
     self.cloud_type = account_type.include?('-') ? 'private-cloud' : 'cloud'
+  end
+
+  def change_plan!(acc_type)
+    change_plan(acc_type)
 
     save!
   end
