@@ -9,7 +9,7 @@ module Remote
       end
 
       def wait_api
-        sleep 0.5
+        sleep 0.5 if ENV['RAILS_ENV'] != 'test'
       end
 
       def all_root_domains

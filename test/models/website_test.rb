@@ -4,24 +4,6 @@ require 'test_helper'
 
 class WebsiteTest < ActiveSupport::TestCase
   class Validation < ActiveSupport::TestCase
-    test 'should not save required fields' do
-      w = Website.new
-      assert_not w.save
-    end
-
-    test 'should save with all required fields' do
-      w = Website.new(
-        site_name: 'thisisauniquesite',
-        cloud_type: 'cloud',
-        user_id: User.first.id,
-        type: 'docker',
-        status: 'starting',
-        domain_type: 'subdomain'
-      )
-
-      assert w.save
-    end
-
     test 'invalid site_name with subdomain' do
       w = Website.new(
         site_name: 'thisisauniq.uesite',
@@ -353,6 +335,59 @@ class WebsiteTest < ActiveSupport::TestCase
       assert_equal credits_actions[0].action_type, CreditAction::TYPE_CONSUME_PLAN
       assert_equal credits_actions[1].action_type, CreditAction::TYPE_CONSUME_STORAGE
       assert_equal credits_actions[2].action_type, CreditAction::TYPE_CONSUME_CPU
+    end
+
+    # create website
+    test 'create - should fail if empty' do
+      website = Website.create({})
+
+      assert_equal website.valid?, false
+    end
+
+    test 'create - subdomain' do
+      user = User.first
+      user.websites.destroy_all
+      website = Website.create!(
+        site_name: 'helloworld',
+        user_id: user.id
+      )
+
+      assert_equal website.valid?, true
+      assert_equal website.site_name, 'helloworld'
+      assert_equal website.account_type, Website::DEFAULT_ACCOUNT_TYPE
+      assert_equal website.domains, []
+      assert_equal website.open_source['status'], 'active'
+    end
+
+    test 'create - subdomain downcase if upper cases' do
+      user = User.first
+      user.websites.destroy_all
+      website = Website.create!(
+        site_name: 'helloWorld',
+        user_id: user.id
+      )
+
+      assert_equal website.valid?, true
+      assert_equal website.site_name, 'helloworld'
+    end
+
+    test 'create - subdomain where cannot create website' do
+      user = User.first
+      user.orders.destroy_all
+      user.websites.destroy_all
+
+      website = Website.create!(
+        site_name: 'helloWorld',
+        user_id: user.id
+      )
+
+      website2 = Website.create(
+        site_name: 'helloworld2',
+        user_id: user.id
+      )
+
+      assert_equal website.valid?, true
+      assert_equal website2.valid?, false
     end
   end
 end

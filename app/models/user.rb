@@ -89,7 +89,7 @@ class User < ApplicationRecord
     credits.positive?
   end
 
-  def can_create_new_website
+  def can_create_new_website?
     orders.count.positive? || websites.count.zero?
   end
 end

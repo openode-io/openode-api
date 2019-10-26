@@ -1,5 +1,6 @@
 class Website < ApplicationRecord
   serialize :domains, JSON
+  serialize :open_source, JSON
   serialize :configs, JSON
   serialize :dns, JSON
   serialize :storage_areas, JSON
@@ -35,6 +36,7 @@ class Website < ApplicationRecord
 
   DEFAULT_ACCOUNT_TYPE = 'free'
 
+  validates :user, presence: true
   validates :site_name, presence: true
   validates :site_name, uniqueness: true
   validates :type, presence: true
@@ -46,26 +48,47 @@ class Website < ApplicationRecord
   validate :validate_dns
   validate :validate_domains
   validate :validate_site_name
+  validate :can_create_new_site, on: :create
 
   validates :type, inclusion: { in: TYPES }
   validates :domain_type, inclusion: { in: DOMAIN_TYPES }
   validates :cloud_type, inclusion: { in: %w[cloud private-cloud] }
   validates :status, inclusion: { in: STATUSES }
 
-  def init_subdomain
-  end
+  def init_subdomain; end
 
   def init_custom_domain
+    self.domains ||= []
+
+    self.domains.unshift(site_name)
+
+    self.domains = domains.uniq
+
+    # verify that the root domain is not already used by another user
+    # self.root_domain(domain_name)
+    root_domain = WebsiteLocation.root_domain(site_name)
+    root_domain_website = Website.find_by(site_name: root_domain)
+
+    if root_domain_website && root_domain_website.user_id != user_id
+      errors.add(:site_name, 'Site name already used')
+    end
+  end
+
+  def can_create_new_site
+    if user && !user.can_create_new_website?
+      errors.add(:invalid, 'Number of websites limit reached for a free user.')
+    end
   end
 
   def prepare_new_site
-    unless user.can_create_new_website
-      errors.add(:site_name, 'Number of websites limit reached for a free user.')
-    end
-
     self.account_type ||= DEFAULT_ACCOUNT_TYPE
     self.site_name = site_name.downcase
     self.domain_type = DOMAIN_TYPE_SUBDOMAIN
+    self.type = TYPE_DOCKER
+    self.is_educational = false # to deprecate
+    self.redir_http_to_https = false
+    self.instance_type = 'server' # to deprecate
+    self.open_source = { 'status' => 'active' }
     self.domains = []
 
     if site_name.include?('.')
@@ -77,8 +100,8 @@ class Website < ApplicationRecord
       self.domain_type = DOMAIN_TYPE_SUBDOMAIN
       self.site_name = site_name.split('.openode.io').first
     end
-    
-    send("init_#{self.domain_type}")
+
+    send("init_#{domain_type}")
   end
 
   def locations
@@ -188,6 +211,8 @@ class Website < ApplicationRecord
   def validate_site_name
     errors.add(:site_name, 'Missing sitename') unless site_name
     return unless site_name
+
+    self.site_name = site_name.downcase
 
     send("validate_site_name_#{domain_type}")
   end
