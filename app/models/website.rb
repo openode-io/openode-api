@@ -18,6 +18,9 @@ class Website < ApplicationRecord
   has_many :website_bandwidth_daily_stats, foreign_key: :ref_id,
                                            class_name: :WebsiteBandwidthDailyStat,
                                            dependent: :destroy
+  has_many :website_utilization_logs, foreign_key: :ref_id,
+                                      class_name: :WebsiteUtilizationLog,
+                                      dependent: :destroy
 
   scope :custom_domain, -> { where(domain_type: 'custom_domain') }
 

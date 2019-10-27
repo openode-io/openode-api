@@ -23,11 +23,17 @@ Rails.application.routes.draw do
     get 'available-plans-at/:type/:location_str_id', to: 'global#available_plans_at'
   end
 
+  scope :order do
+    post 'paypal', to: 'order#paypal'
+  end
+
   scope :instances, constraints: { site_name: %r{[^/]+} } do
     get '/', to: 'instances#index'
     post '/create/', to: 'instances#create_instance'
     get '/:site_name/', to: 'instances#show'
     delete '/:site_name/', to: 'instances#destroy'
+
+    get '/:site_name/stats', to: 'instance_stat#index'
 
     get '/:site_name/get-config', to: 'configs#get_config'
     post '/:site_name/set-config', to: 'configs#set_config'
