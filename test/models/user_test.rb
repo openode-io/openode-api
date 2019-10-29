@@ -142,4 +142,61 @@ class UserTest < ActiveSupport::TestCase
 
     assert_equal user.can_create_new_website?, false
   end
+
+  # first unused coupon
+  test 'first unused coupon with one unused' do
+    user = User.first
+    coupon = Coupon.first
+    user.coupons = [coupon]
+    user.save
+
+    first_coupon = user.first_unused_coupon
+    assert_not_nil first_coupon
+    assert_equal first_coupon['str_id'], coupon.str_id
+  end
+
+  test 'first unused coupon with one unused, two in total' do
+    user = User.first
+    coupon = Coupon.first
+    user.coupons = [coupon, Coupon.last]
+    user.coupons[0]['used'] = true
+    user.save
+
+    first_coupon = user.first_unused_coupon
+    assert_not_nil first_coupon
+    assert_equal first_coupon['str_id'], Coupon.last.str_id
+  end
+
+  test 'first unused coupon with none' do
+    user = User.first
+    user.coupons = []
+    user.save
+
+    first_coupon = user.first_unused_coupon
+    assert_nil first_coupon
+  end
+
+  # use coupon
+  test 'use coupon' do
+    user = User.first
+    coupon = Coupon.first
+    user.use_coupon!(coupon)
+
+    user.reload
+
+    assert_equal user.coupons.length, 1
+    assert_equal user.coupons[0]['str_id'], coupon.str_id
+    assert_equal user.coupons[0]['used'], true
+  end
+
+  test 'use coupon if nil' do
+    user = User.first
+    user.coupons = []
+    user.save
+    user.use_coupon!(nil)
+
+    user.reload
+
+    assert_equal user.coupons.length, 0
+  end
 end

@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  str_id: coupon1
+  extra_ratio_rebate: 0.7
+  nb_days_valid: 1
+
+two:
+  str_id: coupon2
+  extra_ratio_rebate: 0.9
+  nb_days_valid: 1

@@ -1,6 +1,8 @@
 require 'bcrypt'
 
 class User < ApplicationRecord
+  serialize :coupons, JSON
+
   NotAuthorized = Class.new(StandardError)
 
   DISALLOWED_EMAIL_DOMAINS = [
@@ -91,5 +93,24 @@ class User < ApplicationRecord
 
   def can_create_new_website?
     orders.count.positive? || websites.count.zero?
+  end
+
+  def first_unused_coupon
+    return nil unless coupons
+
+    ucoupon = coupons.find { |coupon| !coupon['used'] }
+
+    ucoupon ? Coupon.find_by(str_id: ucoupon['str_id']) : nil
+  end
+
+  def use_coupon!(coupon)
+    return unless coupon
+
+    self.coupons ||= []
+    coupon_obj = JSON.parse(coupon.to_json)
+    coupon_obj['used'] = true
+    self.coupons << coupon_obj
+
+    save
   end
 end

@@ -10,5 +10,9 @@ module Payment
         'payment_status' => cleaned_obj['payment_status']
       }
     end
+
+    def self.completed?(parsed_order)
+      parsed_order && parsed_order['payment_status'] == 'Completed'
+    end
   end
 end

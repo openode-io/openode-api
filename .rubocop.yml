@@ -3,6 +3,7 @@ require: rubocop-rails
 AllCops:
   Exclude:
     # bundled gems
+    - db/schema.rb
     - vendor/**/*
     # package testing gems
     - test/vendor/**/*

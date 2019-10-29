@@ -9,11 +9,29 @@ class Order < ApplicationRecord
   validates :content, presence: true
 
   before_create :apply_coupon
+  after_create :add_user_credits
   after_create :send_confirmation_email
 
   def apply_coupon
-    # if any
+    first_unused_coupon = user.first_unused_coupon
+
+    return unless first_unused_coupon
+
+    self.amount = amount * (1.0 + first_unused_coupon.extra_ratio_rebate)
+
+    content['coupon'] = first_unused_coupon
+
+    user.use_coupon!(first_unused_coupon)
   end
 
-  def send_confirmation_email; end
+  def add_user_credits
+    nb_credits = Website.cost_price_to_credits(amount)
+
+    user.credits += nb_credits
+    user.save
+  end
+
+  def send_confirmation_email
+    # test
+  end
 end

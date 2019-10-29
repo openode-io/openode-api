@@ -16,4 +16,13 @@ class PaypalTest < ActiveSupport::TestCase
     assert_equal result['user_id'], 10_000
     assert_equal result['payment_status'], 'Completed'
   end
+
+  test 'is completed?' do
+    content = JSON.parse(File.read(Rails.root.join('test', 'fixtures',
+                                                   'http', 'payment', 'paypal', 'paypal.json')))
+
+    parsed_order = Payment::Paypal.parse(content)
+
+    assert_equal Payment::Paypal.completed?(parsed_order), true
+  end
 end

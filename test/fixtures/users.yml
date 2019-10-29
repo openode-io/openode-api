@@ -12,7 +12,7 @@ one:
   last_free_credit_distribute_at: 2019-08-09 17:57:23
   newsletter: false
   notified_low_credit: false
-  coupons: MyText
+  coupons: 
   nb_credits_threshold_notification: 1.5
   activated: true
   activation_hash: MyString
@@ -32,7 +32,7 @@ two:
   last_free_credit_distribute_at: 2019-08-09 17:57:23
   newsletter: false
   notified_low_credit: false
-  coupons: MyText
+  coupons: 
   nb_credits_threshold_notification: 1.5
   activated: false
   activation_hash: MyString
