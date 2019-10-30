@@ -3,6 +3,26 @@ require 'test_helper'
 class OrderControllerTest < ActionDispatch::IntegrationTest
   include ActiveJob::TestHelper
 
+  test '/order/paypal completed' do
+    user = User.first
+    content = JSON.parse(File.read(Rails.root.join('test', 'fixtures',
+                                                   'http', 'payment', 'paypal',
+                                                   'paypal.json')))
+
+    content['custom'] = user.id
+
+    post '/order/paypal', params: content, as: :json
+
+    order_id = response.parsed_body['order_id']
+    order = Order.find_by! id: order_id
+
+    assert_response :success
+    assert_equal order.amount, 2.0
+    assert_equal order.gateway, 'paypal'
+    assert_equal order.payment_status, 'Completed'
+    assert_equal order.user_id.to_s, user.id.to_s
+  end
+
   test '/order/paypal not completed' do
     content = JSON.parse(File.read(Rails.root.join('test', 'fixtures',
                                                    'http', 'payment', 'paypal',

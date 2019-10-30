@@ -34,5 +34,12 @@ class Order < ApplicationRecord
 
   def send_confirmation_email
     OrderMailer.with(order: self, comment: '').confirmation.deliver_now
+
+    # extra copy for admin purpose
+    OrderMailer.with(
+      order: self,
+      comment: '',
+      email_to: ENV['DEFAULT_EMAIL']
+    ).confirmation.deliver_now
   end
 end

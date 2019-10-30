@@ -6,7 +6,14 @@ class OrderController < ApplicationController
       return json(result: 'error', msg: 'Order not completed')
     end
 
-    json({})
+    order = Order.create!(
+      user_id: parsed_order['user_id'],
+      amount: parsed_order['amount'],
+      payment_status: parsed_order['payment_status'],
+      content: parsed_order['content']
+    )
+
+    json(result: 'ok', order_id: order.id)
   rescue StandardError => e
     Ex::Logger.error(e)
     json(result: 'error', msg: e.to_s)
