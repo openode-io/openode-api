@@ -1,0 +1,15 @@
+<p>Dear opeNode user, <br /></p>
+
+<p>Your payment has been processed successfully!<br /></p>
+<p>Order Details: </p>
+<ul>
+<li>ID: <%= @order.id %></li>
+<li>User ID: <%= @order.user.id %></li>
+<li>Amount: $<%= @order.amount %></li>
+<li>Status: <%= @order.payment_status %></li>
+<li>Gateway: <%= @order.gateway %></li>
+<li>Comment: <%= @comment %></li>
+</ul>
+
+<p><br />Thanks very much for your payment and we hope you will enjoy your opeNode experience.<br /></p>
+

@@ -8,10 +8,6 @@ AllCops:
     # package testing gems
     - test/vendor/**/*
 
-#AllCops:
-#  Exclude:
-#    - 'path/to/excluded/file.rb'
-
 Rails/Output:
   Exclude:
     - 'config/*.rb'

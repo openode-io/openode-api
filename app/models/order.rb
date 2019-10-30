@@ -7,6 +7,7 @@ class Order < ApplicationRecord
   validates :amount, presence: true, numericality: { greater_than: 0 }
   validates :payment_status, presence: true
   validates :content, presence: true
+  validates :gateway, presence: true
 
   before_create :apply_coupon
   after_create :add_user_credits
@@ -32,6 +33,6 @@ class Order < ApplicationRecord
   end
 
   def send_confirmation_email
-    # test
+    OrderMailer.with(order: self, comment: '').confirmation.deliver_now
   end
 end
