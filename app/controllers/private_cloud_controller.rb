@@ -30,7 +30,6 @@ class PrivateCloudController < InstancesController
   end
 
   def apply
-
     result = []
 
     json(

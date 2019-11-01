@@ -193,13 +193,13 @@ class WebsiteTest < ActiveSupport::TestCase
     # private_cloud?
     test 'private_cloud? thruthy' do
       website = Website.find_by! site_name: 'testprivatecloud'
-      
+
       assert_equal website.private_cloud?, true
     end
 
     test 'private_cloud? with cloud should be false' do
       website = default_website
-      
+
       assert_equal website.private_cloud?, false
     end
 
@@ -208,7 +208,7 @@ class WebsiteTest < ActiveSupport::TestCase
       website = Website.find_by! site_name: 'testprivatecloud'
       website.data = {}
       website.save
-      
+
       assert_equal website.private_cloud_allocated?, false
     end
 
@@ -216,7 +216,7 @@ class WebsiteTest < ActiveSupport::TestCase
       website = Website.find_by! site_name: 'testprivatecloud'
       website.data = { 'privateCloudInfo' => { SUBID: '1234' } }
       website.save
-      
+
       assert_equal website.private_cloud_allocated?, true
     end
 

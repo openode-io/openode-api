@@ -91,5 +91,4 @@ class PrivateCloudTest < ActionDispatch::IntegrationTest
     assert_response :bad_request
     assert_includes response.parsed_body.to_s, 'must be private cloud-based'
   end
-
 end

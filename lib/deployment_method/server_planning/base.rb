@@ -4,10 +4,10 @@ module DeploymentMethod
       attr_accessor :runner
 
       MANAGEMENT_SRC_DIR = '/root/openode-www/'
-      
-      #def initialize(runner)
+
+      # def initialize(runner)
       #  self.runner = runner
-      #end
+      # end
 
       def apply
         raise 'not implemented'
