@@ -29,7 +29,7 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/restart should not allow when no credit' do
-    dep_method = prepare_default_deployment_method
+    dep_method = prepare_default_execution_method
 
     website = default_website
     website.user.credits = 0
@@ -62,7 +62,7 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/restart should not allow when user not activated' do
-    dep_method = prepare_default_deployment_method
+    dep_method = prepare_default_execution_method
 
     website = default_website
     website.user.activated = false
@@ -95,7 +95,7 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/restart should not allow when user suspended' do
-    dep_method = prepare_default_deployment_method
+    dep_method = prepare_default_execution_method
 
     website = default_website
     website.user.suspended = true
@@ -126,7 +126,7 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/restart - happy path' do
-    dep_method = prepare_default_deployment_method
+    dep_method = prepare_default_execution_method
     website = default_website
     website.crontab = ''
     website.save
@@ -173,7 +173,7 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/restart - not listening on proper port' do
-    dep_method = prepare_default_deployment_method
+    dep_method = prepare_default_execution_method
     website = default_website
     website.crontab = ''
     website.save
@@ -220,7 +220,7 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/restart - SKIP_PORT_CHECK' do
-    dep_method = prepare_default_deployment_method
+    dep_method = prepare_default_execution_method
     website = default_website
     website.crontab = ''
     website.configs = {}

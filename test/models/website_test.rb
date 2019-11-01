@@ -190,6 +190,36 @@ class WebsiteTest < ActiveSupport::TestCase
       assert_equal website.website_locations.reload[0].location.str_id, 'canada'
     end
 
+    # private_cloud?
+    test 'private_cloud? thruthy' do
+      website = Website.find_by! site_name: 'testprivatecloud'
+      
+      assert_equal website.private_cloud?, true
+    end
+
+    test 'private_cloud? with cloud should be false' do
+      website = default_website
+      
+      assert_equal website.private_cloud?, false
+    end
+
+    # private_cloud_allocated?
+    test 'private_cloud_allocated? without allocation' do
+      website = Website.find_by! site_name: 'testprivatecloud'
+      website.data = {}
+      website.save
+      
+      assert_equal website.private_cloud_allocated?, false
+    end
+
+    test 'private_cloud_allocated? thruthy' do
+      website = Website.find_by! site_name: 'testprivatecloud'
+      website.data = { 'privateCloudInfo' => { SUBID: '1234' } }
+      website.save
+      
+      assert_equal website.private_cloud_allocated?, true
+    end
+
     # normalize_storage_areas
     test 'normalized_storage_areas with two areas' do
       w = Website.where(site_name: 'testsite').first

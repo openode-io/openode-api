@@ -154,6 +154,10 @@ class Website < ApplicationRecord
     cloud_type == 'private-cloud'
   end
 
+  def private_cloud_allocated?
+    data.present? && data['privateCloudInfo'].present?
+  end
+
   def configs_must_comply
     self.configs ||= {}
 

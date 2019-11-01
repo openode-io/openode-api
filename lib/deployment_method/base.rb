@@ -43,7 +43,7 @@ module DeploymentMethod
       website, = get_website_fields(options)
 
       # stop based on the deployment method (ex. docker compose)
-      runner.deployment_method.do_stop(options)
+      runner.execution_method.do_stop(options)
 
       # stop based on the cloud provider
       runner.cloud_provider.stop(options)

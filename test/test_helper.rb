@@ -257,10 +257,10 @@ class ActiveSupport::TestCase
     }
   end
 
-  def prepare_default_deployment_method
+  def prepare_default_execution_method
     set_dummy_secrets_to(LocationServer.all)
     runner = DeploymentMethod::Runner.new('docker', 'cloud', default_runner_configs)
-    runner.get_deployment_method
+    runner.get_execution_method
   end
 
   def prepare_default_ports

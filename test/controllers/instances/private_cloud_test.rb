@@ -60,4 +60,36 @@ class PrivateCloudTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
   end
+
+  # apply
+
+  test 'POST /instances/:instance_id/apply should fail if not allocated' do
+    website = Website.find_by! site_name: 'testprivatecloud'
+    website.data = {}
+    website.save!
+
+    post '/instances/testprivatecloud/apply?location_str_id=usa',
+         as: :json,
+         params: {},
+         headers: default_headers_auth
+
+    assert_response :bad_request
+    assert_includes response.parsed_body.to_s, 'requires to be already allocated'
+  end
+
+  test 'POST /instances/:instance_id/apply should fail if not private cloud' do
+    website = Website.find_by! site_name: 'testprivatecloud'
+    website.cloud_type = 'cloud'
+    website.data = {}
+    website.save!
+
+    post '/instances/testprivatecloud/apply?location_str_id=usa',
+         as: :json,
+         params: {},
+         headers: default_headers_auth
+
+    assert_response :bad_request
+    assert_includes response.parsed_body.to_s, 'must be private cloud-based'
+  end
+
 end

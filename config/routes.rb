@@ -80,5 +80,6 @@ Rails.application.routes.draw do
     post '/:site_name/set-plan', to: 'instances#set_plan'
 
     post '/:site_name/allocate', to: 'private_cloud#allocate'
+    post '/:site_name/apply', to: 'private_cloud#apply'
   end
 end

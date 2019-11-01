@@ -238,7 +238,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   # stop with docker compose internal
   test '/instances/:instance_id/stop with internal' do
-    dep_method = prepare_default_deployment_method
+    dep_method = prepare_default_execution_method
     set_dummy_secrets_to(LocationServer.all)
     prepare_default_ports
     website = default_website
@@ -268,7 +268,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     set_dummy_secrets_to(LocationServer.all)
     runner = DeploymentMethod::Runner.new('docker', 'private-cloud',
                                           default_runner_configs)
-    dep_method = runner.get_deployment_method
+    dep_method = runner.get_execution_method
 
     location_server = LocationServer.find_by ip: '127.0.0.3'
 
@@ -314,7 +314,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   # reload with docker compose internal
   test '/instances/:instance_id/reload with internal' do
-    dep_method = prepare_default_deployment_method
+    dep_method = prepare_default_execution_method
     set_dummy_secrets_to(LocationServer.all)
     prepare_default_ports
 
@@ -385,7 +385,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   # /set-plan
   test '/instances/:instance_id/set-plan to a new one' do
-    dep_method = prepare_default_deployment_method
+    dep_method = prepare_default_execution_method
     set_dummy_secrets_to(LocationServer.all)
     prepare_default_ports
 
@@ -472,7 +472,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   # DELETE /sitename
   test 'DEL /instances/:instance_id/' do
-    dep_method = prepare_default_deployment_method
+    dep_method = prepare_default_execution_method
     set_dummy_secrets_to(LocationServer.all)
     prepare_default_ports
 

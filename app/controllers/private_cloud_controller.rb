@@ -1,6 +1,10 @@
 class PrivateCloudController < InstancesController
-  before_action only: [:allocate] do
+  before_action only: [:allocate, :apply] do
     requires_private_cloud_plan
+  end
+
+  before_action only: [:apply] do
+    requires_active_private_cloud_allocation
   end
 
   def allocate
@@ -23,5 +27,23 @@ class PrivateCloudController < InstancesController
     json(
       status: 'Instance creating...'
     )
+  end
+
+  def apply
+
+    result = []
+
+    json(
+      status: 'success',
+      result: result
+    )
+  end
+
+  protected
+
+  def requires_active_private_cloud_allocation
+    unless @website.private_cloud_allocated?
+      validation_error!('The instance requires to be already allocated')
+    end
   end
 end

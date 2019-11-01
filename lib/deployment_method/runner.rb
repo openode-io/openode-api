@@ -1,6 +1,8 @@
 module DeploymentMethod
   class Runner
     attr_accessor :execution
+    attr_reader :execution_method
+    attr_reader :cloud_provider
 
     def initialize(type, cloud_type, configs = {})
       @type = type
@@ -8,13 +10,9 @@ module DeploymentMethod
       @configs = configs
       @website = @configs[:website]
       @website_location = @configs[:website_location]
-      @deployment_method = get_deployment_method
+      @execution_method = get_execution_method
       @cloud_provider = get_cloud_provider
     end
-
-    attr_reader :deployment_method
-
-    attr_reader :cloud_provider
 
     def init_execution!(type)
       self.execution = Execution.create!(
@@ -26,6 +24,36 @@ module DeploymentMethod
 
       execution.status = Execution::STATUS_SUCCESS
       execution.save
+    end
+
+    def get_execution_method
+      dep_method = if @configs[:execution_method]
+        @configs[:execution_method]
+      else
+        case @type
+             when 'docker'
+               DeploymentMethod::DockerCompose.new
+             end
+      end
+
+      # for convenience, to call back the runner from any dep method
+      dep_method.runner = self if dep_method
+
+      dep_method
+    end
+
+    def get_cloud_provider
+      provider_type =
+        case @cloud_type
+        when 'cloud' # refactor to internal
+          'internal'
+        when 'private-cloud'
+          'vultr'
+        else
+          @cloud_type
+        end
+
+      CloudProvider::Manager.instance.first_of_type(provider_type)
     end
 
     def multi_steps
@@ -97,7 +125,7 @@ module DeploymentMethod
       results = []
 
       generated_commands = cmds.map do |cmd|
-        result = @deployment_method.send(cmd[:cmd_name], cmd[:options])
+        result = @execution_method.send(cmd[:cmd_name], cmd[:options])
 
         if cmd[:options][:is_complex]
           results << {
@@ -130,32 +158,6 @@ module DeploymentMethod
       end
 
       results
-    end
-
-    def get_deployment_method
-      dep_method = case @type
-                   when 'docker'
-                     DeploymentMethod::DockerCompose.new
-                   end
-
-      # for convenience, to call back the runner from any dep method
-      dep_method.runner = self if dep_method
-
-      dep_method
-    end
-
-    def get_cloud_provider
-      provider_type =
-        case @cloud_type
-        when 'cloud' # refactor to internal
-          'internal'
-        when 'private-cloud'
-          'vultr'
-        else
-          @cloud_type
-        end
-
-      CloudProvider::Manager.instance.first_of_type(provider_type)
     end
   end
 end

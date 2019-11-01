@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 
 require 'test_helper'
 
@@ -159,7 +158,7 @@ services:
   test 'parse_global_containers' do
     set_dummy_secrets_to(LocationServer.all)
     runner = DeploymentMethod::Runner.new('docker', 'cloud', dummy_ssh_configs)
-    dep_method = runner.get_deployment_method
+    dep_method = runner.get_execution_method
 
     expect_global_container(dep_method)
 
@@ -176,7 +175,7 @@ services:
   test 'find_containers_by ports' do
     set_dummy_secrets_to(LocationServer.all)
     runner = DeploymentMethod::Runner.new('docker', 'cloud', dummy_ssh_configs)
-    dep_method = runner.get_deployment_method
+    dep_method = runner.get_execution_method
 
     cmd = dep_method.global_containers({})
     prepare_ssh_session(cmd, IO.read('test/fixtures/docker/global_containers.txt'))
@@ -194,7 +193,7 @@ services:
   test 'find_containers_by name' do
     set_dummy_secrets_to(LocationServer.all)
     runner = DeploymentMethod::Runner.new('docker', 'cloud', dummy_ssh_configs)
-    dep_method = runner.get_deployment_method
+    dep_method = runner.get_execution_method
 
     cmd = dep_method.global_containers({})
     prepare_ssh_session(cmd, IO.read('test/fixtures/docker/global_containers.txt'))
@@ -211,7 +210,7 @@ services:
   test 'kill_global_containers_by ports' do
     set_dummy_secrets_to(LocationServer.all)
     runner = DeploymentMethod::Runner.new('docker', 'cloud', dummy_ssh_configs)
-    dep_method = runner.get_deployment_method
+    dep_method = runner.get_execution_method
 
     cmd = dep_method.global_containers({})
     prepare_ssh_session(cmd, IO.read('test/fixtures/docker/global_containers.txt'))
@@ -235,7 +234,7 @@ services:
     configs[:website_location] = website_location
 
     runner = DeploymentMethod::Runner.new('docker', 'cloud', configs)
-    runner.get_deployment_method
+    runner.get_execution_method
   end
 
   test 'prepare_dind_compose_image' do
@@ -482,7 +481,7 @@ services:
     website = default_website
     website_location = default_website_location
     runner = DeploymentMethod::Runner.new('docker', 'cloud', dummy_ssh_configs)
-    dep_method = runner.get_deployment_method
+    dep_method = runner.get_execution_method
 
     website.status = Website::STATUS_ONLINE
     website.save!

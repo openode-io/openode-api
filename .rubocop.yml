@@ -28,6 +28,9 @@ Style/MultilineBlockChain:
 Style/GuardClause:
   Enabled: false
 
+Style/SymbolArray:
+  Enabled: false
+
 Rails/BulkChangeTable:
   Enabled: false
 
