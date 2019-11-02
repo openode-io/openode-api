@@ -10,11 +10,18 @@ class ServerPlanningDockerComposeTest < ActiveSupport::TestCase
     runner = DeploymentMethod::Runner.new('docker', 'private-cloud', configs)
     dep_method = runner.get_execution_method
 
-    prepare_ssh_session(DeploymentMethod::ServerPlanning::DockerCompose.dind_src_path, '')
+    mkdir_cmd = DeploymentMethod::ServerPlanning::DockerCompose.dind_mk_src_dir
+    prepare_ssh_session(mkdir_cmd, '')
 
     assert_scripted do
+      begin_sftp
       begin_ssh
-      dep_method.apply
+      dep_method.apply({})
+
+      uploaded_files = Remote::Sftp.get_test_uploaded_files
+      assert_equal uploaded_files.length, 1
+      assert_includes uploaded_files[0][:content], 'FROM '
+      assert_includes uploaded_files[0][:remote_file_path], '/Dockerfile'
     end
   end
 end

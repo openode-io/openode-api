@@ -310,6 +310,17 @@ class Website < ApplicationRecord
     configs && [true, 'true'].include?(configs['SKIP_PORT_CHECK'])
   end
 
+  def certs
+    if configs['SSL_CERTIFICATE_PATH']
+      {
+        cert_path: configs['SSL_CERTIFICATE_PATH'],
+        cert_key_path: configs['SSL_CERTIFICATE_KEY_PATH']
+      }
+    else
+      nil
+    end
+  end
+
   def max_build_duration
     [
       (configs['MAX_BUILD_DURATION'] || Website.config_def('MAX_BUILD_DURATION')[:default]).to_i,
