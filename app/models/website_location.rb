@@ -39,13 +39,17 @@ class WebsiteLocation < ApplicationRecord
     CloudProvider::Manager.instance.internal_domains
   end
 
-  def prepare_runner
-    configs = {
+  def prepare_runner_configs
+    {
       website: website,
       website_location: self,
       host: location_server.ip,
       secret: location_server.secret
     }
+  end
+
+  def prepare_runner
+    configs = prepare_runner_configs
 
     @runner =
       DeploymentMethod::Runner.new(website.type, website.cloud_type, configs)

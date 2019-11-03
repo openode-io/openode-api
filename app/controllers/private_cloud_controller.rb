@@ -32,6 +32,17 @@ class PrivateCloudController < InstancesController
   def apply
     result = []
 
+    server_planning_methods = [
+      DeploymentMethod::ServerPlanning::Sync.new,
+      DeploymentMethod::ServerPlanning::DockerCompose.new,
+      DeploymentMethod::ServerPlanning::Nginx.new
+    ]
+
+    server_planning_methods.each do |planning_method|
+      prepare_execution_method_runner(@website, @website_location, planning_method)
+        .apply(website: @website, website_location: @website_location)
+    end
+
     json(
       status: 'success',
       result: result
@@ -39,6 +50,13 @@ class PrivateCloudController < InstancesController
   end
 
   protected
+
+  def prepare_execution_method_runner(website, website_location, server_planning_method)
+    configs = website_location.prepare_runner_configs
+    configs[:execution_method] = server_planning_method
+
+    DeploymentMethod::Runner.new(website.type, website.cloud_type, configs)
+  end
 
   def requires_active_private_cloud_allocation
     unless @website.private_cloud_allocated?
