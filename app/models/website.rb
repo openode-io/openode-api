@@ -311,13 +311,11 @@ class Website < ApplicationRecord
   end
 
   def certs
-    if configs['SSL_CERTIFICATE_PATH']
+    if configs && configs['SSL_CERTIFICATE_PATH'] && configs['SSL_CERTIFICATE_KEY_PATH']
       {
         cert_path: configs['SSL_CERTIFICATE_PATH'],
         cert_key_path: configs['SSL_CERTIFICATE_KEY_PATH']
       }
-    else
-      nil
     end
   end
 
