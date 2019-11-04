@@ -91,4 +91,37 @@ class PrivateCloudTest < ActionDispatch::IntegrationTest
     assert_response :bad_request
     assert_includes response.parsed_body.to_s, 'must be private cloud-based'
   end
+
+  test 'POST /instances/:instance_id/apply happy path' do
+    set_dummy_secrets_to(LocationServer.all)
+
+    website = Website.find_by! site_name: 'testprivatecloud'
+    website.cloud_type = 'private-cloud'
+    website.data = { 'privateCloudInfo': { 'hello': 'world' } }
+    website.save!
+
+    mkdir_sync_cmd = DeploymentMethod::ServerPlanning::Sync.new.sync_mk_src_dir
+    prepare_ssh_session(mkdir_sync_cmd, '')
+
+    mkdir_compose_cmd = DeploymentMethod::ServerPlanning::DockerCompose.dind_mk_src_dir
+    prepare_ssh_session(mkdir_compose_cmd, '')
+
+    exec_method_nginx = DeploymentMethod::ServerPlanning::Nginx.new
+    nginx_cp_orig_config_cmd = exec_method_nginx.cp_original_nginx_configs
+    prepare_ssh_session(nginx_cp_orig_config_cmd, '')
+    nginx_restart_cmd = exec_method_nginx.restart
+    prepare_ssh_session(nginx_restart_cmd, 'restarted nginx')
+
+    assert_scripted do
+      begin_sftp
+      begin_ssh
+      post '/instances/testprivatecloud/apply?location_str_id=usa',
+           as: :json,
+           params: {},
+           headers: default_headers_auth
+
+      assert_response :success
+      assert_includes response.parsed_body.to_s, 'restarted nginx'
+    end
+  end
 end

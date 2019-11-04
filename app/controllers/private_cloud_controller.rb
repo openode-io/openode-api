@@ -30,22 +30,26 @@ class PrivateCloudController < InstancesController
   end
 
   def apply
-    result = []
-
     server_planning_methods = [
       DeploymentMethod::ServerPlanning::Sync.new,
       DeploymentMethod::ServerPlanning::DockerCompose.new,
       DeploymentMethod::ServerPlanning::Nginx.new
     ]
 
-    server_planning_methods.each do |planning_method|
+    result = server_planning_methods.map do |planning_method|
       prepare_execution_method_runner(@website, @website_location, planning_method)
-        .apply(website: @website, website_location: @website_location)
+
+      planning_method.apply(
+        website: @website,
+        website_location: @website_location
+      )
     end
+
+    result_to_present = result.andand.last[0].andand[:result]
 
     json(
       status: 'success',
-      result: result
+      result: result_to_present
     )
   end
 
