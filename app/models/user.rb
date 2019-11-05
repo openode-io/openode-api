@@ -21,7 +21,6 @@ class User < ApplicationRecord
   attr_accessor   :password_confirmation
 
   has_many :websites
-  has_many :snapshots
   has_many :orders
 
   validates :email, uniqueness: true

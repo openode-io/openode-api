@@ -11,7 +11,6 @@ class Website < ApplicationRecord
   belongs_to :user
   has_many :website_locations, dependent: :destroy
   has_many :events, foreign_key: :ref_id, class_name: :WebsiteEvent, dependent: :destroy
-  has_many :snapshots
   has_many :deployments
   has_many :executions
   has_many :credit_actions
