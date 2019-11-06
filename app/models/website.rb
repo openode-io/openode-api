@@ -157,6 +157,12 @@ class Website < ApplicationRecord
     data.present? && data['privateCloudInfo'].present?
   end
 
+  def private_cloud_info
+    return if data.blank?
+
+    data['privateCloudInfo']
+  end
+
   def configs_must_comply
     self.configs ||= {}
 

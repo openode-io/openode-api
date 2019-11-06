@@ -75,6 +75,10 @@ module CloudProvider
       result_to_array(::Vultr::OS.list)
     end
 
+    def server_info(opts = {})
+      ::Vultr::Server.list(opts)[:result]
+    end
+
     def find_os(name, platform)
       os_list
         .find { |os| os['name'].include?(name) && os['name'].include?(platform) }

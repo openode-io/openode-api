@@ -90,4 +90,13 @@ class CloudProviderVultrTest < ActiveSupport::TestCase
     assert_equal website.data['privateCloudInfo']['SUBID'], '30303641'
     assert_equal website.data['privateCloudInfo']['SSHKEYID'], '5da3d3a1affa7'
   end
+
+  test 'server info' do
+    provider = CloudProvider::Manager.instance.first_of_type('vultr')
+
+    result = provider.server_info(SUBID: '123456789')
+
+    assert_equal result['SUBID'], '30751551'
+    assert_equal result['main_ip'], '95.180.134.210'
+  end
 end
