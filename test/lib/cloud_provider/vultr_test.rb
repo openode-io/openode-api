@@ -99,4 +99,40 @@ class CloudProviderVultrTest < ActiveSupport::TestCase
     assert_equal result['SUBID'], '30751551'
     assert_equal result['main_ip'], '95.180.134.210'
   end
+
+  # create openode server
+  test 'create_openode_server!' do
+    wl = default_website_location
+    provider = CloudProvider::Manager.instance.first_of_type('vultr')
+
+    info = provider.server_info(SUBID: '123456789')
+
+    created_server = provider.create_openode_server!(wl, info)
+
+    assert_equal wl.location_server.ip, created_server.ip
+    assert_equal created_server.ip, '95.180.134.210'
+    assert_equal created_server.ram_mb, 1024
+    assert_equal created_server.cpus, 1
+    assert_equal created_server.disk_gb, 25
+    assert_equal created_server.cloud_type, 'private-cloud'
+  end
+
+  # save password
+  test 'save password - happy path' do
+    wl = default_website_location
+    wl.gen_ssh_key!
+    provider = CloudProvider::Manager.instance.first_of_type('vultr')
+
+    info = provider.server_info(SUBID: '123456789')
+
+    created_server = provider.create_openode_server!(wl, info)
+
+    provider.save_password(wl, created_server, info)
+
+    the_secret = created_server.secret
+
+    assert_equal the_secret[:info][:main_ip], '95.180.134.210'
+    assert_includes the_secret[:public_key], 'ssh-rsa '
+    assert_includes the_secret[:private_key], 'BEGIN RSA PRIVATE KEY'
+  end
 end

@@ -172,6 +172,22 @@ class WebsiteLocation < ApplicationRecord
     save!
   end
 
+  def add_server!(attribs = {})
+    server = LocationServer.find_by ip: attribs[:ip]
+    return server if server
+
+    attribs[:location_id] = location_id
+    server = LocationServer.create!(attribs)
+
+    self.location_server_id = server.id
+    save!
+
+    reload
+    update_remote_dns(with_auto_a: true)
+
+    server
+  end
+
   def ports
     [port, second_port]
       .select(&:present?)

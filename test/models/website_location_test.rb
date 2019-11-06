@@ -293,4 +293,33 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert_equal wl.secret[:public_key].include?('ssh-rsa'), true
     assert_equal wl.secret[:private_key].include?('PRIVATE KEY'), true
   end
+
+  # add_server!
+  test 'add_server! when not exists' do
+    wl = default_website_location
+    server = wl.add_server!(
+      ip: '127.0.0.15',
+      ram_mb: 128,
+      cpus: 1,
+      disk_gb: 200,
+      cloud_type: 'private-cloud'
+    )
+
+    assert_equal server.ip, '127.0.0.15'
+    assert_equal wl.location_server.ip, '127.0.0.15'
+    assert_equal wl.location_id, wl.location_id
+    assert_equal wl.website.events[0].obj['title'], 'DNS update'
+    assert_equal wl.website.events.length, 1
+
+    # if create with same ip, should skip it
+    wl.add_server!(
+      ip: '127.0.0.15',
+      ram_mb: 128,
+      cpus: 1,
+      disk_gb: 200,
+      cloud_type: 'private-cloud'
+    )
+
+    assert_equal wl.website.events.length, 1
+  end
 end

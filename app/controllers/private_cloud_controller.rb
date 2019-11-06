@@ -61,7 +61,9 @@ class PrivateCloudController < InstancesController
 
     info = cloud_provider.server_info(SUBID: @website.private_cloud_info['SUBID'])
 
-    verify_ip_availability(info)
+    server = cloud_provider.create_openode_server!(@website_location, info)
+
+    cloud_provider.save_password(website_location, server, info)
   end
 
   protected
@@ -77,25 +79,5 @@ class PrivateCloudController < InstancesController
     unless @website.private_cloud_allocated?
       validation_error!('The instance requires to be already allocated')
     end
-  end
-
-  def verify_ip_availability(info)
-    return if !info || !info['main_ip'] || info['main_ip'] == '0.0.0.0'
-    return if LocationServer.exists?(ip: info['main_ip'])
-
-    server = LocationServer.create!(
-      ip: info['main_ip'],
-      location_id: @website_location.location_id,
-      ram_mb: info['ram'].to_i,
-      cpus: info['vcpu_count'].to_i,
-      disk_gb: info['disk'].to_i,
-      cloud_type: 'private-cloud'
-    )
-
-    @website_location.location_server_id = server.id
-    @website_location.save!
-
-    @website_location.reload
-    @website_location.update_remote_dns(with_auto_a: true)
   end
 end

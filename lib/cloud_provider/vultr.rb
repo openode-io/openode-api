@@ -79,6 +79,39 @@ module CloudProvider
       ::Vultr::Server.list(opts)[:result]
     end
 
+    def create_openode_server!(website_location, info)
+      return if !info || !info['main_ip'] || info['main_ip'] == '0.0.0.0'
+
+      website_location.add_server!(
+        ip: info['main_ip'],
+        ram_mb: info['ram'].to_i,
+        cpus: info['vcpu_count'].to_i,
+        disk_gb: info['disk'].scan(/\d/).join('').to_i,
+        cloud_type: 'private-cloud'
+      )
+    end
+
+    def save_password(website_location, location_server, info)
+      # private - public keys should have been created already
+      assert website_location.secret
+      assert website_location.secret[:public_key]
+      assert website_location.secret[:private_key]
+
+      return unless location_server
+
+      return if !info || info['default_password'].blank? ||
+                info['default_password'] == 'not supported'
+
+      return if info['main_ip'].blank? || info['main_ip'] == '0.0.0.0'
+
+      # save info + add public and private keys
+      location_server.save_secret!(
+        info: info,
+        public_key: website_location.secret[:public_key],
+        private_key: website_location.secret[:private_key]
+      )
+    end
+
     def find_os(name, platform)
       os_list
         .find { |os| os['name'].include?(name) && os['name'].include?(platform) }
