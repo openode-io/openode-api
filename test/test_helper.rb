@@ -173,6 +173,26 @@ class ActiveSupport::TestCase
       content_type: 'application/json',
       response_status: 200,
       response_path: 'test/fixtures/http/cloud_provider/vultr/server_create.json'
+    },
+    {
+      url: 'http://95.180.134.210/',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/cloud_provider/vultr/openode_ready.txt'
+    },
+    {
+      url: 'http://95.180.134.211/',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/cloud_provider/vultr/empty.json'
     }
   ]
 

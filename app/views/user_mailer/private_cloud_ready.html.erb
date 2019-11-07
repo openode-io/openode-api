@@ -1,0 +1,20 @@
+<p>Dear opeNode user, <br /></p>
+<p>Your instance (<%= @sitename %>}) private cloud has been allocated successfully.
+Please find below the details if you want to connect to it via SSH.</p>
+<p></p>
+<ul>
+  <li><b>Username: </b>root</li>
+  <li><b>Password: </b><%= @default_password %></li>
+  <li><b>IP</b><b>: </b><%= @ip %></li>
+</ul>
+<p>Also, your SSH public key is the following (~/.ssh/id_rsa.key):</p>
+<pre><%= @pubkey %></pre>
+<p>It has been added in /root/.ssh/authorized_keys in your server.
+Also, the private key (~/.ssh/id_rsa) is attached.</p>
+<p><br /></p>
+<p>You can either connect with a password or with the SSH key. However, for improved
+security, the SSH key method is recommended. Plus you should disable password
+authentication, set "PasswordAuthentication no" in /etc/ssh/sshd_config.</p>
+
+<p><br /></p>
+<p>If you need any assistance, please let us know.</p>

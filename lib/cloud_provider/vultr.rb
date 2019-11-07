@@ -1,5 +1,6 @@
 require 'vultr'
 require 'countries'
+require 'http'
 
 Vultr.api_key = ENV['']
 
@@ -93,9 +94,12 @@ module CloudProvider
 
     def save_password(website_location, location_server, info)
       # private - public keys should have been created already
+      assert location_server
       assert website_location.secret
       assert website_location.secret[:public_key]
       assert website_location.secret[:private_key]
+
+      return if location_server.secret.andand[:info].present? # already saved the password
 
       return unless location_server
 
@@ -110,6 +114,29 @@ module CloudProvider
         public_key: website_location.secret[:public_key],
         private_key: website_location.secret[:private_key]
       )
+
+      # send the email (refactor if other implementations)
+      # ip, sitename, default_password, pubkey, privkey, mail_to
+      UserMailer.with(
+        ip: location_server.ip,
+        sitename: website_location.website.site_name,
+        default_password: info['default_password'],
+        pubkey: website_location.secret[:public_key],
+        privkey: website_location.secret[:private_key],
+        mail_to: website_location.website.user
+      ).private_cloud_ready.deliver_now
+    end
+
+    def site_installed?(ip)
+      return false if ip.blank? || ip == '0.0.0.0'
+
+      result_get = begin
+                     HTTP.timeout(5).get("http://#{ip}/").to_s
+                   rescue StandardError
+                     'invalid'
+                   end
+
+      result_get.include?('openode-ready')
     end
 
     def find_os(name, platform)

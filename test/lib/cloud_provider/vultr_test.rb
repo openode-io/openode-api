@@ -134,5 +134,55 @@ class CloudProviderVultrTest < ActiveSupport::TestCase
     assert_equal the_secret[:info][:main_ip], '95.180.134.210'
     assert_includes the_secret[:public_key], 'ssh-rsa '
     assert_includes the_secret[:private_key], 'BEGIN RSA PRIVATE KEY'
+
+    # check for the mail
+    mail_sent = ActionMailer::Base.deliveries.last
+
+    assert_includes mail_sent.subject, 'private cloud server is ready'
+    assert_includes mail_sent.to_s, created_server.ip
+    assert_includes mail_sent.to_s, created_server.secret[:info][:default_password]
+    assert_includes mail_sent.to_s, wl.website.site_name
+    assert_equal mail_sent.attachments.first.filename, 'id_rsa'
+  end
+
+  # site_installed?
+  test 'site_installed? - happy path' do
+    provider = CloudProvider::Manager.instance.first_of_type('vultr')
+
+    result = provider.site_installed?('95.180.134.210')
+
+    assert_equal result, true
+  end
+
+  test 'site_installed? - not installed' do
+    provider = CloudProvider::Manager.instance.first_of_type('vultr')
+
+    result = provider.site_installed?('95.180.134.211')
+
+    assert_equal result, false
+  end
+
+  test 'site_installed? - if empty' do
+    provider = CloudProvider::Manager.instance.first_of_type('vultr')
+
+    result = provider.site_installed?('')
+
+    assert_equal result, false
+  end
+
+  test 'site_installed? - if nil' do
+    provider = CloudProvider::Manager.instance.first_of_type('vultr')
+
+    result = provider.site_installed?(nil)
+
+    assert_equal result, false
+  end
+
+  test 'site_installed? - if any ip' do
+    provider = CloudProvider::Manager.instance.first_of_type('vultr')
+
+    result = provider.site_installed?('0.0.0.0')
+
+    assert_equal result, false
   end
 end

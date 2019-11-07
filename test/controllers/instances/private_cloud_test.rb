@@ -124,4 +124,30 @@ class PrivateCloudTest < ActionDispatch::IntegrationTest
       assert_includes response.parsed_body.to_s, 'restarted nginx'
     end
   end
+
+  # private_cloud_info
+  test 'POST /instances/:instance_id/private-cloud-info - happy path' do
+    website = Website.find_by! site_name: 'testprivatecloud'
+    wl = website.website_locations.first
+    wl.gen_ssh_key!
+    website.cloud_type = 'private-cloud'
+    website.data = { 'privateCloudInfo': { 'SUBID': '123456789' } }
+    website.save!
+
+    post '/instances/testprivatecloud/private-cloud-info?location_str_id=usa',
+         as: :json,
+         params: {},
+         headers: default_headers_auth
+
+    wl.reload
+
+    assert_response :success
+    assert_equal response.parsed_body['installation_status'], 'ready'
+    assert_equal response.parsed_body['SUBID'], '30751551'
+    assert_equal wl.location_server.ip, '95.180.134.210'
+
+    assert_equal wl.location_server.secret[:info].present?, true
+    assert_equal wl.location_server.secret[:public_key].present?, true
+    assert_equal wl.location_server.secret[:private_key].present?, true
+  end
 end

@@ -95,11 +95,22 @@ GEM
     faraday_middleware (0.13.1)
       faraday (>= 0.7.4, < 1.0)
     ffi (1.11.1)
+    ffi-compiler (1.0.1)
+      ffi (>= 1.0.0)
+      rake
     globalid (0.4.2)
       activesupport (>= 4.2.0)
     hashdiff (1.0.0)
+    http (4.2.0)
+      addressable (~> 2.3)
+      http-cookie (~> 1.0)
+      http-form_data (~> 2.0)
+      http-parser (~> 1.2.0)
     http-cookie (1.0.3)
       domain_name (~> 0.5)
+    http-form_data (2.1.1)
+    http-parser (1.2.1)
+      ffi-compiler (>= 1.0, < 2.0)
     i18n (1.7.0)
       concurrent-ruby (~> 1.0)
     i18n_data (0.8.0)
@@ -251,6 +262,7 @@ DEPENDENCIES
   daemons
   delayed_job_active_record
   dotenv-rails
+  http
   listen (>= 3.0.5, < 3.2)
   mailgun-ruby (~> 1.2.0)
   mysql2

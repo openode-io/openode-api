@@ -63,7 +63,17 @@ class PrivateCloudController < InstancesController
 
     server = cloud_provider.create_openode_server!(@website_location, info)
 
-    cloud_provider.save_password(website_location, server, info)
+    cloud_provider.save_password(@website_location, server, info)
+    secrets_created = server.secret.andand[:info].present?
+
+    info['installation_status'] =
+      if secrets_created && server.present? && cloud_provider.site_installed?(info['main_ip'])
+        'ready'
+      else
+        ''
+      end
+
+    json(info)
   end
 
   protected
