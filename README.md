@@ -4,7 +4,7 @@
 [![Build status](https://travis-ci.org/openode-io/openode-api.svg?branch=master)](https://travis-ci.org/openode-io/openode-api)
 
 
-WIP - opeNode API revamp of the original Node version
+opeNode API
 
 
 Things you may want to cover:
@@ -28,10 +28,13 @@ Things you may want to cover:
 
 * ...
 
+# Requirements:
+ * Redis for jobs syncing + Action Cable
+
 # Installation
 
  * Install rvm, https://rvm.io/
- ** test
  * rvm install ##.##.## where ##.##.## is the ruby version, see Gemfile
  * apt-get install libmysqlclient-dev
  * bundle install
+
