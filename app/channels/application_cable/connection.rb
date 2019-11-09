@@ -3,13 +3,14 @@ module ApplicationCable
     identified_by :current_user
 
     def connect
-      # puts 'hello connect?'
-      self.current_user = 123_456 # find_verified_user
-      # logger.add_tags current_user.name
+      token = request.headers['token']
+      self.current_user = User.find_by token: token
+
+      reject_unauthorized_connection unless current_user
+
+      logger.add_tags current_user.email
     end
 
-    def disconnect
-      # puts 'disconnected.'
-    end
+    def disconnect; end
   end
 end
