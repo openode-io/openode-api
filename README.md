@@ -28,9 +28,10 @@ Things you may want to cover:
 
 * ...
 
-# Install
+# Installation
 
  * Install rvm, https://rvm.io/
+ ** test
  * rvm install ##.##.## where ##.##.## is the ruby version, see Gemfile
  * apt-get install libmysqlclient-dev
  * bundle install

@@ -11,6 +11,8 @@ module DeploymentMethod
       Rails.logger.info("Starting execution for #{website.site_name}, " \
         "execution-id = #{runner.execution.id}...")
 
+      DeploymentsChannel.broadcast_to(runner.execution, 'msg': "starting deployment #{runner.execution.id}...")
+
       begin
       steps_to_execute = [
         {
