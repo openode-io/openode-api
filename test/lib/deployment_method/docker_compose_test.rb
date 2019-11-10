@@ -493,13 +493,13 @@ services:
     cmd = dep_method.global_containers({})
     prepare_ssh_session(cmd, IO.read('test/fixtures/docker/global_containers.txt'))
     prepare_ssh_session(dep_method.kill_global_container(id: 'b3621dd9d4dd'), 'killed b3621dd9d4dd')
+    prepare_ssh_session(dep_method.logs(container_id: 'b3621dd9d4dd', nb_lines: 10_000,
+                                        website: website),
+                        'done')
 
     assert_scripted do
       begin_ssh
-      result = dep_method.finalize(website: website, website_location: website_location)
-
-      assert_equal result.length, 1
-      assert_equal result[0], 'killed b3621dd9d4dd'
+      dep_method.finalize(website: website, website_location: website_location)
 
       assert_equal website.online?, true
       assert_equal website_location.running_port, 33_120
@@ -512,17 +512,17 @@ services:
   test 'hook_cmd_is if match' do
     obj = { cmd_name: 'tititata', what: 'isthat' }
 
-    assert_equal DeploymentMethod::DockerCompose.hook_cmd_is(obj, 'tititata'), true
+    assert_equal DeploymentMethod::DockerCompose.hook_cmd_is(obj, ['tititata']), true
   end
 
   test 'hook_cmd_is if no match' do
     obj = { cmd_name: 'tititata2', what: 'isthat' }
 
-    assert_equal DeploymentMethod::DockerCompose.hook_cmd_is(obj, 'tititata'), false
+    assert_equal DeploymentMethod::DockerCompose.hook_cmd_is(obj, ['tititata']), false
   end
 
   test 'hook_cmd_is if null' do
-    assert_equal DeploymentMethod::DockerCompose.hook_cmd_is(nil, 'tititata'), false
+    assert_equal DeploymentMethod::DockerCompose.hook_cmd_is(nil, ['tititata']), false
   end
 
   # hook_cmd_state_is

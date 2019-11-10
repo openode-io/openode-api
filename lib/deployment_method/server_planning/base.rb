@@ -9,6 +9,10 @@ module DeploymentMethod
       #  self.runner = runner
       # end
 
+      def hooks
+        []
+      end
+
       def apply
         raise 'not implemented'
       end
