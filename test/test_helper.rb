@@ -308,6 +308,17 @@ class ActiveSupport::TestCase
     prepare_ssh_session(dep_method.kill_global_container(id: '32bfe26a2712'), 'killed 32bfe26a2712')
   end
 
+  def dep_event_exists?(events, status, update)
+    events.any? { |e| e['update'].include?(update) && e['status'] == status }
+  end
+
+  def prepare_logs_container(dep_method, website, container_id, result = 'done_logs')
+    website.container_id = nil
+    prepare_ssh_session(dep_method.logs(container_id: container_id, nb_lines: 10_000,
+                                        website: website),
+                        result)
+  end
+
   def prepare_get_docker_compose(dep_method, website)
     cmd_get_docker_compose = dep_method.get_file(repo_dir: website.repo_dir,
                                                  file: 'docker-compose.yml')

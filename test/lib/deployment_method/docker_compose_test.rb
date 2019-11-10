@@ -490,12 +490,13 @@ services:
     website_location.running_port = 33_121
     website_location.save!
 
-    cmd = dep_method.global_containers({})
-    prepare_ssh_session(cmd, IO.read('test/fixtures/docker/global_containers.txt'))
-    prepare_ssh_session(dep_method.kill_global_container(id: 'b3621dd9d4dd'), 'killed b3621dd9d4dd')
     prepare_ssh_session(dep_method.logs(container_id: 'b3621dd9d4dd', nb_lines: 10_000,
                                         website: website),
                         'done')
+
+    cmd = dep_method.global_containers({})
+    prepare_ssh_session(cmd, IO.read('test/fixtures/docker/global_containers.txt'))
+    prepare_ssh_session(dep_method.kill_global_container(id: 'b3621dd9d4dd'), 'killed b3621dd9d4dd')
 
     assert_scripted do
       begin_ssh
@@ -503,8 +504,6 @@ services:
 
       assert_equal website.online?, true
       assert_equal website_location.running_port, 33_120
-
-      # should also have a deployment
     end
   end
 

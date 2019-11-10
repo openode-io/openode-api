@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_10_29_234344) do
+ActiveRecord::Schema.define(version: 2019_11_10_140111) do
 
   create_table "collaborators", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "website_id"
@@ -73,6 +73,7 @@ ActiveRecord::Schema.define(version: 2019_10_29_234344) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "type", default: "Deployment"
+    t.text "events", size: :medium
     t.index ["website_id"], name: "index_executions_on_website_id"
     t.index ["website_location_id"], name: "index_executions_on_website_location_id"
   end

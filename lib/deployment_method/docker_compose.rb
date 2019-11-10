@@ -115,12 +115,6 @@ module DeploymentMethod
       super(options)
       website.reload
 
-      # remove the dead containers
-      ports_to_remove =
-        [website_location.port, website_location.second_port] - [website_location.running_port]
-
-      kill_global_containers_by(ports: ports_to_remove)
-
       # logs
       begin
         ex_stdout('logs', website: website,
@@ -129,6 +123,12 @@ module DeploymentMethod
       rescue StandardError => e
         Ex::Logger.info(e, 'Unable to retrieve the docker compose logs')
       end
+
+      # remove the dead containers
+      ports_to_remove =
+        [website_location.port, website_location.second_port] - [website_location.running_port]
+
+      kill_global_containers_by(ports: ports_to_remove)
     end
 
     # stop
@@ -281,8 +281,7 @@ module DeploymentMethod
     end
 
     def logs(options = {})
-      container_id = options[:container_id]
-      container_id = options[:website].container_id if options[:website]
+      container_id = options[:website].andand.container_id || options[:container_id]
 
       assert container_id
       require_fields([:nb_lines], options)
@@ -376,6 +375,8 @@ services:
     restart: always
 "
     end
+
+    # the following hooks are notification procs.
 
     def self.hook_error
       proc do |level, msg|

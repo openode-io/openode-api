@@ -44,6 +44,8 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
+    prepare_logs_container(dep_method, website, '123456789', 'done logs')
+
     prepare_default_kill_all(dep_method)
 
     assert_scripted do
@@ -55,7 +57,7 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
 
       assert_equal website.status, Website::STATUS_OFFLINE
       assert_equal deployment.status, Deployment::STATUS_FAILED
-      assert_equal deployment.result['steps'].length, 4 # global, 2 kills, finalize
+      assert_equal deployment.result['steps'].length, 5 # global, 2 kills, finalize
 
       assert_includes deployment.result['errors'][0]['title'], 'No credit'
     end
@@ -77,6 +79,8 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
+    prepare_logs_container(dep_method, website, '123456789', 'done logs')
+
     prepare_default_kill_all(dep_method)
 
     assert_scripted do
@@ -88,7 +92,7 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
 
       assert_equal website.status, Website::STATUS_OFFLINE
       assert_equal deployment.status, Deployment::STATUS_FAILED
-      assert_equal deployment.result['steps'].length, 4 # global, 2 kills, finalize
+      assert_equal deployment.result['steps'].length, 5 # global, 2 kills, finalize
 
       assert_includes deployment.result['errors'][0]['title'], 'User account not yet activated'
     end
@@ -108,6 +112,8 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
          params: base_params,
          headers: default_headers_auth
 
+    prepare_logs_container(dep_method, website, '123456789', 'done logs')
+
     prepare_default_kill_all(dep_method)
 
     assert_scripted do
@@ -119,7 +125,7 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
 
       assert_equal website.status, Website::STATUS_OFFLINE
       assert_equal deployment.status, Deployment::STATUS_FAILED
-      assert_equal deployment.result['steps'].length, 4 # global, 2 kills, finalize
+      assert_equal deployment.result['steps'].length, 5 # global, 2 kills, finalize
 
       assert_includes deployment.result['errors'][0]['title'], 'User suspended'
     end
@@ -154,6 +160,8 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
 
     prepare_ssh_session(dep_method.instance_up_cmd(website_location: website_location), '')
 
+    prepare_logs_container(dep_method, website, 'b3621dd9d4dd', 'done logs')
+
     expect_global_container(dep_method)
     prepare_ssh_session(dep_method.kill_global_container(id: '32bfe26a2712'), 'killed 32bfe26a2712')
 
@@ -166,9 +174,50 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
 
       assert_equal website.status, Website::STATUS_ONLINE
       assert_equal deployment.status, Deployment::STATUS_SUCCESS
-      assert_equal deployment.result['steps'].length, 16 # global, 2 kills, finalize
+      assert_equal deployment.result['steps'].length, 17 # global, 2 kills, finalize
 
       assert_equal deployment.result['errors'].length, 0
+
+      puts "last deployment #{website.deployments.last.events.to_yaml}"
+
+      # should also have a deployment with events
+      assert_equal website.deployments.last.events.length, 15
+
+      allowed_to = dep_event_exists?(website.deployments.last.events,
+                                     'running', 'allowed to dep')
+      assert_equal allowed_to, true
+
+      verified_event = dep_event_exists?(website.deployments.last.events,
+                                         'running', '...verified')
+      assert_equal verified_event, true
+
+      initializing_event = dep_event_exists?(website.deployments.last.events,
+                                             'running', 'Initializing')
+      assert_equal initializing_event, true
+
+      building_image_event = dep_event_exists?(website.deployments.last.events,
+                                               'running', 'Building the instance')
+      assert_equal building_image_event, true
+
+      building_image_done_event = dep_event_exists?(website.deployments.last.events,
+                                                    'running', 'image built')
+      assert_equal building_image_done_event, true
+
+      verif_instance_up_event = dep_event_exists?(website.deployments.last.events,
+                                                  'running', 'Verifying instance up')
+      assert_equal verif_instance_up_event, true
+
+      verif_instance_done_event = dep_event_exists?(website.deployments.last.events,
+                                                    'running', 'instance verification finished')
+      assert_equal verif_instance_done_event, true
+
+      done_log_exists = dep_event_exists?(website.deployments.last.events,
+                                          'success', 'done logs')
+      assert_equal done_log_exists, true
+
+      finalized_event = dep_event_exists?(website.deployments.last.events,
+                                          'success', '...finalized')
+      assert_equal finalized_event, true
     end
   end
 
@@ -200,6 +249,8 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
                         IO.read('test/fixtures/docker/docker-compose-ps.txt'))
 
     prepare_ssh_session(dep_method.instance_up_cmd(website_location: website_location), '', 1)
+
+    prepare_logs_container(dep_method, website, 'b3621dd9d4dd', 'done logs')
 
     expect_global_container(dep_method)
 
@@ -247,6 +298,8 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
     prepare_docker_compose(dep_method, 'b3621dd9d4dd', '')
     prepare_ssh_session(dep_method.ps(front_container_id: 'b3621dd9d4dd'),
                         IO.read('test/fixtures/docker/docker-compose-ps.txt'))
+
+    prepare_logs_container(dep_method, website, 'b3621dd9d4dd', 'done logs')
 
     expect_global_container(dep_method)
 

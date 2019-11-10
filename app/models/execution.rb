@@ -1,5 +1,6 @@
 class Execution < ApplicationRecord
   serialize :result, JSON
+  serialize :events, JSON
 
   belongs_to :website
   belongs_to :website_location
