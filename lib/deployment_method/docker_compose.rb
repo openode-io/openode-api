@@ -109,6 +109,13 @@ module DeploymentMethod
       website.save!
     end
 
+    def notify_final_instance_details(opts = {})
+      get_website_fields(opts)
+      final_details = final_instance_details(opts)
+
+      notify('info', cmd_name: 'final_instance_details', details: final_details)
+    end
+
     # must be run independently (single step)
     def finalize(options = {})
       website, website_location = get_website_fields(options)
@@ -129,6 +136,10 @@ module DeploymentMethod
         [website_location.port, website_location.second_port] - [website_location.running_port]
 
       kill_global_containers_by(ports: ports_to_remove)
+
+      if website.online?
+        notify_final_instance_details(options)
+      end
     end
 
     # stop
@@ -459,6 +470,14 @@ services:
                                        '...finalized.')
     end
 
+    def self.hook_final_instance_details
+      proc do |_, obj|
+        if DockerCompose.hook_cmd_is(obj, 'final_instance_details')
+          obj[:details]
+        end
+      end
+    end
+
     def self.hook_logs
       proc do |_, msg|
         if hook_cmd_is(msg, ['logs']) && hook_cmd_state_is(msg, 'after')
@@ -480,6 +499,7 @@ services:
         DockerCompose.hook_verify_instance_up_done,
         DockerCompose.hook_finalize,
         DockerCompose.hook_finalize_done,
+        DockerCompose.hook_final_instance_details,
         DockerCompose.hook_logs
       ]
     end

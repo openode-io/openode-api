@@ -128,4 +128,32 @@ class DeploymentMethodBaseTest < ActiveSupport::TestCase
     assert_equal website_location.running_port, nil
     assert_equal website.status, Website::STATUS_OFFLINE
   end
+
+  # final_instance_details
+
+  test 'final_instance_details with subdomain' do
+    website = default_website
+    website_location = default_website_location
+    base_dep_method = DeploymentMethod::Base.new
+
+    result = base_dep_method.final_instance_details(website: website,
+                                                    website_location: website_location)
+
+    assert_equal result['result'], 'success'
+    assert_equal result['url'], 'http://testsite.openode.io/'
+  end
+
+  test 'final_instance_details with custom domain' do
+    website = Website.find_by! site_name: 'www.what.is'
+    website_location = website.website_locations.first
+    base_dep_method = DeploymentMethod::Base.new
+
+    result = base_dep_method.final_instance_details(website: website,
+                                                    website_location: website_location)
+
+    assert_equal result['result'], 'success'
+    assert_equal result['url'], 'http://www.what.is/'
+    assert_equal result['NS Records (Nameservers)'], ['ns1.vultr.com', 'ns2.vultr.com']
+    assert_equal result['A Record'], '127.0.0.2'
+  end
 end

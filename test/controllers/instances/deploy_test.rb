@@ -181,7 +181,7 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
       puts "last deployment #{website.deployments.last.events.to_yaml}"
 
       # should also have a deployment with events
-      assert_equal website.deployments.last.events.length, 15
+      assert_equal website.deployments.last.events.length, 16
 
       allowed_to = dep_event_exists?(website.deployments.last.events,
                                      'running', 'allowed to dep')
@@ -218,6 +218,14 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
       finalized_event = dep_event_exists?(website.deployments.last.events,
                                           'success', '...finalized')
       assert_equal finalized_event, true
+
+      final_details_event = website.deployments.last.events.find do |e|
+        e['update'].andand['cmd_name'] == 'final_instance_details'
+      end
+
+      assert_not_nil final_details_event
+      assert_equal(final_details_event['update']['details']['url'],
+                   'http://testsite.openode.io/')
     end
   end
 

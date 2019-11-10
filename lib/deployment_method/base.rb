@@ -174,6 +174,22 @@ module DeploymentMethod
       website_location.save
     end
 
+    def final_instance_details(opts = {})
+      result = {}
+
+      website, website_location = get_website_fields(opts)
+
+      result['result'] = 'success'
+      result['url'] = "http://#{website_location.main_domain}/"
+
+      if website.domain_type == 'custom_domain'
+        result['NS Records (Nameservers)'] = ['ns1.vultr.com', 'ns2.vultr.com']
+        result['A Record'] = website_location.location_server.ip
+      end
+
+      result
+    end
+
     protected
 
     def ex(cmd, options = {})
