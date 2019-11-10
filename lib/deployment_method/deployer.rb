@@ -11,9 +11,6 @@ module DeploymentMethod
       Rails.logger.info("Starting execution for #{website.site_name}, " \
         "execution-id = #{runner.execution.id}...")
 
-      DeploymentsChannel.broadcast_to(runner.execution,
-                                      'msg': "starting deployment #{runner.execution.id}...")
-
       begin
       steps_to_execute = [
         {
@@ -32,11 +29,13 @@ module DeploymentMethod
           cmd_name: 'verify_instance_up', options: { is_complex: true }
         }
       ]
+
       runner.multi_steps.execute(steps_to_execute)
       rescue StandardError => e
         Ex::Logger.info(e, "Issue deploying #{website.site_name}")
         runner.execution.add_error!(e)
         runner.execution.failed!
+        runner.notify_for_hooks('error', e.to_s)
         website.change_status!(Website::STATUS_OFFLINE)
     end
 

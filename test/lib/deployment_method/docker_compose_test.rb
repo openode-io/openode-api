@@ -507,4 +507,51 @@ services:
       # should also have a deployment
     end
   end
+
+  # hook_cmd_is
+  test 'hook_cmd_is if match' do
+    obj = { cmd_name: 'tititata', what: 'isthat' }
+
+    assert_equal DeploymentMethod::DockerCompose.hook_cmd_is(obj, 'tititata'), true
+  end
+
+  test 'hook_cmd_is if no match' do
+    obj = { cmd_name: 'tititata2', what: 'isthat' }
+
+    assert_equal DeploymentMethod::DockerCompose.hook_cmd_is(obj, 'tititata'), false
+  end
+
+  test 'hook_cmd_is if null' do
+    assert_equal DeploymentMethod::DockerCompose.hook_cmd_is(nil, 'tititata'), false
+  end
+
+  # hook_cmd_state_is
+  test 'hook_cmd_state_is if match' do
+    obj = { cmd_name: 'tititata2', cmd_state: 'before' }
+
+    assert_equal DeploymentMethod::DockerCompose.hook_cmd_state_is(obj, 'before'), true
+  end
+
+  test 'hook_cmd_state_is if no match' do
+    obj = { cmd_name: 'tititata2', cmd_state: 'after' }
+
+    assert_equal DeploymentMethod::DockerCompose.hook_cmd_state_is(obj, 'before'), false
+  end
+
+  # hook_verify_can_deploy
+  test 'hook_verify_can_deploy if match' do
+    obj = { cmd_name: 'verify_can_deploy', cmd_state: 'before' }
+
+    result = DeploymentMethod::DockerCompose.hook_verify_can_deploy.call('info', obj)
+
+    assert_includes result, 'allowed to'
+  end
+
+  test 'hook_verify_can_deploy if no match' do
+    obj = { cmd_name: 'verify_can_deploy', cmd_state: 'after' }
+
+    result = DeploymentMethod::DockerCompose.hook_verify_can_deploy.call('info', obj)
+
+    assert_nil result
+  end
 end

@@ -370,6 +370,35 @@ services:
 "
     end
 
+    def self.hook_error
+      proc do |level, msg|
+        msg if level == 'error'
+      end
+    end
+
+    def self.hook_cmd_is(obj, cmd_name)
+      obj.andand[:cmd_name] == cmd_name
+    end
+
+    def self.hook_cmd_state_is(obj, cmd_state)
+      obj.andand[:cmd_state] == cmd_state
+    end
+
+    def self.hook_verify_can_deploy
+      proc do |_, msg|
+        if hook_cmd_is(msg, 'verify_can_deploy') && hook_cmd_state_is(msg, 'before')
+          'Verifying allowed to deploy...'
+        end
+      end
+    end
+
+    def hooks
+      [
+        DockerCompose.hook_error,
+        DockerCompose.hook_verify_can_deploy
+      ]
+    end
+
     protected
 
     def exec_begin(container_id)

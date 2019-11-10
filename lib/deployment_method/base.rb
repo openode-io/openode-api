@@ -9,6 +9,7 @@ module DeploymentMethod
 
     def error!(msg)
       Rails.logger.error(msg)
+      notify('error', msg)
       raise msg
     end
 
@@ -18,6 +19,13 @@ module DeploymentMethod
       can_deploy, msg = website.can_deploy_to?(website_location)
 
       raise ApplicationRecord::ValidationError, msg unless can_deploy
+    end
+
+    def notify(level, msg)
+      DeploymentsChannel.broadcast_to(runner.execution,
+                                      'status': runner.execution.status,
+                                      'level': level,
+                                      'update': Str::Encode.strip_invalid_chars(msg))
     end
 
     def mark_accessed(options = {})

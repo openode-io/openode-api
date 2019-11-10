@@ -3,6 +3,7 @@ module DeploymentMethod
     attr_accessor :execution
     attr_reader :execution_method
     attr_reader :cloud_provider
+    attr_accessor :hooks
 
     def initialize(type, cloud_type, configs = {})
       @type = type
@@ -117,17 +118,43 @@ module DeploymentMethod
       Remote::Sftp.transfer(files, ssh_configs)
     end
 
+    def notify_for_hooks(level, given_result)
+      self.hooks = @execution_method.hooks if @execution_method
+
+      puts "notify for hooks.. hooks = #{hooks.inspect}"
+
+      hooks.each do |hook|
+        puts "cur hook #{hook.inspect}, given result #{given_result.inspect}"
+        result = hook.call(level, given_result)
+        puts "result hook #{result.inspect}"
+
+        if result
+          @execution_method.notify(level, result)
+        end
+      rescue StandardError => e
+        Ex::Logger.info(e, 'Issue logging hook')
+      end
+    end
+
     def execute_ssh(cmds)
       results = []
 
       generated_commands = cmds.map do |cmd|
+        notify_for_hooks('info',
+                         clone_and_set_cmd_state({ cmd_name: cmd[:cmd_name] }, 'before'))
+
         result = @execution_method.send(cmd[:cmd_name], cmd[:options])
 
         if cmd[:options][:is_complex]
-          results << {
+          current_complex_cmd_result = {
             cmd_name: cmd[:cmd_name],
             result: 'done'
           }
+
+          notify_for_hooks('info',
+                           clone_and_set_cmd_state(current_complex_cmd_result, 'after'))
+
+          results << current_complex_cmd_result
 
           # ret nil to skip it as a remote cmd
           nil
@@ -143,17 +170,37 @@ module DeploymentMethod
 
       unless generated_commands.empty?
         @ssh ||= Remote::Ssh.new(ssh_configs)
+
+        # notify the before for each command
+        generated_commands.each do |gen_cmd|
+          notify_for_hooks('info', clone_and_set_cmd_state(gen_cmd, 'before'))
+        end
+
         results_generated_commands = @ssh.exec(generated_commands.map { |c| c[:result] })
 
         results += generated_commands.map.with_index(0) do |gen_cmd, index|
-          {
+          current_result = {
             cmd_name: gen_cmd[:cmd_name],
             result: results_generated_commands[index]
           }
+
+          # notify after also
+          notify_for_hooks('info', clone_and_set_cmd_state(current_result, 'after'))
+
+          current_result
         end
       end
 
       results
+    end
+
+    protected
+
+    def clone_and_set_cmd_state(obj, cmd_state)
+      result = obj.clone
+      result[:cmd_state] = cmd_state
+
+      result
     end
   end
 end
