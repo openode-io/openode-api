@@ -121,14 +121,11 @@ module DeploymentMethod
     def notify_for_hooks(level, given_result)
       self.hooks = @execution_method.hooks if @execution_method
 
-      puts "notify for hooks.. hooks = #{hooks.inspect}"
-
       hooks.each do |hook|
-        puts "cur hook #{hook.inspect}, given result #{given_result.inspect}"
         result = hook.call(level, given_result)
-        puts "result hook #{result.inspect}"
 
         if result
+          given_result[:update] = result
           @execution_method.notify(level, result)
         end
       rescue StandardError => e

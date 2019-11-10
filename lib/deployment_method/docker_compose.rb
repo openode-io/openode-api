@@ -121,7 +121,14 @@ module DeploymentMethod
 
       kill_global_containers_by(ports: ports_to_remove)
 
-      # TODO: add dock compose logs
+      # logs
+      begin
+        ex_stdout('logs', website: website,
+                          container_id: website.container_id,
+                          nb_lines: 10_000)
+      rescue StandardError => e
+        Ex::Logger.info(e, 'Unable to retrieve the docker compose logs')
+      end
     end
 
     # stop
@@ -376,18 +383,85 @@ services:
       end
     end
 
-    def self.hook_cmd_is(obj, cmd_name)
-      obj.andand[:cmd_name] == cmd_name
+    def self.hook_cmd_is(obj, cmds_name)
+      cmds_name.include?(obj.andand[:cmd_name])
     end
 
     def self.hook_cmd_state_is(obj, cmd_state)
       obj.andand[:cmd_state] == cmd_state
     end
 
-    def self.hook_verify_can_deploy
+    def self.hook_cmd_and_state(cmds_name, cmd_state, output)
       proc do |_, msg|
-        if hook_cmd_is(msg, 'verify_can_deploy') && hook_cmd_state_is(msg, 'before')
-          'Verifying allowed to deploy...'
+        if hook_cmd_is(msg, cmds_name) && hook_cmd_state_is(msg, cmd_state)
+          output
+        end
+      end
+    end
+
+    def self.hook_verify_can_deploy
+      DockerCompose.hook_cmd_and_state(['verify_can_deploy'], 'before',
+                                       'Verifying allowed to deploy...')
+    end
+
+    def self.hook_verify_can_deploy_done
+      DockerCompose.hook_cmd_and_state(['verify_can_deploy'], 'after',
+                                       '...verified.')
+    end
+
+    def self.hook_initialization
+      DockerCompose.hook_cmd_and_state(['initialization'], 'before',
+                                       'Initializing the instance...')
+    end
+
+    def self.hook_initialization_done
+      DockerCompose.hook_cmd_and_state(['initialization'], 'after',
+                                       '...initialized.')
+    end
+
+    def self.hook_front_container
+      DockerCompose.hook_cmd_and_state(['front_container'], 'before',
+                                       'Building the ingress connection...')
+    end
+
+    def self.hook_docker_compose
+      DockerCompose.hook_cmd_and_state(['docker_compose'], 'before',
+                                       'Building the instance image...')
+    end
+
+    def self.hook_docker_compose_done
+      DockerCompose.hook_cmd_and_state(['docker_compose'], 'after',
+                                       '...instance image built.')
+    end
+
+    def self.hook_verify_instance_up
+      DockerCompose.hook_cmd_and_state(%w[verify_instance_up instance_up_cmd],
+                                       'before',
+                                       'Verifying instance up...')
+    end
+
+    def self.hook_verify_instance_up_done
+      DockerCompose.hook_cmd_and_state(['verify_instance_up'],
+                                       'after',
+                                       '...instance verification finished.')
+    end
+
+    def self.hook_finalize
+      DockerCompose.hook_cmd_and_state(['finalize'],
+                                       'before',
+                                       'Finalizing...')
+    end
+
+    def self.hook_finalize_done
+      DockerCompose.hook_cmd_and_state(['finalize'],
+                                       'after',
+                                       '...finalized.')
+    end
+
+    def self.hook_logs
+      proc do |_, msg|
+        if hook_cmd_is(msg, ['logs']) && hook_cmd_state_is(msg, 'after')
+          msg[:result][:stdout]
         end
       end
     end
@@ -395,7 +469,17 @@ services:
     def hooks
       [
         DockerCompose.hook_error,
-        DockerCompose.hook_verify_can_deploy
+        DockerCompose.hook_verify_can_deploy,
+        DockerCompose.hook_verify_can_deploy_done,
+        DockerCompose.hook_initialization,
+        DockerCompose.hook_front_container,
+        DockerCompose.hook_docker_compose,
+        DockerCompose.hook_docker_compose_done,
+        DockerCompose.hook_verify_instance_up,
+        DockerCompose.hook_verify_instance_up_done,
+        DockerCompose.hook_finalize,
+        DockerCompose.hook_finalize_done,
+        DockerCompose.hook_logs
       ]
     end
 
