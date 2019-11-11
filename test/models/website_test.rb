@@ -3,470 +3,484 @@
 require 'test_helper'
 
 class WebsiteTest < ActiveSupport::TestCase
-  class Validation < ActiveSupport::TestCase
-    test 'invalid site_name with subdomain' do
-      w = Website.new(
-        site_name: 'thisisauniq.uesite',
-        cloud_type: 'cloud',
-        user_id: User.first.id,
-        type: 'docker',
-        status: 'starting',
-        domain_type: 'subdomain'
-      )
+  test 'invalid site_name with subdomain' do
+    w = Website.new(
+      site_name: 'thisisauniq.uesite',
+      cloud_type: 'cloud',
+      user_id: User.first.id,
+      type: 'docker',
+      status: 'starting',
+      domain_type: 'subdomain'
+    )
 
-      assert_equal w.save, false
-    end
+    assert_equal w.save, false
+  end
 
-    test 'invalid site_name with custom domain' do
-      w = Website.new(
-        site_name: 'thisisauniq.--=uesite',
-        cloud_type: 'cloud',
-        user_id: User.first.id,
-        type: 'docker',
-        status: 'starting',
-        domain_type: 'subdomain'
-      )
+  test 'invalid site_name with custom domain' do
+    w = Website.new(
+      site_name: 'thisisauniq.--=uesite',
+      cloud_type: 'cloud',
+      user_id: User.first.id,
+      type: 'docker',
+      status: 'starting',
+      domain_type: 'subdomain'
+    )
 
-      assert_equal w.save, false
-    end
+    assert_equal w.save, false
+  end
 
-    # domains:
+  # domains:
 
-    test 'getting empty domains' do
-      w = Website.where(site_name: 'testsite').first
-      w.domains ||= []
-      w.save!
-      w.reload
+  test 'getting empty domains' do
+    w = Website.where(site_name: 'testsite').first
+    w.domains ||= []
+    w.save!
+    w.reload
 
-      assert w.domains.empty?
-    end
+    assert w.domains.empty?
+  end
 
-    test 'getting domains' do
-      w = Website.where(site_name: 'www.what.is').first
-      w.domains ||= []
-      w.domains << 'www.what.is'
-      w.save!
-      w.reload
+  test 'getting domains' do
+    w = Website.where(site_name: 'www.what.is').first
+    w.domains ||= []
+    w.domains << 'www.what.is'
+    w.save!
+    w.reload
 
-      assert_equal w.domains.length, 1
-      assert_equal w.domains[0], 'www.what.is'
-    end
+    assert_equal w.domains.length, 1
+    assert_equal w.domains[0], 'www.what.is'
+  end
 
-    test 'fail with invalid domain' do
-      w = Website.where(site_name: 'www.what.is').first
-      w.domains ||= []
-      w.domains << 'www-what-is'
+  test 'fail with invalid domain' do
+    w = Website.where(site_name: 'www.what.is').first
+    w.domains ||= []
+    w.domains << 'www-what-is'
 
-      assert_equal w.save, false
-    end
+    assert_equal w.save, false
+  end
 
-    test 'domains validation should fail if different domain' do
-      w = Website.where(site_name: 'www.what.is').first
-      w.domains ||= []
-      w.domains << 'www3.www.what2.is'
-      w.save
+  test 'domains validation should fail if different domain' do
+    w = Website.where(site_name: 'www.what.is').first
+    w.domains ||= []
+    w.domains << 'www3.www.what2.is'
+    w.save
 
-      assert_equal w.valid?, false
-    end
+    assert_equal w.valid?, false
+  end
 
-    test 'get all custom domain websites' do
-      custom_domain_sites = Website.custom_domain
+  test 'get all custom domain websites' do
+    custom_domain_sites = Website.custom_domain
 
-      assert custom_domain_sites.length == 1
-      assert custom_domain_sites[0].site_name == 'www.what.is'
-    end
+    assert custom_domain_sites.length == 1
+    assert custom_domain_sites[0].site_name == 'www.what.is'
+  end
 
-    test 'getting configs' do
-      w = Website.where(site_name: 'testsite').first
-      w.configs = { hello: 'world', field2: 1234 }
-      w.save!
-      w.reload
+  test 'getting configs' do
+    w = Website.where(site_name: 'testsite').first
+    w.configs = { hello: 'world', field2: 1234 }
+    w.save!
+    w.reload
 
-      assert_equal w.configs['hello'], 'world'
-      assert_equal w.configs['field2'], 1234
-    end
+    assert_equal w.configs['hello'], 'world'
+    assert_equal w.configs['field2'], 1234
+  end
 
-    # repo dir
-    test 'repo dir' do
-      w = Website.where(site_name: 'testsite').first
+  # repo dir
+  test 'repo dir' do
+    w = Website.where(site_name: 'testsite').first
 
-      assert_equal w.repo_dir, "#{Website::REPOS_BASE_DIR}#{w.user_id}/#{w.site_name}/"
-    end
+    assert_equal w.repo_dir, "#{Website::REPOS_BASE_DIR}#{w.user_id}/#{w.site_name}/"
+  end
 
-    # change status
-    test 'change status with valid status' do
-      w = Website.where(site_name: 'testsite').first
-      w.change_status!(Website::STATUS_OFFLINE)
-      w.reload
-      assert_equal w.status, Website::STATUS_OFFLINE
-    end
+  # change status
+  test 'change status with valid status' do
+    w = Website.where(site_name: 'testsite').first
+    w.change_status!(Website::STATUS_OFFLINE)
+    w.reload
+    assert_equal w.status, Website::STATUS_OFFLINE
+  end
 
-    test 'change status with invalid status' do
-      w = Website.where(site_name: 'testsite').first
-      w.change_status!('what')
-    rescue StandardError => e
-      assert_includes e.to_s, 'Wrong status'
-      w.reload
-      assert_equal w.status, Website::STATUS_ONLINE
-    end
+  test 'change status with invalid status' do
+    w = Website.where(site_name: 'testsite').first
+    w.change_status!('what')
+  rescue StandardError => e
+    assert_includes e.to_s, 'Wrong status'
+    w.reload
+    assert_equal w.status, Website::STATUS_ONLINE
+  end
 
-    # storage area validation
+  # storage area validation
 
-    test 'storage area validate with valid ones' do
-      w = Website.where(site_name: 'testsite').first
-      w.storage_areas = ['tmp/', 'what/is/this']
-      w.save!
-      w.reload
+  test 'storage area validate with valid ones' do
+    w = Website.where(site_name: 'testsite').first
+    w.storage_areas = ['tmp/', 'what/is/this']
+    w.save!
+    w.reload
 
-      assert_equal w.storage_areas, ['tmp/', 'what/is/this']
-    end
+    assert_equal w.storage_areas, ['tmp/', 'what/is/this']
+  end
 
-    test 'storage area validate with invalid ones' do
-      w = Website.where(site_name: 'testsite').first
-      w.storage_areas = ['../tmp/', 'what/is/this']
-      w.save
+  test 'storage area validate with invalid ones' do
+    w = Website.where(site_name: 'testsite').first
+    w.storage_areas = ['../tmp/', 'what/is/this']
+    w.save
 
-      assert_equal w.valid?, false
-    end
+    assert_equal w.valid?, false
+  end
 
-    # dns validation
+  # dns validation
 
-    test 'dns fail if domain not in list' do
-      w = Website.where(site_name: 'www.what.is').first
-      w.domains = ['www.what.is']
-      w.dns = [{ domainName: 'www2.what.is', type: 'A', value: '123' }]
-      w.save
+  test 'dns fail if domain not in list' do
+    w = Website.where(site_name: 'www.what.is').first
+    w.domains = ['www.what.is']
+    w.dns = [{ domainName: 'www2.what.is', type: 'A', value: '123' }]
+    w.save
 
-      assert_equal w.valid?, false
-    end
+    assert_equal w.valid?, false
+  end
 
-    test 'dns fail if type invalid' do
-      w = Website.where(site_name: 'www.what.is').first
-      w.domains = ['www.what.is']
-      w.dns = [{ domainName: 'wwww.what.is', type: 'B', value: '123' }]
-      w.save
+  test 'dns fail if type invalid' do
+    w = Website.where(site_name: 'www.what.is').first
+    w.domains = ['www.what.is']
+    w.dns = [{ domainName: 'wwww.what.is', type: 'B', value: '123' }]
+    w.save
 
-      assert_equal w.valid?, false
-    end
+    assert_equal w.valid?, false
+  end
 
-    # locations
+  # locations
 
-    test 'locations for a given website' do
-      w = Website.where(site_name: 'testsite').first
+  test 'locations for a given website' do
+    w = Website.where(site_name: 'testsite').first
 
-      assert_equal w.locations.length, 1
-      assert_equal w.locations[0].str_id, 'canada'
-    end
+    assert_equal w.locations.length, 1
+    assert_equal w.locations[0].str_id, 'canada'
+  end
 
-    # location exists
-    test 'location exists' do
-      website = default_website
-      assert_equal website.location_exists?('canada'), true
-    end
+  # location exists
+  test 'location exists' do
+    website = default_website
+    assert_equal website.location_exists?('canada'), true
+  end
 
-    # add_location
-    test 'add location fail if subdomain and private server' do
-      website = default_website
-      CloudProvider::Manager.clear_instance
-      CloudProvider::Manager.instance # populate locations
-      location = Location.find_by str_id: 'miami-39'
+  # add_location
+  test 'add location fail if subdomain and private server' do
+    website = default_website
+    CloudProvider::Manager.clear_instance
+    CloudProvider::Manager.instance # populate locations
+    location = Location.find_by str_id: 'miami-39'
 
-      begin
-        website.add_location(location)
-        raise 'invalid'
-      rescue StandardError => e
-        assert_includes(e.inspect.to_s,
-                        'This location is available only for custom domains')
-      end
-    end
-
-    test 'add location happy path' do
-      website = default_website
-      website.website_locations.destroy_all
-      location = Location.find_by str_id: 'canada'
-
+    begin
       website.add_location(location)
-
-      assert_equal website.website_locations.reload[0].location.str_id, 'canada'
+      raise 'invalid'
+    rescue StandardError => e
+      assert_includes(e.inspect.to_s,
+                      'This location is available only for custom domains')
     end
+  end
 
-    # private_cloud?
-    test 'private_cloud? thruthy' do
-      website = Website.find_by! site_name: 'testprivatecloud'
+  test 'add location happy path' do
+    website = default_website
+    website.website_locations.destroy_all
+    location = Location.find_by str_id: 'canada'
 
-      assert_equal website.private_cloud?, true
-    end
+    website.add_location(location)
 
-    test 'private_cloud? with cloud should be false' do
-      website = default_website
+    assert_equal website.website_locations.reload[0].location.str_id, 'canada'
+  end
 
-      assert_equal website.private_cloud?, false
-    end
+  # private_cloud?
+  test 'private_cloud? thruthy' do
+    website = Website.find_by! site_name: 'testprivatecloud'
 
-    # private_cloud_allocated?
-    test 'private_cloud_allocated? without allocation' do
-      website = Website.find_by! site_name: 'testprivatecloud'
-      website.data = {}
-      website.save
+    assert_equal website.private_cloud?, true
+  end
 
-      assert_equal website.private_cloud_allocated?, false
-    end
+  test 'private_cloud? with cloud should be false' do
+    website = default_website
 
-    test 'private_cloud_allocated? thruthy' do
-      website = Website.find_by! site_name: 'testprivatecloud'
-      website.data = { 'privateCloudInfo' => { SUBID: '1234' } }
-      website.save
+    assert_equal website.private_cloud?, false
+  end
 
-      assert_equal website.private_cloud_allocated?, true
-    end
+  # private_cloud_allocated?
+  test 'private_cloud_allocated? without allocation' do
+    website = Website.find_by! site_name: 'testprivatecloud'
+    website.data = {}
+    website.save
 
-    # normalize_storage_areas
-    test 'normalized_storage_areas with two areas' do
-      w = Website.where(site_name: 'testsite').first
-      w.storage_areas = ['tmp/', 'what/is/this/']
-      w.save
-      w.reload
+    assert_equal website.private_cloud_allocated?, false
+  end
 
-      n_storage_areas = w.normalized_storage_areas
+  test 'private_cloud_allocated? thruthy' do
+    website = Website.find_by! site_name: 'testprivatecloud'
+    website.data = { 'privateCloudInfo' => { SUBID: '1234' } }
+    website.save
 
-      assert_equal n_storage_areas[0], './tmp/'
-      assert_equal n_storage_areas[1], './what/is/this/'
-    end
+    assert_equal website.private_cloud_allocated?, true
+  end
 
-    # can_deploy_to?
-    test 'can_deploy_to? simple scenario should pass' do
-      website = Website.find_by(site_name: 'testsite')
+  # normalize_storage_areas
+  test 'normalized_storage_areas with two areas' do
+    w = Website.where(site_name: 'testsite').first
+    w.storage_areas = ['tmp/', 'what/is/this/']
+    w.save
+    w.reload
 
-      can_deploy, = website.can_deploy_to?(website.website_locations.first)
-      assert_equal can_deploy, true
-    end
+    n_storage_areas = w.normalized_storage_areas
 
-    test "can_deploy_to? can't if user not activated" do
-      website = Website.find_by(site_name: 'testsite')
-      website.user.activated = false
-      website.user.save!
-      website.user.reload
+    assert_equal n_storage_areas[0], './tmp/'
+    assert_equal n_storage_areas[1], './what/is/this/'
+  end
 
-      can_deploy, msg = website.can_deploy_to?(website.website_locations.first)
+  # can_deploy_to?
+  test 'can_deploy_to? simple scenario should pass' do
+    website = Website.find_by(site_name: 'testsite')
 
-      assert_equal can_deploy, false
-      assert_includes msg, 'not yet activated'
-    end
+    can_deploy, = website.can_deploy_to?(website.website_locations.first)
+    assert_equal can_deploy, true
+  end
 
-    test "can_deploy_to? can't if user suspended" do
-      website = Website.find_by(site_name: 'testsite')
-      website.user.suspended = true
-      website.user.save!
-      website.user.reload
+  test "can_deploy_to? can't if user not activated" do
+    website = Website.find_by(site_name: 'testsite')
+    website.user.activated = false
+    website.user.save!
+    website.user.reload
 
-      can_deploy, msg = website.can_deploy_to?(website.website_locations.first)
+    can_deploy, msg = website.can_deploy_to?(website.website_locations.first)
 
-      assert_equal can_deploy, false
-      assert_includes msg, 'suspended'
-    end
+    assert_equal can_deploy, false
+    assert_includes msg, 'not yet activated'
+  end
 
-    test "can_deploy_to? can't if user does not have any credit" do
-      website = Website.find_by(site_name: 'testsite')
-      website.user.credits = 0
-      website.user.save!
-      website.user.reload
+  test "can_deploy_to? can't if user suspended" do
+    website = Website.find_by(site_name: 'testsite')
+    website.user.suspended = true
+    website.user.save!
+    website.user.reload
 
-      can_deploy, msg = website.can_deploy_to?(website.website_locations.first)
+    can_deploy, msg = website.can_deploy_to?(website.website_locations.first)
 
-      assert_equal can_deploy, false
-      assert_includes msg, 'No credit available'
-    end
+    assert_equal can_deploy, false
+    assert_includes msg, 'suspended'
+  end
 
-    # max build duration
-    test 'max build duration with default' do
-      website = Website.find_by(site_name: 'testsite')
-      website.configs ||= {}
-      website.configs['MAX_BUILD_DURATION'] = 150
-      website.save!
-      website.reload
+  test "can_deploy_to? can't if user does not have any credit" do
+    website = Website.find_by(site_name: 'testsite')
+    website.user.credits = 0
+    website.user.save!
+    website.user.reload
 
-      assert_equal website.max_build_duration, 150
-    end
+    can_deploy, msg = website.can_deploy_to?(website.website_locations.first)
 
-    # extra storage
-    test 'extra storage with extra storage' do
-      website = default_website
-      wl = default_website_location
-      wl.extra_storage = 2
-      wl.save!
+    assert_equal can_deploy, false
+    assert_includes msg, 'No credit available'
+  end
 
-      assert_equal website.total_extra_storage, 2
-      assert_equal website.extra_storage?, true
-      assert_equal(website.extra_storage_credits_cost_per_hour,
-                   2 * 100 * CloudProvider::Internal::COST_EXTRA_STORAGE_GB_PER_HOUR)
-    end
+  # max build duration
+  test 'max build duration with default' do
+    website = Website.find_by(site_name: 'testsite')
+    website.configs ||= {}
+    website.configs['MAX_BUILD_DURATION'] = 150
+    website.save!
+    website.reload
 
-    test 'extra storage without extra storage' do
-      website = default_website
-      wl = default_website_location
-      wl.extra_storage = 0
-      wl.save!
+    assert_equal website.max_build_duration, 150
+  end
 
-      assert_equal website.total_extra_storage, 0
-      assert_equal website.extra_storage?, false
-      assert_equal website.extra_storage_credits_cost_per_hour, 0
-    end
+  # extra storage
+  test 'extra storage with extra storage' do
+    website = default_website
+    wl = default_website_location
+    wl.extra_storage = 2
+    wl.save!
 
-    # extra cpus
-    test 'extra cpus with extra cpus' do
-      website = default_website
-      wl = default_website_location
-      wl.nb_cpus = 3
-      wl.save!
+    assert_equal website.total_extra_storage, 2
+    assert_equal website.extra_storage?, true
+    assert_equal(website.extra_storage_credits_cost_per_hour,
+                 2 * 100 * CloudProvider::Internal::COST_EXTRA_STORAGE_GB_PER_HOUR)
+  end
 
-      assert_equal website.total_extra_cpus, 2
-      assert_equal(website.extra_cpus_credits_cost_per_hour,
-                   2 * 100 * CloudProvider::Internal::COST_EXTRA_CPU_PER_HOUR)
-    end
+  test 'extra storage without extra storage' do
+    website = default_website
+    wl = default_website_location
+    wl.extra_storage = 0
+    wl.save!
 
-    # spend credits
-    test 'spend hourly credits - plan only' do
-      website = default_website
-      website.credit_actions.destroy_all
-      wl = default_website_location
-      wl.nb_cpus = 1
-      wl.extra_storage = 0
-      wl.save!
+    assert_equal website.total_extra_storage, 0
+    assert_equal website.extra_storage?, false
+    assert_equal website.extra_storage_credits_cost_per_hour, 0
+  end
 
-      website.spend_hourly_credits!
+  # extra cpus
+  test 'extra cpus with extra cpus' do
+    website = default_website
+    wl = default_website_location
+    wl.nb_cpus = 3
+    wl.save!
 
-      plan = website.plan
+    assert_equal website.total_extra_cpus, 2
+    assert_equal(website.extra_cpus_credits_cost_per_hour,
+                 2 * 100 * CloudProvider::Internal::COST_EXTRA_CPU_PER_HOUR)
+  end
 
-      assert_equal website.credit_actions.reload.length, 1
-      ca = website.credit_actions.first
+  # spend credits
+  test 'spend hourly credits - plan only' do
+    website = default_website
+    website.credit_actions.destroy_all
+    wl = default_website_location
+    wl.nb_cpus = 1
+    wl.extra_storage = 0
+    wl.save!
 
-      assert_equal(ca.credits_spent.to_f.round(4),
-                   (plan[:cost_per_hour] * 100.0).to_f.round(4))
-      assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
-    end
+    website.spend_hourly_credits!
 
-    test 'spend hourly credits - with extra services' do
-      website = default_website
-      website.credit_actions.destroy_all
-      wl = default_website_location
-      wl.nb_cpus = 2
-      wl.extra_storage = 2
-      wl.save!
+    plan = website.plan
 
-      website.spend_hourly_credits!
+    assert_equal website.credit_actions.reload.length, 1
+    ca = website.credit_actions.first
 
-      plan = website.plan
+    assert_equal(ca.credits_spent.to_f.round(4),
+                 (plan[:cost_per_hour] * 100.0).to_f.round(4))
+    assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
+  end
 
-      assert_equal website.credit_actions.reload.length, 3
-      credits_actions = website.credit_actions
+  test 'spend hourly credits - with extra services' do
+    website = default_website
+    website.credit_actions.destroy_all
+    wl = default_website_location
+    wl.nb_cpus = 2
+    wl.extra_storage = 2
+    wl.save!
 
-      assert_equal(credits_actions[0].credits_spent.to_f.round(4),
-                   (plan[:cost_per_hour] * 100.0).to_f.round(4))
-      assert_equal credits_actions[0].action_type, CreditAction::TYPE_CONSUME_PLAN
-      assert_equal credits_actions[1].action_type, CreditAction::TYPE_CONSUME_STORAGE
-      assert_equal credits_actions[2].action_type, CreditAction::TYPE_CONSUME_CPU
-    end
+    website.spend_hourly_credits!
 
-    # create website
-    test 'create - should fail if empty' do
-      website = Website.create({})
+    plan = website.plan
 
-      assert_equal website.valid?, false
-    end
+    assert_equal website.credit_actions.reload.length, 3
+    credits_actions = website.credit_actions
 
-    test 'create - subdomain' do
-      user = User.first
-      user.websites.destroy_all
-      website = Website.create!(
-        site_name: 'helloworld',
-        user_id: user.id
-      )
+    assert_equal(credits_actions[0].credits_spent.to_f.round(4),
+                 (plan[:cost_per_hour] * 100.0).to_f.round(4))
+    assert_equal credits_actions[0].action_type, CreditAction::TYPE_CONSUME_PLAN
+    assert_equal credits_actions[1].action_type, CreditAction::TYPE_CONSUME_STORAGE
+    assert_equal credits_actions[2].action_type, CreditAction::TYPE_CONSUME_CPU
+  end
 
-      assert_equal website.valid?, true
-      assert_equal website.site_name, 'helloworld'
-      assert_equal website.account_type, Website::DEFAULT_ACCOUNT_TYPE
-      assert_equal website.domains, []
-      assert_equal website.open_source['status'], 'active'
-    end
+  # create website
+  test 'create - should fail if empty' do
+    website = Website.create({})
 
-    test 'create - subdomain downcase if upper cases' do
-      user = User.first
-      user.websites.destroy_all
-      website = Website.create!(
-        site_name: 'helloWorld',
-        user_id: user.id
-      )
+    assert_equal website.valid?, false
+  end
 
-      assert_equal website.valid?, true
-      assert_equal website.site_name, 'helloworld'
-    end
+  test 'create - subdomain' do
+    user = User.first
+    user.websites.destroy_all
+    website = Website.create!(
+      site_name: 'helloworld',
+      user_id: user.id
+    )
 
-    test 'create - subdomain where cannot create website' do
-      user = User.first
-      user.orders.destroy_all
-      user.websites.destroy_all
+    assert_equal website.valid?, true
+    assert_equal website.site_name, 'helloworld'
+    assert_equal website.account_type, Website::DEFAULT_ACCOUNT_TYPE
+    assert_equal website.domains, []
+    assert_equal website.open_source['status'], 'active'
+  end
 
-      website = Website.create!(
-        site_name: 'helloWorld',
-        user_id: user.id
-      )
+  test 'create - subdomain downcase if upper cases' do
+    user = User.first
+    user.websites.destroy_all
+    website = Website.create!(
+      site_name: 'helloWorld',
+      user_id: user.id
+    )
 
-      website2 = Website.create(
-        site_name: 'helloworld2',
-        user_id: user.id
-      )
+    assert_equal website.valid?, true
+    assert_equal website.site_name, 'helloworld'
+  end
 
-      assert_equal website.valid?, true
-      assert_equal website2.valid?, false
-    end
+  test 'create - subdomain where cannot create website' do
+    user = User.first
+    user.orders.destroy_all
+    user.websites.destroy_all
 
-    test 'create - invalid account type' do
-      user = User.first
-      user.orders.destroy_all
-      user.websites.destroy_all
+    website = Website.create!(
+      site_name: 'helloWorld',
+      user_id: user.id
+    )
 
-      website = Website.create(
-        site_name: 'helloWorld',
-        user_id: user.id,
-        account_type: 'second2'
-      )
+    website2 = Website.create(
+      site_name: 'helloworld2',
+      user_id: user.id
+    )
 
-      assert_equal website.valid?, false
-    end
+    assert_equal website.valid?, true
+    assert_equal website2.valid?, false
+  end
 
-    test 'create - custom domain' do
-      user = User.first
-      user.websites.destroy_all
+  test 'create - invalid account type' do
+    user = User.first
+    user.orders.destroy_all
+    user.websites.destroy_all
 
-      website = Website.create!(
-        site_name: 'hello.World',
-        user_id: user.id
-      )
+    website = Website.create(
+      site_name: 'helloWorld',
+      user_id: user.id,
+      account_type: 'second2'
+    )
 
-      assert_equal website.site_name, 'hello.world'
-      assert_equal website.account_type, Website::DEFAULT_ACCOUNT_TYPE
-      assert_equal website.domain_type, Website::DOMAIN_TYPE_CUSTOM_DOMAIN
-      assert_equal website.domains, ['hello.world']
-    end
+    assert_equal website.valid?, false
+  end
 
-    test 'create - custom domain - not allowed if root domain used' do
-      user = User.first
-      user.websites.destroy_all
+  test 'create - custom domain' do
+    user = User.first
+    user.websites.destroy_all
 
-      user2 = User.last
-      user2.websites.destroy_all
+    website = Website.create!(
+      site_name: 'hello.World',
+      user_id: user.id
+    )
 
-      Website.create!(
-        site_name: 'hello.World',
-        user_id: user.id
-      )
+    assert_equal website.site_name, 'hello.world'
+    assert_equal website.account_type, Website::DEFAULT_ACCOUNT_TYPE
+    assert_equal website.domain_type, Website::DOMAIN_TYPE_CUSTOM_DOMAIN
+    assert_equal website.domains, ['hello.world']
+  end
 
-      website2 = Website.create(
-        site_name: 'www.hello.World',
-        user_id: user2.id
-      )
+  test 'create - custom domain - not allowed if root domain used' do
+    user = User.first
+    user.websites.destroy_all
 
-      assert_equal website2.valid?, false
-    end
+    user2 = User.last
+    user2.websites.destroy_all
+
+    Website.create!(
+      site_name: 'hello.World',
+      user_id: user.id
+    )
+
+    website2 = Website.create(
+      site_name: 'www.hello.World',
+      user_id: user2.id
+    )
+
+    assert_equal website2.valid?, false
+  end
+
+  # # accessible_by
+
+  test 'accessible_by? its own user' do
+    website = Website.last
+
+    assert_equal website.accessible_by?(website.user), true
+  end
+
+  test 'accessible_by? without access' do
+    website = Website.last
+    other_user = User.first
+
+    assert_equal other_user.id != website.user_id, true
+    assert_equal website.accessible_by?(other_user), false
   end
 end

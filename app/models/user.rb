@@ -81,6 +81,12 @@ class User < ApplicationRecord
     raise NotAuthorized, 'Not authorized' unless User.passwd_valid?(password_hash, passwd)
   end
 
+  def websites_with_access
+    # TODO
+
+    websites
+  end
+
   def regen_api_token!
     self.token = SecureRandom.hex(16)
     save

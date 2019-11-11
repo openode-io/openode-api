@@ -77,6 +77,12 @@ class Website < ApplicationRecord
     end
   end
 
+  def accessible_by?(current_user)
+    website_ids_with_access = current_user.websites_with_access.pluck(:id)
+
+    website_ids_with_access.include?(id)
+  end
+
   def prepare_new_site
     return unless site_name
 
