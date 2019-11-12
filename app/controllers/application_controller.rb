@@ -5,4 +5,8 @@ class ApplicationController < ActionController::API
   def validation_error!(msg)
     raise ApplicationRecord::ValidationError, msg
   end
+
+  def authorization_error!(msg)
+    raise User::NotAuthorized, msg
+  end
 end

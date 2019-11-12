@@ -308,7 +308,13 @@ class InstancesController < ApplicationController
   end
 
   def populate_website
-    @website = Website.find_by! site_name: params['site_name'] if params['site_name']
+    if params['site_name']
+      @website = Website.find_by! site_name: params['site_name']
+
+      unless @website.accessible_by?(@user)
+        authorization_error!('Not authorized to access website')
+      end
+    end
   end
 
   def populate_website_location

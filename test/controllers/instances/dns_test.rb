@@ -16,6 +16,8 @@ class DnsTest < ActionDispatch::IntegrationTest
     w.domains = ['www.what.is']
     w.save!
 
+    add_collaborator_for(default_user, w)
+
     get '/instances/www.what.is/list-dns', as: :json, headers: default_headers_auth
 
     assert_response :success
@@ -48,6 +50,8 @@ class DnsTest < ActionDispatch::IntegrationTest
     website_location.location_server_id = nil
     website_location.save!
 
+    add_collaborator_for(default_user, w)
+
     post '/instances/www.what.is/add-dns',
          as: :json,
          params: { domainName: 'www2.www.what.is', type: 'A', value: '127.0.0.4' },
@@ -61,6 +65,8 @@ class DnsTest < ActionDispatch::IntegrationTest
     w.domains = ['www.what.is', 'www2.www.what.is']
     w.dns = []
     w.save!
+
+    add_collaborator_for(default_user, w)
 
     post '/instances/www.what.is/add-dns',
          as: :json,
@@ -82,6 +88,8 @@ class DnsTest < ActionDispatch::IntegrationTest
     w.domains = ['www.what.is', 'www2.www.what.is']
     w.dns = []
     w.save!
+
+    add_collaborator_for(default_user, w)
 
     post '/instances/www.what.is/add-dns',
          as: :json,
@@ -119,6 +127,8 @@ class DnsTest < ActionDispatch::IntegrationTest
     w.dns = []
     w.save!
 
+    add_collaborator_for(default_user, w)
+
     post '/instances/www.what.is/add-alias',
          as: :json,
          params: { hostname: 'www3.www.what.is' },
@@ -143,6 +153,8 @@ class DnsTest < ActionDispatch::IntegrationTest
     w.domains = ['www.what.is', 'www2.www.what.is', 'www3.www.what.is']
     w.dns = []
     w.save!
+    
+    add_collaborator_for(default_user, w)
 
     post '/instances/www.what.is/del-alias',
          as: :json,

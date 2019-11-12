@@ -4,6 +4,8 @@ class DeploymentsChannel < ApplicationCable::Channel
 
     deployment = Deployment.find_by! id: deployment_id
 
+    reject unless deployment.website.accessible_by?(current_user)
+
     Rails.logger.info('DeploymentChannel - subscribed channel for ' \
       "deployment id #{deployment_id}...")
 

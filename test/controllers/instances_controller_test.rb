@@ -94,9 +94,20 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id with custom domain' do
+    user = default_user
+    site = Website.find_by! site_name: 'www.what.is'
+
+    Collaborator.create(user: user, website: site)
+
     get '/instances/www.what.is', as: :json, headers: default_headers_auth
 
     assert_response :success
+  end
+
+  test '/instances/:instance_id failing to have access to website' do
+    get '/instances/www.what.is', as: :json, headers: default_headers_auth
+
+    assert_response :unauthorized
   end
 
   test '/instances/:instance_id with non existent site name' do

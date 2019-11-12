@@ -275,6 +275,10 @@ class ActiveSupport::TestCase
     }
   end
 
+  def add_collaborator_for(user, website)
+    Collaborator.create(user: user, website: website)
+  end
+
   def default_runner_configs
     {
       host: 'test.com',
