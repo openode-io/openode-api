@@ -44,6 +44,40 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test '/instances/ happy path' do
+    get '/instances/', as: :json, headers: default_headers_auth
+
+    assert_response :success
+
+    user = User.find_by! token: "1234s56789"
+
+    assert_equal response.parsed_body.length, user.websites_with_access.length
+
+    user.websites_with_access.each do |w|
+      site_exists = response.parsed_body.any? { |cur| cur['site_name'] == w.site_name }
+      assert_equal(site_exists, true)
+    end
+  end
+
+  test '/instances/ with one as collaborator' do
+    user = User.find_by! token: "1234s56789"
+    assert_equal user.websites_with_access.map(&:site_name), %w[testsite testprivatecloud]
+
+    new_site = Website.find_by! site_name: "testsite2"
+
+    Collaborator.create(user: user, website: new_site)
+
+    get '/instances/', as: :json, headers: default_headers_auth
+
+    assert_response :success
+    assert_equal response.parsed_body.length, 3
+
+    %w[testsite testprivatecloud testsite2].each do |site_name|
+      site_exists = response.parsed_body.any? { |cur| cur['site_name'] == site_name }
+      assert_equal(site_exists, true)
+    end
+  end
+
   test '/instances/ with deprecated api version' do
     InstancesController::MINIMUM_CLI_VERSION = '2.0.1'
     get '/instances/?version=1.0.1', as: :json, headers: default_headers_auth

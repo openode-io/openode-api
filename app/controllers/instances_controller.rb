@@ -37,21 +37,10 @@ class InstancesController < ApplicationController
   end
 
   def index
-    json(@user.websites)
+    json(@user.websites_with_access)
   end
 
   def show
-    # TODO.. FOR TESTING
-    # deployment = Deployment.find_by! id: 5
-
-    # DeploymentsChannel.broadcast_to(deployment, 'hello': 'world what haha...')
-
-    # ActionCable.server.broadcast(
-    #  "chat_#{room}",
-    #  sent_by: 'Paul',
-    #  body: 'This is a cool chat app.'
-    # )
-
     json(@website)
   end
 
