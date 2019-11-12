@@ -22,6 +22,9 @@ Style/MixinUsage:
   Exclude:
     - 'bin/*'
 
+Style/StringLiterals:
+  Enabled: false
+
 Style/MultilineBlockChain:
   Enabled: false
 

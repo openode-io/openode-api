@@ -81,10 +81,12 @@ class User < ApplicationRecord
     raise NotAuthorized, 'Not authorized' unless User.passwd_valid?(password_hash, passwd)
   end
 
-  def websites_with_access
-    # TODO
+  def collaborator_websites
+    Collaborator.where(user: self).joins(:website).map(&:website)
+  end
 
-    websites
+  def websites_with_access
+    (websites + collaborator_websites).uniq
   end
 
   def regen_api_token!

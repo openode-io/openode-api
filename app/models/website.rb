@@ -9,6 +9,7 @@ class Website < ApplicationRecord
   self.inheritance_column = :_type
 
   belongs_to :user
+  has_many :collaborators
   has_many :website_locations, dependent: :destroy
   has_many :events, foreign_key: :ref_id, class_name: :WebsiteEvent, dependent: :destroy
   has_many :deployments

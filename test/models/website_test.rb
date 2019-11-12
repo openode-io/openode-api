@@ -483,4 +483,29 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal other_user.id != website.user_id, true
     assert_equal website.accessible_by?(other_user), false
   end
+
+  # collaborator_websites
+  test "collaborator_websites with one" do
+    c = Collaborator.first
+    user = User.find_by email: 'myadmin2@thisisit.com'
+
+    assert_equal user.collaborator_websites.length, 1
+    assert_equal user.collaborator_websites.first.site_name, c.website.site_name
+  end
+
+  # websites with access
+  test "websites_with_access" do
+    user = User.find_by email: 'myadmin2@thisisit.com'
+
+    assert_equal user.websites.map(&:site_name), ["www.what.is", "testsite2"]
+
+    new_website = Website.find_by site_name: "testsite"
+
+    Collaborator.create(user: user, website: new_website)
+
+    user.reload
+
+    expected_with_access = ["www.what.is", "testsite2", "testsite"]
+    assert_equal user.websites_with_access.map(&:site_name), expected_with_access
+  end
 end
