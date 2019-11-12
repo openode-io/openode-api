@@ -153,7 +153,7 @@ class DnsTest < ActionDispatch::IntegrationTest
     w.domains = ['www.what.is', 'www2.www.what.is', 'www3.www.what.is']
     w.dns = []
     w.save!
-    
+
     add_collaborator_for(default_user, w)
 
     post '/instances/www.what.is/del-alias',
