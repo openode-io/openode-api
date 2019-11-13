@@ -30,6 +30,15 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body[0]['domains'], []
   end
 
+  test '/instances/ with null token should fail' do
+    w = Website.find_by site_name: 'testsite'
+    w.domains = []
+    w.save
+    get '/instances/', as: :json, headers: { "x-auth-token": nil }
+
+    assert_response :unauthorized
+  end
+
   test '/instances/ with valid API version (equal to)' do
     InstancesController::MINIMUM_CLI_VERSION = '2.0.1'
     get '/instances/?version=2.0.1', as: :json, headers: default_headers_auth

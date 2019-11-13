@@ -7,20 +7,22 @@ class WebsiteTest < ActiveSupport::TestCase
     w = Website.new(
       site_name: 'thisisauniq.uesite',
       cloud_type: 'cloud',
-      user_id: User.first.id,
+      user_id: default_user.id,
       type: 'docker',
       status: 'starting',
       domain_type: 'subdomain'
     )
 
-    assert_equal w.save, false
+    w.validate_site_name
+
+    assert_includes w.errors.inspect.to_s, "should not container a dot"
   end
 
   test 'invalid site_name with custom domain' do
     w = Website.new(
       site_name: 'thisisauniq.--=uesite',
       cloud_type: 'cloud',
-      user_id: User.first.id,
+      user_id: default_user.id,
       type: 'docker',
       status: 'starting',
       domain_type: 'subdomain'
@@ -374,7 +376,7 @@ class WebsiteTest < ActiveSupport::TestCase
   end
 
   test 'create - subdomain' do
-    user = User.first
+    user = default_user
     user.websites.destroy_all
     website = Website.create!(
       site_name: 'helloworld',
@@ -389,7 +391,7 @@ class WebsiteTest < ActiveSupport::TestCase
   end
 
   test 'create - subdomain downcase if upper cases' do
-    user = User.first
+    user = default_user
     user.websites.destroy_all
     website = Website.create!(
       site_name: 'helloWorld',
@@ -401,7 +403,7 @@ class WebsiteTest < ActiveSupport::TestCase
   end
 
   test 'create - subdomain where cannot create website' do
-    user = User.first
+    user = default_user
     user.orders.destroy_all
     user.websites.destroy_all
 
@@ -420,7 +422,7 @@ class WebsiteTest < ActiveSupport::TestCase
   end
 
   test 'create - invalid account type' do
-    user = User.first
+    user = default_user
     user.orders.destroy_all
     user.websites.destroy_all
 
@@ -434,7 +436,7 @@ class WebsiteTest < ActiveSupport::TestCase
   end
 
   test 'create - custom domain' do
-    user = User.first
+    user = default_user
     user.websites.destroy_all
 
     website = Website.create!(
@@ -478,7 +480,7 @@ class WebsiteTest < ActiveSupport::TestCase
 
   test 'accessible_by? without access' do
     website = Website.last
-    other_user = User.first
+    other_user = User.where('id != ?', website.user_id).first
 
     assert_equal other_user.id != website.user_id, true
     assert_equal website.accessible_by?(other_user), false
