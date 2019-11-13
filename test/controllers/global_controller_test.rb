@@ -101,4 +101,27 @@ class GlobalControllerTest < ActionDispatch::IntegrationTest
     assert response.parsed_body.length, 1
     assert response.parsed_body[0]['name'], 'docker canada'
   end
+
+  # settings
+  test '/global/settings if never set' do
+    get '/global/settings', as: :json
+
+    assert_response :success
+    assert_equal response.parsed_body, {}
+  end
+
+  test '/global/settings if set' do
+    s = SystemSetting.global_msg
+    s.content = {
+      global_msg: 'hello world',
+      global_msg_class: 'info'
+    }
+    s.save
+
+    get '/global/settings', as: :json
+
+    assert_response :success
+    assert_equal(response.parsed_body,
+                 "global_msg" => "hello world", "global_msg_class" => "info")
+  end
 end

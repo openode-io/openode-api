@@ -53,5 +53,5 @@ Rails.application.configure do
 
   config.active_job.queue_adapter = :delayed_job
 
-  config.log_level = :debug
+  config.log_level = :info
 end

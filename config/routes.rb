@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+    
+  namespace :super_admin do
+    get 'system_settings/index'
+  end
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 
   mount ActionCable.server => '/streams'
@@ -21,6 +25,8 @@ Rails.application.routes.draw do
     get 'available-configs', to: 'global#available_configs'
     get 'available-plans', to: 'global#available_plans'
     get 'available-plans-at/:type/:location_str_id', to: 'global#available_plans_at'
+
+    get 'settings', to: 'global#settings'
   end
 
   scope :order do

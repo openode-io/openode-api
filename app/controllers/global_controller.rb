@@ -36,4 +36,8 @@ class GlobalController < ApplicationController
   def services_down
     json(Status.with_status('down'))
   end
+
+  def settings
+    json(SystemSetting.global_msg.content || {})
+  end
 end
