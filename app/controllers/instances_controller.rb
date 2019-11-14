@@ -301,14 +301,6 @@ class InstancesController < ApplicationController
 
   private
 
-  def authorize
-    token = request.headers['x-auth-token'] || params['token']
-
-    authorization_error!("No token provided") unless token
-
-    @user = User.find_by!(token: token)
-  end
-
   def populate_website
     if params['site_name']
       @website = Website.find_by! site_name: params['site_name']

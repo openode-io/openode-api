@@ -113,7 +113,7 @@ module DeploymentMethod
       get_website_fields(opts)
       final_details = final_instance_details(opts)
 
-      notify('info', cmd_name: 'final_instance_details', details: final_details)
+      notify('info', details: final_details)
     end
 
     # must be run independently (single step)

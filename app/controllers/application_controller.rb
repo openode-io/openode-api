@@ -9,4 +9,12 @@ class ApplicationController < ActionController::API
   def authorization_error!(msg)
     raise User::NotAuthorized, msg
   end
+
+  def authorize
+    token = request.headers['x-auth-token'] || params['token']
+
+    authorization_error!("No token provided") unless token
+
+    @user = User.find_by!(token: token)
+  end
 end

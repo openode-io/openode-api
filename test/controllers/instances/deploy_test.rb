@@ -178,8 +178,6 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
 
       assert_equal deployment.result['errors'].length, 0
 
-      puts "last deployment #{website.deployments.last.events.to_yaml}"
-
       # should also have a deployment with events
       assert_equal website.deployments.last.events.length, 16
 
@@ -220,7 +218,7 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
       assert_equal finalized_event, true
 
       final_details_event = website.deployments.last.events.find do |e|
-        e['update'].andand['cmd_name'] == 'final_instance_details'
+        e['update'].andand['details'].andand['result']
       end
 
       assert_not_nil final_details_event

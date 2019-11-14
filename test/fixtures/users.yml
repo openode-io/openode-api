@@ -24,7 +24,7 @@ two:
   email: myadmin2@thisisit.com
   password_hash: $2a$10$BSZDSZNGxqkO8hka09TDIeO6tIJevwsLmHtk9IvPXbBISxe.PvDJG
   reset_token: MyString
-  is_admin: false
+  is_admin: true
   first_admin_entry_at: 2019-08-09 17:57:23
   token: 12345678
   day_one_mail_at: 2019-08-09 17:57:23

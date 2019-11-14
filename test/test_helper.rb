@@ -369,5 +369,11 @@ class ActiveSupport::TestCase
     }
   end
 
+  def super_admin_headers_auth
+    {
+      "x-auth-token": '12345678'
+    }
+  end
+
   # Add more helper methods to be used by all tests here...
 end
