@@ -134,10 +134,9 @@ class PrivateCloudTest < ActionDispatch::IntegrationTest
     website.data = { 'privateCloudInfo': { 'SUBID': '123456789' } }
     website.save!
 
-    post '/instances/testprivatecloud/private-cloud-info?location_str_id=usa',
-         as: :json,
-         params: {},
-         headers: default_headers_auth
+    get '/instances/testprivatecloud/private-cloud-info?location_str_id=usa',
+        as: :json,
+        headers: default_headers_auth
 
     wl.reload
 

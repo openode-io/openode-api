@@ -112,7 +112,8 @@ module CloudProvider
       location_server.save_secret!(
         info: info,
         public_key: website_location.secret[:public_key],
-        private_key: website_location.secret[:private_key]
+        private_key: website_location.secret[:private_key],
+        user: 'root' # TODO: add test
       )
 
       # send the email (refactor if other implementations)

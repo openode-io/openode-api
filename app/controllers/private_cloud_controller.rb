@@ -32,6 +32,8 @@ class PrivateCloudController < InstancesController
   end
 
   def apply
+    @website_location.allocate_ports!
+
     server_planning_methods = [
       DeploymentMethod::ServerPlanning::Sync.new,
       DeploymentMethod::ServerPlanning::DockerCompose.new,
@@ -62,6 +64,8 @@ class PrivateCloudController < InstancesController
     info = cloud_provider.server_info(SUBID: @website.private_cloud_info['SUBID'])
 
     server = cloud_provider.create_openode_server!(@website_location, info)
+
+    return json(info) unless server
 
     cloud_provider.save_password(@website_location, server, info)
     secrets_created = server.secret.andand[:info].present?

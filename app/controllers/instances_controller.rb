@@ -10,6 +10,7 @@ class InstancesController < ApplicationController
   before_action except: [:add_location] do
     populate_website_location
   end
+
   before_action :prepare_runner
   after_action :terminate_runner
 
@@ -93,7 +94,7 @@ class InstancesController < ApplicationController
       original_value: @website.account_type
     }
 
-    @runner.delay.execute([{ cmd_name: 'stop', options: { is_complex: true } }])
+    @runner&.delay&.execute([{ cmd_name: 'stop', options: { is_complex: true } }])
 
     json(result: 'success', msg: 'Instance will stop, make sure to redeploy it')
   end
@@ -193,7 +194,7 @@ class InstancesController < ApplicationController
   end
 
   def stop
-    @runner.execute([{ cmd_name: 'stop', options: { is_complex: true } }])
+    @runner&.execute([{ cmd_name: 'stop', options: { is_complex: true } }])
 
     json(result: 'success')
   end

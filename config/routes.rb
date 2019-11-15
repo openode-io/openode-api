@@ -81,6 +81,6 @@ Rails.application.routes.draw do
 
     post '/:site_name/allocate', to: 'private_cloud#allocate'
     post '/:site_name/apply', to: 'private_cloud#apply'
-    post '/:site_name/private-cloud-info', to: 'private_cloud#private_cloud_info'
+    get '/:site_name/private-cloud-info', to: 'private_cloud#private_cloud_info'
   end
 end

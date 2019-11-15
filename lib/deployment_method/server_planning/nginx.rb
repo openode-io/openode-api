@@ -13,8 +13,8 @@ module DeploymentMethod
 
       def self.gen_nginx_http_confs(opts = {})
         "upstream backend-http {\n" +
-          opts[:ports].map { |port| "  server 127.0.0.1:#{port};" }.join('\n') +
-          '}' +
+          opts[:ports].map { |port| "  server 127.0.0.1:#{port};" }.join("\n") +
+          "}\n" +
           %(
           server {
                 listen       80;

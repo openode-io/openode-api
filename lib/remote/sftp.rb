@@ -24,7 +24,10 @@ module Remote
         Rails.logger.info('Skipping SFTP transfer')
         @@test_uploaded_files = upload_files
       else
+        keys = opts[:private_key] ? [opts[:private_key]] : []
+
         Net::SFTP.start(opts[:host], opts[:user], password: opts[:password],
+                                                  key_data: keys,
                                                   non_interactive: true) do |sftp|
           Sftp.upload(sftp, upload_files)
         end

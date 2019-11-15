@@ -98,17 +98,25 @@ class WebsiteLocationTest < ActiveSupport::TestCase
   test 'compute_a_record_dns with two domains' do
     server = LocationServer.find_by ip: '127.0.0.1'
 
+    domain_names = ['google.com', 'www.google.com', 'www2.www.google.com']
     result =
-      WebsiteLocation.compute_a_record_dns(server, ['google.com', 'www.google.com'])
+      WebsiteLocation.compute_a_record_dns(server, domain_names)
 
-    assert_equal result.length, 2
+    assert_equal result.length, 3
+    assert_equal result[0]['name'], ''
     assert_equal result[0]['domainName'], 'google.com'
     assert_equal result[0]['type'], 'A'
     assert_equal result[0]['value'], '127.0.0.1'
 
     assert_equal result[1]['domainName'], 'www.google.com'
+    assert_equal result[1]['name'], 'www'
     assert_equal result[1]['type'], 'A'
     assert_equal result[1]['value'], '127.0.0.1'
+
+    assert_equal result[2]['domainName'], 'www2.www.google.com'
+    assert_equal result[2]['name'], 'www2.www'
+    assert_equal result[2]['type'], 'A'
+    assert_equal result[2]['value'], '127.0.0.1'
   end
 
   # compute_dns
@@ -127,6 +135,7 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     website.domains = ['www.what.is']
 
     entry1 = {
+      name: 'www',
       domainName: 'www.what.is',
       type: 'A',
       value: '127.0.0.10'
@@ -140,6 +149,7 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     result = wl.compute_dns
 
     assert_equal result.length, 1
+    assert_equal result[0]['name'], 'www'
     assert_equal result[0]['domainName'], 'www.what.is'
     assert_equal result[0]['type'], 'A'
     assert_equal result[0]['value'], '127.0.0.10'
@@ -151,6 +161,7 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     website.domains = ['www.what.is']
 
     entry1 = {
+      name: 'www',
       domainName: 'www.what.is',
       type: 'A',
       value: '127.0.0.10'
@@ -164,15 +175,18 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     result = wl.compute_dns(with_auto_a: true)
 
     assert_equal result.length, 2
+    assert_equal result[0]['name'], 'www'
     assert_equal result[0]['domainName'], 'www.what.is'
     assert_equal result[0]['type'], 'A'
     assert_equal result[0]['value'], '127.0.0.10'
     assert_equal result[0]['id'], WebsiteLocation.dns_entry_to_id(entry1)
 
+    assert_equal result[1]['name'], 'www'
     assert_equal result[1]['domainName'], 'www.what.is'
     assert_equal result[1]['type'], 'A'
     assert_equal result[1]['value'], wl.location_server.ip
     assert_equal result[1]['id'], WebsiteLocation.dns_entry_to_id(
+      name: 'www',
       domainName: 'www.what.is',
       type: 'A',
       value: wl.location_server.ip

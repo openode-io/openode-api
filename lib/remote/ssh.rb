@@ -17,7 +17,10 @@ module Remote
       @opts = opts
 
       unless @@conn_test
-        @ssh = Net::SSH.start(opts[:host], opts[:user], password: opts[:password],
+        keys = opts[:private_key] ? [opts[:private_key]] : []
+
+        @ssh = Net::SSH.start(opts[:host], opts[:user], key_data: keys,
+                                                        password: opts[:password],
                                                         non_interactive: true)
       end
 

@@ -52,7 +52,7 @@ module Remote
 
       def dns_entry_exists?(root_domain, existing_records, dns_entry)
         existing_records.any? do |record|
-          first_part_domain = record['name'] ? "#{record['name']}." : ''
+          first_part_domain = record['name'].present? ? "#{record['name']}." : ''
           record_domain_name = "#{first_part_domain}#{root_domain}"
           record['domainName'] = record_domain_name
 
@@ -64,7 +64,7 @@ module Remote
       def dns_entry_deprecated?(root_domain, main_domain, existing_record, dns_entries)
         record = existing_record
 
-        first_part_domain = record['name'] ? "#{record['name']}." : ''
+        first_part_domain = record['name'].present? ? "#{record['name']}." : ''
         record_domain_name = "#{first_part_domain}#{root_domain}"
         record['domainName'] = record_domain_name
 

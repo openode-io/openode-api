@@ -67,7 +67,9 @@ module DeploymentMethod
 
     def launch(options = {})
       website, website_location = get_website_fields(options)
-      require_fields([:limit_resources], options)
+
+      raise 'missing limit resource' unless [true, false].include?(options[:limit_resources])
+
       limit_resources = options[:limit_resources]
 
       port_info = port_info_for_new_deployment(website_location)

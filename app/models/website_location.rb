@@ -49,6 +49,8 @@ class WebsiteLocation < ApplicationRecord
   end
 
   def prepare_runner
+    return unless location_server
+
     configs = prepare_runner_configs
 
     @runner =
@@ -144,11 +146,24 @@ class WebsiteLocation < ApplicationRecord
     save!
   end
 
+  # for example given www2.www.google.com,
+  # root domain is google.com, so name = www2.www
+  def self.name_of_domain(domain)
+    root_domain_current = WebsiteLocation.root_domain(domain)
+
+    parts = domain.split(root_domain_current)
+
+    return '' if parts.empty?
+
+    parts.first.delete_suffix('.')
+  end
+
   def self.compute_a_record_dns(location_server, computed_domains)
     result = []
 
     computed_domains.each do |domain|
       result << {
+        'name' => WebsiteLocation.name_of_domain(domain),
         'domainName' => domain,
         'type' => 'A',
         'value' => location_server.ip
@@ -159,7 +174,7 @@ class WebsiteLocation < ApplicationRecord
   end
 
   def allocate_ports!
-    return if port && second_port
+    return if (port && second_port) || !location_server_id
 
     ports_used =
       WebsiteLocation.where(location_server_id: location_server_id)
@@ -198,7 +213,7 @@ class WebsiteLocation < ApplicationRecord
       root_domain,
       main_domain,
       opts[:dns_entries] || compute_dns(with_auto_a: opts[:with_auto_a]),
-      location_server.ip
+      location_server.andand.ip
     )
 
     website.create_event(title: 'DNS update', updates: actions_done)

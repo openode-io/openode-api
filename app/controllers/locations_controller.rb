@@ -23,7 +23,8 @@ class LocationsController < InstancesController
       validation_error!(msg)
     end
 
-    @website.add_location(Location.find_by!(str_id: str_id))
+    location = Location.find_by!(str_id: str_id)
+    @website.add_location(location)
 
     @website_event_obj = { title: 'add-location', location_id: str_id }
 

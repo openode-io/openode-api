@@ -40,6 +40,9 @@ class Website < ApplicationRecord
 
   DEFAULT_ACCOUNT_TYPE = 'free'
 
+  CLOUD_TYPE_PRIVATE_CLOUD = 'private-cloud'
+  CLOUD_TYPE_CLOUD = 'cloud'
+
   validates :user, presence: true
   validates :site_name, presence: true
   validates :site_name, uniqueness: true
@@ -57,7 +60,7 @@ class Website < ApplicationRecord
 
   validates :type, inclusion: { in: TYPES }
   validates :domain_type, inclusion: { in: DOMAIN_TYPES }
-  validates :cloud_type, inclusion: { in: %w[cloud private-cloud] }
+  validates :cloud_type, inclusion: { in: [CLOUD_TYPE_PRIVATE_CLOUD, CLOUD_TYPE_CLOUD] }
   validates :status, inclusion: { in: STATUSES }
 
   before_validation :prepare_new_site, on: :create
@@ -126,14 +129,16 @@ class Website < ApplicationRecord
   end
 
   def add_location(location)
-    if location.str_id.include?('-') && domain_type != 'custom_domain'
+    is_private_cloud = location.str_id.include?('-')
+
+    if is_private_cloud && domain_type != 'custom_domain'
       # to refactor (-)
       msg = 'This location is available only for custom domains for now (not subdomains). ' \
             'Only the following locations (ids) are available for subdomains: canada, usa, france.'
       raise ValidationError, msg
     end
 
-    location_server = location.location_servers.first
+    location_server = is_private_cloud ? nil : location.location_servers.first
 
     website_location = WebsiteLocation.create!(
       website: self,
@@ -142,9 +147,11 @@ class Website < ApplicationRecord
     )
 
     if location_server
-      website_location.allocate_ports!
       website_location.update_remote_dns(with_auto_a: true)
     end
+
+    self.cloud_type = is_private_cloud ? CLOUD_TYPE_PRIVATE_CLOUD : CLOUD_TYPE_CLOUD
+    save!
   end
 
   def remove_location(location)

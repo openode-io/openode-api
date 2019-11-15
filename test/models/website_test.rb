@@ -188,7 +188,26 @@ class WebsiteTest < ActiveSupport::TestCase
 
     website.add_location(location)
 
-    assert_equal website.website_locations.reload[0].location.str_id, 'canada'
+    website.reload
+    website.website_locations.reload
+
+    assert_equal website.website_locations[0].location.str_id, 'canada'
+    assert_equal website.cloud_type, 'cloud'
+  end
+
+  test 'add location happy path - private cloud' do
+    website = Website.find_by! site_name: 'www.what.is'
+    website.website_locations.destroy_all
+    prepare_cloud_provider_manager
+    location = Location.find_by! str_id: 'new-jersey-1'
+
+    website.add_location(location)
+
+    website.reload
+    website.website_locations.reload
+
+    assert_equal website.website_locations[0].location.str_id, 'new-jersey-1'
+    assert_equal website.cloud_type, 'private-cloud'
   end
 
   # private_cloud?

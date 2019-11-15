@@ -220,6 +220,7 @@ class ActiveSupport::TestCase
   end
 
   def prepare_cloud_provider_manager
+    CloudProvider::Manager.clear_instance
     CloudProvider::Manager.instance
   end
 
