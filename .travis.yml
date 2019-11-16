@@ -9,3 +9,9 @@ services:
 
 before_install:
   - mysql -e 'CREATE DATABASE openode_test;'
+
+deploy:
+  provider: script
+  script: env bash scripts/deploy.sh
+  on:
+    branch: master
