@@ -3,8 +3,9 @@ sshpass -p $API_PASSWORD ssh -o StrictHostKeyChecking=no $API_USER@$API_HOST \
   "source /root/.bashrc && \
   echo '111' && \
   echo $PATH && \
-  which ruby && \
   cd $PROJECT_PATH && \
+  pwd && \
+  ls -la /root && \
   echo '222' && \
   git pull && \
   echo '333' && \
