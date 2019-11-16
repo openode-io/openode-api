@@ -1,6 +1,6 @@
 
 sshpass -p $API_PASSWORD ssh -o StrictHostKeyChecking=no $API_USER@$API_HOST \
-  "source /root/.bashrc && \
+  "PATH=\"$PATH:/usr/local/rvm/rubies/ruby-2.6.3/bin/\" && \
   echo '111' && \
   echo $PATH && \
   cd $PROJECT_PATH && \
