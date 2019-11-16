@@ -38,3 +38,6 @@ Things you may want to cover:
  * apt-get install libmysqlclient-dev
  * bundle install
 
+# Configuration
+ * cp .test.env .production.env # adapt the environment settings
+ * cp .test.openode.yml .production.openode.yml
