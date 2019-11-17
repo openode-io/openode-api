@@ -102,6 +102,19 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body['status'], 'online'
   end
 
+  test '/instances/summary happy path' do
+    get '/instances/summary', as: :json, headers: default_headers_auth
+
+    assert_response :success
+
+    site_to_check = response.parsed_body.find { |w| w['site_name'] == 'testsite' }
+    assert_equal site_to_check['site_name'], 'testsite'
+    assert_equal site_to_check['ip'], '127.0.0.1'
+    assert_equal site_to_check['location']['full_name'], 'Montreal (Canada)'
+    assert_equal site_to_check['price'], '0.80'
+    assert_equal site_to_check['plan_name'], '100 MB'
+  end
+
   test '/instances/:instance_id with custom domain' do
     user = default_user
     site = Website.find_by! site_name: 'www.what.is'

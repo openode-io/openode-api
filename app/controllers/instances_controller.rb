@@ -41,6 +41,21 @@ class InstancesController < ApplicationController
     json(@user.websites_with_access)
   end
 
+  def summary
+    json(@user.websites_with_access
+      .map do |w|
+        w_obj = w.attributes
+
+        w_obj['location'] = w.website_locations&.first&.location
+        w_obj["plan"] = w.plan
+        w_obj["price"] = w.price
+        w_obj["plan_name"] = w.plan_name
+        w_obj["ip"] = w.first_ip
+
+        w_obj
+      end)
+  end
+
   def show
     json(@website)
   end

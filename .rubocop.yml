@@ -18,6 +18,12 @@ Rails/InverseOf:
 Rails/HasManyOrHasOneDependent:
   Enabled: false
 
+Style/FormatString:
+  Enabled: false
+
+Style/FormatStringToken:
+  Enabled: false
+
 Style/MixinUsage:
   Exclude:
     - 'bin/*'

@@ -1,0 +1,7 @@
+/var/www/openode-api/log/*.log {
+  daily
+    missingok
+    rotate 24
+    compress
+    create
+}

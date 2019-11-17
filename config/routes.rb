@@ -34,6 +34,7 @@ Rails.application.routes.draw do
 
   scope :instances, constraints: { site_name: %r{[^/]+} } do
     get '/', to: 'instances#index'
+    get '/summary', to: 'instances#summary'
     post '/create/', to: 'instances#create_instance'
     get '/:site_name/', to: 'instances#show'
     delete '/:site_name/', to: 'instances#destroy'

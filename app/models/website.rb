@@ -362,6 +362,24 @@ class Website < ApplicationRecord
     Website.plan_of(account_type)
   end
 
+  def plan_name
+    "#{plan[:ram]} MB"
+  rescue StandardError
+    "N/A"
+  end
+
+  def price
+    ("%.2f" % plan[:cost_per_month].to_d.truncate(2))
+  rescue StandardError
+    "N/A"
+  end
+
+  def first_ip
+    website_locations.first.location_server.ip
+  rescue StandardError
+    "N/A"
+  end
+
   def free_sandbox?
     account_type == 'free'
   end
