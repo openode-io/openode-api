@@ -7,5 +7,5 @@ sshpass -p $API_PASSWORD ssh -o StrictHostKeyChecking=no $API_USER@$API_HOST \
   echo 'bundle install' && ./bin/bundle install && \
   RAILS_ENV=$RAILS_ENV ./bin/rails runner 'puts ENV[\"RAILS_ENV\"]' && \
   RAILS_ENV=$RAILS_ENV ./bin/rails db:migrate && \
-  RAILS_ENV=production ./bin/delayed_job --pid-dir=tmp/pids -n 5 restart && \
+  RAILS_ENV=$RAILS_ENV ./bin/delayed_job --pid-dir=tmp/pids -n 5 restart && \
   pm2 list" # replace with reload
