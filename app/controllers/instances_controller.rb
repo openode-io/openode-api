@@ -222,7 +222,7 @@ class InstancesController < ApplicationController
   end
 
   def docker_compose
-    content = if params['has_env_file']
+    content = if [true, 'true'].include?(params['has_env_file'])
                 DeploymentMethod::DockerCompose.default_docker_compose_file(
                   with_env_file: true
                 )

@@ -1,3 +1,6 @@
+notifications:
+  slack: openodeio:6BDG0odfHQqNmWXoYcDfpV2y
+
 language: ruby
 
 before_script:
