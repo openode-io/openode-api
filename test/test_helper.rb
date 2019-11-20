@@ -193,6 +193,16 @@ class ActiveSupport::TestCase
       content_type: 'application/json',
       response_status: 200,
       response_path: 'test/fixtures/http/cloud_provider/vultr/empty.json'
+    },
+    {
+      url: 'https://api.mailgun.net/v3/openode.io/events?event=failed&limit=300',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/mailgun/failed_events.json'
     }
   ]
 
@@ -374,6 +384,11 @@ class ActiveSupport::TestCase
     {
       "x-auth-token": '12345678'
     }
+  end
+
+  def invoke_task(task_name)
+    OpenodeApi::Application.load_tasks
+    Rake::Task[task_name].invoke
   end
 
   # Add more helper methods to be used by all tests here...

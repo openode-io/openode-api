@@ -1,0 +1,145 @@
+{
+  "items": [
+    {
+      "severity": "permanent",
+      "tags": [],
+      "storage": {
+        "url": "https://sw.api.mailgun.net/v3/domains/openode.io/messages/AgEFquOz47Z6Fstdbk5D9qQl-1CIRkg-ZA==",
+        "key": "AgEFquOz47Z6Fstdbk5D9qQl-1CIRkg-ZA=="
+      },
+      "delivery-status": {
+        "attempt-no": 8,
+        "message": "Too old",
+        "code": 602,
+        "description": "",
+        "session-seconds": 0.0
+      },
+      "recipient-domain": "gakkurang.com",
+      "event": "failed",
+      "campaigns": [],
+      "reason": "old",
+      "user-variables": {},
+      "flags": {
+        "is-routed": false,
+        "is-authenticated": true,
+        "is-system-test": false,
+        "is-test-mode": false
+      },
+      "log-level": "error",
+      "timestamp": 1574078067.962732,
+      "envelope": {
+        "sender": "info@openode.io",
+        "transport": "smtp",
+        "targets": "xhanolivia@gakkurang.com"
+      },
+      "message": {
+        "headers": {
+          "to": "xhanolivia@gakkurang.com",
+          "message-id": "20191117235923.1.105564CDF55A87A7@openode.io",
+          "from": "info@openode.io",
+          "subject": "What's new on opeNode.io - New version coming soon!"
+        },
+        "attachments": [],
+        "size": 1542
+      },
+      "recipient": "xhanolivia@gakkurang.com",
+      "id": "aRmpU0uKT2KabXjF72Cg2w"
+    },
+    {
+      "severity": "permanent",
+      "tags": [],
+      "storage": {
+        "url": "https://sw.api.mailgun.net/v3/domains/openode.io/messages/AgEFf7ru6rApuz--DnlKr5P9foLAV9CYZA==",
+        "key": "AgEFf7ru6rApuz--DnlKr5P9foLAV9CYZA=="
+      },
+      "delivery-status": {
+        "attempt-no": 8,
+        "message": "Too old",
+        "code": 602,
+        "description": "",
+        "session-seconds": 0.0
+      },
+      "recipient-domain": "sdf.com",
+      "event": "failed",
+      "campaigns": [],
+      "reason": "old",
+      "user-variables": {},
+      "flags": {
+        "is-routed": false,
+        "is-authenticated": true,
+        "is-system-test": false,
+        "is-test-mode": false
+      },
+      "log-level": "error",
+      "timestamp": 1574077936.062321,
+      "envelope": {
+        "sender": "info@openode.io",
+        "transport": "smtp",
+        "targets": "aafdssadf@sdf.com"
+      },
+      "message": {
+        "headers": {
+          "to": "aafdssadf@sdf.com",
+          "message-id": "20191117235714.1.5F236783C5113628@openode.io",
+          "from": "info@openode.io",
+          "subject": "What's new on opeNode.io - New version coming soon!"
+        },
+        "attachments": [],
+        "size": 1523
+      },
+      "recipient": "aafdssadf@sdf.com",
+      "id": "77Br_FHqT22JxyCMTm_NxA"
+    },
+    {
+      "severity": "permanent",
+      "tags": [],
+      "storage": {
+        "url": "https://sw.api.mailgun.net/v3/domains/openode.io/messages/AgEFduzRa2R9HyAL2IVASZB3ujkW02_iZA==",
+        "key": "AgEFduzRa2R9HyAL2IVASZB3ujkW02_iZA=="
+      },
+      "delivery-status": {
+        "attempt-no": 8,
+        "message": "Too old",
+        "code": 602,
+        "description": "",
+        "session-seconds": 0.0
+      },
+      "recipient-domain": "marketlink.info",
+      "id": "c6SBrzufS_600--J87zk-Q",
+      "campaigns": [],
+      "reason": "old",
+      "user-variables": {},
+      "flags": {
+        "is-routed": false,
+        "is-authenticated": true,
+        "is-system-test": false,
+        "is-test-mode": false
+      },
+      "log-level": "error",
+      "timestamp": 1574077405.104377,
+      "envelope": {
+        "sender": "info@openode.io",
+        "transport": "smtp",
+        "targets": "kixa@marketlink.info"
+      },
+      "message": {
+        "headers": {
+          "to": "kixa@marketlink.info",
+          "message-id": "20191117234818.1.51352DD867D121FA@openode.io",
+          "from": "info@openode.io",
+          "subject": "What's new on opeNode.io - New version coming soon!"
+        },
+        "attachments": [],
+        "size": 1530
+      },
+      "recipient": "kixa@marketlink.info",
+      "event": "failed"
+    }
+  ],
+  "paging": {
+    "previous": "https://api.mailgun.net/v3/openode.io/events/WzMseyJiIjoiMjAxOS0xMS0yMFQyMTo1ODoyOS4yNTIrMDA6MDAiLCJlIjoiMjAxOS0xMS0xNVQyMTo1ODoyOS4yNTIrMDA6MDAifSx7ImIiOiIyMDE5LTExLTE4VDExOjU0OjI3Ljk2MiswMDowMCIsImUiOiIyMDE5LTExLTIwVDIxOjU4OjI5LjI1MyswMDowMCJ9LCJfZG9jI2FSbXBVMHVLVDJLYWJYakY3MkNnMnciLFsicCIsImYiXSxudWxsLFtbImFjY291bnQuaWQiLCI1YjAwMzZiNWNkMTY4MjAwMDE4NmZiNzAiXSxbImRvbWFpbi5uYW1lIiwib3Blbm9kZS5pbyJdLFsiZXZlbnQiLCJmYWlsZWQiXV0sM10=",
+    "first": "https://api.mailgun.net/v3/openode.io/events/WzMseyJiIjoiMjAxOS0xMS0yMFQyMTo1ODoyOS4yNTIrMDA6MDAiLCJlIjoiMjAxOS0xMS0xNVQyMTo1ODoyOS4yNTIrMDA6MDAifSx7ImIiOiIyMDE5LTExLTIwVDIxOjU4OjI5LjI1MiswMDowMCIsImUiOiIyMDE5LTExLTE1VDIxOjU4OjI5LjI1MiswMDowMCJ9LG51bGwsWyJmIl0sbnVsbCxbWyJhY2NvdW50LmlkIiwiNWIwMDM2YjVjZDE2ODIwMDAxODZmYjcwIl0sWyJkb21haW4ubmFtZSIsIm9wZW5vZGUuaW8iXSxbImV2ZW50IiwiZmFpbGVkIl1dLDNd",
+    "last": "https://api.mailgun.net/v3/openode.io/events/WzMseyJiIjoiMjAxOS0xMS0yMFQyMTo1ODoyOS4yNTIrMDA6MDAiLCJlIjoiMjAxOS0xMS0xNVQyMTo1ODoyOS4yNTIrMDA6MDAifSx7ImIiOiIyMDE5LTExLTE1VDIxOjU4OjI5LjI1MiswMDowMCIsImUiOiIyMDE5LTExLTIwVDIxOjU4OjI5LjI1MiswMDowMCJ9LG51bGwsWyJwIiwiZiJdLG51bGwsW1siYWNjb3VudC5pZCIsIjViMDAzNmI1Y2QxNjgyMDAwMTg2ZmI3MCJdLFsiZG9tYWluLm5hbWUiLCJvcGVub2RlLmlvIl0sWyJldmVudCIsImZhaWxlZCJdXSwzXQ==",
+    "next": "https://api.mailgun.net/v3/openode.io/events/WzMseyJiIjoiMjAxOS0xMS0yMFQyMTo1ODoyOS4yNTIrMDA6MDAiLCJlIjoiMjAxOS0xMS0xNVQyMTo1ODoyOS4yNTIrMDA6MDAifSx7ImIiOiIyMDE5LTExLTE4VDExOjQzOjI1LjEwNCswMDowMCIsImUiOiIyMDE5LTExLTE1VDIxOjU4OjI5LjI1MiswMDowMCJ9LCJfZG9jI2M2U0JyenVmU182MDAtLUo4N3prLVEiLFsiZiJdLG51bGwsW1siYWNjb3VudC5pZCIsIjViMDAzNmI1Y2QxNjgyMDAwMTg2ZmI3MCJdLFsiZG9tYWluLm5hbWUiLCJvcGVub2RlLmlvIl0sWyJldmVudCIsImZhaWxlZCJdXSwzXQ=="
+  }
+}
