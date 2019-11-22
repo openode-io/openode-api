@@ -79,7 +79,7 @@ class WebsiteLocation < ApplicationRecord
                    website.site_name.to_s
                  end
 
-    "#{first_part}.openode.io"
+    "#{first_part}.#{CloudProvider::Manager.base_hostname}"
   end
 
   def domain_custom_domain

@@ -223,7 +223,7 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
 
       assert_not_nil final_details_event
       assert_equal(final_details_event['update']['details']['url'],
-                   'http://testsite.openode.io/')
+                   "http://testsite.#{CloudProvider::Manager.base_hostname}/")
     end
   end
 

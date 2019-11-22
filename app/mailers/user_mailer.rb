@@ -1,7 +1,7 @@
 class UserMailer < ApplicationMailer
   def registration
     @user = params[:user]
-    @activation_link = "https://www.#{CloudProvider::Manager.instance.base_hostname}/" \
+    @activation_link = "https://www.#{CloudProvider::Manager.base_hostname}/" \
                        "activate/#{@user.id}/#{@user.activation_hash}"
     mail_to = @user.email
 
@@ -17,6 +17,7 @@ class UserMailer < ApplicationMailer
 
     attachments['id_rsa'] = params[:privkey]
 
-    mail(to: params[:mail_to], subject: 'Your private cloud server is ready - opeNode.io')
+    subject = "Your private cloud server is ready - #{CloudProvider::Manager.base_hostname}"
+    mail(to: params[:mail_to], subject: subject)
   end
 end

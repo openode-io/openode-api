@@ -108,9 +108,9 @@ class Website < ApplicationRecord
       domains << Website.clean_domain(site_name)
     end
 
-    if site_name.include?('.openode.io')
+    if site_name.include?(".#{CloudProvider::Manager.base_hostname}")
       self.domain_type = DOMAIN_TYPE_SUBDOMAIN
-      self.site_name = site_name.split('.openode.io').first
+      self.site_name = site_name.split(".#{CloudProvider::Manager.base_hostname}").first
     end
 
     send("init_#{domain_type}")
@@ -254,7 +254,7 @@ class Website < ApplicationRecord
   def validate_site_name_subdomain
     errors.add(:site_name, 'The site name should not container a dot.') if site_name.include?('.')
 
-    unless Website.domain_valid?("#{site_name}.openode.io")
+    unless Website.domain_valid?("#{site_name}.#{CloudProvider::Manager.base_hostname}")
       errors.add(:site_name, "Invalid subdomain #{site_name}")
     end
   end
@@ -449,7 +449,7 @@ class Website < ApplicationRecord
     unless user.credits?
       msg = 'No credit available. Please make sure to buy credits via the Administration ' \
             'dashboard in Billing - ' \
-            "https://www.#{CloudProvider::Manager.instance.base_hostname}/admin/billing"
+            "https://www.#{CloudProvider::Manager.base_hostname}/admin/billing"
       return false, "*** #{msg}"
     end
 

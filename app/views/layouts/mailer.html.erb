@@ -11,7 +11,12 @@
     <%= yield %>
 
     <p><br /></p>
-    <p>The opeNode team<br /><a href="https://www.openode.io/">opeNode.io</a></p>
+    <p>
+      The opeNode team<br />
+      <a href="https://www.<%= CloudProvider::Manager.base_hostname %>/">
+        <%= CloudProvider::Manager.base_hostname %>
+      </a>
+    </p>
     <p>
       <hr />
     </p>

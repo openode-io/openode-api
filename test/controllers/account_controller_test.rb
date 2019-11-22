@@ -43,6 +43,8 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
 
     mail_sent = ActionMailer::Base.deliveries.first
     assert_equal mail_sent.subject, 'Welcome to opeNode!'
+    assert_includes mail_sent.body.raw_source, 'Activate your account'
+    assert_includes mail_sent.body.raw_source, 'openode.io'
   end
 
   test '/account/register password does not match' do

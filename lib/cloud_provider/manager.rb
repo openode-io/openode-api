@@ -66,6 +66,10 @@ module CloudProvider
       @@instance
     end
 
+    def self.base_hostname
+      CloudProvider::Manager.instance.base_hostname
+    end
+
     def available_locations
       Location.all.order(str_id: :asc).map do |l|
         {
