@@ -29,7 +29,7 @@ class CollaboratorTest < ActiveSupport::TestCase
 
   test "a collaborator should not be the website owner" do
     Collaborator.all.destroy_all
-    
+
     website = default_website
     c = Collaborator.create(
       website: website,
