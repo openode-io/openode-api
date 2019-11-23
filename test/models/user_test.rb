@@ -217,7 +217,11 @@ class UserTest < ActiveSupport::TestCase
 
     new_website = Website.find_by site_name: "testsite"
 
-    Collaborator.create(user: user, website: new_website)
+    Collaborator.create!(
+      user: user,
+      website: new_website,
+      permissions: [Collaborator::PERMISSION_ROOT]
+    )
 
     user.reload
 

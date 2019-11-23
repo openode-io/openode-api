@@ -287,7 +287,11 @@ class ActiveSupport::TestCase
   end
 
   def add_collaborator_for(user, website)
-    Collaborator.create(user: user, website: website)
+    Collaborator.create(
+      user: user,
+      website: website,
+      permissions: [Collaborator::PERMISSION_ROOT]
+    )
   end
 
   def default_runner_configs

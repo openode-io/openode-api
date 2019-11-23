@@ -74,7 +74,11 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
     new_site = Website.find_by! site_name: "testsite2"
 
-    Collaborator.create(user: user, website: new_site)
+    Collaborator.create(
+      user: user,
+      website: new_site,
+      permissions: [Collaborator::PERMISSION_ROOT]
+    )
 
     get '/instances/', as: :json, headers: default_headers_auth
 
@@ -119,7 +123,11 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     user = default_user
     site = Website.find_by! site_name: 'www.what.is'
 
-    Collaborator.create(user: user, website: site)
+    Collaborator.create(
+      user: user,
+      website: site,
+      permissions: [Collaborator::PERMISSION_ROOT]
+    )
 
     get '/instances/www.what.is', as: :json, headers: default_headers_auth
 
