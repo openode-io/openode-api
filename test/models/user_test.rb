@@ -143,6 +143,58 @@ class UserTest < ActiveSupport::TestCase
     assert_equal user.can_create_new_website?, false
   end
 
+  # can?
+  test 'can? anything if owner' do
+    website = default_website
+    user = website.user
+
+    assert_equal user.can?(Website::PERMISSION_PLAN, website), true
+  end
+
+  test 'can? throw forbidden if not owner and not collaborator' do
+    Collaborator.all.destroy_all
+    website = default_website
+    user_to_test = User.where('id != ?', website.user_id).first
+
+    assert_raise User::Forbidden do
+      user_to_test.can?(Website::PERMISSION_PLAN, website)
+    end
+  end
+
+  test 'can? throw forbidden if collaborator but not this action' do
+    Collaborator.all.destroy_all
+    website = default_website
+    user_to_test = User.where('id != ?', website.user_id).first
+
+    Collaborator.create!(
+      website: website,
+      user: user_to_test,
+      permissions: [Website::PERMISSION_LOCATION]
+    )
+
+    user_to_test.can?(Website::PERMISSION_LOCATION, website)
+
+    assert_raise User::Forbidden do
+      user_to_test.can?(Website::PERMISSION_PLAN, website)
+    end
+  end
+
+  test 'can? if root collaborator' do
+    Collaborator.all.destroy_all
+    website = default_website
+    user_to_test = User.where('id != ?', website.user_id).first
+
+    Collaborator.create!(
+      website: website,
+      user: user_to_test,
+      permissions: [Website::PERMISSION_ROOT]
+    )
+
+    Website::PERMISSIONS.each do |perm|
+      assert_equal user_to_test.can?(perm, website), true
+    end
+  end
+
   # first unused coupon
   test 'first unused coupon with one unused' do
     user = User.first
@@ -220,7 +272,7 @@ class UserTest < ActiveSupport::TestCase
     Collaborator.create!(
       user: user,
       website: new_website,
-      permissions: [Collaborator::PERMISSION_ROOT]
+      permissions: [Website::PERMISSION_ROOT]
     )
 
     user.reload

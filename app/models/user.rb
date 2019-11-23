@@ -4,6 +4,7 @@ class User < ApplicationRecord
   serialize :coupons, JSON
 
   NotAuthorized = Class.new(StandardError)
+  Forbidden = Class.new(StandardError)
 
   DISALLOWED_EMAIL_DOMAINS = [
     'cuvox.de',
@@ -100,6 +101,21 @@ class User < ApplicationRecord
 
   def can_create_new_website?
     orders.count.positive? || websites.count.zero?
+  end
+
+  def can?(action, website)
+    assert Website::PERMISSIONS.include?(action)
+
+    # website owner can do everything
+    return true if self == website.user
+
+    collaborator = Collaborator.find_by(user: self, website: website)
+
+    if !collaborator || !collaborator.permission?(action)
+      raise Forbidden, 'Cannot access this resource'
+    end
+
+    true
   end
 
   def first_unused_coupon

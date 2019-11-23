@@ -517,7 +517,7 @@ class WebsiteTest < ActiveSupport::TestCase
     Collaborator.create!(
       user: user,
       website: new_website,
-      permissions: [Collaborator::PERMISSION_ROOT]
+      permissions: [Website::PERMISSION_ROOT]
     )
 
     assert_equal Website.find_by!(site_name: "testsite").accessible_by?(user), true

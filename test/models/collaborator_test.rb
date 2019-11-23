@@ -20,7 +20,7 @@ class CollaboratorTest < ActiveSupport::TestCase
 
   test "when root permission, should only contain one permission" do
     c = Collaborator.first
-    c.permissions = [Collaborator::PERMISSION_ROOT, Collaborator::PERMISSION_PLAN]
+    c.permissions = [Website::PERMISSION_ROOT, Website::PERMISSION_PLAN]
     c.save
 
     assert_equal c.valid?, false
@@ -34,7 +34,7 @@ class CollaboratorTest < ActiveSupport::TestCase
     c = Collaborator.create(
       website: website,
       user: website.user,
-      permissions: [Collaborator::PERMISSION_ROOT]
+      permissions: [Website::PERMISSION_ROOT]
     )
 
     assert_equal c.valid?, false

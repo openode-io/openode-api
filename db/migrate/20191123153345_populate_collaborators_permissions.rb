@@ -1,7 +1,7 @@
 class PopulateCollaboratorsPermissions < ActiveRecord::Migration[6.0]
   def up
     Collaborator.all.each do |collaborator|
-      collaborator.permissions = [Collaborator::PERMISSION_ROOT]
+      collaborator.permissions = [Website::PERMISSION_ROOT]
       collaborator.save!
     end
   end

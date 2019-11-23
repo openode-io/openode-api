@@ -43,6 +43,26 @@ class Website < ApplicationRecord
   CLOUD_TYPE_PRIVATE_CLOUD = 'private-cloud'
   CLOUD_TYPE_CLOUD = 'cloud'
 
+  PERMISSION_ROOT = 'root' # all permissions
+  PERMISSION_DEPLOY = 'deploy'
+  PERMISSION_DNS = 'dns'
+  PERMISSION_ALIAS = 'alias'
+  PERMISSION_STORAGE_AREA = 'storage_area'
+  PERMISSION_LOCATION = 'location'
+  PERMISSION_PLAN = 'plan'
+  PERMISSION_CONFIG = 'config'
+
+  PERMISSIONS = [
+    PERMISSION_ROOT,
+    PERMISSION_DEPLOY,
+    PERMISSION_DNS,
+    PERMISSION_ALIAS,
+    PERMISSION_STORAGE_AREA,
+    PERMISSION_LOCATION,
+    PERMISSION_PLAN,
+    PERMISSION_CONFIG
+  ].freeze
+
   validates :user, presence: true
   validates :site_name, presence: true
   validates :site_name, uniqueness: true

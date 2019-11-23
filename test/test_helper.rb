@@ -290,7 +290,7 @@ class ActiveSupport::TestCase
     Collaborator.create(
       user: user,
       website: website,
-      permissions: [Collaborator::PERMISSION_ROOT]
+      permissions: [Website::PERMISSION_ROOT]
     )
   end
 

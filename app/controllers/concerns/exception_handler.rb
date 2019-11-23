@@ -18,5 +18,9 @@ module ExceptionHandler
     rescue_from User::NotAuthorized do |e|
       json({ error: e.message }, :unauthorized)
     end
+
+    rescue_from User::Forbidden do |e|
+      json({ error: e.message }, :forbidden)
+    end
   end
 end
