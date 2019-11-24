@@ -33,6 +33,19 @@ class LocationsTest < ActionDispatch::IntegrationTest
     assert_includes response.parsed_body['error'], 'Multi location is not currently supported'
   end
 
+  test '/instances/:instance_id/add-location forbidden' do
+    w = Website.find_by site_name: 'www.what.is'
+
+    add_collaborator_for(default_user, w, Website::PERMISSION_DNS)
+
+    post '/instances/www.what.is/add-location',
+         as: :json,
+         params: { location_str_id: 'usa' },
+         headers: default_headers_auth
+
+    assert_response :forbidden
+  end
+
   test '/instances/:instance_id/add-location happy path' do
     w = default_website
     w.website_locations.destroy_all
@@ -75,6 +88,19 @@ class LocationsTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
     assert_includes response.parsed_body['error'], 'That location does not exist'
+  end
+
+  test '/instances/:instance_id/remove-location forbidden' do
+    w = Website.find_by site_name: 'www.what.is'
+
+    add_collaborator_for(default_user, w, Website::PERMISSION_DNS)
+
+    post '/instances/www.what.is/remove-location',
+         as: :json,
+         params: { location_str_id: 'usa' },
+         headers: default_headers_auth
+
+    assert_response :forbidden
   end
 
   test '/instances/:instance_id/remove-location happy path' do

@@ -1,4 +1,9 @@
 class LocationsController < InstancesController
+
+  before_action only: %i[add_location remove_location] do
+    requires_access_to(Website::PERMISSION_LOCATION)
+  end
+
   def index
     result = @website.locations
                      .map do |location|
