@@ -286,11 +286,11 @@ class ActiveSupport::TestCase
     }
   end
 
-  def add_collaborator_for(user, website)
-    Collaborator.create(
+  def add_collaborator_for(user, website, perm = Website::PERMISSION_ROOT)
+    Collaborator.create!(
       user: user,
       website: website,
-      permissions: [Website::PERMISSION_ROOT]
+      permissions: [perm]
     )
   end
 
@@ -379,8 +379,12 @@ class ActiveSupport::TestCase
   end
 
   def default_headers_auth
+    headers_auth('1234s56789')
+  end
+
+  def headers_auth(token)
     {
-      "x-auth-token": '1234s56789'
+      "x-auth-token": token
     }
   end
 

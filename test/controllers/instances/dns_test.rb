@@ -81,6 +81,22 @@ class DnsTest < ActionDispatch::IntegrationTest
     assert_equal w.dns[0]['value'], '127.0.0.4'
   end
 
+  test '/instances/:instance_id/add-dns with custom domain - no permission' do
+    w = Website.find_by site_name: 'www.what.is'
+    w.domains = ['www.what.is', 'www2.www.what.is']
+    w.dns = []
+    w.save!
+
+    add_collaborator_for(default_user, w, Website::PERMISSION_ALIAS)
+
+    post '/instances/www.what.is/add-dns',
+         as: :json,
+         params: { domainName: 'www2.www.what.is', type: 'A', value: '127.0.0.4' },
+         headers: default_headers_auth
+
+    assert_response :forbidden
+  end
+
   # del dns
 
   test '/instances/:instance_id/del-dns with custom domain' do
@@ -117,6 +133,21 @@ class DnsTest < ActionDispatch::IntegrationTest
     assert_equal w.events[0].obj['updates']['deleted'][0]['type'], 'A'
     assert_equal w.events[0].obj['updates']['deleted'][0]['value'], '127.0.0.4'
     assert_equal w.events[1].obj['title'], 'Remove DNS entry'
+  end
+
+  test '/instances/:instance_id/del-dns with custom domain without permission' do
+    w = Website.find_by site_name: 'www.what.is'
+    w.domains = ['www.what.is', 'www2.www.what.is']
+    w.dns = []
+    w.save!
+
+    add_collaborator_for(default_user, w, Website::PERMISSION_ALIAS)
+
+    delete "/instances/www.what.is/del-dns?id=123444",
+           as: :json,
+           headers: default_headers_auth
+
+    assert_response :forbidden
   end
 
   # add alias

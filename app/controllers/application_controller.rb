@@ -10,6 +10,10 @@ class ApplicationController < ActionController::API
     raise User::NotAuthorized, msg
   end
 
+  def forbidden_error!(msg)
+    raise User::Forbidden, msg
+  end
+
   def authorize
     token = request.headers['x-auth-token'] || params['token']
 

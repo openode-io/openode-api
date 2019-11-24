@@ -7,6 +7,7 @@ class DnsController < InstancesController
 
   before_action only: %i[add_dns del_dns] do
     requires_location_server
+    requires_access_to(Website::PERMISSION_DNS)
   end
 
   def list_dns

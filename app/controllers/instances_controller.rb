@@ -315,6 +315,10 @@ class InstancesController < ApplicationController
     end
   end
 
+  def requires_access_to(permission)
+    @user.can?(permission, @website)
+  end
+
   private
 
   def populate_website
