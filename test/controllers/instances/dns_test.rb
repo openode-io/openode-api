@@ -82,11 +82,9 @@ class DnsTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/add-dns with custom domain - no permission' do
-    w = Website.find_by site_name: 'www.what.is'
+    w, = prepare_forbidden_test(Website::PERMISSION_ALIAS)
 
-    add_collaborator_for(default_user, w, Website::PERMISSION_ALIAS)
-
-    post '/instances/www.what.is/add-dns',
+    post "/instances/#{w.site_name}/add-dns",
          as: :json,
          params: { domainName: 'www2.www.what.is', type: 'A', value: '127.0.0.4' },
          headers: default_headers_auth
@@ -133,11 +131,9 @@ class DnsTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/del-dns with custom domain without permission' do
-    w = Website.find_by site_name: 'www.what.is'
+    w, = prepare_forbidden_test(Website::PERMISSION_ALIAS)
 
-    add_collaborator_for(default_user, w, Website::PERMISSION_ALIAS)
-
-    delete "/instances/www.what.is/del-dns?id=123444",
+    delete "/instances/#{w.site_name}/del-dns?id=123444",
            as: :json,
            headers: default_headers_auth
 
@@ -173,11 +169,9 @@ class DnsTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/add-alias with custom domain - forbidden' do
-    w = Website.find_by site_name: 'www.what.is'
+    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
 
-    add_collaborator_for(default_user, w, Website::PERMISSION_DNS)
-
-    post '/instances/www.what.is/add-alias',
+    post "/instances/#{w.site_name}/add-alias",
          as: :json,
          params: { hostname: 'www3.www.what.is' },
          headers: default_headers_auth
@@ -211,11 +205,9 @@ class DnsTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/del-alias with custom domain - forbidden' do
-    w = Website.find_by site_name: 'www.what.is'
+    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
 
-    add_collaborator_for(default_user, w, Website::PERMISSION_DNS)
-
-    post '/instances/www.what.is/del-alias',
+    post "/instances/#{w.site_name}/del-alias",
          as: :json,
          params: { hostname: 'www3.www.what.is' },
          headers: default_headers_auth

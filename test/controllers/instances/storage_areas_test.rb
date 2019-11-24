@@ -38,6 +38,17 @@ class StorageAreasTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+  test 'POST /instances/:instance_id/add-storage-area forbidden' do
+    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
+
+    post "/instances/#{w.site_name}/add-storage-area",
+         as: :json,
+         params: { storage_area: 'tmp/' },
+         headers: default_headers_auth
+
+    assert_response :forbidden
+  end
+
   test 'POST /instances/:instance_id/del-storage-area' do
     w = Website.find_by site_name: 'testsite'
     w.storage_areas = ['t1/', 't2/']
@@ -56,5 +67,16 @@ class StorageAreasTest < ActionDispatch::IntegrationTest
 
     assert_equal w.events.count, 1
     assert_equal w.events[0].obj['title'], 'remove-storage-area'
+  end
+
+  test 'POST /instances/:instance_id/del-storage-area forbidden' do
+    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
+
+    post "/instances/#{w.site_name}/del-storage-area",
+         as: :json,
+         params: { storage_area: 't2/' },
+         headers: default_headers_auth
+
+    assert_response :forbidden
   end
 end

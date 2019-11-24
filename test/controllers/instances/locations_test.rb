@@ -34,11 +34,9 @@ class LocationsTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/add-location forbidden' do
-    w = Website.find_by site_name: 'www.what.is'
+    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
 
-    add_collaborator_for(default_user, w, Website::PERMISSION_DNS)
-
-    post '/instances/www.what.is/add-location',
+    post "/instances/#{w.site_name}/add-location",
          as: :json,
          params: { location_str_id: 'usa' },
          headers: default_headers_auth
@@ -91,11 +89,9 @@ class LocationsTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/remove-location forbidden' do
-    w = Website.find_by site_name: 'www.what.is'
+    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
 
-    add_collaborator_for(default_user, w, Website::PERMISSION_DNS)
-
-    post '/instances/www.what.is/remove-location',
+    post "/instances/#{w.site_name}/remove-location",
          as: :json,
          params: { location_str_id: 'usa' },
          headers: default_headers_auth

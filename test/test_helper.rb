@@ -367,6 +367,14 @@ class ActiveSupport::TestCase
     prepare_ssh_session(cmd, IO.read('test/fixtures/docker/global_containers.txt'))
   end
 
+  def prepare_forbidden_test(permission)
+    w = Website.find_by site_name: 'www.what.is'
+
+    collaborator = add_collaborator_for(default_user, w, permission)
+
+    [w, collaborator]
+  end
+
   def default_user
     User.find_by email: 'myadmin@thisisit.com'
   end

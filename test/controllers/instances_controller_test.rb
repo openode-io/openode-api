@@ -503,6 +503,17 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test '/instances/:instance_id/set-plan forbidden' do
+    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
+
+    post "/instances/#{w.site_name}/set-plan?location_str_id=usa",
+         as: :json,
+         params: { plan: '100000-MB' },
+         headers: default_headers_auth
+
+    assert_response :forbidden
+  end
+
   # set cpus
   test '/instances/:instance_id/set-cpus happy path' do
     website_location = default_website_location
@@ -530,6 +541,19 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
          headers: default_headers_auth
 
     assert_response :bad_request
+  end
+
+  test '/instances/:instance_id/set-cpus forbidden' do
+    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
+    w.account_type = 'second'
+    w.save!
+
+    post "/instances/#{w.site_name}/set-cpus?location_str_id=usa",
+         as: :json,
+         params: { nb_cpus: '2' },
+         headers: default_headers_auth
+
+    assert_response :forbidden
   end
 
   test '/instances/:instance_id/set-cpus fail if non cloud instance' do

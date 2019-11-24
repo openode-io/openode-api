@@ -1,13 +1,17 @@
 class StorageAreasController < InstancesController
+  before_action only: %i[add_storage_area remove_storage_area] do
+    requires_access_to(Website::PERMISSION_STORAGE_AREA)
+  end
+
   def index
     json(@website.storage_areas)
   end
 
-  def add
+  def add_storage_area
     change('add')
   end
 
-  def remove
+  def remove_storage_area
     change('remove')
   end
 

@@ -37,6 +37,10 @@ class InstancesController < ApplicationController
     requires_cloud_plan
   end
 
+  before_action only: [:set_plan, :set_cpus] do
+    requires_access_to(Website::PERMISSION_PLAN)
+  end
+
   def index
     json(@user.websites_with_access)
   end
