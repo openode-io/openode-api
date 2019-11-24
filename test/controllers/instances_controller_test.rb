@@ -611,4 +611,14 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
       assert_nil WebsiteLocation.find_by(id: website_location_id)
     end
   end
+
+  test 'DEL /instances/:instance_id/ forbidden' do
+    w, = prepare_forbidden_test(Website::PERMISSION_PLAN)
+
+    delete "/instances/#{w.site_name}/?location_str_id=usa",
+           as: :json,
+           headers: default_headers_auth
+
+    assert_response :forbidden
+  end
 end

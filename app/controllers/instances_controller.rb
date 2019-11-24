@@ -46,6 +46,10 @@ class InstancesController < ApplicationController
     requires_access_to(Website::PERMISSION_DEPLOY)
   end
 
+  before_action only: [:destroy] do
+    requires_access_to(Website::PERMISSION_ROOT)
+  end
+
   def index
     json(@user.websites_with_access)
   end
