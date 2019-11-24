@@ -28,6 +28,16 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
     assert_includes response.parsed_body['error'], 'The instance must be in status'
   end
 
+  test '/instances/:instance_id/restart forbidden' do
+    w, = prepare_forbidden_test(Website::PERMISSION_PLAN)
+
+    post "/instances/#{w.site_name}/restart?version=#{InstancesController::MINIMUM_CLI_VERSION}",
+         as: :json,
+         headers: default_headers_auth
+
+    assert_response :forbidden
+  end
+
   test '/instances/:instance_id/restart should not allow when no credit' do
     dep_method = prepare_default_execution_method
 

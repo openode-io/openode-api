@@ -41,6 +41,11 @@ class InstancesController < ApplicationController
     requires_access_to(Website::PERMISSION_PLAN)
   end
 
+  before_action only: [:changes, :send_compressed_file, :delete_files, :cmd, :stop,
+                       :reload, :erase_all, :restart] do
+    requires_access_to(Website::PERMISSION_DEPLOY)
+  end
+
   def index
     json(@user.websites_with_access)
   end

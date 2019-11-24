@@ -86,4 +86,15 @@ class ConfigsTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
   end
+
+  test '/instances/:instance_id/set-config forbidden' do
+    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
+
+    post "/instances/#{w.site_name}/set-config",
+         as: :json,
+         params: { variable: 'MAX_BUILD_DURATION', value: '20' },
+         headers: default_headers_auth
+
+    assert_response :forbidden
+  end
 end

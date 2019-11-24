@@ -48,6 +48,17 @@ class PrivateCloudTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body['success'], 'Instance already allocated'
   end
 
+  test 'POST /instances/:instance_id/allocate forbidden' do
+    w, = prepare_forbidden_test(Website::PERMISSION_PLAN)
+
+    post "/instances/#{w.site_name}/allocate?location_str_id=usa",
+         as: :json,
+         params: {},
+         headers: default_headers_auth
+
+    assert_response :forbidden
+  end
+
   test 'POST /instances/:instance_id/allocate fail no credit' do
     website, = prepare_custom_domain_with_vultr
     website.user.credits = 0
@@ -75,6 +86,17 @@ class PrivateCloudTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
     assert_includes response.parsed_body.to_s, 'requires to be already allocated'
+  end
+
+  test 'POST /instances/:instance_id/apply forbidden' do
+    w, = prepare_forbidden_test(Website::PERMISSION_PLAN)
+
+    post "/instances/#{w.site_name}/apply?location_str_id=usa",
+         as: :json,
+         params: {},
+         headers: default_headers_auth
+
+    assert_response :forbidden
   end
 
   test 'POST /instances/:instance_id/apply should fail if not private cloud' do

@@ -338,6 +338,16 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test '/instances/:instance_id/stop forbidden' do
+    w, = prepare_forbidden_test(Website::PERMISSION_PLAN)
+
+    post "/instances/#{w.site_name}/stop?location_str_id=usa",
+         as: :json,
+         headers: default_headers_auth
+
+    assert_response :forbidden
+  end
+
   # stop with docker compose internal
   test '/instances/:instance_id/stop with vultr cloud provider' do
     set_dummy_secrets_to(LocationServer.all)

@@ -1,6 +1,10 @@
 class ConfigsController < InstancesController
   before_action :extract_variable
 
+  before_action only: %i[set_config] do
+    requires_access_to(Website::PERMISSION_CONFIG)
+  end
+
   def get_config
     json(
       result: 'success',

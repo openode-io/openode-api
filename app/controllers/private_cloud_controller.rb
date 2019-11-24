@@ -1,4 +1,8 @@
 class PrivateCloudController < InstancesController
+  before_action only: [:allocate, :apply] do
+    requires_access_to(Website::PERMISSION_DEPLOY)
+  end
+
   before_action only: [:allocate, :apply, :private_cloud_info] do
     requires_private_cloud_plan
   end
