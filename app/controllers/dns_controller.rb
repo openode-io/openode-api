@@ -10,6 +10,10 @@ class DnsController < InstancesController
     requires_access_to(Website::PERMISSION_DNS)
   end
 
+  before_action only: %i[add_alias del_alias] do
+    requires_access_to(Website::PERMISSION_ALIAS)
+  end
+
   def list_dns
     json(@website_location.compute_dns(with_auto_a: true))
   end

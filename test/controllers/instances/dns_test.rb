@@ -66,7 +66,7 @@ class DnsTest < ActionDispatch::IntegrationTest
     w.dns = []
     w.save!
 
-    add_collaborator_for(default_user, w)
+    add_collaborator_for(default_user, w, Website::PERMISSION_DNS)
 
     post '/instances/www.what.is/add-dns',
          as: :json,
@@ -83,9 +83,6 @@ class DnsTest < ActionDispatch::IntegrationTest
 
   test '/instances/:instance_id/add-dns with custom domain - no permission' do
     w = Website.find_by site_name: 'www.what.is'
-    w.domains = ['www.what.is', 'www2.www.what.is']
-    w.dns = []
-    w.save!
 
     add_collaborator_for(default_user, w, Website::PERMISSION_ALIAS)
 
@@ -137,9 +134,6 @@ class DnsTest < ActionDispatch::IntegrationTest
 
   test '/instances/:instance_id/del-dns with custom domain without permission' do
     w = Website.find_by site_name: 'www.what.is'
-    w.domains = ['www.what.is', 'www2.www.what.is']
-    w.dns = []
-    w.save!
 
     add_collaborator_for(default_user, w, Website::PERMISSION_ALIAS)
 
@@ -158,7 +152,7 @@ class DnsTest < ActionDispatch::IntegrationTest
     w.dns = []
     w.save!
 
-    add_collaborator_for(default_user, w)
+    add_collaborator_for(default_user, w, Website::PERMISSION_ALIAS)
 
     post '/instances/www.what.is/add-alias',
          as: :json,
@@ -176,6 +170,19 @@ class DnsTest < ActionDispatch::IntegrationTest
     assert_equal(w.events[0].obj['updates']['created'][nb_created - 1]['domainName'],
                  'www3.www.what.is')
     assert_equal w.events[1].obj['title'], 'Add domain alias'
+  end
+
+  test '/instances/:instance_id/add-alias with custom domain - forbidden' do
+    w = Website.find_by site_name: 'www.what.is'
+
+    add_collaborator_for(default_user, w, Website::PERMISSION_DNS)
+
+    post '/instances/www.what.is/add-alias',
+         as: :json,
+         params: { hostname: 'www3.www.what.is' },
+         headers: default_headers_auth
+
+    assert_response :forbidden
   end
 
   # del alias
@@ -201,5 +208,18 @@ class DnsTest < ActionDispatch::IntegrationTest
     assert_equal w.events.length, 2
     assert_equal w.events[0].obj['title'], 'DNS update'
     assert_equal w.events[1].obj['title'], 'Delete domain alias'
+  end
+
+  test '/instances/:instance_id/del-alias with custom domain - forbidden' do
+    w = Website.find_by site_name: 'www.what.is'
+
+    add_collaborator_for(default_user, w, Website::PERMISSION_DNS)
+
+    post '/instances/www.what.is/del-alias',
+         as: :json,
+         params: { hostname: 'www3.www.what.is' },
+         headers: default_headers_auth
+
+    assert_response :forbidden
   end
 end
