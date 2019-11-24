@@ -71,14 +71,16 @@ Rails.application.routes.draw do
     post '/:site_name/add-storage-area', to: 'storage_areas#add_storage_area'
     post '/:site_name/del-storage-area', to: 'storage_areas#remove_storage_area' # to refactor
 
+    get '/:site_name/collaborators', to: 'collaborators#index'
+
     post '/:site_name/increase-storage', to: 'storages#increase'
     post '/:site_name/decrease-storage', to: 'storages#decrease'
-
-    post '/:site_name/set-cpus', to: 'instances#set_cpus'
 
     get '/:site_name/plan', to: 'instances#plan'
     get '/:site_name/plans', to: 'instances#plans'
     post '/:site_name/set-plan', to: 'instances#set_plan'
+
+    post '/:site_name/set-cpus', to: 'instances#set_cpus'
 
     post '/:site_name/allocate', to: 'private_cloud#allocate'
     post '/:site_name/apply', to: 'private_cloud#apply'

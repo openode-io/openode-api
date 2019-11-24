@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class DnsTest < ActionDispatch::IntegrationTest
+class DnsControllerTest < ActionDispatch::IntegrationTest
   test '/instances/:instance_id/list-dns with subdomain should fail' do
     get '/instances/testsite/list-dns', as: :json, headers: default_headers_auth
 

@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class LocationsTest < ActionDispatch::IntegrationTest
+class LocationsControllerTest < ActionDispatch::IntegrationTest
   setup do
   end
 

@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class PrivateCloudTest < ActionDispatch::IntegrationTest
+class PrivateCloudControllerTest < ActionDispatch::IntegrationTest
   def prepare_custom_domain_with_vultr
     website = default_website
     website.account_type = 'plan-201'

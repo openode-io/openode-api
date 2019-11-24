@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class ConfigsTest < ActionDispatch::IntegrationTest
+class ConfigsControllerTest < ActionDispatch::IntegrationTest
   test '/instances/:instance_id/get-config with valid variable' do
     w = Website.find_by site_name: 'testsite'
     w.configs = { SKIP_PORT_CHECK: 'true' }
