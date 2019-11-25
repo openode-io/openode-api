@@ -72,6 +72,7 @@ Rails.application.routes.draw do
     post '/:site_name/del-storage-area', to: 'storage_areas#remove_storage_area' # to refactor
 
     get '/:site_name/collaborators', to: 'collaborators#index'
+    post '/:site_name/collaborators', to: 'collaborators#create'
 
     post '/:site_name/increase-storage', to: 'storages#increase'
     post '/:site_name/decrease-storage', to: 'storages#decrease'

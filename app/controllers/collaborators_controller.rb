@@ -18,4 +18,14 @@ class CollaboratorsController < InstancesController
 
     json(result)
   end
+
+  def create
+    json(Collaborator.create!(permitted_params.merge('website_id' => @website.id)))
+  end
+
+  protected
+
+  def permitted_params
+    params.require(:collaborator).permit(:user_id, permissions: [])
+  end
 end

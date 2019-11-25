@@ -20,4 +20,23 @@ class CollaboratorsControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body[0]['user']['email'], collab_user.email
     assert_equal response.parsed_body[0]['permissions'], ['dns']
   end
+
+  test 'POST /instances/:instance_id/collaborators' do
+    Collaborator.all.destroy_all
+    website = default_website
+    collab_user = User.where('id != ?', website.user_id).first
+
+    post "/instances/#{website.site_name}/collaborators",
+         as: :json,
+         params: { collaborator: { user_id: collab_user.id, permissions: ['dns'] } },
+         headers: default_headers_auth
+
+    assert_response :success
+
+    Collaborator.find_by! id: response.parsed_body['id']
+
+    assert_equal website.collaborators.length, 1
+    assert_equal website.collaborators[0].user, collab_user
+    assert_equal website.collaborators[0].permissions, ['dns']
+  end
 end

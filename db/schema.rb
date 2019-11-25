@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_11_23_153345) do
+ActiveRecord::Schema.define(version: 2019_11_25_022145) do
 
   create_table "collaborators", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "website_id"
@@ -18,7 +18,7 @@ ActiveRecord::Schema.define(version: 2019_11_23_153345) do
     t.timestamp "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.timestamp "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.text "permissions", size: :medium
-    t.index ["website_id", "user_id"], name: "website_user_id_collaborators"
+    t.index ["website_id", "user_id"], name: "index_collaborators_on_website_id_and_user_id", unique: true
     t.index ["website_id"], name: "website_id_collaborators"
   end
 
