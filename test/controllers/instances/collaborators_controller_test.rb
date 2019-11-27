@@ -40,6 +40,25 @@ class CollaboratorsControllerTest < ActionDispatch::IntegrationTest
     assert_equal website.collaborators[0].permissions, ['dns']
   end
 
+  test 'PATCH /instances/:instance_id/collaborators/id' do
+    Collaborator.all.destroy_all
+    website = default_website
+    collab_user = User.where('id != ?', website.user_id).first
+
+    c = add_collaborator_for(collab_user, website)
+
+    patch "/instances/#{website.site_name}/collaborators/#{c.id}",
+          as: :json,
+          params: { collaborator: { permissions: [Website::PERMISSION_DNS] } },
+          headers: default_headers_auth
+
+    assert_response :success
+
+    collaborator = Collaborator.find_by! id: c.id
+
+    assert_equal collaborator.permissions, [Website::PERMISSION_DNS]
+  end
+
   test 'DELETE /instances/:instance_id/collaborators/id' do
     Collaborator.all.destroy_all
     website = default_website

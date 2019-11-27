@@ -23,15 +23,27 @@ class CollaboratorsController < InstancesController
     json(Collaborator.create!(permitted_params.merge('website_id' => @website.id)))
   end
 
-  def destroy
-    collaborator = @website.collaborators.find_by! id: params['id']
+  def update
+    json(
+      collaborator.update!(permitted_change_params)
+    )
+  end
 
+  def destroy
     collaborator.destroy!
 
     json({})
   end
 
   protected
+
+  def collaborator
+    return @website.collaborators.find_by!(id: params['id']) if params['id']
+  end
+
+  def permitted_change_params
+    params.require(:collaborator).permit(permissions: [])
+  end
 
   def permitted_params
     params.require(:collaborator).permit(:user_id, permissions: [])

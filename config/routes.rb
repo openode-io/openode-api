@@ -74,6 +74,7 @@ Rails.application.routes.draw do
     get '/:site_name/collaborators', to: 'collaborators#index'
     post '/:site_name/collaborators', to: 'collaborators#create'
     delete '/:site_name/collaborators/:id', to: 'collaborators#destroy'
+    patch '/:site_name/collaborators/:id', to: 'collaborators#update'
 
     post '/:site_name/increase-storage', to: 'storages#increase'
     post '/:site_name/decrease-storage', to: 'storages#decrease'
