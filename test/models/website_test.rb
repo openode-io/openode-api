@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 
 require 'test_helper'
 
@@ -521,5 +520,24 @@ class WebsiteTest < ActiveSupport::TestCase
     )
 
     assert_equal Website.find_by!(site_name: "testsite").accessible_by?(user), true
+  end
+
+  # change_plan!
+  test "change_plan to open source without activation should fail" do
+    w = default_website
+
+    assert_raise ActiveRecord::RecordInvalid do
+      w.change_plan!(Website::OPEN_SOURCE_ACCOUNT_TYPE)
+    end
+  end
+
+  test "change_plan to open source - happy path" do
+    w = default_website
+    w.open_source = { 'status' => 'approved' }
+    w.save
+
+    w.change_plan!(Website::OPEN_SOURCE_ACCOUNT_TYPE)
+
+    assert_equal w.account_type, Website::OPEN_SOURCE_ACCOUNT_TYPE
   end
 end

@@ -39,6 +39,7 @@ class Website < ApplicationRecord
   TYPES = ['nodejs', TYPE_DOCKER].freeze
 
   DEFAULT_ACCOUNT_TYPE = 'free'
+  OPEN_SOURCE_ACCOUNT_TYPE = 'open_source'
 
   CLOUD_TYPE_PRIVATE_CLOUD = 'private-cloud'
   CLOUD_TYPE_CLOUD = 'cloud'
@@ -75,6 +76,7 @@ class Website < ApplicationRecord
   validate :validate_dns
   validate :validate_domains
   validate :validate_site_name
+  validate :validate_account_type
   validate :can_create_new_site, on: :create
   validate :can_use_root_domain, on: :create
 
@@ -105,6 +107,10 @@ class Website < ApplicationRecord
     website_ids_with_access = current_user.websites_with_access.pluck(:id)
 
     website_ids_with_access.include?(id)
+  end
+
+  def open_source_approved?
+    open_source.present? && open_source['status'] == 'approved'
   end
 
   def prepare_new_site
@@ -305,6 +311,16 @@ class Website < ApplicationRecord
     end
   end
 
+  def validate_account_type
+    found_plan = Website.plan_of(account_type)
+    errors.add(:account_type, "Invalid plan #{account_type}") unless found_plan
+
+    # make sure it's allowed to change to open source
+    if account_type == OPEN_SOURCE_ACCOUNT_TYPE && !open_source_approved?
+      errors.add(:account_type, "The open source project has not yet been approved.")
+    end
+  end
+
   CONFIG_VARIABLES = [
     {
       variable: 'SSL_CERTIFICATE_PATH',
@@ -412,9 +428,6 @@ class Website < ApplicationRecord
   end
 
   def change_plan(acc_type)
-    found_plan = Website.plan_of(acc_type)
-    errors.add(:account_type, "Invalid plan #{acc_type}") unless found_plan
-
     logger.info("website #{site_name} changing plan to #{acc_type}")
     self.account_type = acc_type
 

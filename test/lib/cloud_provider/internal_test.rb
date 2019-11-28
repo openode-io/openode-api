@@ -27,7 +27,7 @@ class InternalTest < ActiveSupport::TestCase
     internal_provider = CloudProvider::Manager.instance.first_of_type('internal')
 
     plans = internal_provider.plans
-    assert_equal plans.length, 7
+    assert_equal plans.length, 8
     assert_equal plans[0][:id], 'sandbox'
     assert_equal plans[0][:internal_id], 'free'
     assert_equal plans[0][:short_name], 'sandbox'
@@ -49,7 +49,7 @@ class InternalTest < ActiveSupport::TestCase
 
     plans = provider.plans_at(location.str_id)
 
-    assert_equal plans.length, 7
+    assert_equal plans.length, 8
 
     plans.each do |plan|
       assert_equal plan[:type], CloudProvider::Internal::TYPE

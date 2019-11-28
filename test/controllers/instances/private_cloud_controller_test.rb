@@ -1,11 +1,11 @@
-# frozen_string_literal: true
 
 require 'test_helper'
 
 class PrivateCloudControllerTest < ActionDispatch::IntegrationTest
   def prepare_custom_domain_with_vultr
     website = default_website
-    website.account_type = 'plan-201'
+    website.account_type = '1024-MB-201'
+
     website.site_name = 'thisisatest.com'
     website.domains = ['thisisatest.com']
     website.domain_type = 'custom_domain'

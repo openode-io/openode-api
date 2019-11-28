@@ -102,6 +102,14 @@ module CloudProvider
           bandwidth: 10
         },
         {
+          id: 'open-source',
+          internal_id: Website::OPEN_SOURCE_ACCOUNT_TYPE,
+          name: 'Open Source',
+          ram: 100,
+          storage: 1000,
+          bandwidth: 10
+        },
+        {
           id: '50-MB',
           internal_id: 'first',
           name: '50MB Memory',
