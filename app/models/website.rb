@@ -1,3 +1,5 @@
+require 'uri'
+
 class Website < ApplicationRecord
   serialize :domains, JSON
   serialize :open_source, JSON
@@ -64,6 +66,16 @@ class Website < ApplicationRecord
     PERMISSION_CONFIG
   ].freeze
 
+  OPEN_SOURCE_STATUS_APPROVED = 'approved'
+  OPEN_SOURCE_STATUS_REJECTED = 'rejected'
+  OPEN_SOURCE_STATUS_PENDING = 'pending'
+
+  OPEN_SOURCE_STATUSES = [
+    OPEN_SOURCE_STATUS_APPROVED,
+    OPEN_SOURCE_STATUS_REJECTED,
+    OPEN_SOURCE_STATUS_PENDING
+  ].freeze
+
   validates :user, presence: true
   validates :site_name, presence: true
   validates :site_name, uniqueness: true
@@ -77,6 +89,12 @@ class Website < ApplicationRecord
   validate :validate_domains
   validate :validate_site_name
   validate :validate_account_type
+
+  with_options if: :open_source_plan? do
+    validates :open_source, presence: true
+    validate :validate_open_source
+  end
+
   validate :can_create_new_site, on: :create
   validate :can_use_root_domain, on: :create
 
@@ -111,6 +129,10 @@ class Website < ApplicationRecord
 
   def open_source_approved?
     open_source.present? && open_source['status'] == 'approved'
+  end
+
+  def open_source_plan?
+    account_type == OPEN_SOURCE_ACCOUNT_TYPE
   end
 
   def prepare_new_site
@@ -317,7 +339,27 @@ class Website < ApplicationRecord
 
     # make sure it's allowed to change to open source
     if account_type == OPEN_SOURCE_ACCOUNT_TYPE && !open_source_approved?
-      errors.add(:account_type, "The open source project has not yet been approved.")
+      errors.add(:account_type, "the open source project has not yet been approved")
+    end
+  end
+
+  def validate_open_source
+    self.open_source ||= {}
+
+    unless OPEN_SOURCE_STATUSES.include?(open_source['status'])
+      errors.add(:open_source, "invalid open source status (#{open_source['status']})")
+    end
+
+    min_description_words = 30
+
+    description_words = open_source['description']&.scan(/\w+/)
+
+    if !description_words || description_words.size < min_description_words
+      errors.add(:open_source, "provide at least #{min_description_words} words description")
+    end
+
+    unless open_source['repository_url'] =~ /\A#{URI.regexp(%w[http https])}\z/
+      errors.add(:open_source, "invalid repository URL")
     end
   end
 

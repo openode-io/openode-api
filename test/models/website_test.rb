@@ -533,11 +533,43 @@ class WebsiteTest < ActiveSupport::TestCase
 
   test "change_plan to open source - happy path" do
     w = default_website
-    w.open_source = { 'status' => 'approved' }
+    w.open_source = {
+      'status' => Website::OPEN_SOURCE_STATUS_APPROVED,
+      'description' => " asdf " * 31,
+      'repository_url' => "https://github.com/openode-io/openode-cli"
+    }
     w.save
 
     w.change_plan!(Website::OPEN_SOURCE_ACCOUNT_TYPE)
 
     assert_equal w.account_type, Website::OPEN_SOURCE_ACCOUNT_TYPE
+  end
+
+  test "change_plan to open source - not enough words" do
+    w = default_website
+    w.open_source = {
+      'status' => Website::OPEN_SOURCE_STATUS_APPROVED,
+      'description' => " asdf " * 15,
+      'repository_url' => "https://github.com/openode-io/openode-cli"
+    }
+    w.save
+
+    assert_raise ActiveRecord::RecordInvalid do
+      w.change_plan!(Website::OPEN_SOURCE_ACCOUNT_TYPE)
+    end
+  end
+
+  test "change_plan to open source - invalid url" do
+    w = default_website
+    w.open_source = {
+      'status' => Website::OPEN_SOURCE_STATUS_APPROVED,
+      'description' => " asdf " * 200,
+      'repository_url' => "ftp://github.com/openode-io/openode-cli"
+    }
+    w.save
+
+    assert_raise ActiveRecord::RecordInvalid do
+      w.change_plan!(Website::OPEN_SOURCE_ACCOUNT_TYPE)
+    end
   end
 end
