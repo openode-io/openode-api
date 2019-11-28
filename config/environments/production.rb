@@ -81,3 +81,9 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 end
+
+class Logger
+  def format_message(severity, timestamp, _progname, msg)
+    "#{severity.first}, [#{timestamp}] #{severity} -- :   #{msg}\n"
+  end
+end

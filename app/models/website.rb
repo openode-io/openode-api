@@ -117,7 +117,6 @@ class Website < ApplicationRecord
     self.site_name = site_name.downcase
     self.domain_type = DOMAIN_TYPE_SUBDOMAIN
     self.type = TYPE_DOCKER
-    self.is_educational = false # to deprecate
     self.redir_http_to_https = false
     self.instance_type = 'server' # to deprecate
     self.open_source = { 'status' => 'active' }

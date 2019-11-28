@@ -19,7 +19,6 @@ one:
   redir_http_to_https: false
   instance_type: MyString
   sub_status: MyString
-  is_educational: false
   cloud_type: cloud
   init_script: MyText
 
@@ -42,7 +41,6 @@ two:
   redir_http_to_https: false
   instance_type: MyString
   sub_status: MyString
-  is_educational: false
   cloud_type: cloud
   init_script: MyText
 
@@ -65,7 +63,6 @@ three:
   redir_http_to_https: false
   instance_type: MyString
   sub_status: MyString
-  is_educational: false
   cloud_type: cloud
   init_script: MyText
 
@@ -88,6 +85,5 @@ with_private_cloud:
   redir_http_to_https: false
   instance_type: MyString
   sub_status: MyString
-  is_educational: false
   cloud_type: private-cloud
   init_script: MyText
