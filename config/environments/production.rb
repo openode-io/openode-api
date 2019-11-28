@@ -84,6 +84,6 @@ end
 
 class Logger
   def format_message(severity, timestamp, _progname, msg)
-    "#{severity.first}, [#{timestamp}] #{severity} -- :   #{msg}\n"
+    "[#{timestamp}] level=#{severity} -- :   #{msg}\n"
   end
 end
