@@ -520,7 +520,7 @@ class Website < ApplicationRecord
 
     return false, '*** User suspended' if user.suspended?
 
-    unless user.credits?
+    if !user.credits? && !open_source_plan?
       msg = 'No credit available. Please make sure to buy credits via the Administration ' \
             'dashboard in Billing - ' \
             "https://www.#{CloudProvider::Manager.base_hostname}/admin/billing"

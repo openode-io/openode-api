@@ -260,6 +260,21 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal can_deploy, true
   end
 
+  test 'can_deploy_to? should for open source even if no credit' do
+    website = Website.find_by(site_name: 'testsite')
+    website.open_source = {
+      'status' => 'approved',
+      'description' => 'a ' * 31,
+      'repository_url' => 'http://google.com/'
+    }
+    website.change_plan!(Website::OPEN_SOURCE_ACCOUNT_TYPE)
+    website.user.credits = 0
+    website.user.save!
+
+    can_deploy, = website.can_deploy_to?(website.website_locations.first)
+    assert_equal can_deploy, true
+  end
+
   test "can_deploy_to? can't if user not activated" do
     website = Website.find_by(site_name: 'testsite')
     website.user.activated = false

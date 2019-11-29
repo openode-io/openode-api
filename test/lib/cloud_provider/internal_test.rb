@@ -13,7 +13,7 @@ class InternalTest < ActiveSupport::TestCase
 
   test 'calc_cost_per_month for open source' do
     internal_provider = CloudProvider::Manager.instance.first_of_type('internal')
-    
+
     cost = internal_provider.calc_cost_per_month(Website::OPEN_SOURCE_ACCOUNT_TYPE, 50)
     assert_equal cost, 0
   end
