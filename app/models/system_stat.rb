@@ -1,0 +1,3 @@
+
+class SystemStat < History
+end

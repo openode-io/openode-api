@@ -3,7 +3,7 @@
 require 'test_helper'
 
 class WebsiteEventTest < ActiveSupport::TestCase
-  test 'Create properly valid website even' do
+  test 'Create properly valid website event' do
     website = Website.first
 
     e = WebsiteEvent.new
