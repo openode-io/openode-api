@@ -1,1 +1,7 @@
+# */3 * * * * res=$(netstat -lnp | grep ':53 ' | wc -l) ; if [ $res -eq 1 ]; then echo 'allup'; else cd /root/dyn_nameserver && bash start.sh; fi
+30 12 * * * rm -f /root/openode-www/nameserver/scripts/*.log
+33 1 * * * docker system prune --volumes -f 
+0 1 * * * /usr/sbin/service docker restart
+* * * * * linesContainers=`docker ps -a | grep "CONTAINER ID" | wc -l` ; if [ "$linesContainers" -gt "0" ]; then echo ""; else /usr/sbin/service docker start; fi
+* * * * * echo $PROJECT_PATH >> /tmp/what.log
 */3 * * * * RAILS_ENV=production rails update:uptime_robot

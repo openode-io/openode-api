@@ -9,3 +9,6 @@ sshpass -p $API_PASSWORD ssh -o StrictHostKeyChecking=no $API_USER@$API_HOST \
   RAILS_ENV=$RAILS_ENV ./bin/rails db:migrate && \
   RAILS_ENV=$RAILS_ENV ./bin/delayed_job --pid-dir=tmp/pids -n 5 restart && \
   pm2 list" # replace with reload
+
+sshpass -p $API_PASSWORD ssh -o StrictHostKeyChecking=no $API_USER@$API_HOST \
+  "cd $PROJECT_PATH && cat scripts/crontab.txt | PROJECT_PATH=$PROJECT_PATH crontab -" # replace with reload
