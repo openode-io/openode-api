@@ -11,4 +11,4 @@ sshpass -p $API_PASSWORD ssh -o StrictHostKeyChecking=no $API_USER@$API_HOST \
   pm2 list" # replace with reload
 
 sshpass -p $API_PASSWORD ssh -o StrictHostKeyChecking=no $API_USER@$API_HOST \
-  "cd $PROJECT_PATH && cat scripts/crontab.txt | PROJECT_PATH=$PROJECT_PATH crontab -" # replace with reload
+  "cd $PROJECT_PATH && cat scripts/crontab.txt | crontab -"

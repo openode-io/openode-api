@@ -4,4 +4,5 @@
 0 1 * * * /usr/sbin/service docker restart
 * * * * * linesContainers=`docker ps -a | grep "CONTAINER ID" | wc -l` ; if [ "$linesContainers" -gt "0" ]; then echo ""; else /usr/sbin/service docker start; fi
 
-*/3 * * * * cd /var/www/openode-api/ ; RAILS_ENV=production rails update:uptime_robot
+*/3 * * * * cd /var/www/openode-api/ ; source scripts/vars && $RUBY_BIN_PATH/rails update:uptime_robot
+3 * * * * cd /var/www/openode-api/ ; source scripts/vars && $RUBY_BIN_PATH/rails locations:populate
