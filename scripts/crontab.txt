@@ -1,8 +1,13 @@
+PATH_REPO=/var/www/openode-api/
+RAILS_ENV=production
+PATH=PATH=/bin:/usr/bin:/usr/local/rvm/rubies/ruby-2.6.3/bin/
 # */3 * * * * res=$(netstat -lnp | grep ':53 ' | wc -l) ; if [ $res -eq 1 ]; then echo 'allup'; else cd /root/dyn_nameserver && bash start.sh; fi
 30 12 * * * rm -f /root/openode-www/nameserver/scripts/*.log
 33 1 * * * docker system prune --volumes -f 
 0 1 * * * /usr/sbin/service docker restart
 * * * * * linesContainers=`docker ps -a | grep "CONTAINER ID" | wc -l` ; if [ "$linesContainers" -gt "0" ]; then echo ""; else /usr/sbin/service docker start; fi
 
-*/3 * * * * cd /var/www/openode-api/ ; source scripts/vars && $RUBY_BIN_PATH/rails update:uptime_robot
-3 * * * * cd /var/www/openode-api/ ; source scripts/vars && $RUBY_BIN_PATH/rails locations:populate
+1 * * * * cd $PATH_REPO && rails db_stats:log_nb_sites_up
+2 * * * * cd $PATH_REPO && rails locations:populate
+#3 * * * * cd $PATH_REPO && rails mailgun:check_failed_events
+*/3 * * * * cd $PATH_REPO && rails update:uptime_robot
