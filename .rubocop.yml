@@ -79,7 +79,7 @@ Metrics/ClassLength:
   Exclude:
     - 'test/**/*.rb'
 
-Lint/HandleExceptions:
+Lint/SuppressedException:
   Exclude:
     - 'test/**/*.rb'
 
@@ -99,7 +99,7 @@ Style/ClassVars:
 Style/MutableConstant:
   Enabled: false
 
-Layout/LeadingBlankLines:
+Layout/LeadingEmptyLines:
   Enabled: false
 
 Style/FrozenStringLiteralComment:
@@ -138,7 +138,7 @@ Metrics/CyclomaticComplexity:
     - 'lib/cloud_provider/vultr.rb'
     - 'db/migrate/*.rb'
 
-Naming/UncommunicativeMethodParamName:
+Naming/MethodParameterName:
   Exclude:
     - 'lib/io/dir.rb' # to refactor
     - 'lib/deployment_method/runner.rb' # to refactor

@@ -6,8 +6,8 @@ class PaypalTest < ActiveSupport::TestCase
   def setup; end
 
   test 'valid input' do
-    content = JSON.parse(File.read(Rails.root.join('test', 'fixtures',
-                                                   'http', 'payment', 'paypal', 'paypal.json')))
+    paypal_fixture_test_path = 'test/fixtures/http/payment/paypal/paypal.json'
+    content = JSON.parse(File.read(Rails.root.join(paypal_fixture_test_path)))
 
     result = Payment::Paypal.parse(content)
 
@@ -18,8 +18,8 @@ class PaypalTest < ActiveSupport::TestCase
   end
 
   test 'is completed?' do
-    content = JSON.parse(File.read(Rails.root.join('test', 'fixtures',
-                                                   'http', 'payment', 'paypal', 'paypal.json')))
+    paypal_fixture_test_path = 'test/fixtures/http/payment/paypal/paypal.json'
+    content = JSON.parse(File.read(Rails.root.join(paypal_fixture_test_path)))
 
     parsed_order = Payment::Paypal.parse(content)
 

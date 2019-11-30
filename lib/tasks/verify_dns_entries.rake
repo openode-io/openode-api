@@ -2,7 +2,7 @@ require 'vultr'
 
 namespace :verify_dns do
   desc 'Verify and clean DNS entries'
-  task :entries do
+  task entries: :environment do
     # get all custom domain site names
     site_names = Website.custom_domain.pluck(:site_name)
     Rails.logger.info "#{site_names.length} sites to check"

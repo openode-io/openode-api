@@ -5,9 +5,8 @@ class OrderControllerTest < ActionDispatch::IntegrationTest
 
   test '/order/paypal completed' do
     user = User.first
-    content = JSON.parse(File.read(Rails.root.join('test', 'fixtures',
-                                                   'http', 'payment', 'paypal',
-                                                   'paypal.json')))
+    paypal_fixture_test_path = 'test/fixtures/http/payment/paypal/paypal.json'
+    content = JSON.parse(File.read(Rails.root.join(paypal_fixture_test_path)))
 
     content['custom'] = user.id
 
@@ -24,9 +23,8 @@ class OrderControllerTest < ActionDispatch::IntegrationTest
   end
 
   test '/order/paypal not completed' do
-    content = JSON.parse(File.read(Rails.root.join('test', 'fixtures',
-                                                   'http', 'payment', 'paypal',
-                                                   'paypal.json')))
+    paypal_fixture_test_path = 'test/fixtures/http/payment/paypal/paypal.json'
+    content = JSON.parse(File.read(Rails.root.join(paypal_fixture_test_path)))
 
     content['payment_status'] = 'not completed'
 
