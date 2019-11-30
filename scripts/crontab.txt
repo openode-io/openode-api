@@ -10,4 +10,5 @@ PATH=PATH=/bin:/usr/bin:/usr/local/rvm/rubies/ruby-2.6.3/bin/
 1 * * * * cd $PATH_REPO && rails db_stats:log_nb_sites_up
 2 * * * * cd $PATH_REPO && rails locations:populate
 #3 * * * * cd $PATH_REPO && rails mailgun:check_failed_events
+0 */5 * * * cd $PATH_REPO && rails clean_db:old_executions
 */3 * * * * cd $PATH_REPO && rails update:uptime_robot
