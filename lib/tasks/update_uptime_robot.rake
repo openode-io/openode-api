@@ -34,12 +34,12 @@ namespace :update do
       status = stringify_status(monitor['status'])
 
       if Status.exists? name: name
-        Rails.logger.info "Updating status #{name}"
+        Rails.logger.info "[Uptime robot] Updating status #{name}"
         status_record = Status.find_by name: name
         status_record.status = status
         status_record.save
       else
-        Rails.logger.info "Creating status #{name}"
+        Rails.logger.info "[Uptime robot] Creating status #{name}"
         Status.create(name: name, status: status)
       end
     end
