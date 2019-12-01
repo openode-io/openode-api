@@ -26,8 +26,8 @@ end
 namespace :update do
   desc ''
   task uptime_robot: :environment do
-    name = "Task update:uptime_robot"
-    Rails.logger.info "[#{name}] begin"
+    task_name = "Task update:uptime_robot"
+    Rails.logger.info "[#{task_name}] begin"
 
     client = UptimeRobot::Client.new(api_key: ENV['UPTIME_ROBOT_API_KEY'])
     monitors_result = client.getMonitors
@@ -37,12 +37,12 @@ namespace :update do
       status = stringify_status(monitor['status'])
 
       if Status.exists? name: name
-        Rails.logger.info "[#{name}] Updating status #{name}"
+        Rails.logger.info "[#{task_name}] Updating status #{name}"
         status_record = Status.find_by name: name
         status_record.status = status
         status_record.save
       else
-        Rails.logger.info "[#{name}] Creating status #{name}"
+        Rails.logger.info "[#{task_name}] Creating status #{name}"
         Status.create(name: name, status: status)
       end
     end
