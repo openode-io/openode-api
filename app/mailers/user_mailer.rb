@@ -8,6 +8,13 @@ class UserMailer < ApplicationMailer
     mail(to: mail_to, subject: 'Welcome to opeNode!')
   end
 
+  def one_day_notification
+    @user = params[:user]
+    mail_to = @user.email
+
+    mail(to: mail_to, subject: 'New opeNode User Support')
+  end
+
   # ip, sitename, default_password, pubkey, privkey, mail_to
   def private_cloud_ready
     @ip = params[:ip]
