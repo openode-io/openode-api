@@ -32,17 +32,21 @@ namespace :update do
     client = UptimeRobot::Client.new(api_key: ENV['UPTIME_ROBOT_API_KEY'])
     monitors_result = client.getMonitors
 
+    puts "monitor res #{monitors_result.inspect}"
+
     monitors_result['monitors'].each do |monitor|
+      puts "looping"
       name = monitor['friendly_name']
       status = stringify_status(monitor['status'])
 
       if Status.exists? name: name
-        Rails.logger.info "[#{task_name}] Updating status #{name}"
+        Rails.logger.info "[#{task_name}] Updating status #{name} to status #{status}"
         status_record = Status.find_by name: name
         status_record.status = status
         status_record.save
       else
-        Rails.logger.info "[#{task_name}] Creating status #{name}"
+        Rails.logger.info "[#{task_name}] Creating status #{name} to status #{status}"
+
         Status.create(name: name, status: status)
       end
     end

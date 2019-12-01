@@ -203,6 +203,16 @@ class ActiveSupport::TestCase
       content_type: 'application/json',
       response_status: 200,
       response_path: 'test/fixtures/http/mailgun/failed_events.json'
+    },
+    {
+      url: 'https://api.uptimerobot.com/v2/getMonitors',
+      method: :post,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/uptime_robot/get_monitors.json'
     }
   ]
 
