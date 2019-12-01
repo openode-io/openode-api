@@ -68,6 +68,7 @@ Naming/MemoizedInstanceVariableName:
   Enabled: false
 
 Metrics/BlockLength:
+  Max: 200
   Exclude:
     - 'test/**/*.rb'
     - 'db/schema.rb'

@@ -4,8 +4,10 @@ one:
   type: WebsiteEvent
   ref_id: 1
   obj: {}
+  created_at: <%= 1000.day.ago.to_s(:db) %>
 
 two:
   type: WebsiteEvent
   ref_id: 1
   obj: {}
+  created_at: <%= 1.day.ago.to_s(:db) %>

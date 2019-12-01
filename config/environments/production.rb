@@ -82,6 +82,7 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 end
 
+# for datadog logs
 class Logger
   def format_message(severity, timestamp, _progname, msg)
     "[#{timestamp}] level=#{severity} -- :   #{msg}\n"

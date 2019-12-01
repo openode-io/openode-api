@@ -14,4 +14,15 @@ class LibTasksDbCleanTest < ActiveSupport::TestCase
 
     assert_equal Execution.where('created_at < ?', 29.days.ago).count, 1
   end
+
+  test "should remove old histories" do
+    invoke_task "db_clean:old_histories"
+
+    global_stat = GlobalStat.first
+
+    assert_equal global_stat.obj['nb_archived_histories'], 1
+
+    nb_too_old = History.where('created_at < ?', 62.days.ago).count
+    assert_equal nb_too_old, 0
+  end
 end
