@@ -24,6 +24,14 @@ class User < ApplicationRecord
   has_many :websites
   has_many :orders
 
+  scope :lacking_credits, -> { where('credits < nb_credits_threshold_notification') }
+  scope :not_notified_low_credit, -> { where(notified_low_credit: 0) }
+  scope :having_websites_in_statuses, lambda { |statuses|
+    where('EXISTS(SELECT 1 ' \
+      'FROM websites w ' \
+      'WHERE w.user_id = users.id AND w.status IN (?))', statuses)
+  }
+
   validates :email, uniqueness: true
   validates :email, presence: true
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }

@@ -25,6 +25,9 @@ class Website < ApplicationRecord
                                       dependent: :destroy
 
   scope :custom_domain, -> { where(domain_type: 'custom_domain') }
+  scope :in_statuses, lambda { |statuses|
+    where(status: statuses)
+  }
 
   REPOS_BASE_DIR = '/home/'
 

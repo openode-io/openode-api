@@ -280,4 +280,58 @@ class UserTest < ActiveSupport::TestCase
     expected_with_access = ["www.what.is", "testsite2", "testsite"]
     assert_equal user.websites_with_access.map(&:site_name), expected_with_access
   end
+
+  # selecting users which should be notified
+  test "users lacking_credits" do
+    users_lacking_credits = User.lacking_credits
+
+    users_emails = users_lacking_credits.map(&:email)
+    assert_equal users_lacking_credits.count, 2
+    assert_includes users_emails, 'myadmin2@thisisit.com'
+    assert_includes users_emails, 'myadmin33@thisisit.com'
+  end
+
+  test "users not_notified_low_credit" do
+    users_lacking_credits = User.not_notified_low_credit
+
+    users_emails = users_lacking_credits.map(&:email)
+    assert_equal users_lacking_credits.count, 2
+    assert_includes users_emails, 'myadmin@thisisit.com'
+    assert_includes users_emails, 'myadmin2@thisisit.com'
+  end
+
+  test "users not_notified_low_credit and lacking credits" do
+    users = User.lacking_credits.not_notified_low_credit
+
+    users_emails = users.map(&:email)
+    assert_equal users.count, 1
+    assert_includes users_emails, 'myadmin2@thisisit.com'
+  end
+
+  test "users which should be notified" do
+    users = User
+            .lacking_credits
+            .not_notified_low_credit
+            .having_websites_in_statuses([Website::STATUS_ONLINE])
+
+    users_emails = users.map(&:email)
+    assert_equal users.count, 1
+    assert_includes users_emails, 'myadmin2@thisisit.com'
+  end
+
+  test "users which should be notified - no one" do
+    user = User.find_by! email: 'myadmin2@thisisit.com'
+
+    user.websites.each do |w|
+      w.status = Website::STATUS_OFFLINE
+      w.save!
+    end
+
+    users = User
+            .lacking_credits
+            .not_notified_low_credit
+            .having_websites_in_statuses([Website::STATUS_ONLINE])
+
+    assert_equal users.count, 0
+  end
 end
