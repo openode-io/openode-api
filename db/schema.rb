@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_11_30_230330) do
+ActiveRecord::Schema.define(version: 2019_12_03_012932) do
 
   create_table "collaborators", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "website_id"
@@ -196,7 +196,7 @@ ActiveRecord::Schema.define(version: 2019_11_30_230330) do
     t.float "credits", limit: 53, default: 0.0
     t.timestamp "last_free_credit_distribute_at", default: "1970-01-01 00:00:01", null: false
     t.integer "newsletter", limit: 1, default: 1
-    t.integer "notified_low_credit", default: 0
+    t.boolean "notified_low_credit", default: false
     t.integer "has_free_sandbox", default: 0
     t.text "coupons"
     t.float "nb_credits_threshold_notification", default: 50.0

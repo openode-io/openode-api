@@ -417,5 +417,9 @@ class ActiveSupport::TestCase
     Rake::Task[task_name].invoke
   end
 
+  def reset_emails
+    ActionMailer::Base.deliveries = []
+  end
+
   # Add more helper methods to be used by all tests here...
 end

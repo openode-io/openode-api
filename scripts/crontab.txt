@@ -13,4 +13,5 @@ PATH=PATH=/bin:/usr/bin:/usr/local/rvm/rubies/ruby-2.6.3/bin/
 0 */5 * * * cd $PATH_REPO && rails clean_db:old_executions
 0 */5 * * * cd $PATH_REPO && rails clean_db:old_histories
 #0 */6 * * * cd $PATH_REPO && rails background_notification:after_one_day_registration
+1 * * * * cd $PATH_REPO && rails background_notification:low_credit
 */3 * * * * cd $PATH_REPO && rails update:uptime_robot
