@@ -11,6 +11,7 @@ AllCops:
 Rails/Output:
   Exclude:
     - 'config/*.rb'
+    - 'db/seeds.rb'
 
 Rails/InverseOf:
   Enabled: false
