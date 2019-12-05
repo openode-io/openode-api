@@ -1,7 +1,6 @@
 require 'vultr'
 
 class GlobalController < ApplicationController
-
   api!
   def test
     json({})

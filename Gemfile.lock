@@ -147,13 +147,13 @@ GEM
     net-ssh (5.2.0)
     netrc (0.11.0)
     nio4r (2.5.2)
-    nokogiri (1.10.5)
+    nokogiri (1.10.7)
       mini_portile2 (~> 2.4.0)
     parallel (1.19.1)
     parser (2.6.5.0)
       ast (~> 2.4.0)
     public_suffix (4.0.1)
-    puma (4.1.1)
+    puma (4.3.1)
       nio4r (~> 2.0)
     rack (2.0.7)
     rack-test (1.1.0)
@@ -273,7 +273,7 @@ DEPENDENCIES
   net-sftp
   net-ssh
   public_suffix
-  puma (~> 4.1.0)
+  puma
   rails (~> 6.0.0)
   redis
   rubocop-rails

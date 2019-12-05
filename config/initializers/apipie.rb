@@ -15,7 +15,7 @@ module Apipie
     <p>Note that our <a href="https://www.openode.io/openode-cli">CLI</a> uses
     this API in a convenient manner.</p>
 
-    <p><b>The API token must be provided using the following 
+    <p><b>The API token must be provided using the following
     HTTP header: x-auth-token: YOUR_TOKEN.</b></p>
     '
   end
