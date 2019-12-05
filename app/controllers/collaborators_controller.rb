@@ -3,6 +3,7 @@ class CollaboratorsController < InstancesController
     requires_access_to(Website::PERMISSION_ROOT)
   end
 
+  api!
   def index
     result = @website.collaborators
                      .map do |c|
@@ -19,16 +20,19 @@ class CollaboratorsController < InstancesController
     json(result)
   end
 
+  api!
   def create
     json(Collaborator.create!(permitted_params.merge('website_id' => @website.id)))
   end
 
+  api!
   def update
     json(
       collaborator.update!(permitted_change_params)
     )
   end
 
+  api!
   def destroy
     collaborator.destroy!
 

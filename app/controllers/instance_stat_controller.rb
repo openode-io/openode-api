@@ -1,4 +1,5 @@
 class InstanceStatController < InstancesController
+  api!
   def index
     last_bws = @website.website_bandwidth_daily_stats.where('created_at > ?', 24.hours.ago)
     last_util_logs =

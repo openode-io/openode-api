@@ -47,6 +47,8 @@ module OpenodeApi
     config.secret_key_base = ENV['SECRET_KEY_BASE']
 
     config.active_job.queue_adapter = :delayed_job
+
+    config.description = "asdf"
   end
 end
 
@@ -54,8 +56,6 @@ end
 
 require 'dotenv'
 Dotenv.load(".#{ENV['RAILS_ENV']}.env")
-puts "loaded... ENV "
-puts ".#{ENV['RAILS_ENV']}.env"
 
 required_env_vars = %w[
   SQL_HOST

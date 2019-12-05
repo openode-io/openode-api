@@ -14,10 +14,12 @@ class DnsController < InstancesController
     requires_access_to(Website::PERMISSION_ALIAS)
   end
 
+  api!
   def list_dns
     json(@website_location.compute_dns(with_auto_a: true))
   end
 
+  api!
   def add_dns
     domain = params['domainName']
     type = params['type']
@@ -50,6 +52,7 @@ class DnsController < InstancesController
     list_dns
   end
 
+  api!
   def del_dns
     dns_id = params['id']
 
@@ -69,6 +72,7 @@ class DnsController < InstancesController
     list_dns
   end
 
+  api!
   def add_alias
     domain = Website.clean_domain(params['hostname'])
 
@@ -83,6 +87,7 @@ class DnsController < InstancesController
     json(result: 'success')
   end
 
+  api!
   def del_alias
     domain = Website.clean_domain(params['hostname'])
 

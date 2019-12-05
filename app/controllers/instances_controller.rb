@@ -50,10 +50,12 @@ class InstancesController < ApplicationController
     requires_access_to(Website::PERMISSION_ROOT)
   end
 
+  api!
   def index
     json(@user.websites_with_access)
   end
 
+  api!
   def summary
     json(@user.websites_with_access
       .map do |w|
@@ -83,6 +85,7 @@ class InstancesController < ApplicationController
     json(website)
   end
 
+  api!
   def destroy
     @website.website_locations.each do |website_location|
       runner = website_location.prepare_runner
@@ -98,14 +101,17 @@ class InstancesController < ApplicationController
     json(result: 'success')
   end
 
+  api!
   def plan
     json(@website.plan)
   end
 
+  api!
   def plans
     json(@website_location.available_plans)
   end
 
+  api!
   def set_plan
     plan_id = params['plan']
 
@@ -127,6 +133,7 @@ class InstancesController < ApplicationController
     json(result: 'success', msg: 'Instance will stop, make sure to redeploy it')
   end
 
+  api!
   def set_cpus
     @website_location.nb_cpus = params['nb_cpus'].to_i
     @website_location.save!
@@ -139,6 +146,7 @@ class InstancesController < ApplicationController
     json(result: 'success')
   end
 
+  api!
   def changes
     validation_error!('Missing files') unless params['files']
     files_client = JSON.parse(params['files'])
@@ -204,6 +212,7 @@ class InstancesController < ApplicationController
     json(result: 'success')
   end
 
+  api!
   def cmd
     assert params['cmd'].present?
     assert params['service'].present?
@@ -221,12 +230,14 @@ class InstancesController < ApplicationController
     json(result: result)
   end
 
+  api!
   def stop
     @runner&.execute([{ cmd_name: 'stop', options: { is_complex: true } }])
 
     json(result: 'success')
   end
 
+  api!
   def reload
     @runner.delay.execute([{ cmd_name: 'reload', options: { is_complex: true } }])
     @website_event_obj = { title: 'instance-reload' }
@@ -248,6 +259,7 @@ class InstancesController < ApplicationController
     )
   end
 
+  api!
   def erase_all
     return json(result: 'success') if !@website_location || @website_location.location_server.blank?
 
@@ -268,6 +280,7 @@ class InstancesController < ApplicationController
     json(result: 'success')
   end
 
+  api!
   def logs
     nb_lines = params['nbLines'].present? ? params['nbLines'].to_i : 100
 
@@ -277,6 +290,7 @@ class InstancesController < ApplicationController
     json(logs: logs.first[:result][:stdout])
   end
 
+  api!
   def restart
     # run in background:
     @runner.init_execution!('Deployment')

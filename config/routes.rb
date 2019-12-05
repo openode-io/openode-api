@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  apipie
+
   namespace :super_admin do
     post 'system_settings/save'
   end

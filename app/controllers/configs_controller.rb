@@ -5,6 +5,7 @@ class ConfigsController < InstancesController
     requires_access_to(Website::PERMISSION_CONFIG)
   end
 
+  api!
   def get_config
     json(
       result: 'success',
@@ -12,6 +13,7 @@ class ConfigsController < InstancesController
     )
   end
 
+  api!
   def set_config
     config = Website.config_def(@var_name)
     value = params['value']

@@ -3,14 +3,17 @@ class StorageAreasController < InstancesController
     requires_access_to(Website::PERMISSION_STORAGE_AREA)
   end
 
+  api!
   def index
     json(@website.storage_areas)
   end
 
+  api!
   def add_storage_area
     change('add')
   end
 
+  api!
   def remove_storage_area
     change('remove')
   end

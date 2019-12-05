@@ -3,6 +3,7 @@ class LocationsController < InstancesController
     requires_access_to(Website::PERMISSION_LOCATION)
   end
 
+  api!
   def index
     result = @website.locations
                      .map do |location|
@@ -15,6 +16,7 @@ class LocationsController < InstancesController
     json(result)
   end
 
+  api!
   def add_location
     str_id = params['location_str_id']
 
@@ -35,6 +37,7 @@ class LocationsController < InstancesController
     json(result: 'success')
   end
 
+  api!
   def remove_location
     str_id = params['location_str_id']
 

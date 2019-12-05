@@ -8,6 +8,14 @@ class GlobalControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test '/documentation' do
+    get '/documentation'
+
+    assert_response :success
+
+    assert_includes response.parsed_body, 'Official opeNode API documentation'
+  end
+
   test '/global/available-configs' do
     get '/global/available-configs', as: :json
 
