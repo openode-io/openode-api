@@ -26,7 +26,7 @@ end
 namespace :update do
   desc ''
   task uptime_robot: :environment do
-    task_name = "Task update:uptime_robot"
+    task_name = "Task update - uptime_robot"
     Rails.logger.info "[#{task_name}] begin"
 
     client = UptimeRobot::Client.new(api_key: ENV['UPTIME_ROBOT_API_KEY'])
