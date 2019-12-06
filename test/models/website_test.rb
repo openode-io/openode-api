@@ -379,6 +379,23 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
   end
 
+  test 'spend hourly credits - skip if open source' do
+    website = default_website
+    website.credit_actions.destroy_all
+    wl = default_website_location
+    wl.nb_cpus = 1
+    wl.extra_storage = 0
+    wl.save!
+
+    website.open_source = sample_open_source_attributes
+    website.account_type = Website::OPEN_SOURCE_ACCOUNT_TYPE
+    website.save!
+
+    website.spend_hourly_credits!
+
+    assert_equal website.credit_actions.reload.length, 0
+  end
+
   test 'spend hourly credits - with extra services' do
     website = default_website
     website.credit_actions.destroy_all
@@ -548,11 +565,7 @@ class WebsiteTest < ActiveSupport::TestCase
 
   test "change_plan to open source - happy path" do
     w = default_website
-    w.open_source = {
-      'status' => Website::OPEN_SOURCE_STATUS_APPROVED,
-      'description' => " asdf " * 31,
-      'repository_url' => "https://github.com/openode-io/openode-cli"
-    }
+    w.open_source = sample_open_source_attributes
     w.save
 
     w.change_plan!(Website::OPEN_SOURCE_ACCOUNT_TYPE)

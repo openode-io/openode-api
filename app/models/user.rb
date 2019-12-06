@@ -32,7 +32,7 @@ class User < ApplicationRecord
       'WHERE w.user_id = users.id AND w.status IN (?))', statuses)
   }
 
-  validates :email, uniqueness: true
+  validates_uniqueness_of :email, case_sensitive: true
   validates :email, presence: true
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
   validate :email_should_not_have_a_blacklisted_domain

@@ -2,7 +2,7 @@
 namespace :db_stats do
   desc ''
   task log_nb_sites_up: :environment do
-    name = "Task db_stats:log_nb_sites_up"
+    name = "Task db_stats__log_nb_sites_up"
     Rails.logger.info "[#{name}] begin"
 
     nb_online = Website.where(status: 'online').count

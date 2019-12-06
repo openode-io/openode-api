@@ -2,7 +2,7 @@
 namespace :locations do
   desc ''
   task populate: :environment do
-    name = "Task locations:populate"
+    name = "Task locations__populate"
     Rails.logger.info "[#{name}] begin"
 
     # it initialize the locations on instance, for all providers

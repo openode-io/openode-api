@@ -147,3 +147,6 @@ Naming/MethodParameterName:
 
 Layout/EndAlignment:
   Enabled: false
+
+Rails/Validation:
+  Enabled: false

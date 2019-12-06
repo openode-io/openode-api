@@ -396,6 +396,14 @@ class ActiveSupport::TestCase
     }
   end
 
+  def sample_open_source_attributes
+    {
+      'status' => Website::OPEN_SOURCE_STATUS_APPROVED,
+      'description' => " asdf " * 31,
+      'repository_url' => "https://github.com/openode-io/openode-cli"
+    }
+  end
+
   def default_headers_auth
     headers_auth('1234s56789')
   end
@@ -415,10 +423,11 @@ class ActiveSupport::TestCase
   def invoke_task(task_name)
     OpenodeApi::Application.load_tasks
     Rake::Task[task_name].invoke
+    Rake::Task[task_name].reenable
   end
 
   def reset_emails
-    ActionMailer::Base.deliveries = []
+    ActionMailer::Base.deliveries.clear
   end
 
   # Add more helper methods to be used by all tests here...

@@ -2,7 +2,7 @@
 namespace :background_notification do
   desc ''
   task after_one_day_registration: :environment do
-    name = "Task background_notification:after_one_day_registration"
+    name = "Task background_notification__after_one_day_registration"
     Rails.logger.info "[#{name}] begin"
 
     users = User.where('created_at < ? AND day_one_mail_at IS ?', 1.day.ago, nil).limit(500)
@@ -18,7 +18,7 @@ namespace :background_notification do
 
   desc ''
   task low_credit: :environment do
-    name = "Task background_notification:low_credit"
+    name = "Task background_notification__low_credit"
     Rails.logger.info "[#{name}] begin"
 
     users = User

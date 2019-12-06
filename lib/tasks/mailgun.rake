@@ -3,7 +3,7 @@ require 'vultr'
 namespace :mailgun do
   desc 'Verify failed events, unsubscribe newsletter for emails with failed'
   task check_failed_events: :environment do
-    name = "Task mailgun:check_failed_events"
+    name = "Task mailgun__check_failed_events"
     Rails.logger.info "[#{name}] begin"
 
     mg_client = Mailgun::Client.new(ENV['MAILGUN_API_KEY'])

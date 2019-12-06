@@ -2,16 +2,32 @@
 namespace :credits do
   desc ''
   task spend: :environment do
-    # name = "Task creditsspend"
-    # Rails.logger.info "[#{name}] begin"
+    puts "start spend.."
+    name = "Task credits__spend"
+    Rails.logger.info "[#{name}] begin"
 
-    # days_retention = 31
+    websites = Website.in_statuses([Website::STATUS_ONLINE])
 
-    # clean_table(
-    #  Model: Execution,
-    #  days_retention: days_retention,
-    #  name: name,
-    #  stat_name: "nb_archived_executions"
-    # )
+    Rails.logger.info "[#{name}] #{websites.count} to process"
+
+    websites.each do |website|
+      Rails.logger.info "[#{name}] processing #{website.site_name}"
+
+      begin
+        website.spend_hourly_credits!
+      rescue StandardError => e
+        Rails.logger.error "[#{name}] #{e.message}"
+
+        if e.message.to_s.include?("No credits remaining")
+          UserMailer.with(
+            user: website.user,
+            website: website
+          ).stopped_due_no_credit.deliver_now
+        end
+      end
+
+      website.credits_check_at = Time.zone.now
+      website.save!
+    end
   end
 end

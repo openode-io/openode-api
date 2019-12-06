@@ -81,7 +81,7 @@ class Website < ApplicationRecord
 
   validates :user, presence: true
   validates :site_name, presence: true
-  validates :site_name, uniqueness: true
+  validates_uniqueness_of :site_name, case_sensitive: true
   validates :type, presence: true
   validates :domain_type, presence: true
   validates :cloud_type, presence: true
@@ -565,7 +565,7 @@ class Website < ApplicationRecord
   def spend_hourly_credits!
     current_plan = plan
 
-    return unless current_plan
+    return if !current_plan || open_source_plan?
 
     spendings = [
       {

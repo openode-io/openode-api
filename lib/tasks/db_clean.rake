@@ -12,7 +12,7 @@ namespace :db_clean do
 
   desc ''
   task old_executions: :environment do
-    name = "Task db_clean:old_executions"
+    name = "Task db_clean__old_executions"
     Rails.logger.info "[#{name}] begin"
 
     days_retention = 31
@@ -27,7 +27,7 @@ namespace :db_clean do
 
   desc ''
   task old_histories: :environment do
-    name = "Task db_clean:old_histories"
+    name = "Task db_clean__old_histories"
     Rails.logger.info "[#{name}] begin"
 
     days_retention = 62

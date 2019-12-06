@@ -22,6 +22,14 @@ class UserMailer < ApplicationMailer
     mail(to: mail_to, subject: 'Your opeNode account has low credit')
   end
 
+  def stopped_due_no_credit
+    @user = params[:user]
+    @website = params[:website]
+    mail_to = @user.email
+
+    mail(to: mail_to, subject: "#{@website.site_name}@opeNode stopped")
+  end
+
   # ip, sitename, default_password, pubkey, privkey, mail_to
   def private_cloud_ready
     @ip = params[:ip]
