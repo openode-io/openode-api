@@ -35,7 +35,7 @@ class LibTasksCreditsTest < ActiveSupport::TestCase
     website = default_website
     website.status = Website::STATUS_ONLINE
     website.save!
-    
+
     website.user.credits = 0
     website.user.save!
 
