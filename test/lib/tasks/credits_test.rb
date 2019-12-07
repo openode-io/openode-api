@@ -29,6 +29,8 @@ class LibTasksCreditsTest < ActiveSupport::TestCase
 
     assert_equal ActionMailer::Base.deliveries.count, 0
     assert_equal website.user.reload.credits < credits_begin, true
+
+    assert_equal website.events.length, 0
   end
 
   test "spend - one to process, one lacks credits" do
