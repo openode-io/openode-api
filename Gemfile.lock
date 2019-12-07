@@ -276,6 +276,7 @@ DEPENDENCIES
   puma
   rails (~> 6.0.0)
   redis
+  rest-client
   rubocop-rails
   safe_attributes
   simplecov

@@ -46,5 +46,10 @@ class LibTasksCreditsTest < ActiveSupport::TestCase
     assert_includes mail_sent.body.raw_source, 'due to a lack of credit'
     assert_includes mail_sent.body.raw_source, website.site_name
     assert_includes mail_sent.to, website.user.email
+
+    # check that it has stop instance event
+    last_event = website.events.last
+    assert_equal last_event.obj["title"], "Stopping instance (lacking credits)"
+    assert_equal last_event.obj["api_result"]["result"], "success"
   end
 end

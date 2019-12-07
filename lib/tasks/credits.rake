@@ -19,6 +19,23 @@ namespace :credits do
         Rails.logger.error "[#{name}] #{e.message}"
 
         if e.message.to_s.include?("No credits remaining")
+          # stop the instance:
+          openode_api = Api::Openode.new(token: website.user.token)
+          # '/instances/testsite/stop?location_str_id=canada'
+          path_api = "/instances/#{website.site_name}/stop"
+
+          website.website_locations.each do |website_location|
+            result_api_call = openode_api.execute(
+              :post, path_api,
+              params: { 'location_str_id' => website_location.location.str_id }
+            )
+
+            website.create_event(title: 'Stopping instance (lacking credits)',
+                                 api_result: result_api_call)
+          end
+
+          # notify the user:
+
           UserMailer.with(
             user: website.user,
             website: website

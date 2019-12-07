@@ -41,6 +41,7 @@ gem 'vultr'
 gem 'rubocop-rails'
 
 gem 'apipie-rails'
+gem 'rest-client'
 
 # Use ActiveStorage variant
 # gem 'mini_magick', '~> 4.8'

@@ -213,6 +213,26 @@ class ActiveSupport::TestCase
       content_type: 'application/json',
       response_status: 200,
       response_path: 'test/fixtures/http/uptime_robot/get_monitors.json'
+    },
+    {
+      url: 'https://api.openode.io/account/getToken',
+      method: :post,
+      with: {
+        body: { 'email' => 'mymail@openode.io', 'password' => '1234561!' }
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/openode_api/front/get_token_exists.json'
+    },
+    {
+      url: 'https://api.openode.io/instances/testsite/stop?location_str_id=canada',
+      method: :post,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/openode_api/instances_stop.json'
     }
   ]
 
@@ -422,8 +442,10 @@ class ActiveSupport::TestCase
 
   def invoke_task(task_name)
     OpenodeApi::Application.load_tasks
-    Rake::Task[task_name].invoke
+    result = Rake::Task[task_name].invoke
     Rake::Task[task_name].reenable
+
+    result
   end
 
   def reset_emails

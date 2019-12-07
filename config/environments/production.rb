@@ -3,6 +3,8 @@
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  config.API_URL = 'https://api.openode.io'
+
   # Code is not reloaded between requests.
   config.cache_classes = true
 
