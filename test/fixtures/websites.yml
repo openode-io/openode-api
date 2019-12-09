@@ -66,6 +66,28 @@ three:
   cloud_type: cloud
   init_script: MyText
 
+app_what_is:
+  user: two
+  site_name: app.what.is
+  pm2_info: MyText
+  valid: false
+  last_access_at: 2019-08-10 14:24:22
+  status: online
+  type: docker
+  http_port_available: false
+  first_online_at: 2019-08-10 14:24:22
+  account_type: free
+  credits_check_at: 2019-08-10 14:24:22
+  domain_type: custom_domain
+  nb_launch_issues: 1
+  container_id: MyString
+  crontab: MyText
+  redir_http_to_https: false
+  instance_type: MyString
+  sub_status: MyString
+  cloud_type: cloud
+  init_script: MyText
+
 with_private_cloud:
   user: one
   site_name: testprivatecloud

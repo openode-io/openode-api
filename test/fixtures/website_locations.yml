@@ -30,6 +30,16 @@ three:
   second_port: 11008
   running_port: 11008
 
+app_what_is:
+  website: app_what_is
+  location: usa
+  location_server: usa1
+  extra_storage: 0
+  nb_cpus: 1
+  port: 11011
+  second_port: 11012
+  running_port: 11012
+
 with_private_cloud:
   website: with_private_cloud
   location: usa

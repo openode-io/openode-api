@@ -193,6 +193,22 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     )
   end
 
+  # update_remote_dns
+  test 'update_remote_dns with two sitenames having the same root domain' do
+    website = Website.find_by site_name: 'app.what.is'
+    website.domains = ['app.what.is']
+    website.dns = []
+    website.save!
+    wl = website.website_locations[0]
+
+    actions = wl.update_remote_dns(with_auto_a: true)
+
+    assert_equal actions[:deleted], []
+    assert_equal actions[:created][0]["name"], "app"
+    assert_equal actions[:created][0]["type"], "A"
+    assert_equal actions[:created][0]["value"], wl.location_server.ip
+  end
+
   # generic root domain
   test 'root domain of google' do
     assert WebsiteLocation.root_domain('www.google.com') == 'google.com'

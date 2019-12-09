@@ -265,7 +265,7 @@ class UserTest < ActiveSupport::TestCase
   test "websites_with_access" do
     user = User.find_by email: 'myadmin2@thisisit.com'
 
-    assert_equal user.websites.map(&:site_name), ["www.what.is", "testsite2"]
+    assert_equal user.websites.map(&:site_name), ["www.what.is", "testsite2", "app.what.is"]
 
     new_website = Website.find_by site_name: "testsite"
 
@@ -277,7 +277,7 @@ class UserTest < ActiveSupport::TestCase
 
     user.reload
 
-    expected_with_access = ["www.what.is", "testsite2", "testsite"]
+    expected_with_access = ["www.what.is", "testsite2", "app.what.is", "testsite"]
     assert_equal user.websites_with_access.map(&:site_name), expected_with_access
   end
 

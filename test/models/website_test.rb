@@ -72,8 +72,9 @@ class WebsiteTest < ActiveSupport::TestCase
   test 'get all custom domain websites' do
     custom_domain_sites = Website.custom_domain
 
-    assert custom_domain_sites.length == 1
+    assert custom_domain_sites.length == 2
     assert custom_domain_sites[0].site_name == 'www.what.is'
+    assert custom_domain_sites[1].site_name == 'app.what.is'
   end
 
   test 'getting configs' do
@@ -539,7 +540,7 @@ class WebsiteTest < ActiveSupport::TestCase
   test "accessible_by? via collaborator" do
     user = User.find_by email: 'myadmin2@thisisit.com'
 
-    assert_equal user.websites.map(&:site_name), ["www.what.is", "testsite2"]
+    assert_equal user.websites.map(&:site_name), ["www.what.is", "testsite2", "app.what.is"]
 
     assert_equal Website.find_by!(site_name: "testsite").accessible_by?(user), false
 
