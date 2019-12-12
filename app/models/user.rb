@@ -76,6 +76,8 @@ class User < ApplicationRecord
     self.password_hash = User.encrypt_passwd(password_hash)
   end
 
+  before_validation :distribute_free_credits, on: :create
+
   def self.encrypt_passwd(passwd, salt = ENV['AUTH_SALT'])
     BCrypt::Engine.hash_secret(passwd, salt)
   end
@@ -84,6 +86,14 @@ class User < ApplicationRecord
     p = BCrypt::Password.new(hashed_passwd)
 
     p == expected_passwd
+  end
+
+  def distribute_free_credits
+    internal_provider = CloudProvider::Manager.instance.first_of_type('internal')
+
+    plan = internal_provider.plans.find { |p| p[:id] == '100-MB' }
+
+    self.credits = Website.cost_price_to_credits(plan[:cost_per_month])
   end
 
   def verify_authentication(passwd)

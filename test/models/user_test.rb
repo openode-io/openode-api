@@ -69,13 +69,13 @@ class UserTest < ActiveSupport::TestCase
       email: 'USER11@site.com',
       password_hash: 'NotW3akpasswd!',
       is_admin: false,
-      token: '1234s56789101112',
-      credits: 80
+      token: '1234s56789101112'
     }
 
     user = User.create(attribs)
     assert_equal [false, 0].include?(user.activated), true
     assert_equal user.activation_hash.length, 32
+    assert_equal user.credits.positive?, true
   end
 
   test 'should fail to create with an invalid email' do

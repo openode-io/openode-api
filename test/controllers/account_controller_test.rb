@@ -41,6 +41,9 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
     assert_equal user.email, account[:email]
     assert_equal user.token, response.parsed_body['token']
     assert_equal user.newsletter, 1
+    assert_equal user.credits.positive?, true
+
+    puts "user cred #{user.credits}"
 
     mail_sent = ActionMailer::Base.deliveries.first
     assert_equal mail_sent.subject, 'Welcome to opeNode!'
