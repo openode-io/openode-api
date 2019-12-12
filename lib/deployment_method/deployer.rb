@@ -12,32 +12,32 @@ module DeploymentMethod
         "execution-id = #{runner.execution.id}...")
 
       begin
-      steps_to_execute = [
-        {
-          cmd_name: 'verify_can_deploy', options: { is_complex: true }
-        },
-        {
-          cmd_name: 'initialization', options: { is_complex: true }
-        },
-        {
-          cmd_name: 'launch', options: {
-            is_complex: true,
-            limit_resources: runner.cloud_provider.limit_resources?
+        steps_to_execute = [
+          {
+            cmd_name: 'verify_can_deploy', options: { is_complex: true }
+          },
+          {
+            cmd_name: 'initialization', options: { is_complex: true }
+          },
+          {
+            cmd_name: 'launch', options: {
+              is_complex: true,
+              limit_resources: runner.cloud_provider.limit_resources?
+            }
+          },
+          {
+            cmd_name: 'verify_instance_up', options: { is_complex: true }
           }
-        },
-        {
-          cmd_name: 'verify_instance_up', options: { is_complex: true }
-        }
-      ]
+        ]
 
-      runner.multi_steps.execute(steps_to_execute)
+        runner.multi_steps.execute(steps_to_execute)
       rescue StandardError => e
         Ex::Logger.info(e, "Issue deploying #{website.site_name}")
         runner.execution.add_error!(e)
         runner.execution.failed!
         runner.notify_for_hooks('error', e.to_s)
         website.change_status!(Website::STATUS_OFFLINE)
-    end
+      end
 
       begin
         runner.execute([

@@ -125,7 +125,7 @@ module DeploymentMethod
         result = hook.call(level, given_result)
 
         if result
-          given_result[:update] = result
+          given_result[:update] = result if given_result.class == Hash
           @execution_method.notify(level, result)
         end
       rescue StandardError => e

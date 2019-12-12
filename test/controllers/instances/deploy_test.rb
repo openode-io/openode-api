@@ -237,6 +237,41 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test '/instances/:instance_id/restart - missing credits' do
+    prepare_default_execution_method
+    website = default_website
+    website.crontab = ''
+    website.save
+
+    website.user.credits = 0
+    website.user.save!
+
+    website_location = default_website_location
+
+    prepare_default_ports
+    website.reload
+    website_location.reload
+
+    post '/instances/testsite/restart',
+         as: :json,
+         params: base_params,
+         headers: default_headers_auth
+
+    assert_scripted do
+      begin_ssh
+      run_deployer_job
+
+      deployment = website.deployments.last
+      website.reload
+
+      assert_equal website.status, Website::STATUS_OFFLINE
+      assert_equal deployment.status, Deployment::STATUS_FAILED
+
+      credit_error = deployment.result['errors'].first
+      assert_includes credit_error['title'], 'No credit available'
+    end
+  end
+
   test '/instances/:instance_id/restart - not listening on proper port' do
     dep_method = prepare_default_execution_method
     website = default_website
