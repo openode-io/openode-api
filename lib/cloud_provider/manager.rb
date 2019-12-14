@@ -23,6 +23,16 @@ module CloudProvider
       end
     end
 
+    def docker_build_server
+      # get one among any of the build servers
+      nb_build_servers = @application['docker']['build_servers'].length
+      @application['docker']['build_servers'][rand(nb_build_servers)]
+    end
+
+    def docker_images_location
+      @application['docker']['images_location']
+    end
+
     def base_hostname
       @application['base_hostname'] || 'http://unknown/'
     end

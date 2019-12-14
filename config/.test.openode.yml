@@ -4,6 +4,23 @@ application:
   dns:
     type: vultr
     api_key: xxxxx
+  docker:
+    build_servers:
+      - ip: 127.0.0.1
+        user: root
+        private_key: |
+          -----BEGIN RSA PRIVATE KEY-----
+          AAA
+          BBB
+          CCC
+          -----END RSA PRIVATE KEY-----
+        root_files_path: /home/
+    images_location:
+      docker_server: https://index.docker.io/v1/
+      docker_username: test
+      repository_name: openode_prod
+      docker_password: t123456
+      docker_email: test@openode.io
   clouds:
     - type: internal
       locations:

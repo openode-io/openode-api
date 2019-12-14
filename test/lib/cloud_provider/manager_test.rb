@@ -79,4 +79,24 @@ class ManagerTest < ActiveSupport::TestCase
 
     assert_equal manager.application['hostname_private_cloud'], 'openode.dev'
   end
+
+  test 'get docker build server' do
+    manager = CloudProvider::Manager.instance
+
+    build_server = manager.docker_build_server
+
+    assert_equal build_server['ip'], '127.0.0.1'
+    assert_equal build_server['user'], 'root'
+    assert_equal build_server['root_files_path'], '/home/'
+  end
+
+  test 'get docker images location' do
+    manager = CloudProvider::Manager.instance
+
+    img_location = manager.docker_images_location
+
+    assert_equal img_location['docker_server'], 'https://index.docker.io/v1/'
+    assert_equal img_location['docker_username'], 'test'
+    assert_equal img_location['docker_password'], 't123456'
+  end
 end

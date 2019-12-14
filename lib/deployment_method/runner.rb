@@ -18,7 +18,7 @@ module DeploymentMethod
     def init_execution!(type)
       self.execution = Execution.create!(
         website: @website,
-        website_location: @website_location,
+        website_location_id: @website_location&.id,
         status: Execution::STATUS_RUNNING,
         type: type
       )

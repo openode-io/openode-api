@@ -37,6 +37,8 @@ Things you may want to cover:
  * rvm install ##.##.## where ##.##.## is the ruby version, see Gemfile
  * apt-get install libmysqlclient-dev
  * bundle install
+ * If you have build machine (docker.images_location in .\*.openode.yml),
+    remove first \~/.docker/config.json
 
 # Configuration
  * cp .test.env .production.env # adapt the environment settings
