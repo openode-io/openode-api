@@ -51,7 +51,7 @@ module DeploymentMethod
       def push_cmd(options = {})
         repository_name = options[:repository_name]
 
-        t_name = tag_name(website: website, execution_id: @deployment.id)
+        t_name = tag_name(website: @website, execution_id: @deployment.id)
 
         "echo #{docker_images_location['docker_password']} | " \
           "docker login -u #{docker_images_location['docker_username']} " \
