@@ -1,12 +1,14 @@
 module CloudProvider
-  class Internal < Base
+  class Kubernetes < Base
     TYPE = 'cloud'
-    include Helpers::Pricing
+    COST_EXTRA_STORAGE_GB_PER_MONTH = 0.13
+    COST_EXTRA_STORAGE_GB_PER_HOUR = COST_EXTRA_STORAGE_GB_PER_MONTH / (24 * 31)
+    COST_EXTRA_CPU = 5.00
+    COST_EXTRA_CPU_PER_HOUR = COST_EXTRA_CPU / (24 * 31)
 
     def initialize(configs = nil)
       @configs = configs
       initialize_locations
-      initialize_servers
     end
 
     def deployment_protocol
@@ -39,26 +41,33 @@ module CloudProvider
         end
     end
 
-    def initialize_servers
-      @configs['locations'].each do |location_item|
-        location = Location.find_by! str_id: location_item['str_id']
-        raise 'Missing servers' unless location_item['servers']
+    def calc_cost_per_month(id, ram)
+      return 0 if id == Website::OPEN_SOURCE_ACCOUNT_TYPE
 
-        location_item['servers'].each do |server|
-          location_server = LocationServer.find_by ip: server['ip']
+      amount_ram_server = 2000
+      cost_server = 5.16 # in $
 
-          location_server ||= LocationServer.create!(location: location, ip: server['ip'])
+      nb_possible_instances = amount_ram_server.to_f / ram
+      base_cost = cost_server / nb_possible_instances
 
-          location_server.assign_attributes(
-            ram_mb: server['ram_mb'],
-            cpus: server['cpus'],
-            disk_gb: server['disk_gb']
-          )
-          location_server.save!
+      charge = base_cost * 1.50
+      price = charge * 2.6
 
-          location_server.save_secret!(server)
-        end
-      end
+      degressive_saving = 2.0 * ram * 0.001
+
+      price - degressive_saving
+    end
+
+    def credits_per_month(id, ram)
+      calc_cost_per_month(id, ram) * 100 # 1 cent per credit
+    end
+
+    def calc_cost_per_hour(id, ram)
+      calc_cost_per_month(id, ram) / (31.0 * 24.0)
+    end
+
+    def calc_cost_per_minute(id, ram)
+      calc_cost_per_hour(id, ram) / 60.0
     end
 
     def plans

@@ -45,6 +45,12 @@ application:
               ram_mb: 5000
               cpus: 2
               disk_gb: 200
+    - type: kubernetes
+      locations:
+        - str_id: canada2
+          full_name: Montreal (Canada2)
+          country_fullname: Canada2
+          kubeconfig_path: config/.kube/ca.conf
     - type: dummy
     - type: vultr
       api_key: xxxxx
