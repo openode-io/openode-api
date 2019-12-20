@@ -47,7 +47,7 @@ Rails/BulkChangeTable:
 Rails/ReversibleMigration:
   Enabled: false
 
-Metrics/LineLength:
+Layout/LineLength:
   Max: 100
   Exclude:
     - 'db/schema.rb'
@@ -93,6 +93,7 @@ Metrics/MethodLength:
     - 'lib/deployment_method/deployer.rb'
     - 'lib/cloud_provider/vultr.rb'
     - 'lib/cloud_provider/internal.rb'
+    - 'lib/cloud_provider/kubernetes.rb'
     - 'db/migrate/*.rb'
 
 Style/ClassVars:
