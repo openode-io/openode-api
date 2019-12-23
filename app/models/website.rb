@@ -41,7 +41,8 @@ class Website < ApplicationRecord
   DOMAIN_TYPES = [DOMAIN_TYPE_SUBDOMAIN, DOMAIN_TYPE_CUSTOM_DOMAIN].freeze
 
   TYPE_DOCKER = 'docker'
-  TYPES = ['nodejs', TYPE_DOCKER].freeze
+  TYPE_KUBERNETES = 'kubernetes'
+  TYPES = ['nodejs', TYPE_DOCKER, TYPE_KUBERNETES].freeze
 
   DEFAULT_ACCOUNT_TYPE = 'free'
   OPEN_SOURCE_ACCOUNT_TYPE = 'open_source'
