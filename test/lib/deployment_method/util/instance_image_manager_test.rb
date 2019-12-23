@@ -8,13 +8,26 @@ class InstanceImageManagerTest < ActiveSupport::TestCase
     build_server = cloud_provider_manager.docker_build_server
     img_location = cloud_provider_manager.docker_images_location
 
-    @manager = DeploymentMethod::Util::InstanceImageManager.new(
-      docker_build_server: build_server,
-      docker_images_location: img_location,
+    configs = {
       website: @website,
       website_location: @website.website_locations.first,
+      host: build_server['ip'],
+      secret: {
+        user: build_server['user'],
+        private_key: build_server['private_key']
+      }
+    }
+
+    runner = DeploymentMethod::Runner.new(Website::TYPE_KUBERNETES, 'cloud', configs)
+
+    @manager = DeploymentMethod::Util::InstanceImageManager.new(
+      runner: runner,
+      docker_images_location: img_location,
+      website: @website,
       deployment: @deployment
     )
+
+    runner.set_execution_method(@manager)
   end
 
   test 'build cmd' do

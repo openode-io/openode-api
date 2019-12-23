@@ -51,6 +51,19 @@ module DeploymentMethod
       website_location.allocate_ports!
     end
 
+    def send_crontab(options = {})
+      assert options[:website]
+      website = options[:website]
+
+      if website.crontab.present?
+        Rails.logger.info('updating crontab')
+        runner.upload_content_to(website.crontab,
+                                 "#{website.repo_dir}#{Base::DEFAULT_CRONTAB_FILENAME}")
+      else
+        Rails.logger.info('skipping crontab update (empty)')
+      end
+    end
+
     def launch(_options = {})
       raise 'must be implemented in child class'
     end

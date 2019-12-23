@@ -38,9 +38,14 @@ module DeploymentMethod
       end
 
       # for convenience, to call back the runner from any dep method
-      dep_method.runner = self if dep_method
+      set_execution_method(dep_method)
+    end
 
-      dep_method
+    def set_execution_method(exec_method)
+      exec_method.runner = self if exec_method
+      @execution_method = exec_method
+
+      @execution_method
     end
 
     def get_cloud_provider

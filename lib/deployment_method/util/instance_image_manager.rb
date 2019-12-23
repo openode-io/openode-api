@@ -7,24 +7,13 @@ module DeploymentMethod
       attr_accessor :deployment
 
       def initialize(args)
-        assert args[:docker_build_server]
+        assert args[:runner]
         assert args[:docker_images_location]
         assert args[:website]
-        assert args[:website_location]
         assert args[:deployment]
 
-        configs = {
-          website: args[:website],
-          website_location: args[:website_location],
-          host: args[:docker_build_server]['ip'],
-          secret: {
-            user: args[:docker_build_server]['user'],
-            private_key: args[:docker_build_server]['private_key']
-          }
-        }
-        configs[:execution_method] = self
+        @runner = args[:runner]
 
-        @runner = DeploymentMethod::Runner.new(Website::TYPE_KUBERNETES, 'cloud', configs)
         @deployment = args[:deployment]
         @website = args[:website]
         @docker_images_location = args[:docker_images_location]
