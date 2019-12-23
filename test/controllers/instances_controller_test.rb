@@ -11,8 +11,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     get "/instances/?token=#{user.token}", as: :json
 
     assert_response :success
-    assert_equal response.parsed_body.length, 2
-    assert_equal response.parsed_body[0]['site_name'], 'testsite'
+    assert_equal response.parsed_body.length, 3
+    assert_equal response.parsed_body[0]['site_name'], 'testkubernetes-type'
     assert_equal response.parsed_body[0]['status'], 'online'
   end
 
@@ -23,11 +23,12 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     get '/instances/', as: :json, headers: default_headers_auth
 
     assert_response :success
-    assert_equal response.parsed_body.length, 2
-    assert_equal response.parsed_body[0]['site_name'], 'testsite'
-    assert_equal response.parsed_body[0]['status'], 'online'
+    assert_equal response.parsed_body.length, 3
 
-    assert_equal response.parsed_body[0]['domains'], []
+    w_found = response.parsed_body.find { |cur| cur['site_name'] == 'testsite' }
+    assert_equal w_found['site_name'], 'testsite'
+    assert_equal w_found['status'], 'online'
+    assert_equal w_found['domains'], []
   end
 
   test '/instances/ with null token should fail' do
@@ -70,7 +71,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   test '/instances/ with one as collaborator' do
     user = User.find_by! token: "1234s56789"
-    assert_equal user.websites_with_access.map(&:site_name), %w[testsite testprivatecloud]
+    assert_equal user.websites_with_access.map(&:site_name),
+                 %w[testkubernetes-type testsite testprivatecloud]
 
     new_site = Website.find_by! site_name: "testsite2"
 
@@ -83,9 +85,9 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     get '/instances/', as: :json, headers: default_headers_auth
 
     assert_response :success
-    assert_equal response.parsed_body.length, 3
+    assert_equal response.parsed_body.length, 4
 
-    %w[testsite testprivatecloud testsite2].each do |site_name|
+    %w[testkubernetes-type testsite testprivatecloud testsite2].each do |site_name|
       site_exists = response.parsed_body.any? { |cur| cur['site_name'] == site_name }
       assert_equal(site_exists, true)
     end

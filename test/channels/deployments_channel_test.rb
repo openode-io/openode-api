@@ -17,7 +17,8 @@ class DeploymentsChannelTest < ActionCable::Channel::TestCase
 
     user = User.last
 
-    assert_equal user.websites_with_access.map(&:site_name), %w[testsite testprivatecloud]
+    expected_site_names = %w[testkubernetes-type testsite testprivatecloud]
+    assert_equal user.websites_with_access.map(&:site_name), expected_site_names
 
     stub_connection(current_user: user)
 

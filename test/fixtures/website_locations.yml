@@ -49,3 +49,13 @@ with_private_cloud:
   port: 11009
   second_port: 11010
   running_port: 11010
+
+with_kubernetes_type:
+  website: with_type_kubernetes
+  location: canada
+  location_server: canada1
+  extra_storage: 0
+  nb_cpus: 1
+  port: 11013
+  second_port: 11013
+  running_port: 11013

@@ -28,10 +28,14 @@ module DeploymentMethod
     end
 
     def get_execution_method
-      dep_method = @configs[:execution_method] || case @type
-                                                  when 'docker'
-                                                    DeploymentMethod::DockerCompose.new
-                          end
+      dep_method = @configs[:execution_method]
+
+      dep_method ||= case @type
+                     when 'docker'
+                       DeploymentMethod::DockerCompose.new
+                     when 'kubernetes'
+                       DeploymentMethod::Kubernetes.new
+      end
 
       # for convenience, to call back the runner from any dep method
       dep_method.runner = self if dep_method

@@ -24,7 +24,7 @@ module DeploymentMethod
         }
         configs[:execution_method] = self
 
-        @runner = DeploymentMethod::Runner.new('docker', 'cloud', configs)
+        @runner = DeploymentMethod::Runner.new(Website::TYPE_KUBERNETES, 'cloud', configs)
         @deployment = args[:deployment]
         @website = args[:website]
         @docker_images_location = args[:docker_images_location]

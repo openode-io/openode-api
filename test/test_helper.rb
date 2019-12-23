@@ -300,6 +300,10 @@ class ActiveSupport::TestCase
     Website.find_by site_name: 'testsite'
   end
 
+  def default_kube_website
+    Website.find_by type: Website::TYPE_KUBERNETES
+  end
+
   def default_website_location
     default_website.website_locations.first
   end
