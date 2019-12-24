@@ -10,6 +10,16 @@ module DeploymentMethod
       super(options)
     end
 
+    def initialization(options = {})
+      super(options)
+
+      send_crontab(options)
+    end
+
+    def send_crontab(options = {})
+      super(options)
+    end
+
     # the following hooks are notification procs.
 
     def self.hook_error

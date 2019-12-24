@@ -37,7 +37,10 @@ module DeploymentMethod
     # initialization
 
     def initialization(options = {})
+      website_location = options[:website_location]
       super(options)
+
+      website_location.allocate_ports!
 
       ex_stdout('prepare_dind_compose_image')
       send_crontab(options)

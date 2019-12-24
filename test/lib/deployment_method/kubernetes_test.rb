@@ -2,36 +2,77 @@
 require 'test_helper'
 
 class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
-  def setup; end
+  def setup
+    @website = default_kube_website
+    @website_location = @website.website_locations.first
+  end
 
-  def kubernetes_method(website = default_kube_website,
-                        website_location = default_website_location)
-    configs = {}
-    configs[:website] = website
-    configs[:website_location] = website_location
+  def kubernetes_method
+    # cloud_provider_manager = CloudProvider::Manager.instance
+    # build_server = cloud_provider_manager.docker_build_server
 
-    runner = DeploymentMethod::Runner.new(Website::TYPE_KUBERNETES, 'cloud', configs)
+    # configs = {
+    #  website: @website,
+    #  website_location: @website_location,
+    #  host: build_server['ip'],
+    #  secret: {
+    #    user: build_server['user'],
+    #    private_key: build_server['private_key']
+    #  }
+    # }
+
+    runner = prepare_kubernetes_runner(@website, @website_location)
+
     runner.get_execution_method
   end
 
-  test 'verify_can_deploy - can do it' do
-    website = default_kube_website
-    website_location = website.website_locations.first
-    dep_method = kubernetes_method(website, website_location)
+  # verify can deploy
 
-    dep_method.verify_can_deploy(website: website, website_location: website_location)
+  test 'verify_can_deploy - can do it' do
+    dep_method = kubernetes_method
+
+    dep_method.verify_can_deploy(website: @website, website_location: @website_location)
   end
 
   test 'verify_can_deploy - lacking credits' do
-    website = default_kube_website
-    website_location = website.website_locations.first
-    dep_method = kubernetes_method(website, website_location)
-    user = website.user
+    dep_method = kubernetes_method
+    user = @website.user
     user.credits = 0
     user.save!
 
     assert_raises StandardError do
-      dep_method.verify_can_deploy(website: website, website_location: website_location)
+      dep_method.verify_can_deploy(website: @website, website_location: @website_location)
     end
+  end
+
+  # initialization
+
+  test 'initialization with crontab' do
+    @website.crontab = '* * * * * ls'
+    @website.save!
+    dep_method = kubernetes_method
+
+    begin_sftp
+    dep_method.initialization(website: @website, website_location: @website_location)
+
+    up_files = Remote::Sftp.get_test_uploaded_files
+
+    assert_equal up_files.length, 1
+
+    assert_equal up_files[0][:content], @website.crontab
+    assert_equal up_files[0][:remote_file_path], "#{@website.repo_dir}.openode.cron"
+  end
+
+  test 'initialization without crontab' do
+    @website.crontab = nil
+    @website.save!
+    dep_method = kubernetes_method
+
+    begin_sftp
+    dep_method.initialization(website: @website, website_location: @website_location)
+
+    up_files = Remote::Sftp.get_test_uploaded_files
+
+    assert_equal up_files.length, 0
   end
 end

@@ -44,11 +44,10 @@ module DeploymentMethod
     end
 
     def initialization(options = {})
-      website, website_location = get_website_fields(options)
+      website, = get_website_fields(options)
 
       mark_accessed(options)
       website.change_status!(Website::STATUS_STARTING)
-      website_location.allocate_ports!
     end
 
     def send_crontab(options = {})
