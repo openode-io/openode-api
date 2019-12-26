@@ -32,7 +32,7 @@ module DeploymentMethod
       # write the yml to the build machine
 
       # apply
-      result = kubectl_yml_action(website_location, "apply", generate_deployment_yml(website))
+      result = kubectl_yml_action(website_location, "apply", generate_instance_yml(website))
 
       result
     end
@@ -44,7 +44,6 @@ module DeploymentMethod
       config_path = kubeconfig_path(options[:website_location])
       cmd = "KUBECONFIG=#{config_path} kubectl #{options[:s_arguments]}"
 
-      puts "cmd -> #{cmd}"
       cmd
     end
 
@@ -54,24 +53,102 @@ module DeploymentMethod
       tmp_file.write(content)
       tmp_file.flush
 
-      content = File.read(tmp_file.path)
-
-      puts "my content"
-      puts content
-
       ex_stdout('kubectl',
                 website_location: website_location,
                 s_arguments: "#{action} -f #{tmp_file.path}")
     end
 
-    def generate_deployment_yml(website)
+    def generate_instance_yml(website)
       <<~END_YML
         ---
+        #{generate_namespace_yml(website)}
+        ---
+        #{generate_deployment_yml(website)}
+        ---
+        #{generate_service_yml(website)}
+        ---
+      END_YML
+    end
+
+    def namespace_of(website)
+      "instance-#{website.id}"
+    end
+
+    def generate_namespace_yml(website)
+      <<~END_YML
         apiVersion: v1
         kind: Namespace
         metadata:
-          name: instance-#{website.id}
-        ---
+          name: #{namespace_of(website)}
+      END_YML
+    end
+
+    def generate_deployment_yml(website)
+      <<~END_YML
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: www-deployment
+          namespace: #{namespace_of(website)}
+        spec:
+          selector:
+            matchLabels:
+              app: www
+          replicas: 1
+          template:
+            metadata:
+              labels:
+                app: www
+            spec:
+              containers:
+              - image: nginx # gcr.io/kuar-demo/kuard-amd64:1
+                imagePullPolicy: Always
+                name: www
+                envFrom:
+                #- configMapRef:
+                #    name: test-config-map
+                ports:
+                - containerPort: 80
+                livenessProbe:
+                  httpGet:
+                    path: /
+                    port: 80
+                  initialDelaySeconds: 120
+                  periodSeconds: 600
+                  timeoutSeconds: 3
+                  failureThreshold: 1
+                readinessProbe:
+                  httpGet:
+                    path: /
+                    port: 80
+                  periodSeconds: 10
+                  initialDelaySeconds: 5
+                resources:
+                  limits:
+                    ephemeral-storage: "100Mi"
+                    memory: 100Mi
+                    cpu: 1
+                  requests:
+                    ephemeral-storage: "100Mi"
+                    memory: 50Mi
+                    cpu: 0.5
+      END_YML
+    end
+
+    def generate_service_yml(website)
+      <<~END_YML
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: main-service
+          namespace: #{namespace_of(website)}
+        spec:
+          ports:
+          - port: 80
+            targetPort: 80
+            protocol: TCP
+          selector:
+            app: www
       END_YML
     end
 
