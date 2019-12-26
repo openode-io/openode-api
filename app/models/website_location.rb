@@ -39,7 +39,7 @@ class WebsiteLocation < ApplicationRecord
     CloudProvider::Manager.instance.internal_domains
   end
 
-  def prepare_runner_configs
+  def prepare_runner_configs_docker
     {
       website: website,
       website_location: self,
@@ -48,10 +48,25 @@ class WebsiteLocation < ApplicationRecord
     }
   end
 
-  def prepare_runner
-    return unless location_server
+  def prepare_runner_configs_kubernetes
+    cloud_provider_manager = CloudProvider::Manager.instance
+    build_server = cloud_provider_manager.docker_build_server
 
-    configs = prepare_runner_configs
+    {
+      website: website,
+      website_location: self,
+      host: build_server['ip'],
+      secret: {
+        user: build_server['user'],
+        private_key: build_server['private_key']
+      }
+    }
+  end
+
+  def prepare_runner
+    return if !location_server && website.type == Website::TYPE_DOCKER
+
+    configs = send("prepare_runner_configs_#{website.type}")
 
     @runner =
       DeploymentMethod::Runner.new(website.type, website.cloud_type, configs)

@@ -8,19 +8,6 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
   end
 
   def kubernetes_method
-    # cloud_provider_manager = CloudProvider::Manager.instance
-    # build_server = cloud_provider_manager.docker_build_server
-
-    # configs = {
-    #  website: @website,
-    #  website_location: @website_location,
-    #  host: build_server['ip'],
-    #  secret: {
-    #    user: build_server['user'],
-    #    private_key: build_server['private_key']
-    #  }
-    # }
-
     runner = prepare_kubernetes_runner(@website, @website_location)
 
     runner.get_execution_method
@@ -74,5 +61,13 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     up_files = Remote::Sftp.get_test_uploaded_files
 
     assert_equal up_files.length, 0
+  end
+
+  test 'generate deployment yml - standard' do
+    dep_method = kubernetes_method
+
+    s = dep_method.generate_deployment_yml(@website)
+
+    puts "s = #{s}"
   end
 end

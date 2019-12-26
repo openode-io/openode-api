@@ -1,6 +1,6 @@
 module DeploymentMethod
   class Kubernetes < Base
-    # EXTRA_MANAGEMENT_RAM = 250 # MB
+    KUBECONFIGS_BASE_PATH = "config/kubernetes/"
 
     def initialize; end
 
@@ -18,6 +18,61 @@ module DeploymentMethod
 
     def send_crontab(options = {})
       super(options)
+    end
+
+    def launch(options = {})
+      website, website_location = get_website_fields(options)
+
+      puts "before kube path.."
+
+      puts "kube path "
+
+      # generate the deployment yml
+
+      # write the yml to the build machine
+
+      # apply
+      result = kubectl_yml_action(website_location, "apply", generate_deployment_yml(website))
+
+      result
+    end
+
+    def kubectl(options = {})
+      assert options[:website_location]
+      assert options[:s_arguments]
+
+      config_path = kubeconfig_path(options[:website_location])
+      cmd = "KUBECONFIG=#{config_path} kubectl #{options[:s_arguments]}"
+
+      puts "cmd -> #{cmd}"
+      cmd
+    end
+
+    def kubectl_yml_action(website_location, action, content)
+      tmp_file = Tempfile.new("kubectl-apply")
+
+      tmp_file.write(content)
+      tmp_file.flush
+
+      content = File.read(tmp_file.path)
+
+      puts "my content"
+      puts content
+
+      ex_stdout('kubectl',
+                website_location: website_location,
+                s_arguments: "#{action} -f #{tmp_file.path}")
+    end
+
+    def generate_deployment_yml(website)
+      <<~END_YML
+        ---
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: instance-#{website.id}
+        ---
+      END_YML
     end
 
     # the following hooks are notification procs.
@@ -63,6 +118,13 @@ module DeploymentMethod
         DockerCompose.hook_verify_can_deploy,
         DockerCompose.hook_logs
       ]
+    end
+
+    protected
+
+    def kubeconfig_path(website_location)
+      location_str_id = website_location.location.str_id
+      Rails.root.join("#{KUBECONFIGS_BASE_PATH}#{ENV['RAILS_ENV']}-#{location_str_id}.yml")
     end
   end
 end

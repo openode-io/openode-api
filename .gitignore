@@ -34,3 +34,6 @@ coverage/
 
 config/.development.openode.yml
 config/.production.openode.yml
+
+config/kubernetes/development-*.yml
+config/kubernetes/production-*.yml
