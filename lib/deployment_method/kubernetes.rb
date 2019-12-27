@@ -23,10 +23,6 @@ module DeploymentMethod
     def launch(options = {})
       website, website_location = get_website_fields(options)
 
-      puts "before kube path.."
-
-      puts "kube path "
-
       # generate the deployment yml
 
       # write the yml to the build machine
@@ -125,11 +121,11 @@ module DeploymentMethod
                   initialDelaySeconds: 5
                 resources:
                   limits:
-                    ephemeral-storage: "100Mi"
+                    ephemeral-storage: 100Mi
                     memory: 100Mi
                     cpu: 1
                   requests:
-                    ephemeral-storage: "100Mi"
+                    ephemeral-storage: 100Mi
                     memory: 50Mi
                     cpu: 0.5
       END_YML
@@ -149,6 +145,48 @@ module DeploymentMethod
             protocol: TCP
           selector:
             app: www
+      END_YML
+    end
+
+    def generate_rules_ingress_yml(rules = [])
+      result = ""
+
+      rules.each do |rule|
+        result +=
+          <<~END_YML
+            - host: #{rule[:hostname]}
+                http:
+                  paths:
+                  - path: /
+                    backend:
+                      serviceName: main-service
+                      servicePort: 80
+          END_YML
+      end
+
+      result
+    end
+
+    def generate_ingress_yml(website, website_location)
+      domains = website_location.compute_domains
+      rules_domains = domains.map { |d| { hostname: d } }
+
+      <<~END_YML
+        apiVersion: extensions/v1beta1
+        kind: Ingress
+        metadata:
+          name: main-ingress
+          namespace: #{namespace_of(website)}
+          annotations:
+            kubernetes.io/ingress.class: "nginx"
+            # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        spec:
+          #tls:
+          #- hosts:
+          #  - myprettyprettytest112233.openode.io
+          #  secretName: quickstart-example-tls23
+          rules:
+          #{generate_rules_ingress_yml(rules_domains)}
       END_YML
     end
 

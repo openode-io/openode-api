@@ -63,6 +63,10 @@ class WebsiteLocation < ApplicationRecord
     }
   end
 
+  def prepare_runner_configs
+    send("prepare_runner_configs_#{website.type}")
+  end
+
   def prepare_runner
     return if !location_server && website.type == Website::TYPE_DOCKER
 

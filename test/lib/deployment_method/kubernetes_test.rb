@@ -63,11 +63,62 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     assert_equal up_files.length, 0
   end
 
-  test 'generate deployment yml - standard' do
-    dep_method = kubernetes_method
+  test 'namespace_of website' do
+    assert_equal kubernetes_method.namespace_of(@website), "instance-#{@website.id}"
+  end
 
-    s = dep_method.generate_deployment_yml(@website)
+  def assert_contains_namespace_yml(yml, website)
+    assert_includes yml, "kind: Namespace"
+    assert_includes yml, "  name: #{kubernetes_method.namespace_of(website)}"
+  end
 
-    puts "s = #{s}"
+  test 'generate_namespace_yml' do
+    yml = kubernetes_method.generate_namespace_yml(@website)
+    assert_contains_namespace_yml(yml, @website)
+  end
+
+  def assert_contains_minimal_deployment_yml(yml, website)
+    assert_includes yml, "kind: Deployment"
+    assert_includes yml, "  name: www-deployment"
+    assert_includes yml, "  namespace: #{kubernetes_method.namespace_of(website)}"
+    assert_includes yml, "  replicas: 1"
+    assert_includes yml, "  livenessProbe:"
+    assert_includes yml, "  readinessProbe:"
+    assert_includes yml, "  resources:"
+  end
+
+  test 'generate_deployment_yml - basic' do
+    yml = kubernetes_method.generate_deployment_yml(@website)
+    assert_contains_minimal_deployment_yml(yml, @website)
+  end
+
+  def assert_contains_service_yml(yml, website)
+    assert_includes yml, "kind: Service"
+    assert_includes yml, "name: main-service"
+    assert_includes yml, "namespace: #{kubernetes_method.namespace_of(website)}"
+    assert_includes yml, "app: www"
+  end
+
+  test 'generate_service_yml - basic' do
+    yml = kubernetes_method.generate_service_yml(@website)
+    assert_contains_service_yml(yml, @website)
+  end
+
+  def assert_contains_ingress_yml(yml, website, website_location)
+    domains = website_location.compute_domains
+
+    assert_includes yml, "kind: Ingress"
+    assert_includes yml, "name: main-ingress"
+    assert_includes yml, "namespace: #{kubernetes_method.namespace_of(website)}"
+    assert_includes yml, "ingress.class: \"nginx\""
+
+    domains.each do |domain|
+      assert_includes yml, "- host: #{domain}"
+    end
+  end
+
+  test 'generate_ingress_yml' do
+    yml = kubernetes_method.generate_ingress_yml(@website, @website_location)
+    assert_contains_ingress_yml(yml, @website, @website_location)
   end
 end
