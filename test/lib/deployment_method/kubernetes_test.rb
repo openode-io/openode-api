@@ -121,4 +121,13 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     yml = kubernetes_method.generate_ingress_yml(@website, @website_location)
     assert_contains_ingress_yml(yml, @website, @website_location)
   end
+
+  test 'generate_instance_yml' do
+    yml = kubernetes_method.generate_instance_yml(@website, @website_location)
+
+    assert_contains_namespace_yml(yml, @website)
+    assert_contains_minimal_deployment_yml(yml, @website)
+    assert_contains_service_yml(yml, @website)
+    assert_contains_ingress_yml(yml, @website, @website_location)
+  end
 end

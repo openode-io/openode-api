@@ -28,7 +28,8 @@ module DeploymentMethod
       # write the yml to the build machine
 
       # apply
-      result = kubectl_yml_action(website_location, "apply", generate_instance_yml(website))
+      kube_yml = generate_instance_yml(website, website_location)
+      result = kubectl_yml_action(website_location, "apply", kube_yml)
 
       result
     end
@@ -44,7 +45,7 @@ module DeploymentMethod
     end
 
     def kubectl_yml_action(website_location, action, content)
-      tmp_file = Tempfile.new("kubectl-apply")
+      tmp_file = Tempfile.new("kubectl-#{action}")
 
       tmp_file.write(content)
       tmp_file.flush
@@ -54,7 +55,7 @@ module DeploymentMethod
                 s_arguments: "#{action} -f #{tmp_file.path}")
     end
 
-    def generate_instance_yml(website)
+    def generate_instance_yml(website, website_location)
       <<~END_YML
         ---
         #{generate_namespace_yml(website)}
@@ -62,6 +63,8 @@ module DeploymentMethod
         #{generate_deployment_yml(website)}
         ---
         #{generate_service_yml(website)}
+        ---
+        #{generate_ingress_yml(website, website_location)}
         ---
       END_YML
     end
