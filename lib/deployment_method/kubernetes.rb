@@ -23,15 +23,37 @@ module DeploymentMethod
     def launch(options = {})
       website, website_location = get_website_fields(options)
 
-      # generate the deployment yml
+      cloud_provider_manager = CloudProvider::Manager.instance
+      img_location = cloud_provider_manager.docker_images_location
+
+      # build the image
+      cloned_runner = runner.clone
+      image_manager = DeploymentMethod::Util::InstanceImageManager.new(
+        runner: runner,
+        docker_images_location: img_location,
+        website: website,
+        deployment: runner.execution
+      )
+
+      cloned_runner.set_execution_method(image_manager)
+
+      notify("info", "Preparing instance image...")
+      image_manager.build
+      notify("info", "Instance image ready.")
+
+      # then push it to the registry
+      notify("info", "Pushing instance image...")
+      image_manager.push
+      notify("info", "Instance image pushed successfully.")
 
       # write the yml to the build machine
 
       # apply
-      kube_yml = generate_instance_yml(website, website_location)
-      result = kubectl_yml_action(website_location, "apply", kube_yml)
+      #kube_yml = generate_instance_yml(website, website_location)
+      #result = kubectl_yml_action(website_location, "apply", kube_yml)
 
-      result
+      #result
+      ""
     end
 
     def kubectl(options = {})
