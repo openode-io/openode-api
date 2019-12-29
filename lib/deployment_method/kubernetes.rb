@@ -181,11 +181,11 @@ module DeploymentMethod
                   limits: # more resources if available in the cluster
                     ephemeral-storage: 100Mi
                     memory: #{website.memory * 2}Mi
-                    cpu: 1
+                    cpu: #{website.cpus * 2}
                   requests:
                     ephemeral-storage: 100Mi
                     memory: #{website.memory}Mi
-                    cpu: 0.5
+                    cpu: #{website.cpus}
       END_YML
     end
 

@@ -447,6 +447,10 @@ class Website < ApplicationRecord
     plan[:ram].to_i # must not have decimals
   end
 
+  def cpus
+    (1 + total_extra_cpus).to_i
+  end
+
   def plan_name
     "#{plan[:ram]} MB"
   rescue StandardError

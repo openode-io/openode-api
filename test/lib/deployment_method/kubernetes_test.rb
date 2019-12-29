@@ -90,8 +90,13 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     assert_includes yml, "imagePullSecrets:"
     assert_includes yml, "- name: regcred"
 
+    # Memory limitation
     assert_includes yml, "memory: #{opts[:requested_memory]}Mi" if opts[:requested_memory]
     assert_includes yml, "memory: #{opts[:limited_memory]}Mi" if opts[:limited_memory]
+
+    # CPU limitation
+    assert_includes yml, "cpu: #{opts[:requested_cpus]}" if opts[:requested_cpus]
+    assert_includes yml, "cpu: #{opts[:limited_cpus]}" if opts[:limited_cpus]
   end
 
   test 'generate_deployment_yml - basic' do
@@ -99,7 +104,9 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
 
     assert_contains_deployment_yml(yml, @website,
                                    requested_memory: @website.memory,
-                                   limited_memory: @website.memory * 2)
+                                   limited_memory: @website.memory * 2,
+                                   requested_cpus: @website.cpus,
+                                   limited_cpus: @website.cpus * 2)
   end
 
   def assert_contains_service_yml(yml, website)

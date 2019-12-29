@@ -425,6 +425,20 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal default_website.memory, 100
   end
 
+  # cpus
+  test 'cpus without extra cpus' do
+    assert_equal default_website.cpus, 1
+  end
+
+  test 'cpus with extra cpus' do
+    website = default_website
+    wl = default_website_location
+    wl.nb_cpus = 2
+    wl.save!
+
+    assert_equal website.cpus, 2
+  end
+
   # create website
   test 'create - should fail if empty' do
     website = Website.create({})
