@@ -443,6 +443,10 @@ class Website < ApplicationRecord
     Website.plan_of(account_type)
   end
 
+  def memory
+    plan[:ram].to_i # must not have decimals
+  end
+
   def plan_name
     "#{plan[:ram]} MB"
   rescue StandardError

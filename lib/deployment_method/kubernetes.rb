@@ -178,13 +178,13 @@ module DeploymentMethod
                   periodSeconds: 10
                   initialDelaySeconds: 5
                 resources:
-                  limits:
+                  limits: # more resources if available in the cluster
                     ephemeral-storage: 100Mi
-                    memory: 100Mi
+                    memory: #{website.memory * 2}Mi
                     cpu: 1
                   requests:
                     ephemeral-storage: 100Mi
-                    memory: 50Mi
+                    memory: #{website.memory}Mi
                     cpu: 0.5
       END_YML
     end

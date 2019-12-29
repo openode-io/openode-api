@@ -77,7 +77,7 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     assert_contains_namespace_yml(yml, @website)
   end
 
-  def assert_contains_minimal_deployment_yml(yml, website)
+  def assert_contains_deployment_yml(yml, website, opts = {})
     assert_includes yml, "kind: Deployment"
     assert_includes yml, "  name: www-deployment"
     assert_includes yml, "  namespace: #{kubernetes_method.namespace_of(website)}"
@@ -89,11 +89,17 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     # docker registry secret
     assert_includes yml, "imagePullSecrets:"
     assert_includes yml, "- name: regcred"
+
+    assert_includes yml, "memory: #{opts[:requested_memory]}Mi" if opts[:requested_memory]
+    assert_includes yml, "memory: #{opts[:limited_memory]}Mi" if opts[:limited_memory]
   end
 
   test 'generate_deployment_yml - basic' do
     yml = kubernetes_method.generate_deployment_yml(@website, @website_location)
-    assert_contains_minimal_deployment_yml(yml, @website)
+
+    assert_contains_deployment_yml(yml, @website,
+                                   requested_memory: @website.memory,
+                                   limited_memory: @website.memory * 2)
   end
 
   def assert_contains_service_yml(yml, website)
@@ -128,9 +134,10 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
 
   test 'generate_instance_yml' do
     yml = kubernetes_method.generate_instance_yml(@website, @website_location)
+    puts yml
 
     assert_contains_namespace_yml(yml, @website)
-    assert_contains_minimal_deployment_yml(yml, @website)
+    assert_contains_deployment_yml(yml, @website)
     assert_contains_service_yml(yml, @website)
     assert_contains_ingress_yml(yml, @website, @website_location)
   end

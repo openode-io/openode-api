@@ -419,6 +419,12 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal credits_actions[2].action_type, CreditAction::TYPE_CONSUME_CPU
   end
 
+  # memory
+  test 'memory with 100 MB plan' do
+    assert_equal default_website.account_type, "second"
+    assert_equal default_website.memory, 100
+  end
+
   # create website
   test 'create - should fail if empty' do
     website = Website.create({})
