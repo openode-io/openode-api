@@ -85,9 +85,13 @@ module DeploymentMethod
     def kubectl(options = {})
       assert options[:website_location]
       assert options[:s_arguments]
+      website = options[:website_location].website
 
       config_path = kubeconfig_path(options[:website_location])
-      cmd = "KUBECONFIG=#{config_path} kubectl #{options[:s_arguments]}"
+
+      namespace = options[:with_namespace] ? "-n #{namespace_of(website)}" : ""
+
+      cmd = "KUBECONFIG=#{config_path} kubectl #{namespace} #{options[:s_arguments]}"
 
       cmd
     end
@@ -244,14 +248,35 @@ module DeploymentMethod
       END_YML
     end
 
-    def node_available?(_options = {})
-      # TODO
-      # kubectl -n instance-152 get pods  -o=jsonpath='{.items[*].status.containerStatuses[*].state.waiting}' | grep -v "restarting failed"
-      true
+    def node_available?(options = {})
+      _, website_location = get_website_fields(options)
+
+      kubectl_args = {
+        website_location: website_location,
+        with_namespace: true,
+        s_arguments: "get pods " \
+          "-o=jsonpath='{.items[*].status.containerStatuses[*].state.waiting}' " \
+          "| grep \"CrashLoopBackOff\"" # There should NOT be any container in
+        # crash loop backoff state
+      }
+
+      result = ex("kubectl", kubectl_args)
+
+      result[:exit_code] == 1
     end
 
-    def instance_up_cmd(_options = {})
-      # kubectl -n instance-152 get pods  -o=jsonpath='{.items[*].status.containerStatuses[*].ready}' | grep -v false
+    def instance_up_cmd(options = {})
+      _, website_location = get_website_fields(options)
+
+      args = {
+        website_location: website_location,
+        with_namespace: true,
+        s_arguments: "get pods " \
+          "-o=jsonpath='{.items[*].status.containerStatuses[*].ready}' " \
+          "| grep -v false" # There should NOT be any container not ready
+      }
+
+      kubectl(args)
     end
 
     # the following hooks are notification procs.
@@ -291,11 +316,39 @@ module DeploymentMethod
       end
     end
 
+    def self.hook_verify_instance_up
+      DockerCompose.hook_cmd_and_state(%w[verify_instance_up],
+                                       'before',
+                                       'Verifying instance up...')
+    end
+
+    def self.hook_verify_instance_up_done
+      DockerCompose.hook_cmd_and_state(['verify_instance_up'],
+                                       'after',
+                                       '...instance verification finished.')
+    end
+
+    def self.hook_finalize
+      DockerCompose.hook_cmd_and_state(['finalize'],
+                                       'before',
+                                       'Finalizing...')
+    end
+
+    def self.hook_finalize_done
+      DockerCompose.hook_cmd_and_state(['finalize'],
+                                       'after',
+                                       '...finalized.')
+    end
+
     def hooks
       [
         DockerCompose.hook_error,
         DockerCompose.hook_verify_can_deploy,
-        DockerCompose.hook_logs
+        DockerCompose.hook_logs,
+        DockerCompose.hook_finalize,
+        DockerCompose.hook_finalize_done,
+        DockerCompose.hook_verify_instance_up,
+        DockerCompose.hook_verify_instance_up_done
       ]
     end
 

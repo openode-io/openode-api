@@ -122,6 +122,8 @@ module DeploymentMethod
       website = options[:website]
       website_location = options[:website_location]
 
+      Rails.logger.info("instance_up? for #{website.site_name}")
+
       if website.skip_port_check?
         node_available?(options)
       else
