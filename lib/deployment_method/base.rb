@@ -110,14 +110,8 @@ module DeploymentMethod
       website.change_status!(Website::STATUS_OFFLINE)
     end
 
-    def instance_up_cmd(options = {})
-      require_fields([:website_location], options)
-      website_location = options[:website_location]
-
-      port_info = port_info_for_new_deployment(website_location)
-      url = "http://localhost:#{port_info[:port]}/"
-
-      "curl --insecure --max-time 15 --connect-timeout 5 #{url} "
+    def instance_up_cmd(_options = {})
+      raise 'instance_up_cmd must be defined in the child class'
     end
 
     def node_available?(_options = {})

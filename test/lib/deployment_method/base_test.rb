@@ -58,14 +58,6 @@ class DeploymentMethodBaseTest < ActiveSupport::TestCase
     end
   end
 
-  test 'instance_up_cmd' do
-    base_dep_method = DeploymentMethod::Base.new
-
-    cmd = base_dep_method.instance_up_cmd(website_location: default_website_location)
-    assert_includes cmd, 'curl '
-    assert_includes cmd, "http://localhost:#{default_website_location.port}/"
-  end
-
   test 'finalize when success, nothing running' do
     website = default_website
     website_location = default_website_location

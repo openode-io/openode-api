@@ -33,6 +33,14 @@ class DockerComposeTest < ActiveSupport::TestCase
     end
   end
 
+  test 'instance_up_cmd' do
+    base_dep_method = DeploymentMethod::DockerCompose.new
+
+    cmd = base_dep_method.instance_up_cmd(website_location: default_website_location)
+    assert_includes cmd, 'curl '
+    assert_includes cmd, "http://localhost:#{default_website_location.port}/"
+  end
+
   test 'logs should fail if missing nb_lines id' do
     docker_compose = DeploymentMethod::DockerCompose.new
 

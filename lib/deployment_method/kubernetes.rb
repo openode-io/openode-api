@@ -20,11 +20,32 @@ module DeploymentMethod
       super(options)
     end
 
+    def cmd_docker_registry_secret(website, docker_images_location)
+      " -n #{namespace_of(website)} " \
+      "create secret docker-registry regcred " \
+      "--docker-server=#{docker_images_location['docker_server']} " \
+      "--docker-username=#{docker_images_location['docker_username']} " \
+      "--docker-password=#{docker_images_location['docker_password']} " \
+      "--docker-email=#{docker_images_location['docker_email']} "
+    end
+
+    def make_docker_registry_secret(website, website_location, docker_images_location)
+      registry_secret_cmd_arguments =
+        cmd_docker_registry_secret(website, docker_images_location)
+
+      ex_stdout('kubectl',
+                website_location: website_location,
+                s_arguments: registry_secret_cmd_arguments)
+    end
+
     def launch(options = {})
       website, website_location = get_website_fields(options)
 
       cloud_provider_manager = CloudProvider::Manager.instance
       img_location = cloud_provider_manager.docker_images_location
+
+      # ensure docker registry secret
+      make_docker_registry_secret(website, website_location, img_location)
 
       # build the image
       cloned_runner = runner.clone
@@ -49,11 +70,16 @@ module DeploymentMethod
       # write the yml to the build machine
 
       # apply
-      #kube_yml = generate_instance_yml(website, website_location)
-      #result = kubectl_yml_action(website_location, "apply", kube_yml)
+      kube_yml = generate_instance_yml(website, website_location,
+                                       image_name_tag: image_manager.image_name_tag)
 
-      #result
-      ""
+      notify("info", "Applying instance environment...")
+
+      result = kubectl_yml_action(website_location, "apply", kube_yml, ensure_exit_code: 0)
+
+      notify("info", result[:stdout])
+
+      result
     end
 
     def kubectl(options = {})
@@ -66,23 +92,24 @@ module DeploymentMethod
       cmd
     end
 
-    def kubectl_yml_action(website_location, action, content)
+    def kubectl_yml_action(website_location, action, content, opts = {})
       tmp_file = Tempfile.new("kubectl-#{action}")
 
       tmp_file.write(content)
       tmp_file.flush
 
-      ex_stdout('kubectl',
-                website_location: website_location,
-                s_arguments: "#{action} -f #{tmp_file.path}")
+      ex('kubectl', {
+        website_location: website_location,
+        s_arguments: "#{action} -f #{tmp_file.path}"
+      }.merge(opts))
     end
 
-    def generate_instance_yml(website, website_location)
+    def generate_instance_yml(website, website_location, opts = {})
       <<~END_YML
         ---
         #{generate_namespace_yml(website)}
         ---
-        #{generate_deployment_yml(website)}
+        #{generate_deployment_yml(website, opts)}
         ---
         #{generate_service_yml(website)}
         ---
@@ -104,7 +131,7 @@ module DeploymentMethod
       END_YML
     end
 
-    def generate_deployment_yml(website)
+    def generate_deployment_yml(website, opts)
       <<~END_YML
         apiVersion: apps/v1
         kind: Deployment
@@ -121,8 +148,10 @@ module DeploymentMethod
               labels:
                 app: www
             spec:
+              imagePullSecrets:
+              - name: regcred
               containers:
-              - image: nginx # gcr.io/kuar-demo/kuard-amd64:1
+              - image: #{opts[:image_name_tag]}
                 imagePullPolicy: Always
                 name: www
                 envFrom:
@@ -213,6 +242,16 @@ module DeploymentMethod
           rules:
           #{generate_rules_ingress_yml(rules_domains)}
       END_YML
+    end
+
+    def node_available?(_options = {})
+      # TODO
+      # kubectl -n instance-152 get pods  -o=jsonpath='{.items[*].status.containerStatuses[*].state.waiting}' | grep -v "restarting failed"
+      true
+    end
+
+    def instance_up_cmd(_options = {})
+      # kubectl -n instance-152 get pods  -o=jsonpath='{.items[*].status.containerStatuses[*].ready}' | grep -v false
     end
 
     # the following hooks are notification procs.

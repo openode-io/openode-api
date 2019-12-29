@@ -31,16 +31,13 @@ class InstanceImageManagerTest < ActiveSupport::TestCase
   end
 
   test 'build cmd' do
-    repo = 'openode/op_prod'
-
     cmd = @manager.build_cmd(
-      project_path: '/home/123456/what',
-      repository_name: repo
+      project_path: '/home/123456/what'
     )
 
     assert_includes cmd, 'cd /home/123456/what'
-    assert_includes cmd, "docker build -t #{repo}:#{@website.site_name}" \
-                          "--#{@website.id}--#{@deployment.id} ."
+    assert_includes cmd, "docker build -t test/openode_prod:" \
+                          "#{@website.site_name}--#{@website.id}--#{@deployment.id} ."
   end
 
   test 'build' do

@@ -85,10 +85,14 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     assert_includes yml, "  livenessProbe:"
     assert_includes yml, "  readinessProbe:"
     assert_includes yml, "  resources:"
+
+    # docker registry secret
+    assert_includes yml, "imagePullSecrets:"
+    assert_includes yml, "- name: regcred"
   end
 
   test 'generate_deployment_yml - basic' do
-    yml = kubernetes_method.generate_deployment_yml(@website)
+    yml = kubernetes_method.generate_deployment_yml(@website, @website_location)
     assert_contains_minimal_deployment_yml(yml, @website)
   end
 
@@ -129,5 +133,17 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     assert_contains_minimal_deployment_yml(yml, @website)
     assert_contains_service_yml(yml, @website)
     assert_contains_ingress_yml(yml, @website, @website_location)
+  end
+
+  test 'cmd_docker_registry_secret' do
+    cloud_provider_manager = CloudProvider::Manager.instance
+    cmd = kubernetes_method.cmd_docker_registry_secret(
+      @website, cloud_provider_manager.docker_images_location
+    )
+
+    assert_includes cmd, "-n instance-#{@website.id} create secret docker-registry regcred"
+    assert_includes cmd, "--docker-server=https://index.docker.io/v1/"
+    assert_includes cmd, "--docker-username=test"
+    assert_includes cmd, "--docker-email=test@openode.io"
   end
 end

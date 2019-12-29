@@ -201,6 +201,16 @@ module DeploymentMethod
       "docker exec #{options[:front_container_id]} docker-compose ps"
     end
 
+    def instance_up_cmd(options = {})
+      require_fields([:website_location], options)
+      website_location = options[:website_location]
+
+      port_info = port_info_for_new_deployment(website_location)
+      url = "http://localhost:#{port_info[:port]}/"
+
+      "curl --insecure --max-time 15 --connect-timeout 5 #{url} "
+    end
+
     def node_available?(options = {})
       assert options[:website]
       website = options[:website]
