@@ -135,6 +135,27 @@ module DeploymentMethod
       END_YML
     end
 
+    def generate_deployment_probes_yml(website)
+      return '' if website.skip_port_check?
+
+      '
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 120
+          periodSeconds: 600
+          timeoutSeconds: 3
+          failureThreshold: 1
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          periodSeconds: 10
+          initialDelaySeconds: 5
+      '
+    end
+
     def generate_deployment_yml(website, opts)
       <<~END_YML
         apiVersion: apps/v1
@@ -163,20 +184,7 @@ module DeploymentMethod
                 #    name: test-config-map
                 ports:
                 - containerPort: 80
-                livenessProbe:
-                  httpGet:
-                    path: /
-                    port: 80
-                  initialDelaySeconds: 120
-                  periodSeconds: 600
-                  timeoutSeconds: 3
-                  failureThreshold: 1
-                readinessProbe:
-                  httpGet:
-                    path: /
-                    port: 80
-                  periodSeconds: 10
-                  initialDelaySeconds: 5
+        #{generate_deployment_probes_yml(website)}
                 resources:
                   limits: # more resources if available in the cluster
                     ephemeral-storage: 100Mi

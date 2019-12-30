@@ -151,7 +151,7 @@ module DeploymentMethod
           break if is_up
           break if ENV['RAILS_ENV'] == 'test'
 
-          sleep 2
+          sleep 7
         end
 
         error!("Max build duration reached (#{max_build_duration})") unless is_up

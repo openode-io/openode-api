@@ -82,8 +82,8 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     assert_includes yml, "  name: www-deployment"
     assert_includes yml, "  namespace: #{kubernetes_method.namespace_of(website)}"
     assert_includes yml, "  replicas: 1"
-    assert_includes yml, "  livenessProbe:"
-    assert_includes yml, "  readinessProbe:"
+    assert_includes yml, "  livenessProbe:" if opts[:with_probes]
+    assert_includes yml, "  readinessProbe:" if opts[:with_probes]
     assert_includes yml, "  resources:"
 
     # docker registry secret
@@ -106,7 +106,42 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
                                    requested_memory: @website.memory,
                                    limited_memory: @website.memory * 2,
                                    requested_cpus: @website.cpus,
-                                   limited_cpus: @website.cpus * 2)
+                                   limited_cpus: @website.cpus * 2,
+                                   with_probes: true)
+  end
+
+  test 'generate_deployment_yml - with skip port check' do
+    @website.configs = {
+      "SKIP_PORT_CHECK": "true"
+    }
+    @website.save!
+    yml = kubernetes_method.generate_deployment_yml(@website, @website_location)
+
+    assert_contains_deployment_yml(yml, @website,
+                                   requested_memory: @website.memory,
+                                   limited_memory: @website.memory * 2,
+                                   requested_cpus: @website.cpus,
+                                   limited_cpus: @website.cpus * 2,
+                                   with_probes: false)
+  end
+
+  test 'generate_deployment_probes_yml - with probes' do
+    yml = kubernetes_method.generate_deployment_probes_yml(@website)
+
+    assert_includes yml, "livenessProbe:"
+    assert_includes yml, "readinessProbe:"
+  end
+
+  test 'generate_deployment_probes_yml - without probes' do
+    @website.configs = {
+      "SKIP_PORT_CHECK": "true"
+    }
+    @website.save!
+
+    yml = kubernetes_method.generate_deployment_probes_yml(@website)
+
+    assert_not_includes yml, "livenessProbe:"
+    assert_not_includes yml, "readinessProbe:"
   end
 
   def assert_contains_service_yml(yml, website)
@@ -144,7 +179,7 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     puts yml
 
     assert_contains_namespace_yml(yml, @website)
-    assert_contains_deployment_yml(yml, @website)
+    assert_contains_deployment_yml(yml, @website, with_probes: true)
     assert_contains_service_yml(yml, @website)
     assert_contains_ingress_yml(yml, @website, @website_location)
   end
