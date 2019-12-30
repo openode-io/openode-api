@@ -6,6 +6,8 @@ module DeploymentMethod
       attr_accessor :website
       attr_accessor :deployment
 
+      LIMIT_REPOSITORY_BYTES = 1024 * 1024 * 1024 # MB * KB * B -> 1 GB
+
       def initialize(args)
         assert args[:runner]
         assert args[:docker_images_location]
@@ -49,6 +51,27 @@ module DeploymentMethod
           "docker login -u #{docker_images_location['docker_username']} " \
           "--password-stdin && " \
           "docker push #{image_name_tag}"
+      end
+
+      def verify_size_repo_cmd(options = {})
+        project_path = options[:project_path]
+
+        "du -bs #{project_path}"
+      end
+
+      def verify_size_repo
+        opts = {
+          project_path: @website.repo_dir
+        }
+
+        result = @runner.execute([{ cmd_name: 'verify_size_repo_cmd', options: opts }])
+
+        output = result[0][:result][:stdout] rescue ''
+        nb_bytes = output.to_i
+
+        err_msg_too_large = "Repository image size is too large " \
+          "(limit = #{LIMIT_REPOSITORY_BYTES} bytes)"
+        raise err_msg_too_large if nb_bytes > LIMIT_REPOSITORY_BYTES
       end
 
       def build

@@ -30,6 +30,50 @@ class InstanceImageManagerTest < ActiveSupport::TestCase
     runner.set_execution_method(@manager)
   end
 
+  test 'verify image size cmd' do
+    project_path = '/home/123456/what'
+
+    cmd = @manager.verify_size_repo_cmd(
+      project_path: project_path
+    )
+
+    assert_equal cmd, "du -bs #{project_path}"
+  end
+
+  test 'verify_size_repo with small repository' do
+    project_path = '/home/123456/what'
+
+    expected_cmd = @manager.verify_size_repo_cmd(
+      project_path: "/home/#{@website.user_id}/#{@website.site_name}/"
+    )
+    prepare_ssh_session(expected_cmd, "61595  #{project_path}")
+
+    assert_scripted do
+      begin_ssh
+
+      @manager.verify_size_repo
+    end
+  end
+
+  test 'verify_size_repo with too large repository' do
+    project_path = '/home/123456/what'
+
+    expected_cmd = @manager.verify_size_repo_cmd(
+      project_path: "/home/#{@website.user_id}/#{@website.site_name}/"
+    )
+
+    size = DeploymentMethod::Util::InstanceImageManager::LIMIT_REPOSITORY_BYTES
+    prepare_ssh_session(expected_cmd, "#{size * 2}  #{project_path}")
+
+    assert_scripted do
+      begin_ssh
+
+      assert_raises StandardError do
+        @manager.verify_size_repo
+      end
+    end
+  end
+
   test 'build cmd' do
     cmd = @manager.build_cmd(
       project_path: '/home/123456/what'

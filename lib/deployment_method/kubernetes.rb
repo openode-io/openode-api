@@ -59,6 +59,7 @@ module DeploymentMethod
       cloned_runner.set_execution_method(image_manager)
 
       notify("info", "Preparing instance image...")
+      image_manager.verify_size_repo
       image_manager.build
       notify("info", "Instance image ready.")
 
