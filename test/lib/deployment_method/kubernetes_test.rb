@@ -63,6 +63,43 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     assert_equal up_files.length, 0
   end
 
+  test 'retrieve_dotenv_cmd' do
+    generated_cmd = kubernetes_method.retrieve_dotenv_cmd(project_path: '/home/what/')
+    assert_equal generated_cmd, "cat /home/what/.env"
+  end
+
+  test 'retrieve_dotenv without dotenv' do
+    generated_cmd = kubernetes_method.retrieve_dotenv_cmd(project_path: @website.repo_dir)
+
+    prepare_ssh_session(generated_cmd, '')
+
+    assert_scripted do
+      begin_ssh
+      dotenv_content = kubernetes_method.retrieve_dotenv(@website)
+
+      assert_equal dotenv_content, {}
+    end
+  end
+
+  test 'retrieve_dotenv with dotenv' do
+    generated_cmd = kubernetes_method.retrieve_dotenv_cmd(project_path: @website.repo_dir)
+
+    dotenv_content = '
+
+VAR1=1234
+VAR2=5678
+    '
+    prepare_ssh_session(generated_cmd, dotenv_content)
+
+    assert_scripted do
+      begin_ssh
+      dotenv_result = kubernetes_method.retrieve_dotenv(@website)
+
+      assert_equal dotenv_result["VAR1"], "1234"
+      assert_equal dotenv_result["VAR2"], "5678"
+    end
+  end
+
   test 'namespace_of website' do
     assert_equal kubernetes_method.namespace_of(@website), "instance-#{@website.id}"
   end
@@ -174,14 +211,20 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     assert_contains_ingress_yml(yml, @website, @website_location)
   end
 
-  test 'generate_instance_yml' do
-    yml = kubernetes_method.generate_instance_yml(@website, @website_location)
-    puts yml
+  test 'generate_instance_yml - basic' do
+    cmd_get_dotenv = kubernetes_method.retrieve_dotenv_cmd(project_path: @website.repo_dir)
+    prepare_ssh_session(cmd_get_dotenv, '')
 
-    assert_contains_namespace_yml(yml, @website)
-    assert_contains_deployment_yml(yml, @website, with_probes: true)
-    assert_contains_service_yml(yml, @website)
-    assert_contains_ingress_yml(yml, @website, @website_location)
+    assert_scripted do
+      begin_ssh
+
+      yml = kubernetes_method.generate_instance_yml(@website, @website_location)
+
+      assert_contains_namespace_yml(yml, @website)
+      assert_contains_deployment_yml(yml, @website, with_probes: true)
+      assert_contains_service_yml(yml, @website)
+      assert_contains_ingress_yml(yml, @website, @website_location)
+    end
   end
 
   test 'cmd_docker_registry_secret' do

@@ -1,3 +1,5 @@
+require 'dotenv'
+
 module DeploymentMethod
   class Kubernetes < Base
     KUBECONFIGS_BASE_PATH = "config/kubernetes/"
@@ -68,14 +70,13 @@ module DeploymentMethod
       image_manager.push
       notify("info", "Instance image pushed successfully.")
 
-      # write the yml to the build machine
-
-      # apply
+      # generate the yml to the build machine
       kube_yml = generate_instance_yml(website, website_location,
                                        image_name_tag: image_manager.image_name_tag)
 
       notify("info", "Applying instance environment...")
 
+      # then apply the yml
       result = kubectl_yml_action(website_location, "apply", kube_yml, ensure_exit_code: 0)
 
       notify("info", result[:stdout])
@@ -109,7 +110,21 @@ module DeploymentMethod
       }.merge(opts))
     end
 
+    def retrieve_dotenv_cmd(options = {})
+      project_path = options[:project_path]
+
+      "cat #{project_path}.env"
+    end
+
+    def retrieve_dotenv(website)
+      dotenv_content = ex_stdout("retrieve_dotenv_cmd", project_path: website.repo_dir)
+
+      Dotenv::Parser.call(dotenv_content || '')
+    end
+
     def generate_instance_yml(website, website_location, opts = {})
+      retrieve_dotenv(website)
+
       <<~END_YML
         ---
         #{generate_namespace_yml(website)}
