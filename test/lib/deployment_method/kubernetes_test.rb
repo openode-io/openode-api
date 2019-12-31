@@ -63,6 +63,8 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     assert_equal up_files.length, 0
   end
 
+  # DOTENV
+
   test 'retrieve_dotenv_cmd' do
     generated_cmd = kubernetes_method.retrieve_dotenv_cmd(project_path: '/home/what/')
     assert_equal generated_cmd, "cat /home/what/.env"
@@ -98,6 +100,42 @@ VAR2=5678
       assert_equal dotenv_result["VAR1"], "1234"
       assert_equal dotenv_result["VAR2"], "5678"
     end
+  end
+
+  test 'dotenv_vars_to_s without variable' do
+    assert_equal kubernetes_method.dotenv_vars_to_s({}), ""
+  end
+
+  test 'dotenv_vars_to_s with variables' do
+    vars = {
+      'var1': 'val1',
+      'var2': 2,
+      'va_r3': 'va"l'
+    }
+
+    expected = "  var1: \"val1\"\n" \
+    "  var2: \"2\"\n" \
+    "  va_r3: \"va\\\"l\""
+
+    result = kubernetes_method.dotenv_vars_to_s(vars)
+
+    assert_equal result, expected
+  end
+
+  test 'generate_config_map_yml - typical' do
+    yml = kubernetes_method.generate_config_map_yml(
+      name: "dotenv",
+      namespace: "instance-12345",
+      variables: {
+        'var1': 'v1',
+        'var2': 'v2'
+      }
+    )
+
+    assert_includes yml, "name: dotenv"
+    assert_includes yml, "namespace: instance-12345"
+    assert_includes yml, "  var1: \"v1\""
+    assert_includes yml, "  var2: \"v2\""
   end
 
   test 'namespace_of website' do

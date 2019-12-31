@@ -122,12 +122,38 @@ module DeploymentMethod
       Dotenv::Parser.call(dotenv_content || '')
     end
 
+    def dotenv_vars_to_s(variables)
+      vars_s = variables.keys.map do |v|
+        "  #{v}: \"#{variables[v].to_s.gsub('"', '\\"')}\""
+      end
+
+      vars_s.join("\n")
+    end
+
+    def generate_config_map_yml(opts = {})
+      <<~END_YML
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: #{opts[:name]}
+          namespace: #{opts[:namespace]}
+        data:
+        #{dotenv_vars_to_s(opts[:variables])}
+      END_YML
+    end
+
     def generate_instance_yml(website, website_location, opts = {})
-      retrieve_dotenv(website)
+      dotenv_vars = retrieve_dotenv(website)
 
       <<~END_YML
         ---
         #{generate_namespace_yml(website)}
+        ---
+        #{generate_config_map_yml(
+          name: 'dotenv',
+          namespace: namespace_of(website),
+          variables: dotenv_vars
+        )}
         ---
         #{generate_deployment_yml(website, opts)}
         ---
