@@ -172,6 +172,11 @@ VAR2=5678
     # CPU limitation
     assert_includes yml, "cpu: #{opts[:requested_cpus]}" if opts[:requested_cpus]
     assert_includes yml, "cpu: #{opts[:limited_cpus]}" if opts[:limited_cpus]
+
+    # dotenv
+    assert_includes yml, "envFrom:"
+    assert_includes yml, "- configMapRef:"
+    assert_includes yml, "    name: dotenv"
   end
 
   test 'generate_deployment_yml - basic' do

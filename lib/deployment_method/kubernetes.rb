@@ -222,8 +222,8 @@ module DeploymentMethod
                 imagePullPolicy: Always
                 name: www
                 envFrom:
-                #- configMapRef:
-                #    name: test-config-map
+                - configMapRef:
+                    name: dotenv
                 ports:
                 - containerPort: 80
         #{generate_deployment_probes_yml(website)}
