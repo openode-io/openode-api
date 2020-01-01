@@ -27,7 +27,7 @@ class DnsControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body[0]['id'].present?, true
   end
 
-  test '/instances/:instance_id/list-dns with kubernetes type should fail' do
+  test '/instances/:instance_id/list-dns with kubernetes type should pass' do
     w = Website.find_by site_name: 'www.what.is'
     w.type = Website::TYPE_KUBERNETES
     w.domains = ['www.what.is', 'www2.www.what.is']
@@ -40,7 +40,7 @@ class DnsControllerTest < ActionDispatch::IntegrationTest
         as: :json,
         headers: default_headers_auth
 
-    assert_response :bad_request
+    assert_response :success
   end
 
   # add dns
