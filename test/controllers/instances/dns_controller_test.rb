@@ -27,6 +27,22 @@ class DnsControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body[0]['id'].present?, true
   end
 
+  test '/instances/:instance_id/list-dns with kubernetes type should fail' do
+    w = Website.find_by site_name: 'www.what.is'
+    w.type = Website::TYPE_KUBERNETES
+    w.domains = ['www.what.is', 'www2.www.what.is']
+    w.dns = []
+    w.save!
+
+    add_collaborator_for(default_user, w, Website::PERMISSION_DNS)
+
+    get '/instances/www.what.is/list-dns',
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :bad_request
+  end
+
   # add dns
 
   test '/instances/:instance_id/add-dns with subdomain should fail' do
@@ -79,6 +95,23 @@ class DnsControllerTest < ActionDispatch::IntegrationTest
     assert_equal w.dns[0]['domainName'], 'www2.www.what.is'
     assert_equal w.dns[0]['type'], 'A'
     assert_equal w.dns[0]['value'], '127.0.0.4'
+  end
+
+  test '/instances/:instance_id/add-dns with kubernetes type should fail' do
+    w = Website.find_by site_name: 'www.what.is'
+    w.type = Website::TYPE_KUBERNETES
+    w.domains = ['www.what.is', 'www2.www.what.is']
+    w.dns = []
+    w.save!
+
+    add_collaborator_for(default_user, w, Website::PERMISSION_DNS)
+
+    post '/instances/www.what.is/add-dns',
+         as: :json,
+         params: { domainName: 'www2.www.what.is', type: 'A', value: '127.0.0.4' },
+         headers: default_headers_auth
+
+    assert_response :bad_request
   end
 
   test '/instances/:instance_id/add-dns with custom domain - no permission' do
@@ -138,6 +171,22 @@ class DnsControllerTest < ActionDispatch::IntegrationTest
            headers: default_headers_auth
 
     assert_response :forbidden
+  end
+
+  test '/instances/:instance_id/del-dns with kubernetes type should fail' do
+    w = Website.find_by site_name: 'www.what.is'
+    w.type = Website::TYPE_KUBERNETES
+    w.domains = ['www.what.is', 'www2.www.what.is']
+    w.dns = []
+    w.save!
+
+    add_collaborator_for(default_user, w, Website::PERMISSION_DNS)
+
+    delete '/instances/www.what.is/del-dns?id=123444',
+           as: :json,
+           headers: default_headers_auth
+
+    assert_response :bad_request
   end
 
   # add alias

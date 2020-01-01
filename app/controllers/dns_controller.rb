@@ -3,6 +3,7 @@ class DnsController < InstancesController
 
   before_action only: %i[list_dns add_dns del_dns] do
     requires_custom_domain
+    requires_docker_deployment
   end
 
   before_action only: %i[add_dns del_dns] do
