@@ -21,6 +21,10 @@ class InstancesController < ApplicationController
   before_action :check_minimum_cli_version
   after_action :record_website_event
 
+  before_action only: %i[reload] do
+    requires_docker_deployment
+  end
+
   before_action only: %i[logs cmd reload] do
     requires_status_in [Website::STATUS_ONLINE]
   end
@@ -306,6 +310,12 @@ class InstancesController < ApplicationController
 
   def ensure_location
     @website_location ||= @website.website_locations.first
+  end
+
+  def requires_docker_deployment
+    unless @website.type == Website::TYPE_DOCKER
+      validation_error!("The instance must be of docker type.")
+    end
   end
 
   def requires_status_in(statuses)

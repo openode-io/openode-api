@@ -345,6 +345,48 @@ module DeploymentMethod
       kubectl(args)
     end
 
+    def final_instance_details(opts = {})
+      result = {}
+
+      website, website_location = get_website_fields(opts)
+
+      result['result'] = 'success'
+      result['url'] = "http://#{website_location.main_domain}/"
+
+      if website.domain_type == 'custom_domain'
+        result['CNAME Record'] = "TODO"
+      end
+
+      result
+    end
+
+    def notify_final_instance_details(opts = {})
+      get_website_fields(opts)
+      final_details = final_instance_details(opts)
+
+      notify('info', details: final_details)
+    end
+
+    def finalize(options = {})
+      website, = get_website_fields(options)
+      super(options)
+      website.reload
+
+      # TODO
+      # logs
+      # begin
+      #  ex_stdout('logs', website: website,
+      #                    container_id: website.container_id,
+      #                    nb_lines: 10_000)
+      # rescue StandardError => e
+      #  Ex::Logger.info(e, 'Unable to retrieve the docker compose logs')
+      # end
+
+      if website.online?
+        notify_final_instance_details(options)
+      end
+    end
+
     # the following hooks are notification procs.
 
     def self.hook_error
