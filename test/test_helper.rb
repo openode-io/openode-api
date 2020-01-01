@@ -469,6 +469,12 @@ class ActiveSupport::TestCase
     result
   end
 
+  def run_deployer_job
+    job = Delayed::Job.where('handler LIKE ?', '%DeploymentMethod::Deployer%').first
+
+    job.invoke_job
+  end
+
   def reset_emails
     ActionMailer::Base.deliveries.clear
   end

@@ -84,6 +84,10 @@ module DeploymentMethod
       result
     end
 
+    def reload(options = {})
+      launch(options)
+    end
+
     def kubectl(options = {})
       assert options[:website_location]
       assert options[:s_arguments]
@@ -91,22 +95,34 @@ module DeploymentMethod
 
       config_path = kubeconfig_path(options[:website_location])
 
-      namespace = options[:with_namespace] ? "-n #{namespace_of(website)}" : ""
+      namespace = options[:with_namespace] ? "-n #{namespace_of(website)} " : ""
 
-      cmd = "KUBECONFIG=#{config_path} kubectl #{namespace} #{options[:s_arguments]}"
+      cmd = "KUBECONFIG=#{config_path} kubectl #{namespace}#{options[:s_arguments]}"
 
       cmd
     end
 
-    def kubectl_yml_action(website_location, action, content, opts = {})
-      tmp_file = Tempfile.new("kubectl-#{action}")
+    @@test_kubectl_file_path = nil
 
-      tmp_file.write(content)
-      tmp_file.flush
+    def self.set_kubectl_file_path(kube_file_path)
+      @@test_kubectl_file_path = kube_file_path
+    end
+
+    def kubectl_yml_action(website_location, action, content, opts = {})
+      tmp_file_path = if !@@test_kubectl_file_path
+                        tmp_file = Tempfile.new("kubectl-#{action}")
+
+                        tmp_file.write(content)
+                        tmp_file.flush
+
+                        tmp_file.path
+                      else
+                        @@test_kubectl_file_path
+      end
 
       ex('kubectl', {
         website_location: website_location,
-        s_arguments: "#{action} -f #{tmp_file.path}"
+        s_arguments: "#{action} -f #{tmp_file_path}"
       }.merge(opts))
     end
 
