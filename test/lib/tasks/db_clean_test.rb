@@ -7,7 +7,8 @@ class LibTasksDbCleanTest < ActiveSupport::TestCase
 
     global_stat = GlobalStat.first
 
-    assert_equal global_stat.obj['nb_archived_executions'], 1
+    assert_equal global_stat.obj['nb_archived_deployments'], 1
+    assert_equal global_stat.obj['nb_archived_executions'], nil
 
     nb_too_old = Execution.where('created_at < ?', 31.days.ago).count
     assert_equal nb_too_old, 0
