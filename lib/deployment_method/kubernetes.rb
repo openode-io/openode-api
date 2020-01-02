@@ -345,6 +345,58 @@ module DeploymentMethod
       kubectl(args)
     end
 
+    def get_pods_json(options = {})
+      _, website_location = get_website_fields(options)
+
+      args = {
+        website_location: website_location,
+        with_namespace: true,
+        s_arguments: "get pods -o json",
+        default_retry_scheme: true,
+        ensure_exit_code: 0
+      }
+
+      JSON.parse(ex("kubectl", args)[:stdout])
+    end
+
+    def get_latest_pod_in(pods_json)
+      return nil if !pods_json || !pods_json['items']
+
+      pods_json['items'].max_by do |pod|
+        Time.zone.parse(pod['metadata']['creationTimestamp'])
+      end
+    end
+
+    def get_latest_pod_name_in(pods_json)
+      get_latest_pod_in(pods_json)['metadata']['name']
+    end
+
+    def logs(options = {})
+      website, website_location = get_website_fields(options)
+      options[:nb_lines] ||= 100
+
+      pod_name = options[:pod_name]
+
+      unless pod_name
+        pods = get_pods_json(
+          website: website,
+          website_location: website_location
+        )
+
+        pod_name = get_latest_pod_name_in(pods)
+      end
+
+      args = {
+        website_location: website_location,
+        with_namespace: true,
+        s_arguments: "logs #{pod_name} --tail=#{options[:nb_lines]}"
+      }
+
+      cmd = kubectl(args)
+
+      cmd
+    end
+
     def final_instance_details(opts = {})
       result = {}
 

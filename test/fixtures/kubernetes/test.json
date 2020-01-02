@@ -1,0 +1,381 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "creationTimestamp": "2020-01-01T20:11:14Z",
+                "generateName": "www-deployment-5889df69dc-",
+                "labels": {
+                    "app": "www",
+                    "pod-template-hash": "5889df69dc"
+                },
+                "name": "www-deployment-5889df69dc-xg9xl",
+                "namespace": "instance-152",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "apps/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "ReplicaSet",
+                        "name": "www-deployment-5889df69dc",
+                        "uid": "bdd085ac-6b92-4c1b-9eb8-ff8f61f1ee41"
+                    }
+                ],
+                "resourceVersion": "1016338",
+                "selfLink": "/api/v1/namespaces/instance-152/pods/www-deployment-5889df69dc-xg9xl",
+                "uid": "00742669-78cb-4c43-a66b-1ae9ccfb1011"
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "envFrom": [
+                            {
+                                "configMapRef": {
+                                    "name": "dotenv"
+                                }
+                            }
+                        ],
+                        "image": "openode/openode_dev:mytestt5667--152--657",
+                        "imagePullPolicy": "Always",
+                        "livenessProbe": {
+                            "failureThreshold": 1,
+                            "httpGet": {
+                                "path": "/",
+                                "port": 80,
+                                "scheme": "HTTP"
+                            },
+                            "initialDelaySeconds": 120,
+                            "periodSeconds": 600,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 3
+                        },
+                        "name": "www",
+                        "ports": [
+                            {
+                                "containerPort": 80,
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "readinessProbe": {
+                            "failureThreshold": 3,
+                            "httpGet": {
+                                "path": "/",
+                                "port": 80,
+                                "scheme": "HTTP"
+                            },
+                            "initialDelaySeconds": 5,
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 1
+                        },
+                        "resources": {
+                            "limits": {
+                                "cpu": "2",
+                                "ephemeral-storage": "100Mi",
+                                "memory": "200Mi"
+                            },
+                            "requests": {
+                                "cpu": "1",
+                                "ephemeral-storage": "100Mi",
+                                "memory": "100Mi"
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "default-token-j6qz6",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "imagePullSecrets": [
+                    {
+                        "name": "regcred"
+                    }
+                ],
+                "nodeName": "minikube",
+                "priority": 0,
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "default-token-j6qz6",
+                        "secret": {
+                            "defaultMode": 420,
+                            "secretName": "default-token-j6qz6"
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2020-01-01T20:11:14Z",
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2020-01-02T18:41:42Z",
+                        "status": "True",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2020-01-02T18:41:42Z",
+                        "status": "True",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2020-01-01T20:11:14Z",
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "containerID": "docker://8c217a8016019911fa58e0b6b6f161522dbe6134c81041356ccb7795e41bae41",
+                        "image": "openode/openode_dev:mytestt5667--152--650",
+                        "imageID": "docker-pullable://openode/openode_dev@sha256:7c6d01064dc8ca14cea7ef82381c120d2f0a6b2ab4e8ec28837cedac75a6148f",
+                        "lastState": {},
+                        "name": "www",
+                        "ready": true,
+                        "restartCount": 1,
+                        "started": true,
+                        "state": {
+                            "running": {
+                                "startedAt": "2020-01-02T18:41:24Z"
+                            }
+                        }
+                    }
+                ],
+                "hostIP": "192.168.1.5",
+                "phase": "Running",
+                "podIP": "172.17.0.8",
+                "podIPs": [
+                    {
+                        "ip": "172.17.0.8"
+                    }
+                ],
+                "qosClass": "Burstable",
+                "startTime": "2020-01-01T20:11:14Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "creationTimestamp": "2020-01-02T20:14:50Z",
+                "generateName": "www-deployment-84dcfdfdf6-",
+                "labels": {
+                    "app": "www",
+                    "pod-template-hash": "84dcfdfdf6"
+                },
+                "name": "www-deployment-84dcfdfdf6-w4lv9",
+                "namespace": "instance-152",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "apps/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "ReplicaSet",
+                        "name": "www-deployment-84dcfdfdf6",
+                        "uid": "12611fdb-e2db-432f-b6a9-e132a3510764"
+                    }
+                ],
+                "resourceVersion": "1035030",
+                "selfLink": "/api/v1/namespaces/instance-152/pods/www-deployment-84dcfdfdf6-w4lv9",
+                "uid": "ebefcc03-9777-4f9f-a43d-e005f07fe457"
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "envFrom": [
+                            {
+                                "configMapRef": {
+                                    "name": "dotenv"
+                                }
+                            }
+                        ],
+                        "image": "openode/openode_dev:mytestt5667--152--661",
+                        "imagePullPolicy": "Always",
+                        "livenessProbe": {
+                            "failureThreshold": 1,
+                            "httpGet": {
+                                "path": "/",
+                                "port": 80,
+                                "scheme": "HTTP"
+                            },
+                            "initialDelaySeconds": 120,
+                            "periodSeconds": 600,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 3
+                        },
+                        "name": "www",
+                        "ports": [
+                            {
+                                "containerPort": 80,
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "readinessProbe": {
+                            "failureThreshold": 3,
+                            "httpGet": {
+                                "path": "/",
+                                "port": 80,
+                                "scheme": "HTTP"
+                            },
+                            "initialDelaySeconds": 5,
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 1
+                        },
+                        "resources": {
+                            "limits": {
+                                "cpu": "2",
+                                "ephemeral-storage": "100Mi",
+                                "memory": "200Mi"
+                            },
+                            "requests": {
+                                "cpu": "1",
+                                "ephemeral-storage": "100Mi",
+                                "memory": "100Mi"
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "default-token-j6qz6",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "imagePullSecrets": [
+                    {
+                        "name": "regcred"
+                    }
+                ],
+                "nodeName": "minikube",
+                "priority": 0,
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "default-token-j6qz6",
+                        "secret": {
+                            "defaultMode": 420,
+                            "secretName": "default-token-j6qz6"
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2020-01-02T20:14:50Z",
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2020-01-02T20:14:50Z",
+                        "message": "containers with unready status: [www]",
+                        "reason": "ContainersNotReady",
+                        "status": "False",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2020-01-02T20:14:50Z",
+                        "message": "containers with unready status: [www]",
+                        "reason": "ContainersNotReady",
+                        "status": "False",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2020-01-02T20:14:50Z",
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "image": "openode/openode_dev:mytestt5667--152--661",
+                        "imageID": "",
+                        "lastState": {},
+                        "name": "www",
+                        "ready": false,
+                        "restartCount": 0,
+                        "started": false,
+                        "state": {
+                            "waiting": {
+                                "reason": "ContainerCreating"
+                            }
+                        }
+                    }
+                ],
+                "hostIP": "192.168.1.5",
+                "phase": "Pending",
+                "qosClass": "Burstable",
+                "startTime": "2020-01-02T20:14:50Z"
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": "",
+        "selfLink": ""
+    }
+}

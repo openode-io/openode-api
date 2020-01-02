@@ -288,7 +288,14 @@ class InstancesController < ApplicationController
   def logs
     nb_lines = params['nbLines'].present? ? params['nbLines'].to_i : 100
 
-    cmds = [{ cmd_name: 'logs', options: { website: @website, nb_lines: nb_lines } }]
+    cmds = [{
+      cmd_name: 'logs',
+      options: {
+        website: @website,
+        website_location: @website_location || @website.website_locations.first,
+        nb_lines: nb_lines
+      }
+    }]
     logs = @runner.execute(cmds)
 
     json(logs: logs.first[:result][:stdout])

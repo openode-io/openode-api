@@ -13,6 +13,16 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     runner.get_execution_method
   end
 
+  def prepare_get_pods_happy(_website_location)
+    cmd = kubernetes_method.kubectl(
+      website_location: @website_location,
+      with_namespace: true,
+      s_arguments: "get pods -o json"
+    )
+
+    prepare_ssh_session(cmd, IO.read('test/fixtures/kubernetes/1_pod_alive.json'))
+  end
+
   # verify can deploy
 
   test 'verify_can_deploy - can do it' do
@@ -120,6 +130,59 @@ VAR2=5678
     result = kubernetes_method.dotenv_vars_to_s(vars)
 
     assert_equal result, expected
+  end
+
+  test 'get_pods_json - happy path' do
+    prepare_get_pods_happy(@website_location)
+
+    assert_scripted do
+      begin_ssh
+
+      result = kubernetes_method.get_pods_json(
+        website: @website,
+        website_location: @website_location
+      )
+
+      assert_equal result['items'][0]['kind'], 'Pod'
+    end
+  end
+
+  test 'get_latest_pod_in - happy path' do
+    obj = JSON.parse(IO.read('test/fixtures/kubernetes/2_pods_1_successfully_deploying.json'))
+
+    result = kubernetes_method.get_latest_pod_in(obj)
+
+    assert_equal result['metadata']['name'], 'www-deployment-84dcfdfdf6-w4lv9'
+  end
+
+  test 'get_latest_pod_name_in - happy path' do
+    obj = JSON.parse(IO.read('test/fixtures/kubernetes/2_pods_1_successfully_deploying.json'))
+
+    result = kubernetes_method.get_latest_pod_name_in(obj)
+
+    assert_equal result, 'www-deployment-84dcfdfdf6-w4lv9'
+  end
+
+  test 'get_latest_pod_in - no items' do
+    result = kubernetes_method.get_latest_pod_in('what': '123')
+
+    assert_equal result, nil
+  end
+
+  test 'logs - happy path' do
+    prepare_get_pods_happy(@website_location)
+
+    assert_scripted do
+      begin_ssh
+
+      result = kubernetes_method.logs(
+        website: @website,
+        website_location: @website_location
+      )
+
+      pod_name = "www-deployment-5889df69dc-xg9xl"
+      assert_includes result, "kubectl -n instance-#{@website.id} logs #{pod_name} --tail=100"
+    end
   end
 
   test 'generate_config_map_yml - typical' do

@@ -241,6 +241,13 @@ module DeploymentMethod
       Rails.logger.info("Deployment Method ex #{cmd}, options=#{options.inspect}")
       result = nil
 
+      if options[:default_retry_scheme]
+        options[:retry] = {
+          nb_max_trials: 3,
+          interval_between_trials: 2
+        }
+      end
+
       max_trials = options[:retry] ? options[:retry][:nb_max_trials] : 1
 
       (1..max_trials).each do |trial_i|
