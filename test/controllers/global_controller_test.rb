@@ -132,4 +132,12 @@ class GlobalControllerTest < ActionDispatch::IntegrationTest
     assert_equal(response.parsed_body,
                  "global_msg" => "hello world", "global_msg_class" => "info")
   end
+
+  test '/global/stats' do
+    get '/global/stats', as: :json
+
+    assert_response :success
+    assert_equal(response.parsed_body,
+                 "nb_users" => User.count, "nb_deployments" => Deployment.total_nb)
+  end
 end

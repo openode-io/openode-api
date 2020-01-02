@@ -41,6 +41,14 @@ class GlobalController < ApplicationController
   end
 
   api!
+  def stats
+    json(
+      nb_users: User.count,
+      nb_deployments: Deployment.total_nb
+    )
+  end
+
+  api!
   def services_down
     json(Status.with_status('down'))
   end

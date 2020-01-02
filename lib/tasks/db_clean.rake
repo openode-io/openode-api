@@ -14,15 +14,27 @@ namespace :db_clean do
   task old_executions: :environment do
     name = "Task db_clean__old_executions"
     Rails.logger.info "[#{name}] begin"
-
     days_retention = 31
 
-    clean_table(
-      Model: Execution,
-      days_retention: days_retention,
-      name: name,
-      stat_name: "nb_archived_executions"
-    )
+    objects = [
+      {
+        model: Deployment,
+        stat_name: "nb_archived_deployments"
+      },
+      {
+        model: Execution,
+        stat_name: "nb_archived_executions"
+      }
+    ]
+
+    objects.each do |object_to_archived|
+      clean_table(
+        Model: object_to_archived[:model],
+        days_retention: days_retention,
+        name: name,
+        stat_name: object_to_archived[:stat_name]
+      )
+    end
   end
 
   desc ''

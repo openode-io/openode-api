@@ -28,6 +28,7 @@ Rails.application.routes.draw do
     get 'available-plans-at/:type/:location_str_id', to: 'global#available_plans_at'
 
     get 'settings', to: 'global#settings'
+    get 'stats', to: 'global#stats'
   end
 
   scope :order do

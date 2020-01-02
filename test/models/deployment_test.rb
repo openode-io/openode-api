@@ -54,4 +54,24 @@ class DeploymentTest < ActiveSupport::TestCase
       assert_includes e.to_s, 'Validation failed'
    end
   end
+
+  test 'nb_archived_deployments - with archived' do
+    GlobalStat.increase!("nb_archived_deployments", 1)
+    GlobalStat.increase!("nb_archived_deployments", 1)
+
+    assert_equal Deployment.nb_archived_deployments, 2
+  end
+
+  test 'nb_archived_deployments - without archived' do
+    assert_equal Deployment.nb_archived_deployments, 0
+  end
+
+  test 'total_nb - without archived' do
+    assert_equal Deployment.total_nb, 4
+  end
+
+  test 'total_nb - with archived' do
+    GlobalStat.increase!("nb_archived_deployments", 1)
+    assert_equal Deployment.total_nb, 5
+  end
 end
