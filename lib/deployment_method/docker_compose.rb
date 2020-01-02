@@ -334,12 +334,6 @@ module DeploymentMethod
         .join('')
     end
 
-    def clear_repository(options = {})
-      require_fields([:website], options)
-
-      "rm -rf #{options[:website].repo_dir}"
-    end
-
     def self.default_docker_compose_file(opts = {})
       env_part =
         if opts[:with_env_file]

@@ -57,6 +57,12 @@ module DeploymentMethod
         "node -e \"#{remote_js}\""
     end
 
+    def clear_repository(options = {})
+      require_fields([:website], options)
+
+      "rm -rf #{options[:website].repo_dir}"
+    end
+
     def ensure_remote_repository(options = {})
       require_fields([:path], options)
       "mkdir -p #{options[:path]}"
