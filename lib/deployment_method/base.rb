@@ -63,6 +63,12 @@ module DeploymentMethod
       "rm -rf #{options[:website].repo_dir}"
     end
 
+    def erase_repository_files(options = {})
+      require_fields([:path], options)
+
+      "rm -rf #{options[:path]}"
+    end
+
     def ensure_remote_repository(options = {})
       require_fields([:path], options)
       "mkdir -p #{options[:path]}"

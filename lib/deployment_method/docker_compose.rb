@@ -320,12 +320,6 @@ module DeploymentMethod
       "#{exec_begin(website.container_id)} #{service} #{cmd}"
     end
 
-    def erase_repository_files(options = {})
-      require_fields([:path], options)
-
-      "rm -rf #{options[:path]}"
-    end
-
     def delete_files(options = {})
       require_fields([:files], options)
 

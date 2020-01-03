@@ -265,7 +265,7 @@ class InstancesController < ApplicationController
 
   api!
   def erase_all
-    return json(result: 'success') if !@website_location || @website_location.location_server.blank?
+    return json(result: 'success') unless @website_location
 
     @runner.execute([
                       {

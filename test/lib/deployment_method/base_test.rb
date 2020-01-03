@@ -148,4 +148,16 @@ class DeploymentMethodBaseTest < ActiveSupport::TestCase
     assert_equal result['NS Records (Nameservers)'], ['ns1.vultr.com', 'ns2.vultr.com']
     assert_equal result['A Record'], '127.0.0.2'
   end
+
+  test 'erase_repository_files' do
+    cmd = @base_dep_method.erase_repository_files(path: "/home/1234/what/")
+
+    assert_equal cmd, "rm -rf /home/1234/what/"
+  end
+
+  test 'ensure_remote_repository' do
+    cmd = @base_dep_method.ensure_remote_repository(path: "/home/1234/what/")
+
+    assert_equal cmd, "mkdir -p /home/1234/what/"
+  end
 end
