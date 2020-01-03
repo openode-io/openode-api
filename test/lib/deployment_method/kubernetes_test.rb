@@ -341,9 +341,28 @@ VAR2=5678
     assert_scripted do
       begin_ssh
 
-      yml = kubernetes_method.generate_instance_yml(@website, @website_location)
+      yml = kubernetes_method.generate_instance_yml(@website, @website_location,
+                                                    with_namespace_object: true)
 
       assert_contains_namespace_yml(yml, @website)
+      assert_contains_deployment_yml(yml, @website, with_probes: true)
+      assert_contains_service_yml(yml, @website)
+      assert_contains_ingress_yml(yml, @website, @website_location)
+    end
+  end
+
+  test 'generate_instance_yml - without namespace object' do
+    cmd_get_dotenv = kubernetes_method.retrieve_dotenv_cmd(project_path: @website.repo_dir)
+    prepare_ssh_session(cmd_get_dotenv, '')
+
+    assert_scripted do
+      begin_ssh
+
+      yml = kubernetes_method.generate_instance_yml(@website, @website_location,
+                                                    with_namespace_object: false)
+
+      # assert_contains_namespace_yml(yml, @website)
+      assert_not_includes yml, "kind: Namespace"
       assert_contains_deployment_yml(yml, @website, with_probes: true)
       assert_contains_service_yml(yml, @website)
       assert_contains_ingress_yml(yml, @website, @website_location)

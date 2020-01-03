@@ -158,4 +158,27 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
                    "http://#{@website.site_name}.#{CloudProvider::Manager.base_hostname}/")
     end
   end
+
+  # stop with docker compose internal
+  test '/instances/:instance_id/stop ' do
+    prepare_make_secret(@website, @website_location, "result")
+    prepare_get_dotenv(@website, "VAR1=12")
+    prepare_action_yml(@website_location, "apply.yml", "delete -f apply.yml", 'success')
+
+    assert_scripted do
+      begin_ssh
+      post "/instances/#{@website.site_name}/stop?location_str_id=canada",
+           as: :json,
+           params: {},
+           headers: default_headers_auth
+
+      assert_response :success
+      assert_equal response.parsed_body['result'], 'success'
+
+      @website.reload
+
+      assert_equal @website.status, Website::STATUS_OFFLINE
+      assert_equal @website.executions.last.type, 'Task'
+    end
+  end
 end

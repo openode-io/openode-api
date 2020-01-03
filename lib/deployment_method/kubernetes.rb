@@ -40,9 +40,7 @@ module DeploymentMethod
                 s_arguments: registry_secret_cmd_arguments)
     end
 
-    def launch(options = {})
-      website, website_location = get_website_fields(options)
-
+    def prepare_image_manager(website, website_location)
       cloud_provider_manager = CloudProvider::Manager.instance
       img_location = cloud_provider_manager.docker_images_location
 
@@ -60,6 +58,14 @@ module DeploymentMethod
 
       cloned_runner.set_execution_method(image_manager)
 
+      image_manager
+    end
+
+    def launch(options = {})
+      website, website_location = get_website_fields(options)
+
+      image_manager = prepare_image_manager(website, website_location)
+
       notify("info", "Preparing instance image...")
       image_manager.verify_size_repo
       image_manager.build
@@ -72,6 +78,7 @@ module DeploymentMethod
 
       # generate the yml to the build machine
       kube_yml = generate_instance_yml(website, website_location,
+                                       with_namespace_object: true,
                                        image_name_tag: image_manager.image_name_tag)
 
       notify("info", "Applying instance environment...")
@@ -82,6 +89,22 @@ module DeploymentMethod
       notify("info", result[:stdout])
 
       result
+    end
+
+    # stop
+    def do_stop(options = {})
+      website, website_location = get_website_fields(options)
+
+      image_manager = prepare_image_manager(website, website_location)
+
+      # the namespace object must not be generated, as we want to keep it,
+      # to make sure for instance persitent objects are not destroyed
+      kube_yml = generate_instance_yml(website, website_location,
+                                       with_namespace_object: false,
+                                       image_name_tag: image_manager.image_name_tag)
+
+      # then delete the yml
+      kubectl_yml_action(website_location, "delete", kube_yml, ensure_exit_code: 0)
     end
 
     def reload(options = {})
@@ -159,11 +182,12 @@ module DeploymentMethod
     end
 
     def generate_instance_yml(website, website_location, opts = {})
+      assert !opts[:with_namespace_object].nil?
       dotenv_vars = retrieve_dotenv(website)
 
       <<~END_YML
         ---
-        #{generate_namespace_yml(website)}
+        #{generate_namespace_yml(website) if opts[:with_namespace_object]}
         ---
         #{generate_config_map_yml(
           name: 'dotenv',
