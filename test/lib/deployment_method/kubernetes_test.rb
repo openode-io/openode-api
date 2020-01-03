@@ -185,6 +185,23 @@ VAR2=5678
     end
   end
 
+  test 'exec - happy path' do
+    prepare_get_pods_happy(@website_location)
+
+    assert_scripted do
+      begin_ssh
+
+      result = kubernetes_method.custom_cmd(
+        website: @website,
+        website_location: @website_location,
+        cmd: "ls -la"
+      )
+
+      pod_name = "www-deployment-5889df69dc-xg9xl"
+      assert_includes result, "kubectl -n instance-#{@website.id} exec #{pod_name} -- ls -la"
+    end
+  end
+
   test 'generate_config_map_yml - typical' do
     yml = kubernetes_method.generate_config_map_yml(
       name: "dotenv",

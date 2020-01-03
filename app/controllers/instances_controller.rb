@@ -219,12 +219,12 @@ class InstancesController < ApplicationController
   api!
   def cmd
     assert params['cmd'].present?
-    assert params['service'].present?
 
     result = @runner.execute([
                                {
                                  cmd_name: 'custom_cmd', options: {
                                    website: @website.clone,
+                                   website_location: @website_location,
                                    cmd: Io::Cmd.sanitize_input_cmd(params['cmd']),
                                    service: Io::Cmd.sanitize_input_cmd(params['service'])
                                  }
