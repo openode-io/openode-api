@@ -1,5 +1,6 @@
 
 require 'test_helper'
+require 'test_kubernetes_helper'
 
 class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
   def setup
@@ -361,7 +362,6 @@ VAR2=5678
       yml = kubernetes_method.generate_instance_yml(@website, @website_location,
                                                     with_namespace_object: false)
 
-      # assert_contains_namespace_yml(yml, @website)
       assert_not_includes yml, "kind: Namespace"
       assert_contains_deployment_yml(yml, @website, with_probes: true)
       assert_contains_service_yml(yml, @website)
@@ -379,5 +379,39 @@ VAR2=5678
     assert_includes cmd, "--docker-server=https://index.docker.io/v1/"
     assert_includes cmd, "--docker-username=test"
     assert_includes cmd, "--docker-email=test@openode.io"
+  end
+
+  test 'finalize - happy path' do
+    @website.status = Website::STATUS_ONLINE
+    @website.save!
+
+    kubernetes_method.finalize(
+      website: @website,
+      website_location: @website_location
+    )
+
+    exec = @website.reload.executions.last
+
+    assert_equal exec.events.length, 1
+    assert_equal exec.events[0]['update']['details']['result'], 'success'
+  end
+
+  test 'finalize - when failing should stop' do
+    @website.status = Website::STATUS_OFFLINE
+    @website.save!
+
+    prepare_make_secret(kubernetes_method, @website, @website_location, "success")
+    prepare_get_dotenv(kubernetes_method, @website, "VAR=123")
+    prepare_action_yml(kubernetes_method, @website_location, "apply.yml",
+                       "delete -f apply.yml", 'success')
+
+    assert_scripted do
+      begin_ssh
+
+      kubernetes_method.finalize(
+        website: @website,
+        website_location: @website_location
+      )
+    end
   end
 end

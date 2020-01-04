@@ -360,7 +360,11 @@ class ActiveSupport::TestCase
       }
     }
 
-    DeploymentMethod::Runner.new(Website::TYPE_KUBERNETES, 'cloud', configs)
+    runner = DeploymentMethod::Runner.new(Website::TYPE_KUBERNETES, 'cloud', configs)
+
+    runner.init_execution!("Deployment")
+
+    runner
   end
 
   def prepare_default_ports

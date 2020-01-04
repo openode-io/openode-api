@@ -484,6 +484,9 @@ module DeploymentMethod
 
       if website.online?
         notify_final_instance_details(options)
+      else
+        # stop it
+        do_stop(options)
       end
     end
 
