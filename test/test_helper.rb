@@ -465,6 +465,13 @@ class ActiveSupport::TestCase
     }
   end
 
+  def set_website_certs(website, opts = {})
+    website.configs ||= {}
+    website.configs['SSL_CERTIFICATE_PATH'] = opts[:cert] || 'cert/crt'
+    website.configs['SSL_CERTIFICATE_KEY_PATH'] = opts[:key] || 'cert/key'
+    website.save!
+  end
+
   def invoke_task(task_name)
     OpenodeApi::Application.load_tasks
     result = Rake::Task[task_name].invoke

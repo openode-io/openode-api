@@ -356,13 +356,14 @@ module DeploymentMethod
     end
 
     def generate_tls_specs_ingress_yml(website, rules = [])
-      result = ""
+      result = "  - secretName: #{certificate_secret_name(website)}\n" \
+               "    hosts:\n"
+      rules << rules[0]
 
       rules.each do |rule|
         result +=
           <<~END_YML
-            \ \ - #{rule[:hostname]}
-            \ \ secretName: #{certificate_secret_name(website)}
+            \ \ \ \ \ \ - #{rule[:hostname]}
           END_YML
       end
 
@@ -384,7 +385,6 @@ module DeploymentMethod
             # cert-manager.io/cluster-issuer: "letsencrypt-prod"
         spec:
           #{'tls:' if certificate?(website)}
-          #{'- hosts:' if certificate?(website)}
           #{generate_tls_specs_ingress_yml(website, rules_domains) if certificate?(website)}
           rules:
           #{generate_rules_ingress_yml(rules_domains)}

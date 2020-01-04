@@ -1,4 +1,5 @@
 
+require 'base64'
 require 'test_helper'
 require 'test_kubernetes_helper'
 
@@ -318,28 +319,60 @@ VAR2=5678
   end
 
   test 'certificate? - if certificate provided' do
-    @website.configs = {}
-    @website.configs['SSL_CERTIFICATE_PATH'] = 'cert/crt'
-    @website.configs['SSL_CERTIFICATE_KEY_PATH'] = 'cert/key'
-    @website.save!
+    set_website_certs(@website)
 
     assert_equal kubernetes_method.certificate?(@website), true
   end
 
   test 'certificate_secret_name - if certificate provided' do
-    @website.configs = {}
-    @website.configs['SSL_CERTIFICATE_PATH'] = 'cert/crt'
-    @website.configs['SSL_CERTIFICATE_KEY_PATH'] = 'cert/key'
-    @website.save!
+    set_website_certs(@website)
 
     assert_equal kubernetes_method.certificate_secret_name(@website), "manual-certificate"
   end
 
-  test 'generate_tls_secret_yml - ' do
-    # TODO
+  def assert_contains_manual_certificate_secret(yml, crt, key)
+    puts yml
+
+    assert_includes yml, "kind: Secret"
+    assert_includes yml, "name: manual-certificate"
+    assert_includes yml, "type: kubernetes.io/tls"
+    assert_includes yml, "tls.crt: #{crt}"
+    assert_includes yml, "tls.key: #{key}"
   end
 
-  def assert_contains_ingress_yml(yml, website, website_location)
+  test 'generate_tls_secret_yml - with certificate' do
+    set_website_certs(@website)
+
+    cmd_get_crt = kubernetes_method.retrieve_file_cmd(path: "#{@website.repo_dir}cert/crt")
+    tls_crt = IO.read("test/fixtures/certs/tls.crt")
+    prepare_ssh_session(cmd_get_crt, tls_crt)
+
+    cmd_get_key = kubernetes_method.retrieve_file_cmd(path: "#{@website.repo_dir}cert/key")
+    tls_key = IO.read("test/fixtures/certs/tls.key")
+    prepare_ssh_session(cmd_get_key, tls_key)
+
+    crt_b64 = Base64.strict_encode64(tls_crt)
+    key_b64 = Base64.strict_encode64(tls_key)
+
+    assert_scripted do
+      begin_ssh
+
+      yml = kubernetes_method.generate_tls_secret_yml(@website)
+      puts yml
+      assert_contains_manual_certificate_secret(yml, crt_b64, key_b64)
+    end
+  end
+
+  test 'generate_tls_secret_yml - without certificate' do
+    @website.configs = {}
+    @website.configs['SSL_CERTIFICATE_PATH'] = nil
+    @website.configs['SSL_CERTIFICATE_KEY_PATH'] = nil
+    @website.save!
+
+    assert_equal kubernetes_method.generate_tls_secret_yml(@website), ""
+  end
+
+  def assert_contains_ingress_yml(yml, website, website_location, opts = {})
     domains = website_location.compute_domains
 
     assert_includes yml, "kind: Ingress"
@@ -350,11 +383,27 @@ VAR2=5678
     domains.each do |domain|
       assert_includes yml, "- host: #{domain}"
     end
+
+    if opts[:with_certificate_secret]
+      assert_includes yml, "tls:"
+    else
+      assert_not_includes yml, "tls:"
+    end
   end
 
   test 'generate_ingress_yml' do
     yml = kubernetes_method.generate_ingress_yml(@website, @website_location)
     assert_contains_ingress_yml(yml, @website, @website_location)
+  end
+
+  test 'generate_ingress_yml - with certificate' do
+    set_website_certs(@website)
+
+    yml = kubernetes_method.generate_ingress_yml(@website, @website_location)
+
+    assert_contains_ingress_yml(yml, @website, @website_location,
+                                with_certificate_secret: true,
+                                with_certificate_secret_name: "manual-certificate")
   end
 
   test 'generate_instance_yml - basic' do
