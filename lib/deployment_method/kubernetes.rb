@@ -1,4 +1,5 @@
 require 'dotenv'
+require 'base64'
 
 module DeploymentMethod
   class Kubernetes < Base
@@ -149,10 +150,16 @@ module DeploymentMethod
       }.merge(opts))
     end
 
+    def retrieve_file_cmd(options = {})
+      assert options[:path]
+
+      "cat #{options[:path]}"
+    end
+
     def retrieve_dotenv_cmd(options = {})
       project_path = options[:project_path]
 
-      "cat #{project_path}.env"
+      retrieve_file_cmd(path: "#{project_path}.env")
     end
 
     def retrieve_dotenv(website)
@@ -188,6 +195,8 @@ module DeploymentMethod
       <<~END_YML
         ---
         #{generate_namespace_yml(website) if opts[:with_namespace_object]}
+        ---
+        #{generate_tls_secret_yml(website)}
         ---
         #{generate_config_map_yml(
           name: 'dotenv',
@@ -296,6 +305,37 @@ module DeploymentMethod
       END_YML
     end
 
+    def certificate?(website)
+      website.certs.present?
+    end
+
+    def certificate_secret_name(website)
+      if website.certs.present?
+        "manual-certificate"
+      end
+    end
+
+    def generate_tls_secret_yml(website)
+      return "" if website.certs.blank?
+
+      crt = ex_stdout("retrieve_file_cmd",
+                      path: "#{website.repo_dir}#{website.certs[:cert_path]}")
+      crt_key = ex_stdout("retrieve_file_cmd",
+                          path: "#{website.repo_dir}#{website.certs[:cert_key_path]}")
+
+      <<~END_YML
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: manual-certificate
+          namespace: #{namespace_of(website)}
+        type: kubernetes.io/tls
+        data:
+          tls.crt: #{Base64.strict_encode64(crt)}
+          tls.key: #{Base64.strict_encode64(crt_key)}
+      END_YML
+    end
+
     def generate_rules_ingress_yml(rules = [])
       result = ""
 
@@ -309,6 +349,20 @@ module DeploymentMethod
                     backend:
                       serviceName: main-service
                       servicePort: 80
+          END_YML
+      end
+
+      result
+    end
+
+    def generate_tls_specs_ingress_yml(website, rules = [])
+      result = ""
+
+      rules.each do |rule|
+        result +=
+          <<~END_YML
+            \ \ - #{rule[:hostname]}
+            \ \ secretName: #{certificate_secret_name(website)}
           END_YML
       end
 
@@ -329,10 +383,9 @@ module DeploymentMethod
             kubernetes.io/ingress.class: "nginx"
             # cert-manager.io/cluster-issuer: "letsencrypt-prod"
         spec:
-          #tls:
-          #- hosts:
-          #  - myprettyprettytest112233.openode.io
-          #  secretName: quickstart-example-tls23
+          #{'tls:' if certificate?(website)}
+          #{'- hosts:' if certificate?(website)}
+          #{generate_tls_specs_ingress_yml(website, rules_domains) if certificate?(website)}
           rules:
           #{generate_rules_ingress_yml(rules_domains)}
       END_YML

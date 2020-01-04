@@ -317,6 +317,28 @@ VAR2=5678
     assert_contains_service_yml(yml, @website)
   end
 
+  test 'certificate? - if certificate provided' do
+    @website.configs = {}
+    @website.configs['SSL_CERTIFICATE_PATH'] = 'cert/crt'
+    @website.configs['SSL_CERTIFICATE_KEY_PATH'] = 'cert/key'
+    @website.save!
+
+    assert_equal kubernetes_method.certificate?(@website), true
+  end
+
+  test 'certificate_secret_name - if certificate provided' do
+    @website.configs = {}
+    @website.configs['SSL_CERTIFICATE_PATH'] = 'cert/crt'
+    @website.configs['SSL_CERTIFICATE_KEY_PATH'] = 'cert/key'
+    @website.save!
+
+    assert_equal kubernetes_method.certificate_secret_name(@website), "manual-certificate"
+  end
+
+  test 'generate_tls_secret_yml - ' do
+    # TODO
+  end
+
   def assert_contains_ingress_yml(yml, website, website_location)
     domains = website_location.compute_domains
 

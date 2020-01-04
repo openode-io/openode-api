@@ -240,6 +240,24 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.private_cloud_allocated?, true
   end
 
+  test 'certs - provides when available' do
+    website = default_website
+    website.configs ||= {}
+    website.configs['SSL_CERTIFICATE_PATH'] = 'cert/crt'
+    website.configs['SSL_CERTIFICATE_KEY_PATH'] = 'cert/key'
+    website.save!
+
+    assert_equal website.certs, cert_path: "cert/crt", cert_key_path: "cert/key"
+  end
+
+  test 'certs - empty when not provided' do
+    website = default_website
+    website.configs = {}
+    website.save!
+
+    assert_equal website.certs.blank?, true
+  end
+
   # normalize_storage_areas
   test 'normalized_storage_areas with two areas' do
     w = Website.where(site_name: 'testsite').first
