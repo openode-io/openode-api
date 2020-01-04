@@ -47,6 +47,29 @@ class ActiveSupport::TestCase
     prepare_ssh_session(cmd, expected_result)
   end
 
+  def prepare_get_pods_json(kubernetes_method, website, website_location, expected_result,
+                            expected_exit_code)
+    cmd = kubernetes_method.kubectl(
+      website_location: website_location,
+      s_arguments: "-n instance-#{website.id} get pods -o json"
+    )
+
+    prepare_ssh_session(cmd, expected_result, expected_exit_code)
+  end
+
+  def prepare_kubernetes_logs(kubernetes_method,
+                              expected_result,
+                              expected_exit_code,
+                              opts = {})
+    cmd = kubernetes_method.kubectl(
+      website_location: opts[:website_location],
+      s_arguments: "-n instance-#{opts[:website].id} logs #{opts[:pod_name]}" \
+                    " --tail=#{opts[:nb_lines]}"
+    )
+
+    prepare_ssh_session(cmd, expected_result, expected_exit_code)
+  end
+
   def prepare_node_alive(kubernetes_method, website, website_location, expected_result,
                          expected_exit_code)
     cmd_node_alive = kubernetes_method.kubectl(

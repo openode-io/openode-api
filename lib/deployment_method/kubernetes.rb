@@ -468,19 +468,17 @@ module DeploymentMethod
     end
 
     def finalize(options = {})
-      website, = get_website_fields(options)
+      website, website_location = get_website_fields(options)
       super(options)
       website.reload
 
-      # TODO
-      # logs
-      # begin
-      #  ex_stdout('logs', website: website,
-      #                    container_id: website.container_id,
-      #                    nb_lines: 10_000)
-      # rescue StandardError => e
-      #  Ex::Logger.info(e, 'Unable to retrieve the docker compose logs')
-      # end
+      begin
+        ex_stdout('logs', website: website,
+                          website_location: website_location,
+                          nb_lines: 1_000)
+      rescue StandardError => e
+        Ex::Logger.info(e, 'Unable to retrieve the logs')
+      end
 
       if website.online?
         notify_final_instance_details(options)
