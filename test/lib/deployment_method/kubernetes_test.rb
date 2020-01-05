@@ -340,7 +340,7 @@ VAR2=5678
     assert_includes yml, "tls.key: #{key}"
   end
 
-  test 'generate_tls_secret_yml - with certificate' do
+  test 'generate_manual_tls_secret_yml - with certificate' do
     set_website_certs(@website)
 
     cmd_get_crt = kubernetes_method.retrieve_file_cmd(path: "#{@website.repo_dir}cert/crt")
@@ -357,19 +357,18 @@ VAR2=5678
     assert_scripted do
       begin_ssh
 
-      yml = kubernetes_method.generate_tls_secret_yml(@website)
-      puts yml
+      yml = kubernetes_method.generate_manual_tls_secret_yml(@website)
       assert_contains_manual_certificate_secret(yml, crt_b64, key_b64)
     end
   end
 
-  test 'generate_tls_secret_yml - without certificate' do
+  test 'generate_manual_tls_secret_yml - without certificate' do
     @website.configs = {}
     @website.configs['SSL_CERTIFICATE_PATH'] = nil
     @website.configs['SSL_CERTIFICATE_KEY_PATH'] = nil
     @website.save!
 
-    assert_equal kubernetes_method.generate_tls_secret_yml(@website), ""
+    assert_equal kubernetes_method.generate_manual_tls_secret_yml(@website), ""
   end
 
   def assert_contains_ingress_yml(yml, website, website_location, opts = {})

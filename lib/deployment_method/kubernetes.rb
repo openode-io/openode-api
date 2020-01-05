@@ -4,6 +4,7 @@ require 'base64'
 module DeploymentMethod
   class Kubernetes < Base
     KUBECONFIGS_BASE_PATH = "config/kubernetes/"
+    CERTS_BASE_PATH = "config/certs/"
 
     def initialize; end
 
@@ -196,7 +197,7 @@ module DeploymentMethod
         ---
         #{generate_namespace_yml(website) if opts[:with_namespace_object]}
         ---
-        #{generate_tls_secret_yml(website)}
+        #{generate_manual_tls_secret_yml(website)}
         ---
         #{generate_config_map_yml(
           name: 'dotenv',
@@ -315,7 +316,23 @@ module DeploymentMethod
       end
     end
 
-    def generate_tls_secret_yml(website)
+    def generate_tls_secret_yml(website, opts = {})
+      require_fields([:name, :crt, :key], opts)
+
+      <<~END_YML
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: #{opts[:name]}
+          namespace: #{namespace_of(website)}
+        type: kubernetes.io/tls
+        data:
+          tls.crt: #{Base64.strict_encode64(opts[:crt])}
+          tls.key: #{Base64.strict_encode64(opts[:key])}
+      END_YML
+    end
+
+    def generate_manual_tls_secret_yml(website)
       return "" if website.certs.blank?
 
       crt = ex_stdout("retrieve_file_cmd",
@@ -323,17 +340,22 @@ module DeploymentMethod
       crt_key = ex_stdout("retrieve_file_cmd",
                           path: "#{website.repo_dir}#{website.certs[:cert_key_path]}")
 
-      <<~END_YML
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: manual-certificate
-          namespace: #{namespace_of(website)}
-        type: kubernetes.io/tls
-        data:
-          tls.crt: #{Base64.strict_encode64(crt)}
-          tls.key: #{Base64.strict_encode64(crt_key)}
-      END_YML
+      generate_tls_secret_yml(website, name: "manual-certificate", crt: crt, key: crt_key)
+    end
+
+    # TODO test
+    def generate_wildcard_subdomain_tls_secret_yaml(website)
+      wildcard_crt_path =
+        Rails.root.join("#{CERTS_BASE_PATH}#{ENV['RAILS_ENV']}-wildcard.crt")
+      wildcard_key_path =
+        Rails.root.join("#{CERTS_BASE_PATH}#{ENV['RAILS_ENV']}-wildcard.key")
+
+      return "" if !File.exist?(wildcard_crt_path) || !File.exist?(wildcard_key_path)
+
+      crt = IO.read(wildcard_crt_path)
+      key = IO.read(wildcard_key_path)
+
+      generate_tls_secret_yml(website, name: "wildcard-certificate", crt: crt, key: key)
     end
 
     def generate_rules_ingress_yml(rules = [])
