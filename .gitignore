@@ -37,3 +37,8 @@ config/.production.openode.yml
 
 config/kubernetes/development-*.yml
 config/kubernetes/production-*.yml
+
+config/certs/development-*.crt
+config/certs/production-*.crt
+config/certs/development-*.key
+config/certs/production-*.key
