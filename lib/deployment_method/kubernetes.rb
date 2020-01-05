@@ -340,32 +340,29 @@ module DeploymentMethod
       result = ""
 
       rules.each do |rule|
-        result +=
-          <<~END_YML
-            - host: #{rule[:hostname]}
-                http:
-                  paths:
-                  - path: /
-                    backend:
-                      serviceName: main-service
-                      servicePort: 80
-          END_YML
+        result += "    - host: #{rule[:hostname]}\n" \
+                  "      http:\n" \
+                  "        paths:\n" \
+                  "        - path: /\n" \
+                  "          backend:\n" \
+                  "            serviceName: main-service\n" \
+                  "            servicePort: 80\n"
       end
 
       result
     end
 
     def generate_tls_specs_ingress_yml(website, rules = [])
-      result = "  - secretName: #{certificate_secret_name(website)}\n" \
-               "    hosts:\n"
+      result = "  tls:\n" \
+               "  - hosts:\n"
+
       rules << rules[0]
 
       rules.each do |rule|
-        result +=
-          <<~END_YML
-            \ \ \ \ \ \ - #{rule[:hostname]}
-          END_YML
+        result += "    - #{rule[:hostname]}\n"
       end
+
+      result += "    secretName: #{certificate_secret_name(website)}"
 
       result
     end
@@ -384,10 +381,9 @@ module DeploymentMethod
             kubernetes.io/ingress.class: "nginx"
             # cert-manager.io/cluster-issuer: "letsencrypt-prod"
         spec:
-          #{'tls:' if certificate?(website)}
-          #{generate_tls_specs_ingress_yml(website, rules_domains) if certificate?(website)}
+        #{generate_tls_specs_ingress_yml(website, rules_domains) if certificate?(website)}
           rules:
-          #{generate_rules_ingress_yml(rules_domains)}
+        #{generate_rules_ingress_yml(rules_domains)}
       END_YML
     end
 
