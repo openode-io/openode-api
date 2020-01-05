@@ -324,17 +324,23 @@ VAR2=5678
     assert_equal kubernetes_method.certificate?(@website), true
   end
 
+  test 'certificate? - if subdomain' do
+    assert_equal kubernetes_method.certificate?(@website), true
+  end
+
   test 'certificate_secret_name - if certificate provided' do
     set_website_certs(@website)
 
     assert_equal kubernetes_method.certificate_secret_name(@website), "manual-certificate"
   end
 
-  def assert_contains_manual_certificate_secret(yml, crt, key)
-    puts yml
+  test 'certificate_secret_name - if subdomain' do
+    assert_equal kubernetes_method.certificate_secret_name(@website), "wildcard-certificate"
+  end
 
+  def assert_contains_certificate_secret(yml, secret_name, crt, key)
     assert_includes yml, "kind: Secret"
-    assert_includes yml, "name: manual-certificate"
+    assert_includes yml, "name: #{secret_name}"
     assert_includes yml, "type: kubernetes.io/tls"
     assert_includes yml, "tls.crt: #{crt}"
     assert_includes yml, "tls.key: #{key}"
@@ -358,7 +364,7 @@ VAR2=5678
       begin_ssh
 
       yml = kubernetes_method.generate_manual_tls_secret_yml(@website)
-      assert_contains_manual_certificate_secret(yml, crt_b64, key_b64)
+      assert_contains_certificate_secret(yml, "manual-certificate", crt_b64, key_b64)
     end
   end
 
@@ -369,6 +375,20 @@ VAR2=5678
     @website.save!
 
     assert_equal kubernetes_method.generate_manual_tls_secret_yml(@website), ""
+  end
+
+  test 'generate_wildcard_subdomain_tls_secret_yaml' do
+    @website.configs = {}
+    @website.configs['SSL_CERTIFICATE_PATH'] = nil
+    @website.configs['SSL_CERTIFICATE_KEY_PATH'] = nil
+    @website.save!
+
+    yml = kubernetes_method.generate_wildcard_subdomain_tls_secret_yaml(@website)
+
+    crt_b64 = Base64.strict_encode64(IO.read("config/certs/test-wildcard.crt"))
+    key_b64 = Base64.strict_encode64(IO.read("config/certs/test-wildcard.key"))
+
+    assert_contains_certificate_secret(yml, "wildcard-certificate", crt_b64, key_b64)
   end
 
   def assert_contains_ingress_yml(yml, website, website_location, opts = {})
@@ -392,7 +412,8 @@ VAR2=5678
 
   test 'generate_ingress_yml' do
     yml = kubernetes_method.generate_ingress_yml(@website, @website_location)
-    assert_contains_ingress_yml(yml, @website, @website_location)
+    assert_contains_ingress_yml(yml, @website, @website_location,
+                                with_certificate_secret: true)
   end
 
   test 'generate_ingress_yml - with certificate' do
@@ -418,7 +439,8 @@ VAR2=5678
       assert_contains_namespace_yml(yml, @website)
       assert_contains_deployment_yml(yml, @website, with_probes: true)
       assert_contains_service_yml(yml, @website)
-      assert_contains_ingress_yml(yml, @website, @website_location)
+      assert_contains_ingress_yml(yml, @website, @website_location,
+                                  with_certificate_secret: true)
     end
   end
 
@@ -435,7 +457,8 @@ VAR2=5678
       assert_not_includes yml, "kind: Namespace"
       assert_contains_deployment_yml(yml, @website, with_probes: true)
       assert_contains_service_yml(yml, @website)
-      assert_contains_ingress_yml(yml, @website, @website_location)
+      assert_contains_ingress_yml(yml, @website, @website_location,
+                                  with_certificate_secret: true)
     end
   end
 

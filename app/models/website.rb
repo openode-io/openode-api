@@ -263,6 +263,14 @@ class Website < ApplicationRecord
     end
   end
 
+  def subdomain?
+    domain_type == DOMAIN_TYPE_SUBDOMAIN
+  end
+
+  def custom_domain?
+    domain_type == DOMAIN_TYPE_CUSTOM_DOMAIN
+  end
+
   def validate_dns
     return if domain_type == 'subdomain'
 
@@ -411,7 +419,8 @@ class Website < ApplicationRecord
   end
 
   def certs
-    if configs && configs['SSL_CERTIFICATE_PATH'] && configs['SSL_CERTIFICATE_KEY_PATH']
+    if configs && configs['SSL_CERTIFICATE_PATH'].present? &&
+       configs['SSL_CERTIFICATE_KEY_PATH'].present?
       {
         cert_path: configs['SSL_CERTIFICATE_PATH'],
         cert_key_path: configs['SSL_CERTIFICATE_KEY_PATH']

@@ -199,6 +199,8 @@ module DeploymentMethod
         ---
         #{generate_manual_tls_secret_yml(website)}
         ---
+        #{generate_wildcard_subdomain_tls_secret_yaml(website) if website.subdomain?}
+        ---
         #{generate_config_map_yml(
           name: 'dotenv',
           namespace: namespace_of(website),
@@ -307,12 +309,14 @@ module DeploymentMethod
     end
 
     def certificate?(website)
-      website.certs.present?
+      website.certs.present? || website.subdomain?
     end
 
     def certificate_secret_name(website)
       if website.certs.present?
         "manual-certificate"
+      elsif website.subdomain?
+        "wildcard-certificate"
       end
     end
 
@@ -340,10 +344,12 @@ module DeploymentMethod
       crt_key = ex_stdout("retrieve_file_cmd",
                           path: "#{website.repo_dir}#{website.certs[:cert_key_path]}")
 
-      generate_tls_secret_yml(website, name: "manual-certificate", crt: crt, key: crt_key)
+      generate_tls_secret_yml(website,
+                              name: certificate_secret_name(website),
+                              crt: crt,
+                              key: crt_key)
     end
 
-    # TODO test
     def generate_wildcard_subdomain_tls_secret_yaml(website)
       wildcard_crt_path =
         Rails.root.join("#{CERTS_BASE_PATH}#{ENV['RAILS_ENV']}-wildcard.crt")
@@ -355,7 +361,10 @@ module DeploymentMethod
       crt = IO.read(wildcard_crt_path)
       key = IO.read(wildcard_key_path)
 
-      generate_tls_secret_yml(website, name: "wildcard-certificate", crt: crt, key: key)
+      generate_tls_secret_yml(website,
+                              name: certificate_secret_name(website),
+                              crt: crt,
+                              key: key)
     end
 
     def generate_rules_ingress_yml(rules = [])

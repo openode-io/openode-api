@@ -77,6 +77,22 @@ class WebsiteTest < ActiveSupport::TestCase
     assert custom_domain_sites[1].site_name == 'app.what.is'
   end
 
+  test 'subdomain? with subdomain' do
+    assert_equal default_website.subdomain?, true
+  end
+
+  test 'subdomain? with custom domain' do
+    assert_equal default_custom_domain_website.subdomain?, false
+  end
+
+  test 'custom_domain? with subdomain' do
+    assert_equal default_website.custom_domain?, false
+  end
+
+  test 'custom_domain? with custom domain' do
+    assert_equal default_custom_domain_website.custom_domain?, true
+  end
+
   test 'getting configs' do
     w = Website.where(site_name: 'testsite').first
     w.configs = { hello: 'world', field2: 1234 }
@@ -253,6 +269,16 @@ class WebsiteTest < ActiveSupport::TestCase
   test 'certs - empty when not provided' do
     website = default_website
     website.configs = {}
+    website.save!
+
+    assert_equal website.certs.blank?, true
+  end
+
+  test 'certs - empty if empty strings' do
+    website = default_website
+    website.configs ||= {}
+    website.configs['SSL_CERTIFICATE_PATH'] = ''
+    website.configs['SSL_CERTIFICATE_KEY_PATH'] = ''
     website.save!
 
     assert_equal website.certs.blank?, true

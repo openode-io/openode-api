@@ -300,6 +300,10 @@ class ActiveSupport::TestCase
     Website.find_by site_name: 'testsite'
   end
 
+  def default_custom_domain_website
+    Website.find_by site_name: 'www.what.is'
+  end
+
   def default_kube_website
     Website.find_by type: Website::TYPE_KUBERNETES
   end
