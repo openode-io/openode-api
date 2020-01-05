@@ -532,8 +532,12 @@ module DeploymentMethod
       if website.online?
         notify_final_instance_details(options)
       else
-        # stop it
-        do_stop(options)
+        begin
+          # stop it
+          do_stop(options)
+        rescue StandardError => e
+          Ex::Logger.info(e, 'Unable to stop completely')
+        end
       end
     end
 
