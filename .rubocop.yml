@@ -80,7 +80,7 @@ Metrics/BlockLength:
     - 'config/routes.rb'
 
 Metrics/ClassLength:
-  Max: 500
+  Max: 1000
   Exclude:
     - 'test/**/*.rb'
 

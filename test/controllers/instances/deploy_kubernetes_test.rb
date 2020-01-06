@@ -52,7 +52,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert_equal deployment.result['errors'].length, 0
 
       # should also have a deployment with events
-      assert_equal deployment.events.length, 14
+      assert_equal deployment.events.length, 12
 
       allowed_to = dep_event_exists?(deployment.events,
                                      'running', 'allowed to dep')
@@ -68,8 +68,6 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
         { "status" => "running", "level" => "info",
           "update" => "Applying instance environment..." },
         { "status" => "running", "level" => "info", "update" => "success" },
-        { "status" => "running", "level" => "info", "update" => "Verifying instance up..." },
-        { "status" => "running", "level" => "info", "update" => "Verifying instance up..." },
         { "status" => "running", "level" => "info", "update" => "Verifying instance up..." },
         { "status" => "running", "level" => "info",
           "update" => "...instance verification finished." },

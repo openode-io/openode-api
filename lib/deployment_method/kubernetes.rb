@@ -615,38 +615,38 @@ module DeploymentMethod
     end
 
     def self.hook_verify_instance_up
-      DockerCompose.hook_cmd_and_state(%w[verify_instance_up],
-                                       'before',
-                                       'Verifying instance up...')
+      Kubernetes.hook_cmd_and_state(%w[verify_instance_up],
+                                    'before',
+                                    'Verifying instance up...')
     end
 
     def self.hook_verify_instance_up_done
-      DockerCompose.hook_cmd_and_state(['verify_instance_up'],
-                                       'after',
-                                       '...instance verification finished.')
+      Kubernetes.hook_cmd_and_state(['verify_instance_up'],
+                                    'after',
+                                    '...instance verification finished.')
     end
 
     def self.hook_finalize
-      DockerCompose.hook_cmd_and_state(['finalize'],
-                                       'before',
-                                       'Finalizing...')
+      Kubernetes.hook_cmd_and_state(['finalize'],
+                                    'before',
+                                    'Finalizing...')
     end
 
     def self.hook_finalize_done
-      DockerCompose.hook_cmd_and_state(['finalize'],
-                                       'after',
-                                       '...finalized.')
+      Kubernetes.hook_cmd_and_state(['finalize'],
+                                    'after',
+                                    '...finalized.')
     end
 
     def hooks
       [
-        DockerCompose.hook_error,
-        DockerCompose.hook_verify_can_deploy,
-        DockerCompose.hook_logs,
-        DockerCompose.hook_finalize,
-        DockerCompose.hook_finalize_done,
-        DockerCompose.hook_verify_instance_up,
-        DockerCompose.hook_verify_instance_up_done
+        Kubernetes.hook_error,
+        Kubernetes.hook_verify_can_deploy,
+        Kubernetes.hook_logs,
+        Kubernetes.hook_finalize,
+        Kubernetes.hook_finalize_done,
+        Kubernetes.hook_verify_instance_up,
+        Kubernetes.hook_verify_instance_up_done
       ]
     end
 
