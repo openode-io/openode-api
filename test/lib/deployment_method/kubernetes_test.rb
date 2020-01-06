@@ -474,6 +474,15 @@ VAR2=5678
     assert_includes cmd, "--docker-email=test@openode.io"
   end
 
+  test 'should_remove_namespace? - should' do
+    @website_location.change_storage!(2)
+    assert_equal kubernetes_method.should_remove_namespace?(@website.reload), false
+  end
+
+  test 'should_remove_namespace? - should not' do
+    assert_equal kubernetes_method.should_remove_namespace?(@website.reload), true
+  end
+
   test 'finalize - happy path' do
     @website.status = Website::STATUS_ONLINE
     @website.save!

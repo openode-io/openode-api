@@ -93,6 +93,10 @@ module DeploymentMethod
       result
     end
 
+    def should_remove_namespace?(website)
+      !website.extra_storage?
+    end
+
     # stop
     def do_stop(options = {})
       website, website_location = get_website_fields(options)
@@ -101,8 +105,9 @@ module DeploymentMethod
 
       # the namespace object must not be generated, as we want to keep it,
       # to make sure for instance persitent objects are not destroyed
+      with_namespace_object = should_remove_namespace?(website.reload)
       kube_yml = generate_instance_yml(website, website_location,
-                                       with_namespace_object: false,
+                                       with_namespace_object: with_namespace_object,
                                        image_name_tag: image_manager.image_name_tag)
 
       # then delete the yml
