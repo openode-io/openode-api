@@ -202,6 +202,8 @@ module DeploymentMethod
         ---
         #{generate_namespace_yml(website) if opts[:with_namespace_object]}
         ---
+        #{generate_persistence_volume_claim_yml(website_location)}
+        ---
         #{generate_manual_tls_secret_yml(website)}
         ---
         #{generate_wildcard_subdomain_tls_secret_yaml(website) if website.subdomain?}
@@ -231,6 +233,25 @@ module DeploymentMethod
         kind: Namespace
         metadata:
           name: #{namespace_of(website)}
+      END_YML
+    end
+
+    def generate_persistence_volume_claim_yml(website_location)
+      return '' unless website_location.extra_storage?
+
+      <<~END_YML
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: main-pvc
+          namespace: ns-kuard1
+        spec:
+          accessModes:
+            - ReadWriteMany
+          resources:
+            requests:
+              storage: #{website_location.extra_storage}Gi
+          storageClassName: cinder-classic"
       END_YML
     end
 
