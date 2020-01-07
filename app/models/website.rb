@@ -508,6 +508,10 @@ class Website < ApplicationRecord
     status == STATUS_ONLINE
   end
 
+  def offline?
+    status == STATUS_OFFLINE
+  end
+
   def add_storage_area(storage_area)
     self.storage_areas ||= []
     self.storage_areas << storage_area

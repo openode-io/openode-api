@@ -127,6 +127,39 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal w.status, Website::STATUS_ONLINE
   end
 
+  # online? offline?
+  test 'online? - if online' do
+    w = default_website
+    w.change_status!(Website::STATUS_ONLINE)
+    w.reload
+
+    assert_equal w.online?, true
+  end
+
+  test 'online? - if offline' do
+    w = default_website
+    w.change_status!(Website::STATUS_OFFLINE)
+    w.reload
+
+    assert_equal w.online?, false
+  end
+
+  test 'offline? - if online' do
+    w = default_website
+    w.change_status!(Website::STATUS_ONLINE)
+    w.reload
+
+    assert_equal w.offline?, false
+  end
+
+  test 'offline? - if offline' do
+    w = default_website
+    w.change_status!(Website::STATUS_OFFLINE)
+    w.reload
+
+    assert_equal w.offline?, true
+  end
+
   # storage area validation
 
   test 'storage area validate with valid ones' do

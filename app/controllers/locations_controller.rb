@@ -45,6 +45,10 @@ class LocationsController < InstancesController
       validation_error!('This instance does not have that location.')
     end
 
+    unless @website.offline?
+      validation_error!('The instance must first be stopped to apply this action.')
+    end
+
     @website.remove_location(Location.find_by!(str_id: str_id))
 
     @website_event_obj = { title: 'remove-location', location_id: str_id }

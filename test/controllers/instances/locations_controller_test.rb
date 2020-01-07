@@ -99,8 +99,21 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
+  test '/instances/:instance_id/remove-location should not if online' do
+    w = default_website
+    w.change_status!(Website::STATUS_ONLINE)
+
+    post "/instances/#{w.site_name}/remove-location",
+         as: :json,
+         params: { location_str_id: 'usa' },
+         headers: default_headers_auth
+
+    assert_response :bad_request
+  end
+
   test '/instances/:instance_id/remove-location happy path' do
     w = default_website
+    w.change_status!(Website::STATUS_OFFLINE)
 
     post '/instances/testsite/remove-location',
          as: :json,
