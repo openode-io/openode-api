@@ -251,10 +251,6 @@ VAR2=5678
     assert_includes yml, "memory: #{opts[:requested_memory]}Mi" if opts[:requested_memory]
     assert_includes yml, "memory: #{opts[:limited_memory]}Mi" if opts[:limited_memory]
 
-    # CPU limitation
-    assert_includes yml, "cpu: #{opts[:requested_cpus]}" if opts[:requested_cpus]
-    assert_includes yml, "cpu: #{opts[:limited_cpus]}" if opts[:limited_cpus]
-
     # dotenv
     assert_includes yml, "envFrom:"
     assert_includes yml, "- configMapRef:"
@@ -267,8 +263,6 @@ VAR2=5678
     assert_contains_deployment_yml(yml, @website,
                                    requested_memory: @website.memory,
                                    limited_memory: @website.memory * 2,
-                                   requested_cpus: @website.cpus,
-                                   limited_cpus: @website.cpus * 2,
                                    with_probes: true)
   end
 
@@ -282,8 +276,6 @@ VAR2=5678
     assert_contains_deployment_yml(yml, @website,
                                    requested_memory: @website.memory,
                                    limited_memory: @website.memory * 2,
-                                   requested_cpus: @website.cpus,
-                                   limited_cpus: @website.cpus * 2,
                                    with_probes: false)
   end
 

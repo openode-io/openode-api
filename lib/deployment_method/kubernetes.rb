@@ -309,11 +309,11 @@ module DeploymentMethod
                   limits: # more resources if available in the cluster
                     ephemeral-storage: 100Mi
                     memory: #{website.memory * 2}Mi
-                    cpu: #{website.cpus * 2}
+                    # cpu: #{website.cpus}
                   requests:
                     ephemeral-storage: 100Mi
                     memory: #{website.memory}Mi
-                    cpu: #{website.cpus}
+                    # cpu: #{website.cpus}
       END_YML
     end
 
@@ -325,6 +325,7 @@ module DeploymentMethod
           name: main-service
           namespace: #{namespace_of(website)}
         spec:
+          type: LoadBalancer
           ports:
           - port: 80
             targetPort: 80
