@@ -33,15 +33,7 @@ class InstancesController < ApplicationController
     requires_status_in [Website::STATUS_ONLINE, Website::STATUS_OFFLINE]
   end
 
-  before_action only: [:set_cpus] do
-    requires_paid_instance
-  end
-
-  before_action only: [:set_cpus] do
-    requires_cloud_plan
-  end
-
-  before_action only: [:set_plan, :set_cpus] do
+  before_action only: [:set_plan] do
     requires_access_to(Website::PERMISSION_PLAN)
   end
 
@@ -135,19 +127,6 @@ class InstancesController < ApplicationController
     @runner&.delay&.execute([{ cmd_name: 'stop', options: { is_complex: true } }])
 
     json(result: 'success', msg: 'Instance will stop, make sure to redeploy it')
-  end
-
-  api!
-  def set_cpus
-    @website_location.nb_cpus = params['nb_cpus'].to_i
-    @website_location.save!
-
-    @website_event_obj = { title: 'change-nb-cpus', nb_cpus: @website_location.nb_cpus }
-
-    # redeploy
-    DeploymentMethod::Deployer.delay.run(@website_location, @runner)
-
-    json(result: 'success')
   end
 
   api!

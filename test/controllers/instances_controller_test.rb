@@ -535,61 +535,6 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
-  # set cpus
-  test '/instances/:instance_id/set-cpus happy path' do
-    website_location = default_website_location
-
-    post '/instances/testsite/set-cpus?location_str_id=canada',
-         as: :json,
-         params: { nb_cpus: '2' },
-         headers: default_headers_auth
-
-    website_location.reload
-
-    assert_response :success
-    assert_equal website_location.nb_cpus, 2
-    assert_equal !Delayed::Job.first.nil?, true
-  end
-
-  test '/instances/:instance_id/set-cpus fail if free instance' do
-    website = default_website
-    website.account_type = 'free'
-    website.save!
-
-    post '/instances/testsite/set-cpus?location_str_id=canada',
-         as: :json,
-         params: { nb_cpus: '2' },
-         headers: default_headers_auth
-
-    assert_response :bad_request
-  end
-
-  test '/instances/:instance_id/set-cpus forbidden' do
-    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
-    w.account_type = 'second'
-    w.save!
-
-    post "/instances/#{w.site_name}/set-cpus?location_str_id=usa",
-         as: :json,
-         params: { nb_cpus: '2' },
-         headers: default_headers_auth
-
-    assert_response :forbidden
-  end
-
-  test '/instances/:instance_id/set-cpus fail if non cloud instance' do
-    website = default_website
-    website.cloud_type = 'private-cloud'
-    website.save!
-
-    post '/instances/testsite/set-cpus?location_str_id=canada',
-         as: :json,
-         params: { nb_cpus: '2' },
-         headers: default_headers_auth
-
-    assert_response :bad_request
-  end
-
   # DELETE /sitename
   test 'DEL /instances/:instance_id/' do
     dep_method = prepare_default_execution_method
