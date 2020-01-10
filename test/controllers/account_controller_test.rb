@@ -93,7 +93,7 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
     user.reload
 
     mail_sent = ActionMailer::Base.deliveries.first
-    
+
     assert_equal mail_sent.subject, 'opeNode Password Reset'
     assert_includes mail_sent.body.raw_source, "/reset/#{user.reset_token}"
   end
