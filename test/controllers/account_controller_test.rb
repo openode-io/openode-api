@@ -43,8 +43,6 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
     assert_equal user.newsletter, 1
     assert_equal user.credits.positive?, true
 
-    puts "user cred #{user.credits}"
-
     mail_sent = ActionMailer::Base.deliveries.first
     assert_equal mail_sent.subject, 'Welcome to opeNode!'
     assert_includes mail_sent.body.raw_source, 'Activate your account'
@@ -83,5 +81,63 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
     post '/account/register', params: account, as: :json
 
     assert response.status >= 400
+  end
+
+  test '/account/forgot-password with valid email' do
+    user = default_user
+
+    post '/account/forgot-password',
+         as: :json,
+         params: { email: user.email }
+
+    user.reload
+
+    mail_sent = ActionMailer::Base.deliveries.first
+    
+    assert_equal mail_sent.subject, 'opeNode Password Reset'
+    assert_includes mail_sent.body.raw_source, "/reset/#{user.reset_token}"
+  end
+
+  test '/account/forgot-password with invalid email' do
+    user = default_user
+    user.reset_token = nil
+    user.save!
+
+    post '/account/forgot-password',
+         as: :json,
+         params: { email: "hiworld@gmaill.com" }
+
+    user.reload
+
+    assert_equal user.reset_token, nil
+  end
+
+  test '/account/verify-reset-token with invalid reset token' do
+    user = default_user
+    user.regen_reset_token!
+
+    post '/account/verify-reset-token',
+         as: :json,
+         params: { reset_token: "invalid" }
+
+    assert_response :not_found
+  end
+
+  test '/account/verify-reset-token with valid reset token' do
+    user = default_user
+    user.regen_reset_token!
+    original_reset_token = user.reset_token
+
+    post '/account/verify-reset-token',
+         as: :json,
+         params: { reset_token: user.reset_token }
+
+    assert_response :success
+
+    assert response.parsed_body['token'], user.token
+
+    # once used, it should change
+    user.reload
+    assert_equal user.reset_token != original_reset_token, true
   end
 end

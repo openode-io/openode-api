@@ -13,6 +13,8 @@ Rails.application.routes.draw do
   scope :account do
     post 'getToken', to: 'account#get_token'
     post 'register', to: 'account#register'
+    post 'forgot-password', to: 'account#forgot_password'
+    post 'verify-reset-token', to: 'account#verify_reset_token'
   end
 
   scope :global do

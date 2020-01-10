@@ -22,6 +22,13 @@ class UserMailer < ApplicationMailer
     mail(to: mail_to, subject: 'Your opeNode account has low credit')
   end
 
+  def forgot_password
+    @user = params[:user]
+    mail_to = @user.email
+
+    mail(to: mail_to, subject: 'opeNode Password Reset')
+  end
+
   def stopped_due_no_credit
     @user = params[:user]
     @website = params[:website]

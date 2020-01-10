@@ -1,4 +1,5 @@
 class AccountController < ApplicationController
+
   # get a token given a login-passwd
   def get_token
     user = User.find_by! email: params['email']
@@ -18,6 +19,33 @@ class AccountController < ApplicationController
       email: user.email,
       token: user.token
     )
+  end
+
+  def forgot_password
+    email = params['email']
+    user = User.find_by email: email
+
+    unless user
+      logger.error("invalid email #{email}")
+      return json('status': 'success')
+    end
+
+    user.regen_reset_token!
+
+    UserMailer.with(user: user).forgot_password.deliver_now
+
+    json(
+      'status': 'success'
+    )
+  end
+
+  def verify_reset_token
+    user = User.find_by! reset_token: params['reset_token']
+
+    # deactivate the token
+    user.regen_reset_token!
+
+    json(token: user.token)
   end
 
   private

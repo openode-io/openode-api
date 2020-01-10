@@ -113,6 +113,11 @@ class User < ApplicationRecord
     save
   end
 
+  def regen_reset_token!
+    self.reset_token = SecureRandom.hex(32)
+    save
+  end
+
   def credits?
     credits.positive?
   end

@@ -121,6 +121,15 @@ class UserTest < ActiveSupport::TestCase
     assert_not_equal token, user_changed.token
   end
 
+  test 'regen reset token' do
+    u = default_user
+    u.reset_token = nil
+    u.save!
+    u.regen_reset_token!
+
+    assert_equal u.reset_token.length, 64
+  end
+
   test 'credits? when having credits' do
     user = User.find_by email: 'myadmin@thisisit.com'
     assert_equal user.credits?, true
