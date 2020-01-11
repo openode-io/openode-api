@@ -17,6 +17,8 @@ Rails.application.routes.draw do
     post 'verify-reset-token', to: 'account#verify_reset_token'
   end
 
+  get '/', to: 'global#test'
+
   scope :global do
     get 'test', to: 'global#test'
     get 'version', to: 'global#version'
