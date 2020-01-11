@@ -25,19 +25,6 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     prepare_ssh_session(cmd, IO.read('test/fixtures/kubernetes/1_pod_alive.json'))
   end
 
-  def prepare_get_services_default_happy
-    cmd = kubernetes_method.kubectl(
-      website_location: @website_location,
-      with_namespace: false,
-      s_arguments: "get services -o json"
-    )
-
-    result = IO.read(
-      'test/fixtures/kubernetes/get-default-services-with-nginx-controller.json'
-    )
-    prepare_ssh_session(cmd, result)
-  end
-
   # verify can deploy
 
   test 'verify_can_deploy - can do it' do
@@ -163,7 +150,7 @@ VAR2=5678
   end
 
   test 'get_services_json - happy path' do
-    prepare_get_services_default_happy
+    prepare_get_services_default_happy(kubernetes_method, @website_location)
 
     assert_scripted do
       begin_ssh
@@ -179,7 +166,7 @@ VAR2=5678
   end
 
   test 'find_first_load_balancer default' do
-    prepare_get_services_default_happy
+    prepare_get_services_default_happy(kubernetes_method, @website_location)
 
     assert_scripted do
       begin_ssh
@@ -493,24 +480,36 @@ VAR2=5678
   end
 
   test 'generate_ingress_yml' do
-    yml = kubernetes_method.generate_ingress_yml(@website, @website_location)
-    assert_contains_ingress_yml(yml, @website, @website_location,
-                                with_certificate_secret: true)
+    prepare_get_services_default_happy(kubernetes_method, @website_location)
+
+    assert_scripted do
+      begin_ssh
+
+      yml = kubernetes_method.generate_ingress_yml(@website, @website_location)
+      assert_contains_ingress_yml(yml, @website, @website_location,
+                                  with_certificate_secret: true)
+    end
   end
 
   test 'generate_ingress_yml - with certificate' do
     set_website_certs(@website)
+    prepare_get_services_default_happy(kubernetes_method, @website_location)
 
-    yml = kubernetes_method.generate_ingress_yml(@website, @website_location)
+    assert_scripted do
+      begin_ssh
 
-    assert_contains_ingress_yml(yml, @website, @website_location,
-                                with_certificate_secret: true,
-                                with_certificate_secret_name: "manual-certificate")
+      yml = kubernetes_method.generate_ingress_yml(@website, @website_location)
+
+      assert_contains_ingress_yml(yml, @website, @website_location,
+                                  with_certificate_secret: true,
+                                  with_certificate_secret_name: "manual-certificate")
+    end
   end
 
   test 'generate_instance_yml - basic' do
     cmd_get_dotenv = kubernetes_method.retrieve_dotenv_cmd(project_path: @website.repo_dir)
     prepare_ssh_session(cmd_get_dotenv, '')
+    prepare_get_services_default_happy(kubernetes_method, @website_location)
 
     assert_scripted do
       begin_ssh
@@ -529,6 +528,7 @@ VAR2=5678
   test 'generate_instance_yml - without namespace object' do
     cmd_get_dotenv = kubernetes_method.retrieve_dotenv_cmd(project_path: @website.repo_dir)
     prepare_ssh_session(cmd_get_dotenv, '')
+    prepare_get_services_default_happy(kubernetes_method, @website_location)
 
     assert_scripted do
       begin_ssh
@@ -608,6 +608,8 @@ VAR2=5678
                             nb_lines: 1_000)
     prepare_make_secret(kubernetes_method, @website, @website_location, "success")
     prepare_get_dotenv(kubernetes_method, @website, "VAR=123")
+
+    prepare_get_services_default_happy(kubernetes_method, @website_location)
 
     prepare_action_yml(kubernetes_method, @website_location, "apply.yml",
                        "delete -f apply.yml", 'success')

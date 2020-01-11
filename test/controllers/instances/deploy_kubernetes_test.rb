@@ -21,6 +21,9 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     prepare_build_image(kubernetes_method, website, deployment, "result")
     prepare_push_image(kubernetes_method, website, deployment, "result")
     prepare_get_dotenv(kubernetes_method, website, "VAR1=12")
+
+    prepare_get_services_default_happy(kubernetes_method, website_location)
+
     prepare_action_yml(kubernetes_method, website_location, "apply.yml",
                        "apply -f apply.yml", 'success')
     prepare_node_alive(kubernetes_method, website, website_location, 'success', 1)
@@ -47,7 +50,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
       assert_equal @website.status, Website::STATUS_ONLINE
       assert_equal deployment.status, Deployment::STATUS_SUCCESS
-      assert_equal deployment.result['steps'].length, 13 # global, 2 kills, finalize
+      assert_equal deployment.result['steps'].length, 14 # global, 2 kills, finalize
 
       assert_equal deployment.result['errors'].length, 0
 
@@ -96,6 +99,9 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
   test '/instances/:instance_id/stop ' do
     prepare_make_secret(@kubernetes_method, @website, @website_location, "result")
     prepare_get_dotenv(@kubernetes_method, @website, "VAR1=12")
+
+    prepare_get_services_default_happy(@kubernetes_method, @website_location)
+
     prepare_action_yml(@kubernetes_method, @website_location, "apply.yml",
                        "delete -f apply.yml", 'success')
 

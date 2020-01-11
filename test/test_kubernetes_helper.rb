@@ -93,4 +93,17 @@ class ActiveSupport::TestCase
 
     prepare_ssh_session(cmd_instance_up, expected_result, expected_exit_code)
   end
+
+  def prepare_get_services_default_happy(kubernetes_method, website_location)
+    cmd = kubernetes_method.kubectl(
+      website_location: website_location,
+      with_namespace: false,
+      s_arguments: "get services -o json"
+    )
+
+    result = IO.read(
+      'test/fixtures/kubernetes/get-default-services-with-nginx-controller.json'
+    )
+    prepare_ssh_session(cmd, result)
+  end
 end

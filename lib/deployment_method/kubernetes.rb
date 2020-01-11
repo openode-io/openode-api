@@ -83,9 +83,6 @@ module DeploymentMethod
                                        with_namespace_object: true,
                                        image_name_tag: image_manager.image_name_tag)
 
-      puts "kube yml -->"
-      puts kube_yml
-
       notify("info", "Applying instance environment...")
 
       # then apply the yml
