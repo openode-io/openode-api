@@ -594,6 +594,34 @@ VAR2=5678
     end
   end
 
+  test 'final_instance_details - with custom domain' do
+    w = default_custom_domain_website
+    website_location = w.website_locations.first
+
+    file_services =
+      "test/fixtures/kubernetes/services-with-resolved-load-balancer.json"
+    result = IO.read(file_services)
+    prepare_get_services_namespaced_happy(kubernetes_method, website_location,
+                                          result)
+
+    assert_scripted do
+      begin_ssh
+
+      result_details = kubernetes_method.final_instance_details(
+        website: w,
+        website_location: website_location
+      )
+
+      expected_result = {
+        "result" => "success",
+        "url" => "http://www.what.is/",
+        "CNAME Record" => "6ojq59kjlk.lb.c1.bhs5.k8s.ovh.net"
+      }
+
+      assert_equal result_details, expected_result
+    end
+  end
+
   test 'finalize - when failing should stop' do
     @website.status = Website::STATUS_OFFLINE
     @website.save!
@@ -621,6 +649,26 @@ VAR2=5678
         website: @website,
         website_location: @website_location
       )
+    end
+  end
+
+  test 'wait_for_service_load_balancer - available' do
+    w = default_custom_domain_website
+    website_location = w.website_locations.first
+
+    file_services =
+      "test/fixtures/kubernetes/services-with-resolved-load-balancer.json"
+    result = IO.read(file_services)
+    prepare_get_services_namespaced_happy(kubernetes_method, website_location,
+                                          result)
+
+    assert_scripted do
+      begin_ssh
+
+      load_balancer =
+        kubernetes_method.wait_for_service_load_balancer(w, website_location)
+
+      assert_equal load_balancer, "6ojq59kjlk.lb.c1.bhs5.k8s.ovh.net"
     end
   end
 end

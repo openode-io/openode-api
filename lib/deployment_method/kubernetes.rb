@@ -602,6 +602,26 @@ module DeploymentMethod
       )
     end
 
+    def wait_for_service_load_balancer(website, website_location)
+      load_balancer = nil
+
+      18.times do |_iteration|
+        services = get_services_json(
+          website: website,
+          website_location: website_location,
+          with_namespace: true # for the given custom domain
+        )
+
+        load_balancer = find_first_load_balancer(services)
+
+        return load_balancer if load_balancer
+
+        sleep 10 if ENV['RAILS_ENV'] != 'test'
+      end
+
+      'unavailable CNAME - unable to get the load balancer address'
+    end
+
     def final_instance_details(opts = {})
       result = {}
 
@@ -611,7 +631,9 @@ module DeploymentMethod
       result['url'] = "http://#{website_location.main_domain}/"
 
       if website.domain_type == 'custom_domain'
-        result['CNAME Record'] = "TODO"
+        notify('info', "Waiting for the load balancer hostname to resolve...")
+        load_balancer = wait_for_service_load_balancer(website, website_location)
+        result['CNAME Record'] = load_balancer
       end
 
       result
@@ -637,15 +659,15 @@ module DeploymentMethod
         Ex::Logger.info(e, 'Unable to retrieve the logs')
       end
 
-      if website.online?
-        notify_final_instance_details(options)
-      else
-        begin
+      begin
+        if website.online?
+          notify_final_instance_details(options)
+        else
           # stop it
           do_stop(options)
-        rescue StandardError => e
-          Ex::Logger.info(e, 'Unable to stop completely')
         end
+      rescue StandardError => e
+        Ex::Logger.info(e, 'Unable to finalize completely')
       end
     end
 

@@ -106,4 +106,15 @@ class ActiveSupport::TestCase
     )
     prepare_ssh_session(cmd, result)
   end
+
+  def prepare_get_services_namespaced_happy(kubernetes_method, website_location,
+                                            expected_result)
+    cmd = kubernetes_method.kubectl(
+      website_location: website_location,
+      with_namespace: true,
+      s_arguments: "get services -o json"
+    )
+
+    prepare_ssh_session(cmd, expected_result)
+  end
 end
