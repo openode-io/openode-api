@@ -1,0 +1,137 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "creationTimestamp": "2019-12-07T21:56:57Z",
+                "labels": {
+                    "component": "apiserver",
+                    "provider": "kubernetes"
+                },
+                "name": "kubernetes",
+                "namespace": "default",
+                "resourceVersion": "545260182",
+                "selfLink": "/api/v1/namespaces/default/services/kubernetes",
+                "uid": "9ff6e890-2e31-4691-aa35-c86dc2d83816"
+            },
+            "spec": {
+                "clusterIP": "10.3.0.1",
+                "ports": [
+                    {
+                        "name": "https",
+                        "port": 443,
+                        "protocol": "TCP",
+                        "targetPort": 6443
+                    }
+                ],
+                "sessionAffinity": "None",
+                "type": "ClusterIP"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "creationTimestamp": "2019-12-17T15:05:48Z",
+                "labels": {
+                    "app": "nginx-ingress",
+                    "chart": "nginx-ingress-1.26.2",
+                    "component": "controller",
+                    "heritage": "Helm",
+                    "release": "quickstart"
+                },
+                "name": "quickstart-nginx-ingress-controller",
+                "namespace": "default",
+                "resourceVersion": "622539110",
+                "selfLink": "/api/v1/namespaces/default/services/quickstart-nginx-ingress-controller",
+                "uid": "6bde7069-777c-4903-be90-9f41239152ba"
+            },
+            "spec": {
+                "clusterIP": "10.3.11.53",
+                "externalTrafficPolicy": "Cluster",
+                "ports": [
+                    {
+                        "name": "http",
+                        "nodePort": 32117,
+                        "port": 80,
+                        "protocol": "TCP",
+                        "targetPort": "http"
+                    },
+                    {
+                        "name": "https",
+                        "nodePort": 32218,
+                        "port": 443,
+                        "protocol": "TCP",
+                        "targetPort": "https"
+                    }
+                ],
+                "selector": {
+                    "app": "nginx-ingress",
+                    "component": "controller",
+                    "release": "quickstart"
+                },
+                "sessionAffinity": "None",
+                "type": "LoadBalancer"
+            },
+            "status": {
+                "loadBalancer": {
+                    "ingress": [
+                        {
+                            "hostname": "6ojq5t5np0.lb.c1.bhs5.k8s.ovh.net"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "creationTimestamp": "2019-12-17T15:05:48Z",
+                "labels": {
+                    "app": "nginx-ingress",
+                    "chart": "nginx-ingress-1.26.2",
+                    "component": "default-backend",
+                    "heritage": "Helm",
+                    "release": "quickstart"
+                },
+                "name": "quickstart-nginx-ingress-default-backend",
+                "namespace": "default",
+                "resourceVersion": "622533740",
+                "selfLink": "/api/v1/namespaces/default/services/quickstart-nginx-ingress-default-backend",
+                "uid": "ee93b785-2295-478e-8b23-fa28ffce8bb2"
+            },
+            "spec": {
+                "clusterIP": "10.3.221.156",
+                "ports": [
+                    {
+                        "name": "http",
+                        "port": 80,
+                        "protocol": "TCP",
+                        "targetPort": "http"
+                    }
+                ],
+                "selector": {
+                    "app": "nginx-ingress",
+                    "component": "default-backend",
+                    "release": "quickstart"
+                },
+                "sessionAffinity": "None",
+                "type": "ClusterIP"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": "",
+        "selfLink": ""
+    }
+}

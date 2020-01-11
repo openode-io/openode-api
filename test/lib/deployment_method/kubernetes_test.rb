@@ -25,6 +25,19 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     prepare_ssh_session(cmd, IO.read('test/fixtures/kubernetes/1_pod_alive.json'))
   end
 
+  def prepare_get_services_default_happy
+    cmd = kubernetes_method.kubectl(
+      website_location: @website_location,
+      with_namespace: false,
+      s_arguments: "get services -o json"
+    )
+
+    result = IO.read(
+      'test/fixtures/kubernetes/get-default-services-with-nginx-controller.json'
+    )
+    prepare_ssh_session(cmd, result)
+  end
+
   # verify can deploy
 
   test 'verify_can_deploy - can do it' do
@@ -146,6 +159,70 @@ VAR2=5678
       )
 
       assert_equal result['items'][0]['kind'], 'Pod'
+    end
+  end
+
+  test 'get_services_json - happy path' do
+    prepare_get_services_default_happy
+
+    assert_scripted do
+      begin_ssh
+
+      result = kubernetes_method.get_services_json(
+        website: @website,
+        website_location: @website_location,
+        with_namespace: false
+      )
+
+      assert_equal result['items'][0]['kind'], 'Service'
+    end
+  end
+
+  test 'find_first_load_balancer default' do
+    prepare_get_services_default_happy
+
+    assert_scripted do
+      begin_ssh
+
+      result = kubernetes_method.get_services_json(
+        website: @website,
+        website_location: @website_location,
+        with_namespace: false
+      )
+
+      load_balancer = kubernetes_method.find_first_load_balancer(result)
+
+      assert_equal load_balancer, "6ojq5t5np0.lb.c1.bhs5.k8s.ovh.net"
+    end
+  end
+
+  test 'find_first_load_balancer in namespace' do
+    result = JSON.parse(
+      IO.read("test/fixtures/kubernetes/services-with-resolved-load-balancer.json")
+    )
+
+    load_balancer = kubernetes_method.find_first_load_balancer!(result)
+
+    assert_equal load_balancer, "6ojq59kjlk.lb.c1.bhs5.k8s.ovh.net"
+  end
+
+  test 'find_first_load_balancer in namespace - not yet resolved' do
+    result = JSON.parse(
+      IO.read("test/fixtures/kubernetes/services-with-pending-load-balancer.json")
+    )
+
+    load_balancer = kubernetes_method.find_first_load_balancer(result)
+
+    assert_nil load_balancer
+  end
+
+  test 'find_first_load_balancer! in namespace - not yet resolved' do
+    result = JSON.parse(
+      IO.read("test/fixtures/kubernetes/services-with-pending-load-balancer.json")
+    )
+
+    assert_raises StandardError do
+      kubernetes_method.find_first_load_balancer!(result)
     end
   end
 
@@ -298,16 +375,29 @@ VAR2=5678
     assert_not_includes yml, "readinessProbe:"
   end
 
-  def assert_contains_service_yml(yml, website)
+  def assert_contains_service_yml(yml, website, options = {})
     assert_includes yml, "kind: Service"
     assert_includes yml, "name: main-service"
     assert_includes yml, "namespace: #{kubernetes_method.namespace_of(website)}"
     assert_includes yml, "app: www"
+
+    if options[:with_type]
+      assert_includes yml, "type: #{options[:with_type]}"
+    end
   end
 
   test 'generate_service_yml - basic' do
     yml = kubernetes_method.generate_service_yml(@website)
-    assert_contains_service_yml(yml, @website)
+
+    assert_contains_service_yml(yml, @website, with_type: "NodePort")
+  end
+
+  test 'generate_service_yml - with custom domain' do
+    w = default_custom_domain_website
+
+    yml = kubernetes_method.generate_service_yml(w)
+
+    assert_contains_service_yml(yml, w, with_type: "LoadBalancer")
   end
 
   test 'certificate? - if certificate provided' do

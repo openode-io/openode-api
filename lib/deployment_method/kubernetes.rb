@@ -83,6 +83,9 @@ module DeploymentMethod
                                        with_namespace_object: true,
                                        image_name_tag: image_manager.image_name_tag)
 
+      puts "kube yml -->"
+      puts kube_yml
+
       notify("info", "Applying instance environment...")
 
       # then apply the yml
@@ -325,7 +328,7 @@ module DeploymentMethod
           name: main-service
           namespace: #{namespace_of(website)}
         spec:
-          type: LoadBalancer
+          #{website.custom_domain? ? 'type: LoadBalancer' : 'type: NodePort'}
           ports:
           - port: 80
             targetPort: 80
@@ -394,7 +397,20 @@ module DeploymentMethod
                               key: key)
     end
 
-    def generate_rules_ingress_yml(rules = [])
+    def generate_rules_ingress_yml(website, website_location, rules = [])
+      if website.subdomain?
+        # we add an extra rule:
+        # - host: ***.k8s.ovh.net # nginx controller external ip
+        default_services = get_services_json(
+          website: website,
+          website_location: website_location,
+          with_namespace: false
+        )
+
+        load_balancer = find_first_load_balancer!(default_services)
+        rules << { hostname: load_balancer }
+      end
+
       result = ""
 
       rules.each do |rule|
@@ -441,7 +457,7 @@ module DeploymentMethod
         spec:
         #{generate_tls_specs_ingress_yml(website, rules_domains) if certificate?(website)}
           rules:
-        #{generate_rules_ingress_yml(rules_domains)}
+        #{generate_rules_ingress_yml(website, website_location, rules_domains)}
       END_YML
     end
 
@@ -488,6 +504,43 @@ module DeploymentMethod
       }
 
       JSON.parse(ex("kubectl", args)[:stdout])
+    end
+
+    def get_services_json(options = {})
+      _, website_location = get_website_fields(options)
+
+      args = {
+        website_location: website_location,
+        with_namespace: options[:with_namespace],
+        s_arguments: "get services -o json",
+        default_retry_scheme: true,
+        ensure_exit_code: 0
+      }
+
+      JSON.parse(ex("kubectl", args)[:stdout])
+    end
+
+    def find_first_load_balancer(object)
+      load_balancer = nil
+
+      object['items'].find do |item|
+        next unless item.dig('spec', 'type') == "LoadBalancer"
+
+        in_load_balancers = item.dig('status', 'loadBalancer', 'ingress')
+
+        load_balancer = in_load_balancers[0]['hostname'] if in_load_balancers
+      end
+
+      load_balancer
+    end
+
+    # if not found, throw an exception
+    def find_first_load_balancer!(object)
+      result = find_first_load_balancer(object)
+
+      raise 'Cannot find a proper load balancer' unless result
+
+      result
     end
 
     def get_latest_pod_in(pods_json)
