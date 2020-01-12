@@ -536,6 +536,7 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.account_type, Website::DEFAULT_ACCOUNT_TYPE
     assert_equal website.domains, []
     assert_equal website.open_source['status'], 'active'
+    assert_equal website.type, 'kubernetes'
   end
 
   test 'create - subdomain downcase if upper cases' do
