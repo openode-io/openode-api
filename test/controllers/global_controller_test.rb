@@ -57,7 +57,6 @@ class GlobalControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal response.parsed_body.length, 1
     assert_equal response.parsed_body[0]['str_id'], 'canada2'
-    
   end
 
   test '/global/available-plans' do
