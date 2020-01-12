@@ -15,7 +15,15 @@ class GlobalController < ApplicationController
 
   api!
   def available_locations
-    json(CloudProvider::Manager.instance.available_locations)
+    type = params['type']
+
+    manager = if type
+                CloudProvider::Manager.instance.first_of_type(type)
+              else
+                CloudProvider::Manager.instance
+              end
+
+    json(manager.available_locations)
   end
 
   api!
