@@ -44,6 +44,11 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     end
   end
 
+  test 'delete files generate proper command' do
+    result = kubernetes_method.delete_files(files: ['/home/4/test.txt', '/home/what/isthat'])
+    assert_equal result, 'rm -rf "/home/4/test.txt" ; rm -rf "/home/what/isthat" ; '
+  end
+
   # initialization
 
   test 'initialization with crontab' do

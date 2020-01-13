@@ -320,14 +320,6 @@ module DeploymentMethod
       "#{exec_begin(website.container_id)} #{service} #{cmd}"
     end
 
-    def delete_files(options = {})
-      require_fields([:files], options)
-
-      options[:files]
-        .map { |file| "rm -rf \"#{file}\" ; " }
-        .join('')
-    end
-
     def self.default_docker_compose_file(opts = {})
       env_part =
         if opts[:with_env_file]

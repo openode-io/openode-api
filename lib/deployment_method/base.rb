@@ -74,6 +74,14 @@ module DeploymentMethod
       "mkdir -p #{options[:path]}"
     end
 
+    def delete_files(options = {})
+      require_fields([:files], options)
+
+      options[:files]
+        .map { |file| "rm -rf \"#{file}\" ; " }
+        .join('')
+    end
+
     def uncompress_remote_archive(options = {})
       require_fields(%i[archive_path repo_dir], options)
       arch_path = options[:archive_path]
