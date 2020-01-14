@@ -23,17 +23,19 @@ module DeploymentMethod
 
     def notify(level, msg)
       event = {
-        'status': runner.execution.status,
+        'status': runner.execution&.status,
         'level': level,
         'update': Str::Encode.strip_invalid_chars(msg)
       }
 
       DeploymentsChannel.broadcast_to(runner.execution, event)
 
-      runner.execution.reload
-      runner.execution.events ||= []
-      runner.execution.events << event
-      runner.execution.save
+      if runner.execution
+        runner.execution.reload
+        runner.execution.events ||= []
+        runner.execution.events << event
+        runner.execution.save
+      end
     end
 
     def mark_accessed(options = {})

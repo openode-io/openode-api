@@ -7,6 +7,12 @@ module DeploymentMethod
     # verify can deploy
 
     def verify_can_deploy(options = {})
+      notify('warn', "*** DEPRECATION WARNING - you are using a deployment " \
+                      "method which will get deprecated. " \
+                      "Make sure to upgrade the CLI (npm -g i openode) " \
+                      "and run openode set-config TYPE kubernetes. " \
+                      "See TODO for more information.")
+
       super(options)
 
       pre_repository_verification(options)

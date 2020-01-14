@@ -154,7 +154,7 @@ class InstancesControllerDeployDockerTest < ActionDispatch::IntegrationTest
       assert_equal deployment.result['errors'].length, 0
 
       # should also have a deployment with events
-      assert_equal website.deployments.last.events.length, 16
+      assert_equal website.deployments.last.events.length, 17
 
       allowed_to = dep_event_exists?(website.deployments.last.events,
                                      'running', 'allowed to dep')
