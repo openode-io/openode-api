@@ -391,6 +391,12 @@ class Website < ApplicationRecord
       enum: ['true', 'false', '']
     },
     {
+      variable: 'TYPE',
+      description: 'Deployment method (internal)',
+      type: 'website',
+      enum: [TYPE_KUBERNETES, TYPE_DOCKER]
+    },
+    {
       variable: 'MAX_BUILD_DURATION',
       description: 'The build duration limit in seconds.',
       min: 50,

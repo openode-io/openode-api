@@ -38,6 +38,18 @@ class ConfigsControllerTest < ActionDispatch::IntegrationTest
     assert_equal w.redir_http_to_https, true
   end
 
+  test '/instances/:instance_id/set-config with TYPE' do
+    post '/instances/testsite/set-config',
+         as: :json,
+         params: { variable: 'TYPE', value: 'kubernetes' },
+         headers: default_headers_auth
+
+    assert_response :success
+    w = Website.find_by site_name: 'testsite'
+
+    assert_equal w.type, 'kubernetes'
+  end
+
   test '/instances/:instance_id/set-config with valid variable, enum' do
     post '/instances/testsite/set-config',
          as: :json,
