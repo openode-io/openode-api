@@ -35,6 +35,14 @@ Rails.application.routes.draw do
     get 'stats', to: 'global#stats'
   end
 
+  scope :open_source_projects do
+    get 'latest', to: 'open_source#latest'
+  end
+
+  scope :open_source_project, constraints: { site_name: %r{[^/]+} } do
+    get ':site_name', to: 'open_source#project'
+  end
+
   scope :order do
     post 'paypal', to: 'order#paypal'
   end

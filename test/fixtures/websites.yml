@@ -131,3 +131,4 @@ with_type_kubernetes:
   sub_status: MyString
   cloud_type: cloud
   init_script: MyText
+  open_source_activated: true

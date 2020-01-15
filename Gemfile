@@ -39,6 +39,7 @@ gem 'solid_assert'
 gem 'sshkey'
 gem 'uptimerobot'
 gem 'vultr'
+gem 'will_paginate'
 
 gem 'rubocop-rails'
 
