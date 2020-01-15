@@ -303,7 +303,7 @@ VAR2=5678
     assert_contains_namespace_yml(yml, @website)
   end
 
-  def assert_contains_deployment_yml(yml, website, opts = {})
+  def assert_contains_deployment_yml(yml, website, _website_location, opts = {})
     assert_includes yml, "kind: Deployment"
     assert_includes yml, "  name: www-deployment"
     assert_includes yml, "  namespace: #{kubernetes_method.namespace_of(website)}"
@@ -324,15 +324,60 @@ VAR2=5678
     assert_includes yml, "envFrom:"
     assert_includes yml, "- configMapRef:"
     assert_includes yml, "    name: dotenv"
+
+    persistence_strings_to_expect = [
+      "volumes:",
+      "- name: main-volume",
+      "- mountPath:",
+      "volumeMounts:"
+    ]
+
+    if opts[:with_persistence]
+      persistence_strings_to_expect.each do |s|
+        assert_includes yml, s
+      end
+    else
+      persistence_strings_to_expect.each do |s|
+        assert_not_includes yml, s
+      end
+    end
   end
 
   test 'generate_deployment_yml - basic' do
-    yml = kubernetes_method.generate_deployment_yml(@website, @website_location)
+    yml = kubernetes_method.generate_deployment_yml(@website, @website_location, {})
 
-    assert_contains_deployment_yml(yml, @website,
+    assert_contains_deployment_yml(yml, @website, @website_location,
                                    requested_memory: @website.memory,
                                    limited_memory: @website.memory * 2,
                                    with_probes: true)
+  end
+
+  test 'generate_deployment_yml - with persisted storage' do
+    @website.storage_areas = ["/opt/data"]
+    @website.save!
+    @website_location.change_storage!(5)
+
+    yml = kubernetes_method.generate_deployment_yml(@website, @website_location, {})
+
+    assert_contains_deployment_yml(yml, @website, @website_location,
+                                   requested_memory: @website.memory,
+                                   limited_memory: @website.memory * 2,
+                                   with_probes: true,
+                                   with_persistence: true)
+  end
+
+  test 'generate_persistence_volume_claim_yml - without extra storage' do
+    yml = kubernetes_method.generate_persistence_volume_claim_yml(@website_location)
+
+    assert_equal yml, ""
+  end
+
+  test 'generate_persistence_volume_claim_yml - with extra storage' do
+    @website_location.change_storage!(3)
+    yml = kubernetes_method.generate_persistence_volume_claim_yml(@website_location)
+
+    assert_includes yml, "kind: PersistentVolumeClaim"
+    assert_includes yml, "storage: 3Gi"
   end
 
   test 'generate_deployment_yml - with skip port check' do
@@ -340,9 +385,9 @@ VAR2=5678
       "SKIP_PORT_CHECK": "true"
     }
     @website.save!
-    yml = kubernetes_method.generate_deployment_yml(@website, @website_location)
+    yml = kubernetes_method.generate_deployment_yml(@website, @website_location, {})
 
-    assert_contains_deployment_yml(yml, @website,
+    assert_contains_deployment_yml(yml, @website, @website_location,
                                    requested_memory: @website.memory,
                                    limited_memory: @website.memory * 2,
                                    with_probes: false)
@@ -515,22 +560,25 @@ VAR2=5678
     cmd_get_dotenv = kubernetes_method.retrieve_dotenv_cmd(project_path: @website.repo_dir)
     prepare_ssh_session(cmd_get_dotenv, '')
     prepare_get_services_default_happy(kubernetes_method, @website_location)
+    @website_location.change_storage!(3)
 
     assert_scripted do
       begin_ssh
 
       yml = kubernetes_method.generate_instance_yml(@website, @website_location,
-                                                    with_namespace_object: true)
+                                                    with_namespace_object: true,
+                                                    with_pvc_object: true)
 
+      assert_includes yml, "kind: PersistentVolumeClaim"
       assert_contains_namespace_yml(yml, @website)
-      assert_contains_deployment_yml(yml, @website, with_probes: true)
+      assert_contains_deployment_yml(yml, @website, @website_location, with_probes: true)
       assert_contains_service_yml(yml, @website)
       assert_contains_ingress_yml(yml, @website, @website_location,
                                   with_certificate_secret: true)
     end
   end
 
-  test 'generate_instance_yml - without namespace object' do
+  test 'generate_instance_yml - without namespace object/pvc' do
     cmd_get_dotenv = kubernetes_method.retrieve_dotenv_cmd(project_path: @website.repo_dir)
     prepare_ssh_session(cmd_get_dotenv, '')
     prepare_get_services_default_happy(kubernetes_method, @website_location)
@@ -539,10 +587,12 @@ VAR2=5678
       begin_ssh
 
       yml = kubernetes_method.generate_instance_yml(@website, @website_location,
-                                                    with_namespace_object: false)
+                                                    with_namespace_object: false,
+                                                    with_pvc_object: false)
 
+      assert_not_includes yml, "kind: PersistentVolumeClaim"
       assert_not_includes yml, "kind: Namespace"
-      assert_contains_deployment_yml(yml, @website, with_probes: true)
+      assert_contains_deployment_yml(yml, @website, @website_location, with_probes: true)
       assert_contains_service_yml(yml, @website)
       assert_contains_ingress_yml(yml, @website, @website_location,
                                   with_certificate_secret: true)
@@ -675,5 +725,43 @@ VAR2=5678
 
       assert_equal load_balancer, "6ojq59kjlk.lb.c1.bhs5.k8s.ovh.net"
     end
+  end
+
+  # volumes, persistence
+  test 'storage_volumes? when having volumes' do
+    w = default_website
+    wl = default_website_location
+    w.storage_areas = ["/opt/data/what"]
+    w.save!
+
+    assert_equal wl.extra_storage, 1
+
+    # storage_volumes
+    assert_equal kubernetes_method.storage_volumes?(w, wl), true
+  end
+
+  test 'storage_volumes? when no storage area' do
+    w = default_website
+    wl = default_website_location
+    w.storage_areas = []
+    w.save!
+
+    assert_equal wl.extra_storage, 1
+
+    # storage_volumes
+    assert_equal kubernetes_method.storage_volumes?(w, wl), false
+  end
+
+  test 'storage_volumes? when no extra storage' do
+    w = default_website
+    wl = default_website_location
+    w.storage_areas = ["/what"]
+    w.save!
+
+    wl.change_storage!(-1)
+    assert_equal wl.extra_storage, 0
+
+    # storage_volumes
+    assert_equal kubernetes_method.storage_volumes?(w, wl), false
   end
 end

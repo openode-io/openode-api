@@ -81,6 +81,7 @@ module DeploymentMethod
       # generate the yml to the build machine
       kube_yml = generate_instance_yml(website, website_location,
                                        with_namespace_object: true,
+                                       with_pvc_object: true,
                                        image_name_tag: image_manager.image_name_tag)
 
       notify("info", "Applying instance environment...")
@@ -108,6 +109,7 @@ module DeploymentMethod
       with_namespace_object = should_remove_namespace?(website.reload)
       kube_yml = generate_instance_yml(website, website_location,
                                        with_namespace_object: with_namespace_object,
+                                       with_pvc_object: false,
                                        image_name_tag: image_manager.image_name_tag)
 
       # then delete the yml
@@ -196,13 +198,14 @@ module DeploymentMethod
 
     def generate_instance_yml(website, website_location, opts = {})
       assert !opts[:with_namespace_object].nil?
+      assert !opts[:with_pvc_object].nil?
       dotenv_vars = retrieve_dotenv(website)
 
       <<~END_YML
         ---
         #{generate_namespace_yml(website) if opts[:with_namespace_object]}
         ---
-        #{generate_persistence_volume_claim_yml(website_location)}
+        #{generate_persistence_volume_claim_yml(website_location) if opts[:with_pvc_object]}
         ---
         #{generate_manual_tls_secret_yml(website)}
         ---
@@ -214,7 +217,7 @@ module DeploymentMethod
           variables: dotenv_vars
         )}
         ---
-        #{generate_deployment_yml(website, opts)}
+        #{generate_deployment_yml(website, website_location, opts)}
         ---
         #{generate_service_yml(website)}
         ---
@@ -244,14 +247,14 @@ module DeploymentMethod
         kind: PersistentVolumeClaim
         metadata:
           name: main-pvc
-          namespace: ns-kuard1
+          namespace: #{namespace_of(website_location.website)}
         spec:
           accessModes:
             - ReadWriteMany
           resources:
             requests:
               storage: #{website_location.extra_storage}Gi
-          storageClassName: cinder-classic"
+          storageClassName: cinder-classic
       END_YML
     end
 
@@ -276,7 +279,44 @@ module DeploymentMethod
       '
     end
 
-    def generate_deployment_yml(website, opts)
+    def storage_volumes?(website, website_location)
+      website_location.extra_storage? && website.storage_areas && !website.storage_areas.empty?
+    end
+
+    def generate_deployment_mount_paths_yml(website, website_location)
+      return "" unless storage_volumes?(website, website_location)
+
+      yml = ""
+
+      website.storage_areas.each do |storage_path|
+        yml += "" \
+"        - mountPath: \"#{storage_path}\"\n"\
+"          name: main-volume\n"
+      end
+
+      yml
+    end
+
+    def generate_deployment_volumes_yml(website, website_location)
+      return "" unless storage_volumes?(website, website_location)
+
+      chmod_cmds = website.storage_areas.map { |a| "chmod 777 \"#{a}\"" }.join(" ; ")
+
+      yml = "" \
+"      volumes:\n" \
+"      - name: main-volume\n" \
+"        persistentVolumeClaim:\n" \
+"          claimName: main-pvc\n" \
+"      initContainers:\n" \
+"      - name: init-volume\n" \
+"        image: busybox\n" \
+"        command: ['sh', '-c', '#{chmod_cmds}']\n" \
+"        volumeMounts:\n"
+
+      yml + generate_deployment_mount_paths_yml(website, website_location)
+    end
+
+    def generate_deployment_yml(website, website_location, opts)
       <<~END_YML
         apiVersion: apps/v1
         kind: Deployment
@@ -295,6 +335,7 @@ module DeploymentMethod
             spec:
               imagePullSecrets:
               - name: regcred
+        #{generate_deployment_volumes_yml(website, website_location)}
               containers:
               - image: #{opts[:image_name_tag]}
                 imagePullPolicy: Always
@@ -314,6 +355,8 @@ module DeploymentMethod
                     ephemeral-storage: 100Mi
                     memory: #{website.memory}Mi
                     # cpu: #{website.cpus}
+                #{'volumeMounts:  ' if storage_volumes?(website, website_location)}
+        #{generate_deployment_mount_paths_yml(website, website_location)}
       END_YML
     end
 
