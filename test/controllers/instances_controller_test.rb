@@ -319,6 +319,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     set_dummy_secrets_to(LocationServer.all)
     prepare_default_ports
     website = default_website
+    puts "statusss #{website.status}"
 
     expect_global_container(dep_method)
     prepare_ssh_session(dep_method.kill_global_container(id: 'b3621dd9d4dd'),
@@ -338,6 +339,20 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
       assert_equal website.executions.last.type, 'Task'
     end
+  end
+
+  test '/instances/:instance_id/stop should fail if offline' do
+    website = default_website
+    website.status = Website::STATUS_OFFLINE
+    website.save!
+
+    post '/instances/testsite/stop?location_str_id=canada',
+         as: :json,
+         params: {},
+         headers: default_headers_auth
+
+    assert_response :bad_request
+    assert_includes response.parsed_body.to_s, "must be in status"
   end
 
   test '/instances/:instance_id/stop forbidden' do

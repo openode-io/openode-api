@@ -25,7 +25,7 @@ class InstancesController < ApplicationController
     requires_docker_deployment
   end
 
-  before_action only: %i[logs cmd reload] do
+  before_action only: %i[stop logs cmd reload] do
     requires_status_in [Website::STATUS_ONLINE]
   end
 
