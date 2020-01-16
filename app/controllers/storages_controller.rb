@@ -13,6 +13,24 @@ class StoragesController < InstancesController
     change_storage(- @gb_to_change)
   end
 
+  api!
+  def destroy
+    if @website_location.extra_storage.positive?
+      params['amount_gb'] = @website_location.extra_storage
+      prepare_storage_change(sign: -1)
+      change_storage(- @gb_to_change, false)
+    end
+
+    @runner.execute([
+                      { cmd_name: 'destroy_storage_cmd' }
+                    ])
+
+    json(
+      result: 'success',
+      "Extra Storage (GB)": @website_location.extra_storage
+    )
+  end
+
   protected
 
   def prepare_storage_change(opts = {})
@@ -29,13 +47,15 @@ class StoragesController < InstancesController
     }
   end
 
-  def change_storage(gb_to_change)
+  def change_storage(gb_to_change, with_response = true)
     @website_location.change_storage!(gb_to_change)
     @website_location.reload
 
-    json(
-      result: 'success',
-      "Extra Storage (GB)": @website_location.extra_storage
-    )
+    if with_response
+      json(
+        result: 'success',
+        "Extra Storage (GB)": @website_location.extra_storage
+      )
+    end
   end
 end

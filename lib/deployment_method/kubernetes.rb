@@ -258,6 +258,18 @@ module DeploymentMethod
       END_YML
     end
 
+    def destroy_storage_cmd(options = {})
+      _, website_location = get_website_fields(options)
+
+      args = {
+        website_location: website_location,
+        with_namespace: true,
+        s_arguments: "delete pvc main-pvc"
+      }
+
+      kubectl(args)
+    end
+
     def generate_deployment_probes_yml(website)
       return '' if website.skip_port_check?
 
