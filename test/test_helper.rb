@@ -438,10 +438,10 @@ class ActiveSupport::TestCase
     User.find_by email: 'myadmin@thisisit.com'
   end
 
-  def base_params
+  def base_params(opts = {})
     {
       version: InstancesController::MINIMUM_CLI_VERSION,
-      location_str_id: 'canada'
+      location_str_id: opts[:location_str_id] || 'canada'
     }
   end
 
@@ -485,7 +485,7 @@ class ActiveSupport::TestCase
   end
 
   def run_deployer_job
-    job = Delayed::Job.where('handler LIKE ?', '%DeploymentMethod::Deployer%').first
+    job = Delayed::Job.where('handler LIKE ?', '%DeploymentMethod::Deployer%').last
 
     job.invoke_job
   end

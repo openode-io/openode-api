@@ -19,6 +19,7 @@ class InstancesController < ApplicationController
   end
 
   before_action :check_minimum_cli_version
+  before_action :prepare_record_website_event
   after_action :record_website_event
 
   before_action only: %i[reload] do
@@ -390,7 +391,16 @@ class InstancesController < ApplicationController
     @runner.terminate if @runner.present?
   end
 
+  def prepare_record_website_event
+    @website_event_obj = nil
+    @website_event_objs = []
+  end
+
   def record_website_event
     @website.create_event(@website_event_obj) if @website_event_obj
+
+    @website_event_objs.each do |event_obj|
+      @website.create_event(event_obj)
+    end
   end
 end

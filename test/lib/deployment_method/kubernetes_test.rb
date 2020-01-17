@@ -667,13 +667,19 @@ VAR2=5678
         website_location: website_location
       )
 
+      expected_cname = "6ojq59kjlk.lb.c1.bhs5.k8s.ovh.net"
+
       expected_result = {
         "result" => "success",
         "url" => "http://www.what.is/",
-        "CNAME Record" => "6ojq59kjlk.lb.c1.bhs5.k8s.ovh.net"
+        "CNAME Record" => expected_cname
       }
 
       assert_equal result_details, expected_result
+
+      # verify the cname is stored correctly
+      website_location.reload
+      assert_equal website_location.cname, expected_cname
     end
   end
 

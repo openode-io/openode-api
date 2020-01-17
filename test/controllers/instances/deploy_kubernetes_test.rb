@@ -7,7 +7,11 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     @website = default_kube_website
     @website_location = @website.website_locations.first
 
-    runner = prepare_kubernetes_runner(@website, @website_location)
+    prepare_kubernetes_method(@website, @website_location)
+  end
+
+  def prepare_kubernetes_method(website, website_location)
+    runner = prepare_kubernetes_runner(website, website_location)
 
     @kubernetes_method = runner.get_execution_method
   end

@@ -57,10 +57,11 @@ class StoragesControllerTest < ActionDispatch::IntegrationTest
 
       assert_equal website_location.extra_storage, 0
 
-      assert_equal website.events.count, 1
+      assert_equal website.events.count, 2
       assert_equal website.events[0].obj['title'], 'Extra Storage modification'
       assert_equal website.events[0].obj['extra_storage_changed'], '-3 GBs'
       assert_equal website.events[0].obj['total_extra_storage'], '0 GBs'
+      assert_equal website.events[1].obj['title'], 'Destroy storage'
 
       last_exec = website.executions.last
 

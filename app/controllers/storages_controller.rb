@@ -25,6 +25,8 @@ class StoragesController < InstancesController
                       { cmd_name: 'destroy_storage_cmd' }
                     ])
 
+    @website_event_objs << { title: 'Destroy storage' }
+
     json(
       result: 'success',
       "Extra Storage (GB)": @website_location.extra_storage
@@ -40,7 +42,7 @@ class StoragesController < InstancesController
 
     signed_gb_to_change = opts[:sign] * @gb_to_change
 
-    @website_event_obj = {
+    @website_event_objs << {
       title: 'Extra Storage modification',
       extra_storage_changed: "#{signed_gb_to_change} GBs",
       total_extra_storage: "#{@website_location.extra_storage + signed_gb_to_change} GBs"

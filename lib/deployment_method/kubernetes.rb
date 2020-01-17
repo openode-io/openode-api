@@ -688,6 +688,8 @@ module DeploymentMethod
       if website.domain_type == 'custom_domain'
         notify('info', "Waiting for the load balancer hostname to resolve...")
         load_balancer = wait_for_service_load_balancer(website, website_location)
+        website_location.cname = load_balancer
+        website_location.save
         result['CNAME Record'] = load_balancer
       end
 
