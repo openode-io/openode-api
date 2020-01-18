@@ -1,5 +1,5 @@
 class StoragesController < InstancesController
-  before_action :requires_cloud_plan, only: %i[increase]
+  before_action :requires_cloud_plan, only: %i[increase destroy]
 
   api!
   def increase

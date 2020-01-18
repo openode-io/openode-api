@@ -25,6 +25,10 @@ class Website < ApplicationRecord
                                       dependent: :destroy
 
   scope :custom_domain, -> { where(domain_type: 'custom_domain') }
+  scope :having_extra_storage, lambda {
+    joins(:website_locations).where('website_locations.extra_storage > 0')
+  }
+
   scope :in_statuses, lambda { |statuses|
     where(status: statuses)
   }
@@ -571,7 +575,7 @@ class Website < ApplicationRecord
 
   def extra_storage_credits_cost_per_hour
     Website.cost_price_to_credits(
-      total_extra_storage * CloudProvider::Internal::COST_EXTRA_STORAGE_GB_PER_HOUR
+      total_extra_storage * CloudProvider::Kubernetes::COST_EXTRA_STORAGE_GB_PER_HOUR
     )
   end
 
@@ -579,37 +583,46 @@ class Website < ApplicationRecord
     website_locations.sum { |wl| (wl.nb_cpus || 1) - 1 }
   end
 
-  def extra_cpus_credits_cost_per_hour
-    Website.cost_price_to_credits(
-      total_extra_cpus * CloudProvider::Internal::COST_EXTRA_CPU_PER_HOUR
-    )
-  end
-
   def self.cost_price_to_credits(price)
     price * 100.0
   end
 
   # credits related task updates and calculations
-  def spend_hourly_credits!
+  def spend_online_hourly_credits!
     current_plan = plan
 
-    return if !current_plan || open_source_plan?
+    return unless current_plan
 
     spendings = [
       {
         action_type: CreditAction::TYPE_CONSUME_PLAN,
         credits_cost: Website.cost_price_to_credits(current_plan[:cost_per_hour])
-      },
-      {
-        action_type: CreditAction::TYPE_CONSUME_STORAGE,
-        credits_cost: extra_storage_credits_cost_per_hour
-      },
-      {
-        action_type: CreditAction::TYPE_CONSUME_CPU,
-        credits_cost: extra_cpus_credits_cost_per_hour
       }
     ]
 
+    spend_hourly_credits!(spendings)
+  end
+
+  def spend_persistence_hourly_credits!
+    spendings = [
+      {
+        action_type: CreditAction::TYPE_CONSUME_STORAGE,
+        credits_cost: extra_storage_credits_cost_per_hour
+      }
+    ]
+
+    spend_hourly_credits!(spendings)
+  end
+
+  def spend_hourly_credits!(spendings)
+    current_plan = plan
+
+    return if !current_plan || open_source_plan?
+
+    consume_spendings(spendings)
+  end
+
+  def consume_spendings(spendings)
     spendings.each do |spending|
       if spending[:credits_cost] != 0
         CreditAction.consume!(self, spending[:action_type],

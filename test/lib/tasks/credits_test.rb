@@ -14,7 +14,7 @@ class LibTasksCreditsTest < ActiveSupport::TestCase
   end
 
   test "spend - no online site" do
-    invoke_task "credits:spend"
+    invoke_task "credits:online_spend"
 
     assert_equal ActionMailer::Base.deliveries.count, 0
   end
@@ -25,7 +25,7 @@ class LibTasksCreditsTest < ActiveSupport::TestCase
     website.save!
     credits_begin = website.user.reload.credits
 
-    invoke_task "credits:spend"
+    invoke_task "credits:online_spend"
 
     assert_equal ActionMailer::Base.deliveries.count, 0
     assert_equal website.user.reload.credits < credits_begin, true
@@ -41,7 +41,7 @@ class LibTasksCreditsTest < ActiveSupport::TestCase
     website.user.credits = 0
     website.user.save!
 
-    invoke_task "credits:spend"
+    invoke_task "credits:online_spend"
 
     mail_sent = ActionMailer::Base.deliveries.last
 

@@ -30,6 +30,21 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal w.save, false
   end
 
+  # scopes
+  test 'having extra storage' do
+    reset_all_extra_storage
+
+    w = default_website
+    wl = w.website_locations.first
+    wl.extra_storage = 2
+    wl.save!
+
+    websites_with_storage = Website.having_extra_storage
+
+    assert_equal websites_with_storage.count, 1
+    assert_equal websites_with_storage.first.id, w.id
+  end
+
   # domains:
 
   test 'getting empty domains' do
@@ -424,18 +439,6 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.extra_storage_credits_cost_per_hour, 0
   end
 
-  # extra cpus
-  test 'extra cpus with extra cpus' do
-    website = default_website
-    wl = default_website_location
-    wl.nb_cpus = 3
-    wl.save!
-
-    assert_equal website.total_extra_cpus, 2
-    assert_equal(website.extra_cpus_credits_cost_per_hour,
-                 2 * 100 * CloudProvider::Internal::COST_EXTRA_CPU_PER_HOUR)
-  end
-
   # spend credits
   test 'spend hourly credits - plan only' do
     website = default_website
@@ -445,7 +448,7 @@ class WebsiteTest < ActiveSupport::TestCase
     wl.extra_storage = 0
     wl.save!
 
-    website.spend_hourly_credits!
+    website.spend_online_hourly_credits!
 
     plan = website.plan
 
@@ -469,31 +472,30 @@ class WebsiteTest < ActiveSupport::TestCase
     website.account_type = Website::OPEN_SOURCE_ACCOUNT_TYPE
     website.save!
 
-    website.spend_hourly_credits!
+    website.spend_online_hourly_credits!
 
     assert_equal website.credit_actions.reload.length, 0
   end
 
-  test 'spend hourly credits - with extra services' do
+  test 'spend hourly credits - with persistent services' do
     website = default_website
     website.credit_actions.destroy_all
     wl = default_website_location
-    wl.nb_cpus = 2
+    wl.nb_cpus = 1
     wl.extra_storage = 2
     wl.save!
 
-    website.spend_hourly_credits!
+    website.spend_persistence_hourly_credits!
 
-    plan = website.plan
-
-    assert_equal website.credit_actions.reload.length, 3
+    assert_equal website.credit_actions.reload.length, 1
     credits_actions = website.credit_actions
 
-    assert_equal(credits_actions[0].credits_spent.to_f.round(4),
-                 (plan[:cost_per_hour] * 100.0).to_f.round(4))
-    assert_equal credits_actions[0].action_type, CreditAction::TYPE_CONSUME_PLAN
-    assert_equal credits_actions[1].action_type, CreditAction::TYPE_CONSUME_STORAGE
-    assert_equal credits_actions[2].action_type, CreditAction::TYPE_CONSUME_CPU
+    assert_equal credits_actions[0].action_type, CreditAction::TYPE_CONSUME_STORAGE
+
+    expected_credits_spent = Website.cost_price_to_credits(
+      2 * CloudProvider::Kubernetes::COST_EXTRA_STORAGE_GB_PER_HOUR
+    )
+    assert_in_delta credits_actions[0].credits_spent, expected_credits_spent, 0.0000001
   end
 
   # memory

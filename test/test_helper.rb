@@ -233,6 +233,16 @@ class ActiveSupport::TestCase
       content_type: 'application/json',
       response_status: 200,
       response_path: 'test/fixtures/http/openode_api/instances_stop.json'
+    },
+    {
+      url: 'https://api.openode.io/instances/testsite/destroy-storage?location_str_id=canada',
+      method: :post,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/openode_api/destroy-storage.json'
     }
   ]
 
@@ -256,6 +266,13 @@ class ActiveSupport::TestCase
         password: 'mypass',
         private_key: 'toto'
       )
+    end
+  end
+
+  def reset_all_extra_storage
+    WebsiteLocation.all.each do |wl|
+      wl.extra_storage = 0
+      wl.save!
     end
   end
 
@@ -477,11 +494,9 @@ class ActiveSupport::TestCase
   end
 
   def invoke_task(task_name)
-    OpenodeApi::Application.load_tasks
-    result = Rake::Task[task_name].invoke
-    Rake::Task[task_name].reenable
+    OpenodeApi::Application.load_tasks unless defined?(Rake::Task)
 
-    result
+    Rake::Task[task_name].execute
   end
 
   def run_deployer_job

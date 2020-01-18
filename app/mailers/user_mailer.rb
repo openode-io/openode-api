@@ -37,6 +37,14 @@ class UserMailer < ApplicationMailer
     mail(to: mail_to, subject: "#{@website.site_name}@opeNode stopped")
   end
 
+  def stopped_due_no_credit_persistence
+    @user = params[:user]
+    @website = params[:website]
+    mail_to = @user.email
+
+    mail(to: mail_to, subject: "#{@website.site_name}@opeNode persistence removed")
+  end
+
   # ip, sitename, default_password, pubkey, privkey, mail_to
   def private_cloud_ready
     @ip = params[:ip]
