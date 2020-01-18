@@ -1,16 +1,10 @@
 class StoragesController < InstancesController
-  before_action :requires_cloud_plan, only: %i[increase decrease]
+  before_action :requires_cloud_plan, only: %i[increase]
 
   api!
   def increase
     prepare_storage_change(sign: 1)
     change_storage(@gb_to_change)
-  end
-
-  api!
-  def decrease
-    prepare_storage_change(sign: -1)
-    change_storage(- @gb_to_change)
   end
 
   api!

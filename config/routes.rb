@@ -93,7 +93,6 @@ Rails.application.routes.draw do
 
     post '/:site_name/increase-storage', to: 'storages#increase'
     post '/:site_name/destroy-storage', to: 'storages#destroy'
-    post '/:site_name/decrease-storage', to: 'storages#decrease'
 
     get '/:site_name/plan', to: 'instances#plan'
     get '/:site_name/plans', to: 'instances#plans'
