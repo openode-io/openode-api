@@ -11,7 +11,8 @@ module DeploymentMethod
                       "method which will get deprecated. " \
                       "Make sure to upgrade the CLI (npm -g i openode) " \
                       "and run openode set-config TYPE kubernetes. " \
-                      "See TODO for more information.")
+                      "See http://www.openode.io/docs/installation/upgrade.md " \
+                      "for more information.")
 
       super(options)
 
