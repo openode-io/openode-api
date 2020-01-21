@@ -21,6 +21,7 @@ Rails.application.routes.draw do
 
   scope :notifications do
     post '', to: 'notifications#create'
+    patch ':id', to: 'notifications#update'
   end
 
   scope :global do
