@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  type: WebsiteNotification
+  level: info
+  content: hello world
+  website: one
+
+two:
+  type: WebsiteNotification
+  level: info
+  content: hello notification
+  website: two

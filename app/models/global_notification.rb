@@ -1,0 +1,3 @@
+
+class GlobalNotification < Notification
+end

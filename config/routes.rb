@@ -3,8 +3,10 @@
 Rails.application.routes.draw do
   apipie
 
+  get '/', to: 'global#test'
+
   namespace :super_admin do
-    post 'system_settings/save'
+    # post 'system_settings/save'
   end
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 
@@ -17,7 +19,9 @@ Rails.application.routes.draw do
     post 'verify-reset-token', to: 'account#verify_reset_token'
   end
 
-  get '/', to: 'global#test'
+  scope :notifications do
+    post '', to: 'notifications#create'
+  end
 
   scope :global do
     get 'test', to: 'global#test'

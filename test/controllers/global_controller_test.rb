@@ -128,18 +128,17 @@ class GlobalControllerTest < ActionDispatch::IntegrationTest
   end
 
   test '/global/settings if set' do
-    s = SystemSetting.global_msg
-    s.content = {
-      global_msg: 'hello world',
-      global_msg_class: 'info'
-    }
-    s.save
+    GlobalNotification.create!(
+      level: Notification::LEVEL_PRIORITY,
+      content: 'issue happening'
+    )
 
     get '/global/settings', as: :json
 
     assert_response :success
     assert_equal(response.parsed_body,
-                 "global_msg" => "hello world", "global_msg_class" => "info")
+                 "global_msg" => "issue happening",
+                 "global_msg_class" => "danger")
   end
 
   test '/global/stats' do

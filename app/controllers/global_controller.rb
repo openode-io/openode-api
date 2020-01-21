@@ -63,6 +63,16 @@ class GlobalController < ApplicationController
 
   api!
   def settings
-    json(SystemSetting.global_msg.content || {})
+    msg = nil
+    notification = Notification.of_level(Notification::LEVEL_PRIORITY).first
+
+    if notification
+      msg = {
+        global_msg: notification&.content,
+        global_msg_class: "danger"
+      }
+    end
+
+    json(msg || {})
   end
 end

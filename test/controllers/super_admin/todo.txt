@@ -9,6 +9,7 @@ class SuperAdmin::SystemSettingsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
+
     sys_setting = SystemSetting.find_by! name: 'what'
     assert_equal sys_setting.name, 'what'
     assert_equal sys_setting.content['hello'], 'world'
