@@ -13,6 +13,11 @@ class NotificationsController < SuperAdmin::SuperAdminController
     json(@notification.update!(update_notification_params) && @notification)
   end
 
+  def destroy
+    Notification.find_by!(id: params['id']).destroy
+    json({})
+  end
+
   private
 
   def notification_params

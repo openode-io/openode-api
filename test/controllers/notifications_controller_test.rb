@@ -99,4 +99,29 @@ class NotificationsControllerTest < ActionDispatch::IntegrationTest
     notification.reload
     assert_equal notification.website_id, default_website.id
   end
+
+  test 'DELETE /notifications/:id happy path' do
+    notification = WebsiteNotification.create!(
+      level: Notification::LEVEL_WARNING,
+      content: 'hello world ! ;)',
+      website: default_website
+    )
+
+    delete "/notifications/#{notification.id}",
+           as: :json,
+           headers: super_admin_headers_auth
+
+    assert_response :success
+
+    n = WebsiteNotification.find_by id: notification.id
+    assert_nil n
+  end
+
+  test 'DELETE /notifications/:id invalid id' do
+    delete "/notifications/123456",
+           as: :json,
+           headers: super_admin_headers_auth
+
+    assert_response :not_found
+  end
 end
