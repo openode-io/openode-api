@@ -1,6 +1,6 @@
 
 class NotificationsController < SuperAdmin::SuperAdminController
-  before_action only: %i[update delete] do
+  before_action only: %i[update destroy] do
     @notification = Notification.find_by! id: params['id']
   end
 
@@ -14,7 +14,7 @@ class NotificationsController < SuperAdmin::SuperAdminController
   end
 
   def destroy
-    Notification.find_by!(id: params['id']).destroy
+    @notification.destroy
     json({})
   end
 
