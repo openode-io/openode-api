@@ -70,6 +70,41 @@ class UserNotificationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body['notifications'].length, 1
   end
 
+  test '/notifications/ with specified website' do
+    GlobalNotification.create!(
+      level: Notification::LEVEL_CRITICAL,
+      content: 'hello world ! ;)'
+    )
+
+    websites = default_user.websites_with_access
+
+    websites.each do |w|
+      WebsiteNotification.create!(
+        website: w,
+        level: Notification::LEVEL_WARNING,
+        content: 'warning, warning'
+      )
+    end
+
+    w = websites.first
+
+    get "/notifications/?website=#{w.id}",
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body['notifications'].length, 2
+
+    response.parsed_body['notifications'].each do |notification|
+      assert notification['website_id'] == w.id ||
+             (notification['website_id'].nil? &&
+               notification['content'] == 'hello world ! ;)')
+    end
+
+    assert_equal response.parsed_body['nb_unviewed'], 2
+  end
+
   test '/notifications/ with one type' do
     global_notif = GlobalNotification.create!(
       level: Notification::LEVEL_CRITICAL,

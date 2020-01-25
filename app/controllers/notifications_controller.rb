@@ -5,18 +5,6 @@ class NotificationsController < SuperAdmin::SuperAdminController
   end
 
   api!
-  # params: limit, types
-  def index
-    Notification
-      .order(created_at: :desc)
-      .limit(params['limit'] || 10)
-
-    json(
-      nb_unviewed: nb_unviewed
-    )
-  end
-
-  api!
   def create
     json(Notification.create!(notification_params))
   end
