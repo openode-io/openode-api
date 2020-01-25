@@ -22,9 +22,10 @@ Rails.application.routes.draw do
   end
 
   scope :notifications do
-    post '', to: 'notifications#create'
-    patch ':id', to: 'notifications#update'
-    delete ':id', to: 'notifications#destroy'
+    get '',         to: 'user_notifications#index'
+    post '',        to: 'notifications#create'
+    patch ':id',    to: 'notifications#update'
+    delete ':id',   to: 'notifications#destroy'
   end
 
   scope :global do

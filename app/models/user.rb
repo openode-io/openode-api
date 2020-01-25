@@ -23,6 +23,7 @@ class User < ApplicationRecord
 
   has_many :websites
   has_many :orders
+  has_many :viewed_notifications
 
   scope :lacking_credits, -> { where('credits < nb_credits_threshold_notification') }
   scope :not_notified_low_credit, -> { where(notified_low_credit: 0) }

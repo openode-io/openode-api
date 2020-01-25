@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_21_004331) do
+ActiveRecord::Schema.define(version: 2020_01_25_004607) do
 
   create_table "collaborators", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "website_id"
@@ -233,6 +233,16 @@ ActiveRecord::Schema.define(version: 2020_01_21_004331) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["entity_type", "ref_id"], name: "index_vaults_on_entity_type_and_ref_id"
     t.index ["ref_id"], name: "index_vaults_on_ref_id"
+  end
+
+  create_table "viewed_notifications", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "notification_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["notification_id"], name: "index_viewed_notifications_on_notification_id"
+    t.index ["user_id", "notification_id"], name: "index_viewed_notifications_on_user_id_and_notification_id"
+    t.index ["user_id"], name: "index_viewed_notifications_on_user_id"
   end
 
   create_table "website_locations", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|

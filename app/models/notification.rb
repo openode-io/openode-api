@@ -1,4 +1,7 @@
 class Notification < ApplicationRecord
+
+  has_many :viewed_notifications
+
   LEVEL_INFO = 'info'
   LEVEL_WARNING = 'warning'
   LEVEL_CRITICAL = 'critical'
