@@ -1,5 +1,4 @@
 class Notification < ApplicationRecord
-
   has_many :viewed_notifications
 
   LEVEL_INFO = 'info'
