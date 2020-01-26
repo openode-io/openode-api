@@ -5,20 +5,11 @@ class UserNotificationsController < ApplicationController
   api!
   # params: limit, types, website
   def index
-    user_website_ids = @user.websites_with_access.pluck(:id)
+    types = params['types'] ? params['types'].split(",") : nil
 
-    types = if params['types']
-              params['types'].split(",")
-            else
-              %w[GlobalNotification WebsiteNotification]
-      end
-
-    website_ids = params['website'] ? [params['website']] : user_website_ids
-
-    all_notifications = where_notifications(
-      types: types,
-      website_ids: website_ids
-    )
+    all_notifications = Notification.of_user(@user,
+                                             types: types,
+                                             website: params['website'])
 
     notifications = all_notifications
                     .order(created_at: :desc)
@@ -33,22 +24,38 @@ class UserNotificationsController < ApplicationController
     )
   end
 
-  private
+  def mark_viewed
+    notifications = if params['all']
+                      user_notifications = Notification.of_user(@user)
+                      unviewed_notifications(
+                        notifications: user_notifications,
+                        user: @user
+                      )
+                    else
+      # todo
+    end
 
-  def where_notifications(opts = {})
-    base_criteria_notifications = Notification.where(type: opts[:types])
+    notifications.each do |notification|
+      next if notification.viewed_by?(@user)
 
-    base_criteria_notifications
-      .where(website_id: nil)
-      .or(base_criteria_notifications.where(website_id: opts[:website_ids]))
+      ViewedNotification.create(
+        notification: notification,
+        user: @user
+      )
+    end
+
+    json({})
   end
 
-  def unviewed_notifications(opts = {})
-    # how many are unviewed?
-    viewed_notification_ids = ViewedNotification
-                              .where(user: opts[:user])
-                              .pluck(:notification_id)
+  private
 
-    opts[:notifications].where.not(id: viewed_notification_ids)
+  def unviewed_notifications(opts = {})
+    opts[:notifications].where(
+      "notifications.id NOT IN(" \
+      " SELECT notification_id "\
+      " FROM viewed_notifications vn " \
+      " WHERE vn.user_id = ? " \
+      ")", opts[:user].id
+    )
   end
 end

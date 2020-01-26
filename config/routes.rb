@@ -23,6 +23,7 @@ Rails.application.routes.draw do
 
   scope :notifications do
     get '',         to: 'user_notifications#index'
+    post 'view',    to: 'user_notifications#mark_viewed'
     post '',        to: 'notifications#create'
     patch ':id',    to: 'notifications#update'
     delete ':id',   to: 'notifications#destroy'
