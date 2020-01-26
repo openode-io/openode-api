@@ -62,6 +62,9 @@ Lint/ImplicitStringConcatenation:
 Naming/AccessorMethodName:
   Enabled: false
 
+Naming/VariableNumber:
+  Enabled: false
+
 Style/ClassAndModuleChildren:
   Enabled: false
 

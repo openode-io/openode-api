@@ -1,5 +1,5 @@
 class Notification < ApplicationRecord
-  has_many :viewed_notifications
+  has_many :viewed_notifications, dependent: :destroy
 
   LEVEL_INFO = 'info'
   LEVEL_WARNING = 'warning'

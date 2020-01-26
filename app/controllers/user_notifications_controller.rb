@@ -25,15 +25,19 @@ class UserNotificationsController < ApplicationController
   end
 
   def mark_viewed
+    user_notifications = Notification.of_user(@user)
+    all_unviewed_notifications = unviewed_notifications(
+      notifications: user_notifications,
+      user: @user
+    )
+
     notifications = if params['all']
-                      user_notifications = Notification.of_user(@user)
-                      unviewed_notifications(
-                        notifications: user_notifications,
-                        user: @user
-                      )
+                      all_unviewed_notifications
                     else
-      # todo
+                      all_unviewed_notifications.where(id: params['notifications'])
     end
+
+    marked = []
 
     notifications.each do |notification|
       next if notification.viewed_by?(@user)
@@ -42,9 +46,14 @@ class UserNotificationsController < ApplicationController
         notification: notification,
         user: @user
       )
+
+      marked << notification
     end
 
-    json({})
+    json(
+      nb_marked: marked.length,
+      marked: marked
+    )
   end
 
   private

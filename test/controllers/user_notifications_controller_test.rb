@@ -119,4 +119,90 @@ class UserNotificationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body['notifications'].length, 1
     assert_equal response.parsed_body['notifications'][0]['id'], global_notif.id
   end
+
+  test '/notifications/view with list of notifications - happy path' do
+    global_notif_1 = GlobalNotification.create!(
+      level: Notification::LEVEL_CRITICAL,
+      content: 'hello world ! ;)'
+    )
+
+    global_notif_2 = GlobalNotification.create!(
+      level: Notification::LEVEL_CRITICAL,
+      content: 'hello world ! ;)'
+    )
+
+    post '/notifications/view',
+         as: :json,
+         headers: default_headers_auth,
+         params: { notifications: [global_notif_1.id, global_notif_2.id] }
+
+    assert_response :success
+    assert_equal response.parsed_body['nb_marked'], 2
+
+    ViewedNotification.find_by! user: default_user, notification: global_notif_1
+    ViewedNotification.find_by! user: default_user, notification: global_notif_2
+  end
+
+  test '/notifications/view with list of notifications - partial view' do
+    global_notif_1 = GlobalNotification.create!(
+      level: Notification::LEVEL_CRITICAL,
+      content: 'hello world ! ;)'
+    )
+
+    global_notif_2 = GlobalNotification.create!(
+      level: Notification::LEVEL_CRITICAL,
+      content: 'hello world ! ;)'
+    )
+
+    ViewedNotification.create(
+      user: default_user,
+      notification: global_notif_1
+    )
+
+    post '/notifications/view',
+         as: :json,
+         headers: default_headers_auth,
+         params: { notifications: [global_notif_1.id, global_notif_2.id] }
+
+    assert_response :success
+    assert_equal response.parsed_body['nb_marked'], 1
+    assert_equal response.parsed_body['marked'][0]['id'], global_notif_2.id
+  end
+
+  test '/notifications/view without notification' do
+    Notification.all.destroy_all
+
+    post '/notifications/view',
+         as: :json,
+         headers: default_headers_auth,
+         params: { notifications: [] }
+
+    assert_response :success
+    assert_equal response.parsed_body['nb_marked'], 0
+  end
+
+  test '/notifications/view all - happy path' do
+    Notification.all.destroy_all
+
+    global_notif_1 = GlobalNotification.create!(
+      level: Notification::LEVEL_CRITICAL,
+      content: 'hello world ! ;)'
+    )
+
+    global_notif_2 = GlobalNotification.create!(
+      level: Notification::LEVEL_CRITICAL,
+      content: 'hello world ! ;)'
+    )
+
+    post '/notifications/view?all=true',
+         as: :json,
+         headers: default_headers_auth,
+         params: { notifications: [] }
+
+    assert_response :success
+    assert_equal response.parsed_body['nb_marked'], 2
+
+    ViewedNotification.find_by! user: default_user, notification: global_notif_1
+    ViewedNotification.find_by! user: default_user, notification: global_notif_2
+  end
 end
