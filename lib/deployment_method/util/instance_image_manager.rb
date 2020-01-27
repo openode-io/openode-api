@@ -66,6 +66,8 @@ module DeploymentMethod
 
         result = @runner.execute([{ cmd_name: 'verify_size_repo_cmd', options: opts }])
 
+        ensure_no_execution_error("verifying repository size", result.first)
+
         output = result[0][:result][:stdout] rescue ''
         nb_bytes = output.to_i
 
@@ -74,12 +76,23 @@ module DeploymentMethod
         raise err_msg_too_large if nb_bytes > LIMIT_REPOSITORY_BYTES
       end
 
+      def ensure_no_execution_error(step_name, result)
+        unless result[:result][:exit_code].zero?
+          msg = "Failed at #{step_name}. \n#{result[:stderr]}"
+          raise msg
+        end
+      end
+
       def build
         opts = {
           project_path: @website.repo_dir
         }
 
-        @runner.execute([{ cmd_name: 'build_cmd', options: opts }])
+        result = @runner.execute([{ cmd_name: 'build_cmd', options: opts }])
+
+        ensure_no_execution_error("building the image", result.first)
+
+        result
       end
 
       def push
@@ -89,7 +102,11 @@ module DeploymentMethod
             "#{docker_images_location['repository_name']}"
         }
 
-        @runner.execute([{ cmd_name: 'push_cmd', options: opts }])
+        result = @runner.execute([{ cmd_name: 'push_cmd', options: opts }])
+
+        ensure_no_execution_error("pusing the image", result.first)
+
+        result
       end
     end
   end

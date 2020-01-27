@@ -74,6 +74,19 @@ class InstanceImageManagerTest < ActiveSupport::TestCase
     end
   end
 
+  test 'ensure_no_execution_error without error' do
+    obj = { result: { exit_code: 0 } }
+    @manager.ensure_no_execution_error("step name..", obj)
+  end
+
+  test 'ensure_no_execution_error with non exit zero' do
+    obj = { result: { exit_code: 1 } }
+
+    assert_raises StandardError do
+      @manager.ensure_no_execution_error("step name..", obj)
+    end
+  end
+
   test 'build cmd' do
     cmd = @manager.build_cmd(
       project_path: '/home/123456/what'
