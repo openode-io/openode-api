@@ -1,0 +1,13 @@
+{
+  "name": "openode-api",
+  "cwd": "/var/www/openode-api/",
+  "error_file": "./scripts/pm2/err.log",
+  "out_file": "./scripts/pm2/out.log",
+  "script"     : "./bin/rails",
+  "args": " server",
+  "exec_interpreter": "ruby",
+  "max_memory_restart" : "2024M",
+  "env": {
+    "RAILS_ENV": "production"
+  }
+}
