@@ -1,14 +1,22 @@
+set -e
 
-sshpass -p $API_PASSWORD ssh -o StrictHostKeyChecking=no $API_USER@$API_HOST \
-  "PATH=\"$PATH:$RUBY_BIN_PATH\" && \
+echo $SERVER_PK_KEY | base64 --decode > id_rsa_tmp
+chmod 400 id_rsa_tmp
+
+ssh -i id_rsa_tmp -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST  \
+  "PATH=\"$PATH:$RUBY_BIN_PATH:$NODE_BIN_PATH\" && \
   cd $PROJECT_PATH && \
   echo 'CWD:' && pwd && \
   echo 'git pulling' && git pull && \
-  echo 'bundle install' && ./bin/bundle install && \
+  echo 'bundle install' && bundle install && \
   RAILS_ENV=$RAILS_ENV ./bin/rails runner 'puts ENV[\"RAILS_ENV\"]' && \
   RAILS_ENV=$RAILS_ENV ./bin/rails db:migrate && \
-  RAILS_ENV=$RAILS_ENV ./bin/delayed_job --pid-dir=tmp/pids -n 5 restart && \
-  pm2 list" # replace with reload
+  RAILS_ENV=$RAILS_ENV ./bin/delayed_job --pid-dir=tmp/pids -n 2 restart && \
+  pm2 restart openode-api && \
+  pm2 list && \
+  ps aux | grep delayed_job"
 
-sshpass -p $API_PASSWORD ssh -o StrictHostKeyChecking=no $API_USER@$API_HOST \
+ssh -i id_rsa_tmp -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST \
   "cd $PROJECT_PATH && cat scripts/crontab.txt | crontab -"
+
+rm -f id_rsa_tmp
