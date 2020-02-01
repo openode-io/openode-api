@@ -43,14 +43,14 @@ module DeploymentMethod
         project_path = options[:project_path]
 
         "cd #{project_path} && " \
-        "docker build -t #{image_name_tag} ."
+        "sudo docker build -t #{image_name_tag} ."
       end
 
       def push_cmd(_options = {})
         "echo #{docker_images_location['docker_password']} | " \
-          "docker login -u #{docker_images_location['docker_username']} " \
+          "sudo docker login -u #{docker_images_location['docker_username']} " \
           "--password-stdin && " \
-          "docker push #{image_name_tag}"
+          "sudo docker push #{image_name_tag}"
       end
 
       def verify_size_repo_cmd(options = {})
