@@ -93,13 +93,13 @@ class InstanceImageManagerTest < ActiveSupport::TestCase
     )
 
     assert_includes cmd, 'cd /home/123456/what'
-    assert_includes cmd, "docker build -t test/openode_prod:" \
+    assert_includes cmd, "sudo docker build -t test/openode_prod:" \
                           "#{@website.site_name}--#{@website.id}--#{@deployment.id} ."
   end
 
   test 'build' do
     expected_cmd = "cd /home/#{@website.user.id}/#{@website.site_name}/ && " \
-      "docker build " \
+      "sudo docker build " \
       "-t test/openode_prod:#{@website.site_name}--#{@website.id}--#{@deployment.id} ."
     prepare_ssh_session(expected_cmd, 'successfully built')
 
@@ -115,8 +115,8 @@ class InstanceImageManagerTest < ActiveSupport::TestCase
   end
 
   test 'push' do
-    expected_cmd = "echo t123456 | docker login -u test --password-stdin && " \
-      "docker push test/openode_prod:#{@website.site_name}--#{@website.id}--#{@deployment.id}"
+    expected_cmd = "echo t123456 | sudo docker login -u test --password-stdin && " \
+      "sudo docker push test/openode_prod:#{@website.site_name}--#{@website.id}--#{@deployment.id}"
     prepare_ssh_session(expected_cmd, 'successfully pushed')
 
     assert_scripted do

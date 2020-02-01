@@ -19,14 +19,14 @@ class ActiveSupport::TestCase
 
   def prepare_build_image(_kubernetes_method, website, deployment, expected_result)
     prepare_ssh_session("cd /home/#{website.user_id}/#{website.site_name}/ && " \
-                        "docker build -t test/openode_prod:" \
+                        "sudo docker build -t test/openode_prod:" \
                         "#{website.site_name}--#{website.id}--#{deployment.id} .",
                         expected_result)
   end
 
   def prepare_push_image(_kubernetes_method, website, deployment, expected_result)
-    prepare_ssh_session("echo t123456 | docker login -u test --password-stdin && " \
-                        "docker push test/openode_prod:" \
+    prepare_ssh_session("echo t123456 | sudo docker login -u test --password-stdin && " \
+                        "sudo docker push test/openode_prod:" \
                         "#{website.site_name}--#{website.id}--#{deployment.id}",
                         expected_result)
   end
