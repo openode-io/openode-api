@@ -2,7 +2,7 @@ require 'json'
 
 class SupportMailer < ApplicationMailer
   def contact
-    @message = params[:attributes]['message']
+    @message = params[:attributes]['message']&.gsub(/\n/, '<br>')
     attributes = params[:attributes].except('message')
     @content = JSON.pretty_generate(attributes)
 
