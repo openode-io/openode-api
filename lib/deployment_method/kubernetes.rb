@@ -201,6 +201,8 @@ module DeploymentMethod
       assert !opts[:with_pvc_object].nil?
       dotenv_vars = retrieve_dotenv(website)
 
+      # TODO: REMOVE && type kubernetes when beta finished
+
       <<~END_YML
         ---
         #{generate_namespace_yml(website) if opts[:with_namespace_object]}
@@ -209,7 +211,7 @@ module DeploymentMethod
         ---
         #{generate_manual_tls_secret_yml(website)}
         ---
-        #{generate_wildcard_subdomain_tls_secret_yaml(website) if website.subdomain?}
+        #{generate_wildcard_subdomain_tls_secret_yaml(website) if website.subdomain? && website.type != Website::TYPE_KUBERNETES}
         ---
         #{generate_config_map_yml(
           name: 'dotenv',
@@ -391,13 +393,15 @@ module DeploymentMethod
     end
 
     def certificate?(website)
-      website.certs.present? || website.subdomain?
+      # TODO: remove && website.type when beta finished
+      website.certs.present? || (website.subdomain? && website.type != Website::TYPE_KUBERNETES)
     end
 
     def certificate_secret_name(website)
       if website.certs.present?
         "manual-certificate"
-      elsif website.subdomain?
+      elsif website.subdomain? && website.type != Website::TYPE_KUBERNETES
+        # TODO: remove && when beta finished
         "wildcard-certificate"
       end
     end

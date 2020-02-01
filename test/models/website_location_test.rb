@@ -63,6 +63,14 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert wl.main_domain == 'testsite2.us.openode.io'
   end
 
+  test 'domain with kubernetes (beta) subdomain' do
+    website = Website.find_by site_name: 'testsite2'
+    website.type = Website::TYPE_KUBERNETES
+    wl = website.website_locations[0]
+
+    assert wl.main_domain == 'testsite2.dev.openode.io'
+  end
+
   test 'domain with usa custom domain' do
     website = Website.find_by site_name: 'www.what.is'
     wl = website.website_locations[0]

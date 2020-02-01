@@ -95,7 +95,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
       assert_not_nil final_details_event
       assert_equal(final_details_event['update']['details']['url'],
-                   "http://#{@website.site_name}.#{CloudProvider::Manager.base_hostname}/")
+                   "http://#{@website.site_name}.dev.#{CloudProvider::Manager.base_hostname}/")
     end
   end
 
