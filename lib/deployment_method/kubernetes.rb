@@ -86,6 +86,13 @@ module DeploymentMethod
 
       notify("info", "Applying instance environment...")
 
+      if website.subdomain? && website.type == Website::TYPE_KUBERNETES
+        notify("info",
+               "Important notice: subdomains have <your sitename>.dev.openode.io " \
+               "without SSL during the beta phase. Soon they will be replaced with " \
+               "<your sitename>.openode.io and with HTTPS.")
+      end
+
       # then apply the yml
       result = kubectl_yml_action(website_location, "apply", kube_yml, ensure_exit_code: 0)
 
