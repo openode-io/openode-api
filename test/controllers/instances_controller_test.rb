@@ -126,10 +126,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   test '/instances/summary happy path without last deployment' do
     website = Website.find_by site_name: 'testsite'
-    
-    website.deployments.each do |deployment|
-      deployment.destroy
-    end
+
+    website.deployments.each(&:destroy)
 
     get '/instances/summary', as: :json, headers: default_headers_auth
 
