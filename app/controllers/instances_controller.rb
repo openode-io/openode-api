@@ -63,6 +63,7 @@ class InstancesController < ApplicationController
         w_obj["price"] = w.price
         w_obj["plan_name"] = w.plan_name
         w_obj["nb_collaborators"] = w.collaborators.count
+        w_obj["last_deployment_id"] = w.deployments.last&.id
         w_obj["ip"] = w.first_ip
 
         w_obj
