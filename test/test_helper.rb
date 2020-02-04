@@ -243,6 +243,26 @@ class ActiveSupport::TestCase
       content_type: 'application/json',
       response_status: 200,
       response_path: 'test/fixtures/http/openode_api/destroy-storage.json'
+    },
+    {
+      url: 'https://ipnpb.paypal.com/cgi-bin/webscr?cmd=_notify-validate&what=is',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'text/html',
+      response_status: 200,
+      response_path: 'test/fixtures/http/payment/paypal/verified.txt'
+    },
+    {
+      url: 'https://ipnpb.paypal.com/cgi-bin/webscr?cmd=_notify-validate&invalid=is',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'text/html',
+      response_status: 200,
+      response_path: 'test/fixtures/http/payment/paypal/invalid.txt'
     }
   ]
 

@@ -25,4 +25,23 @@ class PaypalTest < ActiveSupport::TestCase
 
     assert_equal Payment::Paypal.completed?(parsed_order), true
   end
+
+  test 'prepare_validate_transaction_url with dummy vars' do
+    vars = { 'what' => 'is', 'that' => 'asdf' }
+
+    url = Payment::Paypal.prepare_validate_transaction_url(vars)
+
+    expected_url =
+      "https://ipnpb.paypal.com/cgi-bin/webscr?cmd=_notify-validate&what=is&that=asdf"
+
+    assert_equal url, expected_url
+  end
+
+  test 'transaction_valid? with verified' do
+    assert_equal Payment::Paypal.transaction_valid?('what' => 'is'), true
+  end
+
+  test 'transaction_valid? with invalid' do
+    assert_equal Payment::Paypal.transaction_valid?('invalid' => 'is'), false
+  end
 end
