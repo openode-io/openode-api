@@ -55,6 +55,7 @@ Layout/LineLength:
   Exclude:
     - 'db/schema.rb'
     - 'db/migrate/*.rb'
+    - 'test/test_helper.rb'
 
 Lint/ImplicitStringConcatenation:
   Enabled: false
