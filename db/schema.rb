@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_02_08_161017) do
+ActiveRecord::Schema.define(version: 2020_02_08_164318) do
 
   create_table "collaborators", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "website_id"
@@ -315,7 +315,6 @@ ActiveRecord::Schema.define(version: 2020_02_08_161017) do
   end
 
   add_foreign_key "location_servers", "locations", name: "location_servers_ibfk_1"
-  add_foreign_key "website_locations", "location_servers", name: "website_locations_ibfk_3"
   add_foreign_key "website_locations", "locations", name: "website_locations_ibfk_2"
   add_foreign_key "website_locations", "websites", name: "website_locations_ibfk_1", on_delete: :cascade
 end
