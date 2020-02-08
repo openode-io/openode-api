@@ -1,0 +1,14 @@
+{
+  "name": "openode-job",
+  "cwd": "/var/www/openode-api/",
+  "error_file": "./scripts/pm2/job-err.log",
+  "out_file": "./scripts/pm2/job-out.log",
+  "script"     : "./bin/rails",
+  "args": " jobs:work",
+  "exec_interpreter": "ruby",
+  "max_memory_restart" : "2024M",
+  "instances": "2",
+  "env": {
+    "RAILS_ENV": "production"
+  }
+}

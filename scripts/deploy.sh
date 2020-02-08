@@ -11,8 +11,8 @@ ssh -i id_rsa_tmp -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST  \
   echo 'bundle install' && bundle install && \
   RAILS_ENV=$RAILS_ENV ./bin/rails runner 'puts ENV[\"RAILS_ENV\"]' && \
   RAILS_ENV=$RAILS_ENV ./bin/rails db:migrate && \
-  RAILS_ENV=$RAILS_ENV ./bin/delayed_job --pid-dir=tmp/pids -n 2 restart && \
-  pm2 restart openode-api && \
+  pm2 reload openode-job && \
+  pm2 reload openode-api && \
   pm2 list && \
   ps aux | grep delayed_job"
 
