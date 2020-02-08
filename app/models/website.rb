@@ -201,7 +201,7 @@ class Website < ApplicationRecord
       location_server: location_server
     )
 
-    if location_server
+    if location_server && type != TYPE_KUBERNETES
       website_location.update_remote_dns(with_auto_a: true)
     end
 
@@ -213,7 +213,10 @@ class Website < ApplicationRecord
     website_location = website_locations.to_a.find { |wl| wl.location_id == location.id }
 
     if website_location
-      website_location.update_remote_dns(dns_entries: [])
+      if type != TYPE_KUBERNETES
+        website_location.update_remote_dns(dns_entries: [])
+      end
+
       website_location.destroy
     end
   end
