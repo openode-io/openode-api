@@ -182,6 +182,26 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal website.domain_type, 'subdomain'
   end
 
+  test '/instances/create with initial location' do
+    post '/instances/create',
+         params: {
+           site_name: 'helloworld123',
+           account_type: 'second',
+           location: 'canada'
+         },
+         as: :json,
+         headers: default_headers_auth
+
+    assert_response :success
+    assert_equal !response.parsed_body['id'].nil?, true
+
+    website = Website.find(response.parsed_body['id'])
+
+    assert_equal website.id, response.parsed_body['id']
+
+    assert_equal website.website_locations.first.location.str_id, 'canada'
+  end
+
   test '/instances/create with invalid' do
     post '/instances/create',
          params: { site_name: '..', account_type: 'second' },

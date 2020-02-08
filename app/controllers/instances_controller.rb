@@ -81,6 +81,12 @@ class InstancesController < ApplicationController
       user: @user
     )
 
+    # if a location is specified, create website location
+    if params['location']
+      location = Location.find_by!(str_id: params['location'])
+      website.add_location(location)
+    end
+
     json(website)
   end
 
