@@ -6,6 +6,10 @@ class RemoveUniquePortIndexWebsiteLocations < ActiveRecord::Migration[6.0]
       Rails.logger.error("Issue removing fk #{e}")
     end
 
-    remove_index :website_locations, column: [:location_server_id, :port]
+    begin
+      remove_index :website_locations, column: [:location_server_id, :port]
+    rescue StandardError => e
+      Rails.logger.error("Issue removing fk #{e}")
+    end
   end
 end
