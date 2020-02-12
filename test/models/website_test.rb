@@ -17,6 +17,21 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_includes w.errors.inspect.to_s, "should not container a dot"
   end
 
+  test 'should default status if not specified' do
+    w = Website.new(
+      site_name: 'thisisauniquesite',
+      cloud_type: 'cloud',
+      user_id: default_user.id,
+      type: 'docker',
+      domain_type: 'subdomain'
+    )
+
+    w.save!
+    w.reload
+
+    assert_equal w.status, Website::DEFAULT_STATUS
+  end
+
   test 'invalid site_name with custom domain' do
     w = Website.new(
       site_name: 'thisisauniq.--=uesite',

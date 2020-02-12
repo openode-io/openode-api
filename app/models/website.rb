@@ -40,6 +40,8 @@ class Website < ApplicationRecord
   STATUS_STARTING = 'starting'
   STATUSES = [STATUS_ONLINE, STATUS_OFFLINE, STATUS_STARTING].freeze
 
+  DEFAULT_STATUS = STATUS_OFFLINE
+
   DOMAIN_TYPE_SUBDOMAIN = 'subdomain'
   DOMAIN_TYPE_CUSTOM_DOMAIN = 'custom_domain'
   DOMAIN_TYPES = [DOMAIN_TYPE_SUBDOMAIN, DOMAIN_TYPE_CUSTOM_DOMAIN].freeze
@@ -147,8 +149,10 @@ class Website < ApplicationRecord
     return unless site_name
 
     self.account_type ||= DEFAULT_ACCOUNT_TYPE
-
     change_plan(account_type)
+
+    self.status ||= DEFAULT_STATUS
+    change_status(status)
 
     self.site_name = site_name.downcase
     self.domain_type = DOMAIN_TYPE_SUBDOMAIN
@@ -496,11 +500,16 @@ class Website < ApplicationRecord
   end
 
   def change_status!(new_status)
+    change_status(new_status)
+
+    save!
+  end
+
+  def change_status(new_status)
     logger.info("website #{site_name} changing status to #{new_status}")
     raise "Wrong status #{new_status}" unless STATUSES.include?(new_status)
 
     self.status = new_status
-    save!
   end
 
   def change_plan(acc_type)
