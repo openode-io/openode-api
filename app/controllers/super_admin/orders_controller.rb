@@ -16,7 +16,6 @@ class SuperAdmin::OrdersController < SuperAdmin::SuperAdminController
       attribs = o.attributes
       attribs["email"] = o.user.email
       attribs
-    end
-    )
+    end)
   end
 end
