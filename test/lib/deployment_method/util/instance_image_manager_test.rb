@@ -80,11 +80,20 @@ class InstanceImageManagerTest < ActiveSupport::TestCase
   end
 
   test 'ensure_no_execution_error with non exit zero' do
-    obj = { result: { exit_code: 1 } }
+    obj = {
+      result: {
+        exit_code: 1,
+        stdout: 'stdout msg',
+        stderr: 'stderr msg'
+      }
+    }
 
-    assert_raises StandardError do
+    exception = assert_raises StandardError do
       @manager.ensure_no_execution_error("step name..", obj)
     end
+
+    assert_includes exception.inspect.to_s, "stdout msg"
+    assert_includes exception.inspect.to_s, "stderr msg"
   end
 
   test 'build cmd' do

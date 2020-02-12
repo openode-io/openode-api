@@ -78,7 +78,8 @@ module DeploymentMethod
 
       def ensure_no_execution_error(step_name, result)
         unless result[:result][:exit_code].zero?
-          msg = "Failed at #{step_name}. \n#{result[:stderr]}"
+          msg = "Failed at #{step_name}. \n#{result.dig(:result, :stdout)}" \
+                " \n#{result.dig(:result, :stderr)}"
           raise msg
         end
       end

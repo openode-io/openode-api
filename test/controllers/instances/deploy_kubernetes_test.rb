@@ -22,7 +22,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
     deployment = website.deployments.last
 
-    prepare_build_image(kubernetes_method, website, deployment, "result")
+    prepare_build_image(kubernetes_method, website, deployment, "new image built")
     prepare_push_image(kubernetes_method, website, deployment, "result")
     prepare_get_dotenv(kubernetes_method, website, "VAR1=12")
 
@@ -59,7 +59,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert_equal deployment.result['errors'].length, 0
 
       # should also have a deployment with events
-      assert_equal deployment.events.length, 13
+      assert_equal deployment.events.length, 14
 
       allowed_to = dep_event_exists?(deployment.events,
                                      'running', 'allowed to dep')
@@ -68,6 +68,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       steps_to_verify = [
         { "status" => "running", "level" => "info", "update" => "Verifying allowed to deploy..." },
         { "status" => "running", "level" => "info", "update" => "Preparing instance image..." },
+        { "status" => "running", "level" => "info", "update" => "new image built" },
         { "status" => "running", "level" => "info", "update" => "Instance image ready." },
         { "status" => "running", "level" => "info", "update" => "Pushing instance image..." },
         { "status" => "running", "level" => "info",

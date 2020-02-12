@@ -70,7 +70,8 @@ module DeploymentMethod
 
       notify("info", "Preparing instance image...")
       image_manager.verify_size_repo
-      image_manager.build
+      result_build = image_manager.build
+      notify("info", result_build.first&.dig(:result, :stdout)) if result_build&.first
       notify("info", "Instance image ready.")
 
       # then push it to the registry
