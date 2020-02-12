@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class SuperAdmin::SystemSettingsControllerTest < ActionDispatch::IntegrationTest
+class SuperAdmin::SupportControllerTest < ActionDispatch::IntegrationTest
   test "send basic contact" do
     post '/super_admin/support/contact',
          params: { hi: 'world' },
