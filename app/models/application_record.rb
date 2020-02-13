@@ -3,6 +3,10 @@ class ApplicationRecord < ActiveRecord::Base
 
   ValidationError = Class.new(StandardError)
 
+  scope :search_for, lambda { |search, attributes|
+    where(attributes.map { |attrib| "#{attrib} LIKE :search" }.join(" OR "), search: search)
+  }
+
   before_destroy :destroy_secret!
 
   def vault

@@ -1,16 +1,15 @@
 class SuperAdmin::OrdersController < SuperAdmin::SuperAdminController
   def index
+    attributes_to_search = ["users.email", "content", "orders.id",
+                            "payment_status", "gateway"]
     search_for = "%#{params['search']}%"
 
     orders = Order
              .preload(:user)
              .joins(:user)
-             .where(" users.email LIKE ? OR " \
-                      " content LIKE ? OR " \
-                      " payment_status LIKE ? OR " \
-                      " gateway LIKE ? ", search_for, search_for, search_for, search_for)
+             .search_for(search_for, attributes_to_search)
              .paginate(page: params[:page] || 1, per_page: 99)
-             .order("id DESC")
+             .order("orders.id DESC")
 
     json(orders.map do |o|
       attribs = o.attributes
