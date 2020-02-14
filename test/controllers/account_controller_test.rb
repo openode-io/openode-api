@@ -25,6 +25,22 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
+  test '/account/me with valid' do
+    u = User.find_by! token: '1234s56789'
+    get '/account/me', headers: default_headers_auth, as: :json
+
+    assert_response :success
+    
+    assert_equal response.parsed_body['type'], u.type
+    assert_equal response.parsed_body['email'], u.email
+  end
+
+  test '/account/me with not logged in' do
+    get '/account/me', headers: {}, as: :json
+
+    assert_response :unauthorized
+  end
+
   test '/account/register valid' do
     account = {
       email: 'myadminvalidregister@thisisit.com',

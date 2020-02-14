@@ -51,6 +51,23 @@ class UserTest < ActiveSupport::TestCase
     assert_nil user.id
   end
 
+  test 'user type - regular' do
+    u = default_user
+
+    assert_equal u.is_admin, 0
+    assert_equal u.type, 'regular'
+  end
+
+  test 'user type - admin' do
+    u = default_user
+
+    u.is_admin = true
+    u.save!
+
+    assert_equal u.is_admin, 1
+    assert_equal u.type, 'admin'
+  end
+
   test 'should downcase user emails' do
     attribs = {
       email: 'USER10@site.com',

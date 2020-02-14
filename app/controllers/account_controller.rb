@@ -1,4 +1,9 @@
 class AccountController < ApplicationController
+
+  before_action only: [:me] do
+    authorize
+  end
+
   # get a token given a login-passwd
   def get_token
     user = User.find_by! email: params['email']
@@ -6,6 +11,14 @@ class AccountController < ApplicationController
     user.verify_authentication params['password']
 
     json("\"#{user.token}\"")
+  end
+
+  # returns the logged in user
+  def me
+    result = @user.attributes
+    result['type'] = @user.type
+
+    json(result)
   end
 
   def register

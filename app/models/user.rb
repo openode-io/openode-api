@@ -89,6 +89,10 @@ class User < ApplicationRecord
     p == expected_passwd
   end
 
+  def type
+    [1, true].include?(is_admin) ? 'admin' : 'regular'
+  end
+
   def distribute_free_credits
     internal_provider = CloudProvider::Manager.instance.first_of_type('internal')
 
