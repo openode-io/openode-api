@@ -30,7 +30,7 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
     get '/account/me', headers: default_headers_auth, as: :json
 
     assert_response :success
-    
+
     assert_equal response.parsed_body['type'], u.type
     assert_equal response.parsed_body['email'], u.email
   end

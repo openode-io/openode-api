@@ -1,5 +1,4 @@
 class AccountController < ApplicationController
-
   before_action only: [:me] do
     authorize
   end
