@@ -11,6 +11,8 @@ Rails.application.routes.draw do
     get 'orders', to: 'orders#index'
 
     get 'users', to: 'users#index'
+
+    get 'websites', to: 'websites#index'
   end
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
