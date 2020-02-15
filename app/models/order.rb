@@ -8,6 +8,7 @@ class Order < ApplicationRecord
   validates :payment_status, presence: true
   validates :content, presence: true
   validates :gateway, presence: true
+  validates :gateway, inclusion: { in: %w[paypal btc ether bch stellar] }
 
   before_create :apply_coupon
   after_create :add_user_credits

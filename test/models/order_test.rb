@@ -48,4 +48,19 @@ class OrderTest < ActiveSupport::TestCase
 
     assert_equal mail_sent.subject, "opeNode Order ##{order.id} Confirmation"
   end
+
+  test 'fail with invalid gateway' do
+    user = User.first
+
+    order = Order.create(
+      user: user,
+      amount: 10.0,
+      payment_status: 'Completed',
+      gateway: 'asdf',
+      content: { 'payment_status' => 'Completed' }
+    )
+
+    assert_includes order.errors.inspect.to_s, 'is not included in the list'
+    assert_equal order.valid?, false
+  end
 end

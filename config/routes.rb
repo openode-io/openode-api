@@ -8,7 +8,10 @@ Rails.application.routes.draw do
   namespace :super_admin do
     # post 'system_settings/save'
     post 'support/contact'
+
+    # Order
     get 'orders', to: 'orders#index'
+    post 'orders', to: 'orders#create'
 
     get 'users', to: 'users#index'
 

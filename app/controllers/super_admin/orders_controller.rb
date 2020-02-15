@@ -17,4 +17,23 @@ class SuperAdmin::OrdersController < SuperAdmin::SuperAdminController
       attribs
     end)
   end
+
+  # make custom order
+  def create
+    assert params['user_id']
+    assert params['amount']
+    assert params['payment_status']
+    assert params['gateway']
+    assert params['reason']
+
+    order = Order.create!(
+      user_id: params['user_id'],
+      amount: params['amount'],
+      payment_status: params['payment_status'],
+      gateway: params['gateway'],
+      content: { type: 'custom', reason: params['reason'] }
+    )
+
+    json(order)
+  end
 end
