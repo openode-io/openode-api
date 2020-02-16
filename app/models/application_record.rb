@@ -38,4 +38,12 @@ class ApplicationRecord < ActiveRecord::Base
 
     existing_vault&.destroy
   end
+
+  def as_json(options = {})
+    options = options.try(:clone) || {}
+    options[:methods] = Array(options[:methods]).map(&:to_sym)
+    options[:methods] |= [:type] if attributes.keys.include?("type")
+
+    super(options)
+  end
 end

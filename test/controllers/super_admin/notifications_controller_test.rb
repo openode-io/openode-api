@@ -1,6 +1,18 @@
 require 'test_helper'
 
 class NotificationsControllerTest < ActionDispatch::IntegrationTest
+  test 'GET /notifications/all' do
+    get '/notifications/all',
+        as: :json,
+        headers: super_admin_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body.count, 2
+    assert_equal response.parsed_body[0]["type"], "WebsiteNotification"
+    assert_equal response.parsed_body[0]["content"], "hello world"
+  end
+
   test 'POST /notifications disallow if not super admin' do
     post '/notifications/',
          params: {},

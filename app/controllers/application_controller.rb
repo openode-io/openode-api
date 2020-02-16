@@ -21,4 +21,14 @@ class ApplicationController < ActionController::API
 
     @user = User.find_by!(token: token)
   end
+
+  def default_listing(model, attributes, opts = {})
+    search_for = opts[:search_for] || "%#{params['search']}%"
+
+    model
+      .search_for(search_for, attributes)
+      .paginate(page: params[:page] || 1, per_page: 99)
+      .order(opts[:order] || "id DESC")
+  end
+
 end

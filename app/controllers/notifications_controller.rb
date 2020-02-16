@@ -4,6 +4,12 @@ class NotificationsController < SuperAdmin::SuperAdminController
     @notification = Notification.find_by! id: params['id']
   end
 
+  def index
+    attribs_to_search = %w[type level content website_id]
+
+    json(default_listing(Notification, attribs_to_search))
+  end
+
   api!
   def create
     json(Notification.create!(notification_params))
