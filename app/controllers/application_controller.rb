@@ -30,5 +30,4 @@ class ApplicationController < ActionController::API
       .paginate(page: params[:page] || 1, per_page: 99)
       .order(opts[:order] || "id DESC")
   end
-
 end
