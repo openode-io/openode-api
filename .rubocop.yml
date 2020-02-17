@@ -13,6 +13,10 @@ Rails/Output:
     - 'config/*.rb'
     - 'db/seeds.rb'
 
+Rails/OutputSafety:
+  Exclude:
+    - 'app/mailers/newsletter_mailer.rb'
+
 Rails/InverseOf:
   Enabled: false
 

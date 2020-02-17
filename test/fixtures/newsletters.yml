@@ -1,0 +1,12 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  title: Hello newsletter
+  recipients_type: custom
+  content: hoho
+  emails_sent: []
+
+two:
+  title: Hello
+  recipients_type: newsletter
+  content: hi hi

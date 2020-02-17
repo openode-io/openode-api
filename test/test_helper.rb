@@ -555,6 +555,10 @@ class ActiveSupport::TestCase
     job.invoke_job
   end
 
+  def invoke_all_jobs
+    Delayed::Job.all.each(&:invoke_job)
+  end
+
   def reset_emails
     ActionMailer::Base.deliveries.clear
   end
