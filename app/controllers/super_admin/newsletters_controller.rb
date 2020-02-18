@@ -1,7 +1,7 @@
 class SuperAdmin::NewslettersController < SuperAdmin::SuperAdminController
   before_action do
     if params['id']
-      @newsletter = Newsletter.find_by params['id']
+      @newsletter = Newsletter.find_by id: params['id']
     end
   end
 
