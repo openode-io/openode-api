@@ -53,8 +53,6 @@ module DeploymentMethod
         case @cloud_type
         when 'cloud' # refactor to internal
           'internal'
-        when 'private-cloud'
-          'vultr'
         else
           @cloud_type
         end

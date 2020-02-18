@@ -10,7 +10,7 @@ canada2:
   str_id: canada2
   full_name: Montreal (Canada2)
   country_fullname: Canada2
-  cloud_provider: vultr
+  cloud_provider: internal
 
 usa:
   str_id: usa

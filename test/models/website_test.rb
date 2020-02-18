@@ -245,21 +245,6 @@ class WebsiteTest < ActiveSupport::TestCase
   end
 
   # add_location
-  test 'add location fail if subdomain and private server' do
-    website = default_website
-    CloudProvider::Manager.clear_instance
-    CloudProvider::Manager.instance # populate locations
-    location = Location.find_by str_id: 'miami-39'
-
-    begin
-      website.add_location(location)
-      raise 'invalid'
-    rescue StandardError => e
-      assert_includes(e.inspect.to_s,
-                      'This location is available only for custom domains')
-    end
-  end
-
   test 'add location happy path' do
     website = default_website
     website.website_locations.destroy_all
@@ -272,51 +257,6 @@ class WebsiteTest < ActiveSupport::TestCase
 
     assert_equal website.website_locations[0].location.str_id, 'canada'
     assert_equal website.cloud_type, 'cloud'
-  end
-
-  test 'add location happy path - private cloud' do
-    website = Website.find_by! site_name: 'www.what.is'
-    website.website_locations.destroy_all
-    prepare_cloud_provider_manager
-    location = Location.find_by! str_id: 'new-jersey-1'
-
-    website.add_location(location)
-
-    website.reload
-    website.website_locations.reload
-
-    assert_equal website.website_locations[0].location.str_id, 'new-jersey-1'
-    assert_equal website.cloud_type, 'private-cloud'
-  end
-
-  # private_cloud?
-  test 'private_cloud? thruthy' do
-    website = Website.find_by! site_name: 'testprivatecloud'
-
-    assert_equal website.private_cloud?, true
-  end
-
-  test 'private_cloud? with cloud should be false' do
-    website = default_website
-
-    assert_equal website.private_cloud?, false
-  end
-
-  # private_cloud_allocated?
-  test 'private_cloud_allocated? without allocation' do
-    website = Website.find_by! site_name: 'testprivatecloud'
-    website.data = {}
-    website.save
-
-    assert_equal website.private_cloud_allocated?, false
-  end
-
-  test 'private_cloud_allocated? thruthy' do
-    website = Website.find_by! site_name: 'testprivatecloud'
-    website.data = { 'privateCloudInfo' => { SUBID: '1234' } }
-    website.save
-
-    assert_equal website.private_cloud_allocated?, true
   end
 
   test 'certs - provides when available' do

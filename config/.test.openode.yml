@@ -52,5 +52,3 @@ application:
           country_fullname: Canada2
           kubeconfig_path: config/.kube/ca.conf
     - type: dummy
-    - type: vultr
-      api_key: xxxxx

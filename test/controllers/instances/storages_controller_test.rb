@@ -87,12 +87,4 @@ class StoragesControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert response.parsed_body['error'].include?('Extra storage')
   end
-
-  test 'POST /instances/:instance_id/increase-storage with private cloud should fail' do
-    payload = { amount_gb: 2 }
-    post '/instances/testprivatecloud/increase-storage?location_str_id=usa',
-         params: payload, as: :json, headers: default_headers_auth
-
-    assert_response :bad_request
-  end
 end

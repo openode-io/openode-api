@@ -188,16 +188,7 @@ class Website < ApplicationRecord
   end
 
   def add_location(location)
-    is_private_cloud = location.str_id.include?('-')
-
-    if is_private_cloud && domain_type != 'custom_domain'
-      # to refactor (-)
-      msg = 'This location is available only for custom domains for now (not subdomains). ' \
-            'Only the following locations (ids) are available for subdomains: canada, usa, france.'
-      raise ValidationError, msg
-    end
-
-    location_server = is_private_cloud ? nil : location.location_servers.first
+    location_server = location.location_servers.first
 
     website_location = WebsiteLocation.create!(
       website: self,
@@ -209,7 +200,7 @@ class Website < ApplicationRecord
       website_location.update_remote_dns(with_auto_a: true)
     end
 
-    self.cloud_type = is_private_cloud ? CLOUD_TYPE_PRIVATE_CLOUD : CLOUD_TYPE_CLOUD
+    self.cloud_type = CLOUD_TYPE_CLOUD
     save!
   end
 
@@ -223,20 +214,6 @@ class Website < ApplicationRecord
 
       website_location.destroy
     end
-  end
-
-  def private_cloud?
-    cloud_type == 'private-cloud'
-  end
-
-  def private_cloud_allocated?
-    data.present? && data['privateCloudInfo'].present?
-  end
-
-  def private_cloud_info
-    return if data.blank?
-
-    data['privateCloudInfo']
   end
 
   def configs_must_comply
@@ -516,8 +493,7 @@ class Website < ApplicationRecord
     logger.info("website #{site_name} changing plan to #{acc_type}")
     self.account_type = acc_type
 
-    # to refactor
-    self.cloud_type = account_type.include?('-') ? 'private-cloud' : 'cloud'
+    self.cloud_type = 'cloud'
   end
 
   def change_plan!(acc_type)

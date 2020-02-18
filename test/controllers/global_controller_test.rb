@@ -64,15 +64,12 @@ class GlobalControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
-    assert_equal response.parsed_body.length, 17
+    assert_equal response.parsed_body.length, 9
     dummy = response.parsed_body.find { |l| l['id'] == 'DUMMY-PLAN' }
     assert_equal dummy['id'], 'DUMMY-PLAN'
 
     cloud = response.parsed_body.find { |l| l['id'] == '100-MB' }
     assert_equal cloud['id'], '100-MB'
-
-    private_cloud = response.parsed_body.find { |l| l['id'] == '1024-MB-201' }
-    assert_equal private_cloud['id'], '1024-MB-201'
   end
 
   test '/global/available-plans-at internal' do
@@ -82,17 +79,6 @@ class GlobalControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal response.parsed_body.length, 8
     assert_equal response.parsed_body[0]['id'], 'sandbox'
-  end
-
-  test '/global/available-plans-at vultr' do
-    provider = CloudProvider::Manager.instance.first_of_type('vultr')
-    provider.initialize_locations
-    get '/global/available-plans-at/private-cloud/singapore-40', as: :json
-
-    assert_response :success
-
-    assert_equal response.parsed_body.length, 7
-    assert_equal response.parsed_body[0]['id'], '1024-MB-201'
   end
 
   test '/global/version' do

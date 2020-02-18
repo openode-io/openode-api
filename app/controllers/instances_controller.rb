@@ -323,18 +323,6 @@ class InstancesController < ApplicationController
     validation_error!("This feature can't be used with a free sandbox.") if @website.free_sandbox?
   end
 
-  def requires_cloud_plan
-    if @website.private_cloud?
-      validation_error!('The instance must be cloud-based for this operation.')
-    end
-  end
-
-  def requires_private_cloud_plan
-    unless @website.private_cloud?
-      validation_error!('The instance must be private cloud-based for this operation.')
-    end
-  end
-
   def requires_location_server
     unless @website_location.andand.location_server
       validation_error!('This feature requires a server already allocated.')
