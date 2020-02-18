@@ -37,4 +37,26 @@ class SuperAdmin::NewslettersControllerTest < ActionDispatch::IntegrationTest
     assert_includes n.content, n_to_create[:content]
     assert_equal n.custom_recipients, n_to_create[:custom_recipients]
   end
+
+  test "send" do
+    Newsletter.all.each(&:destroy)
+
+    custom_newsletter = Newsletter.create!(
+      title: 'hi world.',
+      content: 'hihihi.',
+      recipients_type: 'custom',
+      custom_recipients: ['what@gmaill.com', 'what2@gmaill.com']
+    )
+
+    post "/super_admin/newsletters/#{custom_newsletter.id}/send",
+         as: :json,
+         headers: super_admin_headers_auth
+
+    assert_response :success
+
+    custom_newsletter.reload
+
+    assert_equal response.parsed_body, {}
+    assert_equal custom_newsletter.emails_sent, custom_newsletter.custom_recipients
+  end
 end
