@@ -4,7 +4,6 @@ one:
   title: Hello newsletter
   recipients_type: custom
   content: hoho
-  emails_sent: []
 
 two:
   title: Hello

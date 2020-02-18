@@ -16,6 +16,10 @@ Rails.application.routes.draw do
     get 'users', to: 'users#index'
 
     get 'websites', to: 'websites#index'
+
+    get 'newsletters', to: 'newsletters#index'
+    post 'newsletters', to: 'newsletters#create'
+    post 'newsletters/:id/send', to: 'newsletters#send'
   end
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
