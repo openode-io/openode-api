@@ -121,5 +121,9 @@ Rails.application.routes.draw do
     get '/:site_name/plan', to: 'instances#plan'
     get '/:site_name/plans', to: 'instances#plans'
     post '/:site_name/set-plan', to: 'instances#set_plan'
+
+    # executions
+    get '/:site_name/executions/list/:type', to: 'executions#index'
+    get '/:site_name/executions/:id', to: 'executions#retrieve'
   end
 end
