@@ -15,6 +15,7 @@ class ExecutionsController < InstancesController
         .select(:id, :website_id, :type, :status, :created_at))
   end
 
+  api!
   def retrieve
     json(@execution)
   end
