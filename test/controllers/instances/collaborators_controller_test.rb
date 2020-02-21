@@ -14,6 +14,8 @@ class CollaboratorsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
+    puts "response.parsed_body #{response.parsed_body.inspect}"
+
     assert_equal response.parsed_body.length, 1
     assert_equal response.parsed_body[0]['id'], collaborator.id
     assert_equal response.parsed_body[0]['user']['id'], collab_user.id

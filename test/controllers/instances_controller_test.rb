@@ -108,6 +108,16 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body['status'], 'online'
   end
 
+  test '/instances/:instance_id with id instead of site name' do
+    w = default_website
+
+    get "/instances/#{w.id}", as: :json, headers: default_headers_auth
+
+    assert_response :success
+    assert_equal response.parsed_body['site_name'], 'testsite'
+    assert_equal response.parsed_body['status'], 'online'
+  end
+
   test '/instances/summary happy path' do
     website = Website.find_by site_name: 'testsite'
     get '/instances/summary', as: :json, headers: default_headers_auth
