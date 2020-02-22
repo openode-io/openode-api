@@ -72,5 +72,4 @@ class UserMailer < ApplicationMailer
     "https://www.#{CloudProvider::Manager.base_hostname}/" \
                        "activate/#{user.id}/#{user.activation_hash}"
   end
-
 end
