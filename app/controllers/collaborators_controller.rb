@@ -22,7 +22,28 @@ class CollaboratorsController < InstancesController
 
   api!
   def create
-    json(Collaborator.create!(permitted_params.merge('website_id' => @website.id)))
+    c_params = permitted_params.merge('website_id' => @website.id)
+
+    if c_params[:email]
+      user = User.find_by email: c_params[:email]
+
+      unless user
+        # otherwise we need to create it and send an email to the collaborator
+        tmp_passwd = Str::Rand.password
+        user = User.create!(email: c_params[:email], password_hash: tmp_passwd)
+
+        UserMailer.with(
+          user: user,
+          password: tmp_passwd
+        ).registration_collaborator.deliver_now
+      end
+
+      c_params[:user_id] = user.id
+    end
+
+    c_params.delete(:email)
+
+    json(Collaborator.create!(c_params))
   end
 
   api!
@@ -50,6 +71,6 @@ class CollaboratorsController < InstancesController
   end
 
   def permitted_params
-    params.require(:collaborator).permit(:user_id, permissions: [])
+    params.require(:collaborator).permit(:user_id, :email, permissions: [])
   end
 end

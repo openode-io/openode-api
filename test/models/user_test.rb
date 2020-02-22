@@ -81,6 +81,16 @@ class UserTest < ActiveSupport::TestCase
     assert_equal user.email, 'user10@site.com'
   end
 
+  test 'create with randomly generated password' do
+    attribs = {
+      email: 'USER10@site.com',
+      password_hash: Str::Rand.password
+    }
+
+    user = User.create(attribs)
+    assert_equal user.valid?, true
+  end
+
   test 'should create proper default values' do
     attribs = {
       email: 'USER11@site.com',

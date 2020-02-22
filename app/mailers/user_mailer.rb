@@ -1,8 +1,16 @@
 class UserMailer < ApplicationMailer
   def registration
     @user = params[:user]
-    @activation_link = "https://www.#{CloudProvider::Manager.base_hostname}/" \
-                       "activate/#{@user.id}/#{@user.activation_hash}"
+    @activation_link = activation_link(@user)
+    mail_to = @user.email
+
+    mail(to: mail_to, subject: 'Welcome to opeNode!')
+  end
+
+  def registration_collaborator
+    @user = params[:user]
+    @password = params[:password]
+    @activation_link = activation_link(@user)
     mail_to = @user.email
 
     mail(to: mail_to, subject: 'Welcome to opeNode!')
@@ -57,4 +65,12 @@ class UserMailer < ApplicationMailer
     subject = "Your private cloud server is ready - #{CloudProvider::Manager.base_hostname}"
     mail(to: params[:mail_to], subject: subject)
   end
+
+  protected
+
+  def activation_link(user)
+    "https://www.#{CloudProvider::Manager.base_hostname}/" \
+                       "activate/#{user.id}/#{user.activation_hash}"
+  end
+
 end
