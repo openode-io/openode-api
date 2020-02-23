@@ -66,7 +66,7 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
           headers: default_headers_auth,
           params: {
             account: {
-              credits: 10000
+              credits: 10_000
             }
           },
           as: :json
