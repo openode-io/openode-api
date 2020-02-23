@@ -263,4 +263,44 @@ class DnsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :forbidden
   end
+
+  test '/instances/:instance_id/dns get settings with cname' do
+    w = Website.find_by site_name: 'www.what.is'
+    w.user = default_user
+    w.type = Website::TYPE_KUBERNETES
+    w.domains = ['www.what.is', 'www2.www.what.is']
+    w.save!
+
+    wl = w.website_locations.first
+    wl.cname = 'populated.cname.com'
+    wl.save!
+
+    get '/instances/www.what.is/dns',
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body['cname'], wl.cname
+  end
+
+  test '/instances/:instance_id/dns get settings without cname' do
+    w = Website.find_by site_name: 'www.what.is'
+    w.user = default_user
+    w.type = Website::TYPE_KUBERNETES
+    w.domains = ['www.what.is', 'www2.www.what.is']
+    w.save!
+
+    wl = w.website_locations.first
+    wl.cname = nil
+    wl.save!
+
+    get '/instances/www.what.is/dns',
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body['cname'], nil
+  end
 end

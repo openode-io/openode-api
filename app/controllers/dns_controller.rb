@@ -1,7 +1,7 @@
 class DnsController < InstancesController
   before_action :ensure_location
 
-  before_action only: %i[list_dns add_dns del_dns] do
+  before_action only: %i[list_dns add_dns del_dns settings] do
     requires_custom_domain
   end
 
@@ -18,12 +18,10 @@ class DnsController < InstancesController
     requires_access_to(Website::PERMISSION_ALIAS)
   end
 
-  api!
   def list_dns
     json(@website_location.compute_dns(with_auto_a: true))
   end
 
-  api!
   def add_dns
     domain = params['domainName']
     type = params['type']
@@ -56,7 +54,6 @@ class DnsController < InstancesController
     list_dns
   end
 
-  api!
   def del_dns
     dns_id = params['id']
 
@@ -76,7 +73,6 @@ class DnsController < InstancesController
     list_dns
   end
 
-  api!
   def add_alias
     domain = Website.clean_domain(params['hostname'])
 
@@ -91,7 +87,6 @@ class DnsController < InstancesController
     json(result: 'success')
   end
 
-  api!
   def del_alias
     domain = Website.clean_domain(params['hostname'])
 
@@ -104,5 +99,12 @@ class DnsController < InstancesController
     @website.create_event(title: 'Delete domain alias', domain: domain)
 
     json(result: 'success')
+  end
+
+  api!
+  def settings
+    # returns the custom domain DNS settings
+
+    json(cname: @website_location.cname)
   end
 end
