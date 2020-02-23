@@ -35,6 +35,48 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body['email'], u.email
   end
 
+  test 'PATCH /account/me with valid' do
+    u = User.find_by! token: '1234s56789'
+    u.newsletter = 0
+    u.save!
+    u.reload
+
+    assert_equal u.newsletter, 0
+
+    patch '/account/me',
+          headers: default_headers_auth,
+          params: {
+            account: {
+              newsletter: 1
+            }
+          },
+          as: :json
+
+    u.reload
+
+    assert_response :success
+    assert_equal u.newsletter, 1
+  end
+
+  test 'PATCH /account/me not allowed to change other fields' do
+    u = User.find_by! token: '1234s56789'
+    credits = u.credits
+
+    patch '/account/me',
+          headers: default_headers_auth,
+          params: {
+            account: {
+              credits: 10000
+            }
+          },
+          as: :json
+
+    u.reload
+
+    assert_response :success
+    assert_equal u.credits, credits
+  end
+
   test '/account/me with not logged in' do
     get '/account/me', headers: {}, as: :json
 

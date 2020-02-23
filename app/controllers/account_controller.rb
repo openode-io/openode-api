@@ -1,5 +1,5 @@
 class AccountController < ApplicationController
-  before_action only: [:me] do
+  before_action only: [:me, :update] do
     authorize
   end
 
@@ -30,6 +30,12 @@ class AccountController < ApplicationController
       email: user.email,
       token: user.token
     )
+  end
+
+  def update
+    @user.update!(user_params)
+
+    json(status: 'success')
   end
 
   def forgot_password
