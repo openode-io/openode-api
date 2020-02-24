@@ -77,6 +77,7 @@ Rails.application.routes.draw do
     get '/summary', to: 'instances#summary'
     post '/create/', to: 'instances#create_instance'
     get '/:site_name/', to: 'instances#show'
+    patch '/:site_name/', to: 'instances#update'
     delete '/:site_name/', to: 'instances#destroy'
 
     get '/:site_name/stats', to: 'instance_stat#index'

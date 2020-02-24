@@ -581,6 +581,29 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # PATCH /sitename
+  test 'patch /instances/:instance_id/' do
+    website = default_website
+    website.crontab = ""
+    website.save!
+
+    new_crontab = "\n * * * * * ls -la\n"
+
+    patch '/instances/testsite/',
+          as: :json,
+          params: {
+            website: {
+              crontab: new_crontab
+            }
+          },
+          headers: default_headers_auth
+
+    assert_response :success
+
+    website.reload
+    assert_equal website.crontab, new_crontab
+  end
+
   test 'DEL /instances/:instance_id/ forbidden' do
     w, = prepare_forbidden_test(Website::PERMISSION_PLAN)
 

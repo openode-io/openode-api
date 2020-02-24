@@ -47,6 +47,10 @@ class InstancesController < ApplicationController
     requires_access_to(Website::PERMISSION_ROOT)
   end
 
+  before_action only: [:update] do
+    requires_access_to(Website::PERMISSION_CONFIG)
+  end
+
   api!
   def index
     json(@user.websites_with_access)
@@ -102,6 +106,18 @@ class InstancesController < ApplicationController
     end
 
     @website.destroy
+
+    json(result: 'success')
+  end
+
+  api!
+  def update
+    @website.update!(website_params)
+
+    @website_event_obj = {
+      title: 'update-website',
+      changes: website_params
+    }
 
     json(result: 'success')
   end
@@ -399,5 +415,9 @@ class InstancesController < ApplicationController
     @website_event_objs.each do |event_obj|
       @website.create_event(event_obj)
     end
+  end
+
+  def website_params
+    params.require(:website).permit(:user_id, :crontab)
   end
 end
