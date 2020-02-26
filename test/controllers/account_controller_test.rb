@@ -86,6 +86,31 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
+  test 'POST /account/generate-token - happy path' do
+    orig_token = '1234s56789'
+    u = User.find_by! token: orig_token
+
+    post '/account/regenerate-token',
+         headers: default_headers_auth,
+         params: {},
+         as: :json
+
+    u.reload
+
+    assert_response :success
+    assert_equal u.token, response.parsed_body['token']
+    assert_not_equal u.token, orig_token
+  end
+
+  test 'POST /account/generate-token - not authorized' do
+    post '/account/regenerate-token',
+         headers: {},
+         params: {},
+         as: :json
+
+    assert_response :unauthorized
+  end
+
   test '/account/register valid' do
     account = {
       email: 'myadminvalidregister@thisisit.com',

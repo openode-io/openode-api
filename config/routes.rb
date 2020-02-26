@@ -30,6 +30,7 @@ Rails.application.routes.draw do
     post 'getToken', to: 'account#get_token'
     get  'me', to: 'account#me'
     patch 'me', to: 'account#update'
+    post 'regenerate-token', to: 'account#regenerate_token'
     post 'register', to: 'account#register'
     post 'forgot-password', to: 'account#forgot_password'
     post 'verify-reset-token', to: 'account#verify_reset_token'

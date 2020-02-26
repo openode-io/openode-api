@@ -1,5 +1,5 @@
 class AccountController < ApplicationController
-  before_action only: [:me, :update] do
+  before_action only: [:me, :update, :regenerate_token] do
     authorize
   end
 
@@ -36,6 +36,13 @@ class AccountController < ApplicationController
     @user.update!(user_params)
 
     json(status: 'success')
+  end
+
+  def regenerate_token
+    @user.regen_api_token!
+
+    # returns back the new token
+    json(token: @user.token)
   end
 
   def forgot_password
