@@ -38,6 +38,7 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
   test 'PATCH /account/me with valid' do
     u = User.find_by! token: '1234s56789'
     u.newsletter = 0
+    u.nb_credits_threshold_notification = 50
     u.save!
     u.reload
 
@@ -47,7 +48,8 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
           headers: default_headers_auth,
           params: {
             account: {
-              newsletter: 1
+              newsletter: 1,
+              nb_credits_threshold_notification: 100
             }
           },
           as: :json
@@ -56,6 +58,7 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal u.newsletter, 1
+    assert_equal u.nb_credits_threshold_notification, 100
   end
 
   test 'PATCH /account/me not allowed to change other fields' do

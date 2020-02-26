@@ -68,6 +68,8 @@ class AccountController < ApplicationController
   private
 
   def user_params
-    params.require(:account).permit(:email, :password, :password_confirmation, :newsletter)
+    params.require(:account).permit(:email, :password,
+                                    :password_confirmation, :newsletter,
+                                    :nb_credits_threshold_notification)
   end
 end
