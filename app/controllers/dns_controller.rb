@@ -105,6 +105,6 @@ class DnsController < InstancesController
   def settings
     # returns the custom domain DNS settings
 
-    json(cname: @website_location.cname)
+    json(external_addr: @website_location.external_addr)
   end
 end

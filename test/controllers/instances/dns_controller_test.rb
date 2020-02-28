@@ -272,7 +272,7 @@ class DnsControllerTest < ActionDispatch::IntegrationTest
     w.save!
 
     wl = w.website_locations.first
-    wl.cname = 'populated.cname.com'
+    wl.external_addr = 'populated.cname.com'
     wl.save!
 
     get '/instances/www.what.is/dns',
@@ -281,7 +281,7 @@ class DnsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
-    assert_equal response.parsed_body['cname'], wl.cname
+    assert_equal response.parsed_body['external_addr'], wl.external_addr
   end
 
   test '/instances/:instance_id/dns get settings without cname' do
@@ -292,7 +292,7 @@ class DnsControllerTest < ActionDispatch::IntegrationTest
     w.save!
 
     wl = w.website_locations.first
-    wl.cname = nil
+    wl.external_addr = nil
     wl.save!
 
     get '/instances/www.what.is/dns',

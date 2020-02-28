@@ -434,7 +434,7 @@ VAR2=5678
 
     yml = kubernetes_method.generate_service_yml(w)
 
-    assert_contains_service_yml(yml, w, with_type: "LoadBalancer")
+    assert_contains_service_yml(yml, w, with_type: "NodePort")
   end
 
   test 'certificate? - if certificate provided' do
@@ -535,8 +535,6 @@ VAR2=5678
   end
 
   test 'generate_ingress_yml' do
-    prepare_get_services_default_happy(kubernetes_method, @website_location)
-
     assert_scripted do
       begin_ssh
 
@@ -550,7 +548,6 @@ VAR2=5678
 
   test 'generate_ingress_yml - with certificate' do
     set_website_certs(@website)
-    prepare_get_services_default_happy(kubernetes_method, @website_location)
 
     assert_scripted do
       begin_ssh
@@ -566,7 +563,6 @@ VAR2=5678
   test 'generate_instance_yml - basic' do
     cmd_get_dotenv = kubernetes_method.retrieve_dotenv_cmd(project_path: @website.repo_dir)
     prepare_ssh_session(cmd_get_dotenv, '')
-    prepare_get_services_default_happy(kubernetes_method, @website_location)
     @website_location.change_storage!(3)
 
     assert_scripted do
@@ -589,7 +585,6 @@ VAR2=5678
   test 'generate_instance_yml - without namespace object/pvc' do
     cmd_get_dotenv = kubernetes_method.retrieve_dotenv_cmd(project_path: @website.repo_dir)
     prepare_ssh_session(cmd_get_dotenv, '')
-    prepare_get_services_default_happy(kubernetes_method, @website_location)
 
     assert_scripted do
       begin_ssh
@@ -662,11 +657,7 @@ VAR2=5678
     w = default_custom_domain_website
     website_location = w.website_locations.first
 
-    file_services =
-      "test/fixtures/kubernetes/services-with-resolved-load-balancer.json"
-    result = IO.read(file_services)
-    prepare_get_services_namespaced_happy(kubernetes_method, website_location,
-                                          result)
+    prepare_get_services_default_happy(kubernetes_method, website_location)
 
     assert_scripted do
       begin_ssh
@@ -676,19 +667,19 @@ VAR2=5678
         website_location: website_location
       )
 
-      expected_cname = "6ojq59kjlk.lb.c1.bhs5.k8s.ovh.net"
+      expected_cname = "6ojq5t5np0.lb.c1.bhs5.k8s.ovh.net"
 
       expected_result = {
         "result" => "success",
         "url" => "http://www.what.is/",
-        "CNAME Record" => expected_cname
+        "A Record" => expected_cname
       }
 
       assert_equal result_details, expected_result
 
       # verify the cname is stored correctly
       website_location.reload
-      assert_equal website_location.cname, expected_cname
+      assert_equal website_location.external_addr, expected_cname
     end
   end
 
@@ -706,8 +697,6 @@ VAR2=5678
                             nb_lines: 1_000)
     prepare_make_secret(kubernetes_method, @website, @website_location, "success")
     prepare_get_dotenv(kubernetes_method, @website, "VAR=123")
-
-    prepare_get_services_default_happy(kubernetes_method, @website_location)
 
     prepare_action_yml(kubernetes_method, @website_location, "apply.yml",
                        "delete -f apply.yml", 'success')

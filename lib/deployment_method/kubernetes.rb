@@ -390,7 +390,7 @@ module DeploymentMethod
           name: main-service
           namespace: #{namespace_of(website)}
         spec:
-          #{website.custom_domain? ? 'type: LoadBalancer' : 'type: NodePort'}
+          type: NodePort
           ports:
           - port: 80
             targetPort: 80
@@ -461,18 +461,15 @@ module DeploymentMethod
                               key: key)
     end
 
-    def generate_rules_ingress_yml(website, website_location, rules = [])
+    def generate_rules_ingress_yml(website, _website_location, rules = [])
       if website.subdomain?
+        # disabled.. cleanup
         # we add an extra rule:
         # - host: ***.k8s.ovh.net # nginx controller external ip
-        default_services = get_services_json(
-          website: website,
-          website_location: website_location,
-          with_namespace: false
-        )
 
-        load_balancer = find_first_load_balancer!(default_services)
-        rules << { hostname: load_balancer }
+        # TODO: - should really remove?
+        # load_balancer = find_first_load_balancer!(default_services)
+        # rules << { hostname: load_balancer }
       end
 
       result = ""
@@ -587,12 +584,15 @@ module DeploymentMethod
     def find_first_load_balancer(object)
       load_balancer = nil
 
-      object['items'].find do |item|
+      object['items'].each do |item|
         next unless item.dig('spec', 'type') == "LoadBalancer"
 
         in_load_balancers = item.dig('status', 'loadBalancer', 'ingress')
 
-        load_balancer = in_load_balancers[0]['hostname'] if in_load_balancers
+        if in_load_balancers
+          load_balancer =
+            in_load_balancers[0]['hostname'] || in_load_balancers[0]['ip']
+        end
       end
 
       load_balancer
@@ -698,11 +698,17 @@ module DeploymentMethod
       result['url'] = "http://#{website_location.main_domain}/"
 
       if website.domain_type == 'custom_domain'
-        notify('info', "Waiting for the load balancer hostname to resolve...")
-        load_balancer = wait_for_service_load_balancer(website, website_location)
-        website_location.cname = load_balancer
+        default_services = get_services_json(
+          website: website,
+          website_location: website_location,
+          with_namespace: false
+        )
+
+        load_balancer = find_first_load_balancer!(default_services)
+
+        website_location.external_addr = load_balancer
         website_location.save
-        result['CNAME Record'] = load_balancer
+        result['A Record'] = load_balancer
       end
 
       result
