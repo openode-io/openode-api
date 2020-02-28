@@ -51,6 +51,10 @@ module CloudProvider
       cloud ? cloud['instance'] : nil
     end
 
+    def first_details_of_type(type)
+      @clouds.find { |c| c['type'] == type }
+    end
+
     def first_of_internal_type(type)
       cloud = @clouds.find { |c| c['instance'].type == type }
 

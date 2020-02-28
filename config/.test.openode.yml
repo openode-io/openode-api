@@ -46,6 +46,7 @@ application:
               cpus: 2
               disk_gb: 200
     - type: kubernetes
+      storage_class_name: do-block-storage
       locations:
         - str_id: canada2
           full_name: Montreal (Canada2)

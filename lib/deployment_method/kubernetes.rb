@@ -252,6 +252,9 @@ module DeploymentMethod
     def generate_persistence_volume_claim_yml(website_location)
       return '' unless website_location.extra_storage?
 
+      kube_cloud = CloudProvider::Manager.instance.first_details_of_type('kubernetes')
+      storage_class_name = kube_cloud['storage_class_name']
+
       <<~END_YML
         apiVersion: v1
         kind: PersistentVolumeClaim
@@ -260,11 +263,11 @@ module DeploymentMethod
           namespace: #{namespace_of(website_location.website)}
         spec:
           accessModes:
-            - ReadWriteMany
+            - ReadWriteOnce
           resources:
             requests:
               storage: #{website_location.extra_storage}Gi
-          storageClassName: cinder-classic
+          storageClassName: #{storage_class_name}
       END_YML
     end
 

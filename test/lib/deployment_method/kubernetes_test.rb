@@ -378,6 +378,7 @@ VAR2=5678
 
     assert_includes yml, "kind: PersistentVolumeClaim"
     assert_includes yml, "storage: 3Gi"
+    assert_includes yml, "storageClassName: do-block-storage"
   end
 
   test 'generate_deployment_yml - with skip port check' do
@@ -573,6 +574,7 @@ VAR2=5678
                                                     with_pvc_object: true)
 
       assert_includes yml, "kind: PersistentVolumeClaim"
+      assert_includes yml, "storageClassName: do-block-storage"
       assert_contains_namespace_yml(yml, @website)
       assert_contains_deployment_yml(yml, @website, @website_location, with_probes: true)
       assert_contains_service_yml(yml, @website)
@@ -594,6 +596,7 @@ VAR2=5678
                                                     with_pvc_object: false)
 
       assert_not_includes yml, "kind: PersistentVolumeClaim"
+      assert_not_includes yml, "storageClassName: do-block-storage"
       assert_not_includes yml, "kind: Namespace"
       assert_contains_deployment_yml(yml, @website, @website_location, with_probes: true)
       assert_contains_service_yml(yml, @website)
