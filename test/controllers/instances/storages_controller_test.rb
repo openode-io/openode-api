@@ -26,6 +26,7 @@ class StoragesControllerTest < ActionDispatch::IntegrationTest
   test 'POST /instances/:instance_id/destroy-storage with valid info' do
     website = Website.find_by! site_name: 'testsite'
     website.type = Website::TYPE_KUBERNETES
+    website.status = Website::STATUS_OFFLINE
     website.save!
     wl = website.website_locations.first
     wl.change_storage!(2)
@@ -68,6 +69,20 @@ class StoragesControllerTest < ActionDispatch::IntegrationTest
       assert_equal last_exec.result['steps'][0]['cmd_name'], 'destroy_storage_cmd'
       assert_equal last_exec.result['steps'][0]['result']['stdout'], 'deleted.'
     end
+  end
+
+  test 'POST /instances/:instance_id/destroy-storage if online should fail' do
+    website = Website.find_by! site_name: 'testsite'
+    website.type = Website::TYPE_KUBERNETES
+    website.status = Website::STATUS_ONLINE
+    website.save!
+    wl = website.website_locations.first
+    wl.change_storage!(2)
+
+    post '/instances/testsite/destroy-storage?location_str_id=canada',
+         params: {}, as: :json, headers: default_headers_auth
+
+    assert_response :bad_request
   end
 
   test 'POST /instances/:instance_id/increase_storage with negative gb' do

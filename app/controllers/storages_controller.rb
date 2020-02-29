@@ -1,4 +1,8 @@
 class StoragesController < InstancesController
+  before_action only: %i[destroy] do
+    requires_status_in [Website::STATUS_OFFLINE]
+  end
+
   api!
   def increase
     prepare_storage_change(sign: 1)
