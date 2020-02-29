@@ -73,9 +73,18 @@ module DeploymentMethod
       image_manager
     end
 
+    def initialize_ns(options = {})
+      website, website_location = get_website_fields(options)
+
+      ex_stdout('kubectl',
+                website_location: website_location,
+                s_arguments: "create namespace #{namespace_of(website)}")
+    end
+
     def launch(options = {})
       website, website_location = get_website_fields(options)
 
+      initialize_ns(options)
       image_manager = prepare_image_manager(website, website_location)
 
       notify("info", "Preparing instance image...")
@@ -158,17 +167,23 @@ module DeploymentMethod
       @@test_kubectl_file_path = kube_file_path
     end
 
-    def kubectl_yml_action(website_location, action, content, opts = {})
-      tmp_file_path = if !@@test_kubectl_file_path
-                        tmp_file = Tempfile.new("kubectl-#{action}")
+    def self.yml_remote_file_path(action)
+      if !@@test_kubectl_file_path
+        tmp_file = Tempfile.new("kubectl-#{action}")
 
-                        tmp_file.write(content)
-                        tmp_file.flush
+        # tmp_file.write(content)
+        # tmp_file.flush
 
-                        tmp_file.path
-                      else
-                        @@test_kubectl_file_path
+        tmp_file.path
+      else
+        @@test_kubectl_file_path
       end
+    end
+
+    def kubectl_yml_action(website_location, action, content, opts = {})
+      # upload(local_path, remote_path)
+      tmp_file_path = Kubernetes.yml_remote_file_path(action)
+      runner.upload_content_to(content, tmp_file_path)
 
       ex('kubectl', {
         website_location: website_location,
