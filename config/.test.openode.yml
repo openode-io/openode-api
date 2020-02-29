@@ -52,4 +52,11 @@ application:
           full_name: Montreal (Canada2)
           country_fullname: Canada2
           kubeconfig_path: config/.kube/ca.conf
+          cname: canada.openode.io
+          external_addr: 127.0.0.1
+        - str_id: usa
+          full_name: New York (USA)
+          country_fullname: United States
+          cname: usa.openode.io
+          external_addr: 127.0.0.2
     - type: dummy

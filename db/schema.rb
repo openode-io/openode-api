@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_02_28_003307) do
+ActiveRecord::Schema.define(version: 2020_02_28_002830) do
 
   create_table "collaborators", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "website_id"
@@ -266,7 +266,6 @@ ActiveRecord::Schema.define(version: 2020_02_28_003307) do
     t.integer "nb_cpus", default: 1
     t.integer "second_port"
     t.integer "running_port"
-    t.string "external_addr"
     t.index ["location_id"], name: "location_id"
     t.index ["location_server_id"], name: "location_server_id"
     t.index ["website_id"], name: "website_id"

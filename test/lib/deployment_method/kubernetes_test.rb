@@ -80,6 +80,19 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     assert_equal up_files.length, 0
   end
 
+  # kube_configs
+  test 'kube_configs' do
+    configs = DeploymentMethod::Kubernetes.kube_configs
+    assert_equal configs['storage_class_name'], 'do-block-storage'
+  end
+
+  # kube_configs_at_location
+  test 'kube_configs_at_location' do
+    confs = DeploymentMethod::Kubernetes.kube_configs_at_location('canada2')
+    assert_equal confs['cname'], 'canada.openode.io'
+    assert_equal confs['external_addr'], '127.0.0.1'
+  end
+
   # DOTENV
 
   test 'retrieve_dotenv_cmd' do
@@ -675,14 +688,11 @@ VAR2=5678
       expected_result = {
         "result" => "success",
         "url" => "http://www.what.is/",
-        "A Record" => expected_cname
+        "A Record" => expected_cname,
+        "CNAME Record" => 'usa.openode.io'
       }
 
       assert_equal result_details, expected_result
-
-      # verify the cname is stored correctly
-      website_location.reload
-      assert_equal website_location.external_addr, expected_cname
     end
   end
 

@@ -264,16 +264,12 @@ class DnsControllerTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
-  test '/instances/:instance_id/dns get settings with cname' do
+  test '/instances/:instance_id/dns get settings with configs' do
     w = Website.find_by site_name: 'www.what.is'
     w.user = default_user
     w.type = Website::TYPE_KUBERNETES
     w.domains = ['www.what.is', 'www2.www.what.is']
     w.save!
-
-    wl = w.website_locations.first
-    wl.external_addr = 'populated.cname.com'
-    wl.save!
 
     get '/instances/www.what.is/dns',
         as: :json,
@@ -281,26 +277,7 @@ class DnsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
-    assert_equal response.parsed_body['external_addr'], wl.external_addr
-  end
-
-  test '/instances/:instance_id/dns get settings without cname' do
-    w = Website.find_by site_name: 'www.what.is'
-    w.user = default_user
-    w.type = Website::TYPE_KUBERNETES
-    w.domains = ['www.what.is', 'www2.www.what.is']
-    w.save!
-
-    wl = w.website_locations.first
-    wl.external_addr = nil
-    wl.save!
-
-    get '/instances/www.what.is/dns',
-        as: :json,
-        headers: default_headers_auth
-
-    assert_response :success
-
-    assert_equal response.parsed_body['cname'], nil
+    assert_equal response.parsed_body['external_addr'], '127.0.0.2'
+    assert_equal response.parsed_body['cname'], 'usa.openode.io'
   end
 end

@@ -20,6 +20,16 @@ module DeploymentMethod
       send_crontab(options)
     end
 
+    def self.kube_configs
+      CloudProvider::Manager.instance.first_details_of_type('kubernetes')
+    end
+
+    def self.kube_configs_at_location(str_id)
+      confs = kube_configs
+
+      confs['locations'].find { |l| l['str_id'] == str_id }
+    end
+
     def send_crontab(options = {})
       super(options)
     end
@@ -252,7 +262,7 @@ module DeploymentMethod
     def generate_persistence_volume_claim_yml(website_location)
       return '' unless website_location.extra_storage?
 
-      kube_cloud = CloudProvider::Manager.instance.first_details_of_type('kubernetes')
+      kube_cloud = Kubernetes.kube_configs
       storage_class_name = kube_cloud['storage_class_name']
 
       <<~END_YML
@@ -709,9 +719,10 @@ module DeploymentMethod
 
         load_balancer = find_first_load_balancer!(default_services)
 
-        website_location.external_addr = load_balancer
-        website_location.save
+        kconfs_at = Kubernetes.kube_configs_at_location(website_location.location.str_id)
+
         result['A Record'] = load_balancer
+        result['CNAME Record'] = kconfs_at['cname']
       end
 
       result
