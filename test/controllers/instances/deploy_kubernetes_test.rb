@@ -17,6 +17,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
   end
 
   def prepare_launch_happy_path(kubernetes_method, website, website_location)
+    prepare_make_namespace(kubernetes_method, website, website_location, "result")
     prepare_make_secret(kubernetes_method, website, website_location, "result")
     prepare_check_repo_size(kubernetes_method, website, "1231 /what")
 
@@ -52,7 +53,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
       assert_equal @website.status, Website::STATUS_ONLINE
       assert_equal deployment.status, Deployment::STATUS_SUCCESS
-      assert_equal deployment.result['steps'].length, 13 # global, 2 kills, finalize
+      assert_equal deployment.result['steps'].length, 15 # global, 2 kills, finalize
 
       assert_equal deployment.result['errors'].length, 0
 

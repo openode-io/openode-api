@@ -359,6 +359,10 @@ class ActiveSupport::TestCase
     Remote::Sftp.set_conn_test('dummy')
   end
 
+  def expect_file_sent(filename)
+    Remote::Sftp.get_test_uploaded_files.any? { |f| f[:remote_file_path] == filename }
+  end
+
   def begin_ssh
     Remote::Ssh.set_conn_test(connection)
   end

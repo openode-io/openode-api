@@ -25,6 +25,17 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     prepare_ssh_session(cmd, IO.read('test/fixtures/kubernetes/1_pod_alive.json'))
   end
 
+  # kubeconfig path
+  test 'kubeconfig_path' do
+    dep_method = kubernetes_method
+    location = Location.find_by str_id: 'usa'
+    wl = location.website_locations.first
+
+    path = dep_method.kubeconfig_path(wl)
+
+    assert_equal path, '/var/www/openode-api/config/kubernetes/production-usa.yml'
+  end
+
   # verify can deploy
 
   test 'verify_can_deploy - can do it' do
@@ -88,7 +99,7 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
 
   # kube_configs_at_location
   test 'kube_configs_at_location' do
-    confs = DeploymentMethod::Kubernetes.kube_configs_at_location('canada2')
+    confs = DeploymentMethod::Kubernetes.kube_configs_at_location('canada')
     assert_equal confs['cname'], 'canada.openode.io'
     assert_equal confs['external_addr'], '127.0.0.1'
   end
@@ -721,6 +732,8 @@ VAR2=5678
         website: @website,
         website_location: @website_location
       )
+
+      expect_file_sent("apply.yml")
     end
   end
 

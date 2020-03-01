@@ -171,9 +171,6 @@ module DeploymentMethod
       if !@@test_kubectl_file_path
         tmp_file = Tempfile.new("kubectl-#{action}")
 
-        # tmp_file.write(content)
-        # tmp_file.flush
-
         tmp_file.path
       else
         @@test_kubectl_file_path
@@ -185,10 +182,18 @@ module DeploymentMethod
       tmp_file_path = Kubernetes.yml_remote_file_path(action)
       runner.upload_content_to(content, tmp_file_path)
 
-      ex('kubectl', {
-        website_location: website_location,
-        s_arguments: "#{action} -f #{tmp_file_path}"
-      }.merge(opts))
+      result = nil
+
+      begin
+        result = ex('kubectl', {
+          website_location: website_location,
+          s_arguments: "#{action} -f #{tmp_file_path}"
+        }.merge(opts))
+      ensure
+        ex("delete_files", files: [tmp_file_path])
+      end
+
+      result
     end
 
     def retrieve_file_cmd(options = {})
@@ -848,11 +853,17 @@ module DeploymentMethod
       ]
     end
 
-    protected
-
     def kubeconfig_path(website_location)
       location_str_id = website_location.location.str_id
-      Rails.root.join("#{KUBECONFIGS_BASE_PATH}#{ENV['RAILS_ENV']}-#{location_str_id}.yml")
+      configs = Kubernetes.kube_configs_at_location(location_str_id)
+
+      raise "missing kubeconfig for #{location_str_id}" unless configs
+
+      path = configs['builder_kubeconfig_path']
+
+      assert path
+
+      path
     end
   end
 end

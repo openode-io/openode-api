@@ -1,5 +1,15 @@
 
 class ActiveSupport::TestCase
+  def prepare_make_namespace(kubernetes_method, website, website_location, result_expected)
+    cmd_create_secret = kubernetes_method.kubectl(
+      website_location: website_location,
+      s_arguments:
+        "create namespace instance-#{website.id}"
+    )
+
+    prepare_ssh_session(cmd_create_secret, result_expected)
+  end
+
   def prepare_make_secret(kubernetes_method, website, website_location, result_expected)
     cmd_create_secret = kubernetes_method.kubectl(
       website_location: website_location,
@@ -40,11 +50,15 @@ class ActiveSupport::TestCase
                          expected_result)
     DeploymentMethod::Kubernetes.set_kubectl_file_path(filename)
 
+    begin_sftp
+
     cmd = kubernetes_method.kubectl(
       website_location: website_location,
       s_arguments: s_arguments
     )
     prepare_ssh_session(cmd, expected_result)
+
+    prepare_ssh_session("rm -rf \"#{filename}\" ; ", "")
   end
 
   def prepare_get_pods_json(kubernetes_method, website, website_location, expected_result,

@@ -9,7 +9,8 @@ class LibTasksLocationsTest < ActiveSupport::TestCase
 
     invoke_task "locations:populate"
 
-    assert_equal Location.count, 2
+    assert_equal Location.count, 3
+    assert_equal Location.exists?(str_id: 'canada'), true
     assert_equal Location.exists?(str_id: 'canada2'), true
     assert_equal Location.exists?(str_id: 'usa'), true
   end

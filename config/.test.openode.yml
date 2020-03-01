@@ -48,15 +48,16 @@ application:
     - type: kubernetes
       storage_class_name: do-block-storage
       locations:
-        - str_id: canada2
+        - str_id: canada
           full_name: Montreal (Canada2)
           country_fullname: Canada2
-          kubeconfig_path: config/.kube/ca.conf
+          builder_kubeconfig_path: /var/www/openode-api/config/kubernetes/production-canada2.yml
           cname: canada.openode.io
           external_addr: 127.0.0.1
         - str_id: usa
           full_name: New York (USA)
           country_fullname: United States
           cname: usa.openode.io
+          builder_kubeconfig_path: /var/www/openode-api/config/kubernetes/production-usa.yml
           external_addr: 127.0.0.2
     - type: dummy
