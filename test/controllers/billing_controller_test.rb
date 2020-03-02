@@ -28,5 +28,4 @@ class BillingControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unauthorized
   end
-
 end
