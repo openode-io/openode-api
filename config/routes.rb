@@ -36,6 +36,10 @@ Rails.application.routes.draw do
     post 'verify-reset-token', to: 'account#verify_reset_token'
   end
 
+  scope :billing do
+    get  'orders', to: 'billing#orders'
+  end
+
   scope :notifications do
     get '',         to: 'user_notifications#index'
     post 'view',    to: 'user_notifications#mark_viewed'
