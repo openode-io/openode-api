@@ -31,11 +31,11 @@ module DeploymentMethod
 
       def image_name_tag
         t_name = InstanceImageManager.tag_name(website: @website, execution_id: @deployment.id)
-        "#{full_repository_name}:#{t_name}"
+        "#{full_repository_name}/#{@website.site_name}:#{t_name}"
       end
 
       def full_repository_name
-        "#{docker_images_location['docker_username']}/" \
+        "#{docker_images_location['docker_server']}/" \
         "#{docker_images_location['repository_name']}"
       end
 
@@ -49,6 +49,7 @@ module DeploymentMethod
       def push_cmd(_options = {})
         "echo #{docker_images_location['docker_password']} | " \
           "sudo docker login -u #{docker_images_location['docker_username']} " \
+          "#{docker_images_location['docker_server']} " \
           "--password-stdin && " \
           "sudo docker push #{image_name_tag}"
       end

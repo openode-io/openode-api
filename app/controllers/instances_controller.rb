@@ -369,6 +369,10 @@ class InstancesController < ApplicationController
   end
 
   def populate_website_location
+    if !params['location_str_id'] && @website&.website_locations&.first
+      params['location_str_id'] = @website.website_locations.first.location.str_id
+    end
+
     if params['location_str_id']
       @location = Location.find_by str_id: params['location_str_id']
 

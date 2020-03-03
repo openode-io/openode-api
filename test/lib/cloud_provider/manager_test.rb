@@ -95,7 +95,7 @@ class ManagerTest < ActiveSupport::TestCase
 
     img_location = manager.docker_images_location
 
-    assert_equal img_location['docker_server'], 'https://index.docker.io/v1/'
+    assert_equal img_location['docker_server'], 'docker.io'
     assert_equal img_location['docker_username'], 'test'
     assert_equal img_location['docker_password'], 't123456'
   end

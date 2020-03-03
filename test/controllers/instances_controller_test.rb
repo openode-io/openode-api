@@ -508,7 +508,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
     assert_scripted do
       begin_ssh
-      post '/instances/testsite/set-plan?location_str_id=canada',
+      post '/instances/testsite/set-plan', # works without location str id
            as: :json,
            params: { plan: '100-MB' },
            headers: default_headers_auth

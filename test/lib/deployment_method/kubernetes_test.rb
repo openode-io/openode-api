@@ -637,7 +637,7 @@ VAR2=5678
     )
 
     assert_includes cmd, "-n instance-#{@website.id} create secret docker-registry regcred"
-    assert_includes cmd, "--docker-server=https://index.docker.io/v1/"
+    assert_includes cmd, "--docker-server=docker.io"
     assert_includes cmd, "--docker-username=test"
     assert_includes cmd, "--docker-email=test@openode.io"
   end

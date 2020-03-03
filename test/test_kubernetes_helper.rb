@@ -15,7 +15,7 @@ class ActiveSupport::TestCase
       website_location: website_location,
       s_arguments:
         " -n instance-#{website.id} create secret docker-registry regcred " \
-        "--docker-server=https://index.docker.io/v1/ " \
+        "--docker-server=docker.io " \
         "--docker-username=test --docker-password=t123456 " \
         "--docker-email=test@openode.io "
     )
@@ -29,14 +29,14 @@ class ActiveSupport::TestCase
 
   def prepare_build_image(_kubernetes_method, website, deployment, expected_result)
     prepare_ssh_session("cd /home/#{website.user_id}/#{website.site_name}/ && " \
-                        "sudo docker build -t test/openode_prod:" \
+                        "sudo docker build -t docker.io/openode_prod/testkubernetes-type:" \
                         "#{website.site_name}--#{website.id}--#{deployment.id} .",
                         expected_result)
   end
 
   def prepare_push_image(_kubernetes_method, website, deployment, expected_result)
-    prepare_ssh_session("echo t123456 | sudo docker login -u test --password-stdin && " \
-                        "sudo docker push test/openode_prod:" \
+    prepare_ssh_session("echo t123456 | sudo docker login -u test docker.io --password-stdin && " \
+                        "sudo docker push docker.io/openode_prod/testkubernetes-type:" \
                         "#{website.site_name}--#{website.id}--#{deployment.id}",
                         expected_result)
   end

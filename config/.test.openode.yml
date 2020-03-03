@@ -16,7 +16,7 @@ application:
           -----END RSA PRIVATE KEY-----
         root_files_path: /home/
     images_location:
-      docker_server: https://index.docker.io/v1/
+      docker_server: docker.io
       docker_username: test
       repository_name: openode_prod
       docker_password: t123456
