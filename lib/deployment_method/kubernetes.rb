@@ -404,7 +404,7 @@ module DeploymentMethod
                 resources:
                   limits: # more resources if available in the cluster
                     ephemeral-storage: 100Mi
-                    memory: #{website.memory * 2}Mi
+                    memory: #{website.memory}Mi
                     # cpu: #{website.cpus}
                   requests:
                     ephemeral-storage: 100Mi

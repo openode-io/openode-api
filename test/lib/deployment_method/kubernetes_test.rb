@@ -372,7 +372,7 @@ VAR2=5678
 
     assert_contains_deployment_yml(yml, @website, @website_location,
                                    requested_memory: @website.memory,
-                                   limited_memory: @website.memory * 2,
+                                   limited_memory: @website.memory,
                                    with_probes: true)
   end
 
@@ -385,7 +385,7 @@ VAR2=5678
 
     assert_contains_deployment_yml(yml, @website, @website_location,
                                    requested_memory: @website.memory,
-                                   limited_memory: @website.memory * 2,
+                                   limited_memory: @website.memory,
                                    with_probes: true,
                                    with_persistence: true)
   end
@@ -414,7 +414,7 @@ VAR2=5678
 
     assert_contains_deployment_yml(yml, @website, @website_location,
                                    requested_memory: @website.memory,
-                                   limited_memory: @website.memory * 2,
+                                   limited_memory: @website.memory,
                                    with_probes: false)
   end
 
