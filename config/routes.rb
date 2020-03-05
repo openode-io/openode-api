@@ -94,7 +94,7 @@ Rails.application.routes.draw do
     post '/:site_name/add-location', to: 'locations#add_location'
     post '/:site_name/remove-location', to: 'locations#remove_location'
 
-    get '/:site_name/docker-compose', to: 'instances#docker_compose'
+    get '/:site_name/docker-compose', to: 'instances#docker_compose' # to deprecate
 
     post '/:site_name/add-alias', to: 'dns#add_alias'
     post '/:site_name/del-alias', to: 'dns#del_alias'
@@ -133,5 +133,9 @@ Rails.application.routes.draw do
     # executions
     get '/:site_name/executions/list/:type', to: 'executions#index'
     get '/:site_name/executions/:id', to: 'executions#retrieve'
+
+    # events
+    get '/:site_name/events/', to: 'events#index'
+    get '/:site_name/events/:id', to: 'events#retrieve'
   end
 end
