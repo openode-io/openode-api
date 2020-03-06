@@ -18,7 +18,8 @@ class User < ApplicationRecord
     'armyspy.com'
   ].freeze
 
-  alias_attribute :password, :password_hash
+  # alias_attribute :password, :password_hash
+  attr_accessor   :password
   attr_accessor   :password_confirmation
 
   has_many :websites
@@ -38,19 +39,23 @@ class User < ApplicationRecord
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
   validate :email_should_not_have_a_blacklisted_domain
 
-  validates :password_hash, presence: true
+  validates :password, presence: true, on: :create
   PASSWORD_FORMAT = /\A
     (?=.{8,})          # Must contain 8 or more characters
     (?=.*\d)           # Must contain a digit
     (?=.*[a-z])        # Must contain a lower case character
     (?=.*[A-Z])        # Must contain an upper case character
   /x.freeze
-  validates :password_hash, format: {
+  validates :password, if: :password?, format: {
     with: PASSWORD_FORMAT,
     message: 'must contain: 8 characters, a lowercase letter, an uppercase letter, a digit'
   }
 
   validate :verify_passwords_match, on: :create
+
+  def password?
+    password.present?
+  end
 
   def verify_passwords_match
     if password_confirmation && password != password_confirmation
@@ -74,7 +79,11 @@ class User < ApplicationRecord
   end
 
   after_validation do
-    self.password_hash = User.encrypt_passwd(password_hash)
+    if password?
+      self.password_hash = User.encrypt_passwd(password)
+    end
+
+    errors.add(:password_hash, "The password can't be blank.") unless password_hash
   end
 
   before_validation :distribute_free_credits, on: :create

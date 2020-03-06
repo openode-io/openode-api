@@ -17,20 +17,20 @@ class UserTest < ActiveSupport::TestCase
   test 'saving and reading user password' do
     attribs = {
       email: 'user1@site.com',
-      password_hash: 'Hello123',
+      password: 'Hello123',
       is_admin: false,
       token: '1234s56789101112',
       credits: 80
     }
 
-    user = User.create(attribs)
+    user = User.create!(attribs)
     assert_equal user.password_hash, User.encrypt_passwd('Hello123')
 
     user = User.find(user.id)
     assert_equal user.password_hash, User.encrypt_passwd('Hello123')
 
     user.token = 'whatisthatlongtoken'
-    user.password_hash = 'Hello2123!'
+    user.password = 'Hello2123!'
     user.save
 
     user = User.find(user.id)
@@ -84,7 +84,7 @@ class UserTest < ActiveSupport::TestCase
   test 'create with randomly generated password' do
     attribs = {
       email: 'USER10@site.com',
-      password_hash: Str::Rand.password
+      password: Str::Rand.password
     }
 
     user = User.create(attribs)
@@ -146,6 +146,23 @@ class UserTest < ActiveSupport::TestCase
     user_changed = User.find(user.id)
 
     assert_not_equal token, user_changed.token
+  end
+
+  test 'fields should not be regen on save' do
+    u = default_user
+
+    orig_token = u.token
+    orig_pw_hash = u.password_hash
+    orig_activation_hash = u.activation_hash
+
+    u.updated_at = Time.current
+    u.save
+
+    u.reload
+
+    assert_equal u.activation_hash, orig_activation_hash
+    assert_equal u.token, orig_token
+    assert_equal u.password_hash, orig_pw_hash
   end
 
   test 'regen reset token' do

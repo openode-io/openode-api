@@ -30,7 +30,7 @@ class CollaboratorsController < InstancesController
       unless user
         # otherwise we need to create it and send an email to the collaborator
         tmp_passwd = Str::Rand.password
-        user = User.create!(email: c_params[:email], password_hash: tmp_passwd)
+        user = User.create!(email: c_params[:email], password: tmp_passwd)
 
         UserMailer.with(
           user: user,
