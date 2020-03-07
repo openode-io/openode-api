@@ -29,6 +29,14 @@ class StoragesController < InstancesController
     )
   end
 
+  api!
+  def retrieve
+    json(
+      extra_storage: @website_location&.extra_storage || 0,
+      storage_areas: @website.storage_areas || []
+    )
+  end
+
   protected
 
   def prepare_storage_change(opts = {})

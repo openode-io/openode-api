@@ -102,4 +102,36 @@ class StoragesControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert response.parsed_body['error'].include?('Extra storage')
   end
+
+  test 'GET /instances/:instance_id/storage with website location' do
+    w = Website.find_by site_name: 'testsite'
+    w.storage_areas = ['/home1']
+    w.save
+
+    get '/instances/testsite/storage',
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body['extra_storage'], 1
+    assert_equal response.parsed_body['storage_areas'], ['/home1']
+  end
+
+  test 'GET /instances/:instance_id/storage without website location' do
+    w = Website.find_by site_name: 'testsite'
+    w.storage_areas = ['/home1']
+    w.save
+
+    w.website_locations.each(&:destroy)
+
+    get '/instances/testsite/storage',
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body['extra_storage'], 0
+    assert_equal response.parsed_body['storage_areas'], ['/home1']
+  end
 end

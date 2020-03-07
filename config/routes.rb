@@ -123,6 +123,7 @@ Rails.application.routes.draw do
     delete '/:site_name/collaborators/:id', to: 'collaborators#destroy'
     patch '/:site_name/collaborators/:id', to: 'collaborators#update'
 
+    get '/:site_name/storage', to: 'storages#retrieve'
     post '/:site_name/increase-storage', to: 'storages#increase'
     post '/:site_name/destroy-storage', to: 'storages#destroy'
 
