@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_03_08_031022) do
+ActiveRecord::Schema.define(version: 2020_03_08_031704) do
 
   create_table "collaborators", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "website_id"
@@ -104,28 +104,10 @@ ActiveRecord::Schema.define(version: 2020_03_08_031022) do
   create_table "locations", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "full_name", limit: 100
     t.string "str_id", limit: 100
-    t.timestamp "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.timestamp "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.string "country_fullname", limit: 150, default: ""
     t.string "cloud_provider", default: "internal"
-  end
-
-  create_table "logs", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
-    t.string "type", limit: 100
-    t.integer "ref_id"
-    t.string "content", limit: 1000
-    t.timestamp "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.timestamp "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.index ["ref_id"], name: "log_ref_id"
-    t.index ["type"], name: "log_type"
-  end
-
-  create_table "news", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
-    t.string "title", limit: 500
-    t.text "content", size: :medium
-    t.timestamp "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.timestamp "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.string "type", limit: 50, default: "news"
   end
 
   create_table "newsletters", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
@@ -173,12 +155,6 @@ ActiveRecord::Schema.define(version: 2020_03_08_031022) do
     t.index ["website_id"], name: "index_snapshots_on_website_id"
   end
 
-  create_table "stats", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
-    t.integer "basic_up"
-    t.integer "nodejs_up"
-    t.timestamp "last_status_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-  end
-
   create_table "statuses", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "name"
     t.string "status"
@@ -217,14 +193,6 @@ ActiveRecord::Schema.define(version: 2020_03_08_031022) do
     t.index ["token"], name: "users_token", unique: true
   end
 
-  create_table "vault", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
-    t.bigint "ref_id", null: false
-    t.text "data"
-    t.timestamp "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.timestamp "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.index ["ref_id"], name: "ref_id_ind"
-  end
-
   create_table "vaults", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "ref_id"
     t.string "entity_type"
@@ -250,8 +218,8 @@ ActiveRecord::Schema.define(version: 2020_03_08_031022) do
     t.integer "website_id"
     t.integer "location_id"
     t.integer "location_server_id"
-    t.timestamp "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.timestamp "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.integer "extra_storage", default: 0
     t.integer "port", default: 0
     t.integer "nb_cpus", default: 1
@@ -262,22 +230,10 @@ ActiveRecord::Schema.define(version: 2020_03_08_031022) do
     t.index ["website_id"], name: "website_id"
   end
 
-  create_table "website_stats", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
-    t.integer "website_id"
-    t.string "type", limit: 50
-    t.float "value", limit: 53
-    t.date "on_date"
-    t.timestamp "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.timestamp "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.index ["website_id", "type", "on_date"], name: "website_stat_id_type_on_date"
-    t.index ["website_id", "type"], name: "website_stat_id_type"
-    t.index ["website_id"], name: "website_stat_id"
-  end
-
   create_table "websites", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "user_id"
     t.string "site_name"
-    t.timestamp "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.text "data"
     t.text "pm2_info"
