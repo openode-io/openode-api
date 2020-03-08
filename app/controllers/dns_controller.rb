@@ -80,7 +80,9 @@ class DnsController < InstancesController
     @website.domains << domain
     @website.save!
 
-    @website_location.update_remote_dns(with_auto_a: true)
+    unless @website.type == Website::TYPE_KUBERNETES
+      @website_location.update_remote_dns(with_auto_a: true)
+    end
 
     @website.create_event(title: 'Add domain alias', domain: domain)
 
@@ -94,7 +96,9 @@ class DnsController < InstancesController
     @website.domains.delete(domain)
     @website.save!
 
-    @website_location.update_remote_dns(with_auto_a: true)
+    unless @website.type == Website::TYPE_KUBERNETES
+      @website_location.update_remote_dns(with_auto_a: true)
+    end
 
     @website.create_event(title: 'Delete domain alias', domain: domain)
 
