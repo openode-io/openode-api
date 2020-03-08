@@ -99,8 +99,13 @@ class InstancesController < ApplicationController
     @website.website_locations.each do |website_location|
       runner = website_location.prepare_runner
 
+      if @website.online?
+        runner.execute([
+                         { cmd_name: 'stop', options: { is_complex: true } }
+                       ])
+      end
+
       runner.execute([
-                       { cmd_name: 'stop', options: { is_complex: true } },
                        { cmd_name: 'clear_repository' }
                      ])
     end
