@@ -10,6 +10,8 @@ class Collaborator < ApplicationRecord
   def validate_permissions
     self.permissions ||= []
 
+    self.permissions = self.permissions.select { |p| Website::PERMISSIONS.include?(p) }
+
     if self.permissions.empty?
       errors.add(:permissions, "must have at least one")
     end

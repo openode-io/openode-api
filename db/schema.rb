@@ -10,13 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_02_28_002830) do
+ActiveRecord::Schema.define(version: 2020_03_08_031022) do
 
   create_table "collaborators", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "website_id"
     t.integer "user_id"
-    t.timestamp "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.timestamp "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.text "permissions", size: :medium
     t.index ["website_id", "user_id"], name: "index_collaborators_on_website_id_and_user_id", unique: true
     t.index ["website_id"], name: "website_id_collaborators"
@@ -57,15 +57,6 @@ ActiveRecord::Schema.define(version: 2020_02_28_002830) do
     t.index ["priority", "run_at"], name: "delayed_jobs_priority"
   end
 
-  create_table "docs", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
-    t.string "title", limit: 500
-    t.text "content", size: :medium
-    t.timestamp "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.timestamp "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.string "type", limit: 50, default: "news"
-    t.string "short", limit: 500, default: ""
-  end
-
   create_table "executions", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.bigint "website_id", null: false
     t.bigint "website_location_id", null: false
@@ -99,8 +90,8 @@ ActiveRecord::Schema.define(version: 2020_02_28_002830) do
   create_table "location_servers", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "location_id"
     t.string "ip", limit: 100
-    t.timestamp "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.timestamp "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.integer "ram_mb"
     t.integer "cpus"
     t.integer "disk_gb"
@@ -198,8 +189,8 @@ ActiveRecord::Schema.define(version: 2020_02_28_002830) do
   create_table "users", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "email"
     t.string "password_hash"
-    t.timestamp "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.timestamp "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.timestamp "last_admin_access_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.string "reset_token", limit: 250, default: ""
     t.integer "is_admin", default: 0
@@ -287,7 +278,7 @@ ActiveRecord::Schema.define(version: 2020_02_28_002830) do
     t.integer "user_id"
     t.string "site_name"
     t.timestamp "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.timestamp "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.text "data"
     t.text "pm2_info"
     t.boolean "valid"
