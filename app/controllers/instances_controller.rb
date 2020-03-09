@@ -14,10 +14,6 @@ class InstancesController < ApplicationController
   before_action :prepare_runner
   after_action :terminate_runner
 
-  before_action only: [:restart] do
-    requires_minimum_cli_version
-  end
-
   before_action :check_minimum_cli_version
   before_action :prepare_record_website_event
   after_action :record_website_event
@@ -388,12 +384,6 @@ class InstancesController < ApplicationController
       validation_error!('That location does not exist for this instance.') unless @website_location
 
       @location_server = @website_location.location_server
-    end
-  end
-
-  def requires_minimum_cli_version
-    if params['version'].blank?
-      params['version'] = '0.0.0' # dummy low version
     end
   end
 

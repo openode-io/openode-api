@@ -7,13 +7,12 @@ class InstancesControllerDeployTest < ActionDispatch::IntegrationTest
     @website_location = @website.website_locations.first
   end
 
-  test '/instances/:instance_id/restart requires minimum CLI version' do
+  test '/instances/:instance_id/restart does not require minimum CLI version' do
     post "/instances/#{@website.site_name}/restart",
          as: :json,
          headers: default_headers_auth
 
-    assert_response :bad_request
-    assert_includes response.parsed_body['error'], 'Deprecated'
+    assert_response :success
   end
 
   test '/instances/:instance_id/restart should not be starting' do
