@@ -86,6 +86,7 @@ Rails.application.routes.draw do
     delete '/:site_name/', to: 'instances#destroy'
 
     get '/:site_name/stats', to: 'instance_stat#index'
+    get '/:site_name/stats/spendings', to: 'instance_stat#spendings'
 
     get '/:site_name/get-config', to: 'configs#get_config'
     post '/:site_name/set-config', to: 'configs#set_config'
