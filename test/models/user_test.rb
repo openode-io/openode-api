@@ -3,7 +3,6 @@
 require 'test_helper'
 
 class UserTest < ActiveSupport::TestCase
-
   setup do
     reset_emails
   end
