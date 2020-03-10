@@ -72,6 +72,27 @@ class UserTest < ActiveSupport::TestCase
     assert_equal u.type, 'admin'
   end
 
+  test 'saving account' do
+    attribs = {
+      email: 'user10@site.com',
+      password: 'NotW3akpasswd!',
+      is_admin: false,
+      token: '1234s56789101112',
+      credits: 80
+    }
+
+    user = User.create!(attribs)
+    user.account = {
+      attrib1: 'toto',
+      attrib2: 'tata'
+    }
+    user.save
+    user.reload
+
+    assert_equal user.account['attrib1'], 'toto'
+    assert_equal user.account['attrib2'], 'tata'
+  end
+
   test 'should downcase user emails' do
     attribs = {
       email: 'USER10@site.com',

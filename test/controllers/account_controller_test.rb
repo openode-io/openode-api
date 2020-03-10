@@ -49,7 +49,11 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
           params: {
             account: {
               newsletter: 1,
-              nb_credits_threshold_notification: 100
+              nb_credits_threshold_notification: 100,
+              account: {
+                name: 'elvis',
+                company: 'Microsse'
+              }
             }
           },
           as: :json
@@ -59,6 +63,8 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal u.newsletter, 1
     assert_equal u.nb_credits_threshold_notification, 100
+    assert_equal u.account['name'], 'elvis'
+    assert_equal u.account['company'], 'Microsse'
   end
 
   test 'PATCH /account/me not allowed to change other fields' do

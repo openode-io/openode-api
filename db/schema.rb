@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_03_08_031704) do
+ActiveRecord::Schema.define(version: 2020_03_10_173152) do
 
   create_table "collaborators", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "website_id"
@@ -183,6 +183,7 @@ ActiveRecord::Schema.define(version: 2020_03_08_031704) do
     t.integer "activated"
     t.string "activation_hash", limit: 200
     t.integer "suspended", limit: 1, default: 0
+    t.text "account"
     t.index ["day_one_mail_at"], name: "users_day_one_mail_at"
     t.index ["email"], name: "users_email_unique", unique: true
     t.index ["is_admin"], name: "user_is_admin"

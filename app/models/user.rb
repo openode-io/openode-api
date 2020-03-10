@@ -2,6 +2,7 @@ require 'bcrypt'
 
 class User < ApplicationRecord
   serialize :coupons, JSON
+  serialize :account, JSON
 
   NotAuthorized = Class.new(StandardError)
   Forbidden = Class.new(StandardError)
