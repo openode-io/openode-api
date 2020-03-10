@@ -86,6 +86,16 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
     assert_equal u.credits, credits
   end
 
+  test 'GET /account/spendings - happy path' do
+    get '/account/spendings',
+        headers: default_headers_auth,
+        as: :json
+
+    assert_response :success
+    assert_equal response.parsed_body.length, 1
+    assert_equal response.parsed_body[0]['value'], 1.5
+  end
+
   test '/account/me with not logged in' do
     get '/account/me', headers: {}, as: :json
 

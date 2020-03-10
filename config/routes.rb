@@ -34,6 +34,7 @@ Rails.application.routes.draw do
     post 'register', to: 'account#register'
     post 'forgot-password', to: 'account#forgot_password'
     post 'verify-reset-token', to: 'account#verify_reset_token'
+    get 'spendings', to: 'account#spendings'
   end
 
   scope :billing do

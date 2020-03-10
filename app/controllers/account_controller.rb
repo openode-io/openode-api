@@ -1,5 +1,5 @@
 class AccountController < ApplicationController
-  before_action only: [:me, :update, :regenerate_token] do
+  before_action only: [:me, :update, :regenerate_token, :spendings] do
     authorize
   end
 
@@ -68,6 +68,19 @@ class AccountController < ApplicationController
     user.regen_reset_token!
 
     json(token: user.token)
+  end
+
+  api!
+  def spendings
+    nb_days = (params['nb_days'] || 30).to_i
+
+    hash_entries = CreditAction
+                   .where(user_id: @user.id)
+                   .where('created_at > ?', nb_days.days.ago)
+                   .group("DATE(created_at)")
+                   .sum(:credits_spent)
+
+    json(hash_entries.map { |k, v| { date: k, value: v } })
   end
 
   private
