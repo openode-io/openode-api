@@ -53,6 +53,10 @@ class User < ApplicationRecord
 
   validate :verify_passwords_match, on: :create
 
+  after_create :send_registration_email
+  after_update :send_registration_email_on_mail_changed
+  before_update :mark_changing_email
+
   def password?
     password.present?
   end
@@ -71,9 +75,29 @@ class User < ApplicationRecord
     end
   end
 
+  def send_registration_email
+    UserMailer.with(user: self).registration.deliver_now
+  end
+
+  def mark_changing_email
+    return unless email_changed?
+
+    redo_activation
+  end
+
+  def send_registration_email_on_mail_changed
+    return if saved_changes['email'].blank?
+
+    send_registration_email
+  end
+
+  def self.gen_activation_hash
+    SecureRandom.hex(16)
+  end
+
   before_validation do
     self.activated = false if activated.nil?
-    self.activation_hash ||= SecureRandom.hex(16)
+    self.activation_hash ||= User.gen_activation_hash
     self.token ||= SecureRandom.hex(16)
     self.email = email.downcase if email
   end
@@ -120,6 +144,11 @@ class User < ApplicationRecord
 
   def websites_with_access
     (websites + collaborator_websites).uniq
+  end
+
+  def redo_activation
+    self.activated = false
+    self.activation_hash = User.gen_activation_hash
   end
 
   def regen_api_token!

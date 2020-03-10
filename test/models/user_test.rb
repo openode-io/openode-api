@@ -3,6 +3,11 @@
 require 'test_helper'
 
 class UserTest < ActiveSupport::TestCase
+
+  setup do
+    reset_emails
+  end
+
   test 'encrypt_passwd correctly' do
     salt = '$2a$10$ThisIsTheSalt22CharsX.'
     expected_encryption = '$2a$10$ThisIsTheSalt22CharsX.ZJyiIxDe4rFcyc7N/fw8gkI4Dvu0gKi'
@@ -386,5 +391,42 @@ class UserTest < ActiveSupport::TestCase
             .having_websites_in_statuses([Website::STATUS_ONLINE])
 
     assert_equal users.count, 0
+  end
+
+  test "updating user email should redo activation" do
+    new_email = 'asdfasdf@gmail.com'
+
+    user = default_user
+    original_activation_hash = user.activation_hash
+    user.email = new_email
+    user.save
+
+    user.reload
+
+    assert_equal user.email, new_email
+    assert_equal user.activated, 0
+    assert_not_equal user.activation_hash, original_activation_hash
+
+    mail_sent = ActionMailer::Base.deliveries.first
+    assert_equal mail_sent.subject, 'Welcome to opeNode!'
+    assert_includes mail_sent.body.raw_source, 'Activate your account'
+    assert_includes mail_sent.body.raw_source, 'openode.io'
+  end
+
+  test "updating user email should not redo activation" do
+    user = default_user
+    original_activation_hash = user.activation_hash
+    user.token = 'toto'
+    user.activated = true
+    user.save!
+
+    user.reload
+
+    assert_equal user.token, 'toto'
+    assert_equal user.activated, 1
+    assert_equal user.activation_hash, original_activation_hash
+
+    mail_sent = ActionMailer::Base.deliveries.first
+    assert_nil mail_sent
   end
 end

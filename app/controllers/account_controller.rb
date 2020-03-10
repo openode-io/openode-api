@@ -23,8 +23,6 @@ class AccountController < ApplicationController
   def register
     user = User.create!(user_params)
 
-    UserMailer.with(user: user).registration.deliver_now
-
     json(
       id: user.id,
       email: user.email,
