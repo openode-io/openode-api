@@ -113,17 +113,11 @@ class InstancesController < ApplicationController
 
   api!
   def update
-    new_params = website_params
-
-    if new_params['open_source'] && !new_params['open_source']['status']
-      new_params['open_source']['status'] = @website.open_source['status']
-    end
-
-    @website.update!(new_params)
+    @website.update(website_params)
 
     @website_event_obj = {
       title: 'update-website',
-      changes: new_params
+      changes: website_params
     }
 
     json(result: 'success')

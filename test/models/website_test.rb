@@ -622,6 +622,42 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal w.account_type, Website::OPEN_SOURCE_ACCOUNT_TYPE
   end
 
+  test "open source status - should change if already set" do
+    w = default_website
+    w.open_source = { status: Website::OPEN_SOURCE_STATUS_APPROVED }
+    w.save!
+
+    w.reload
+
+    # change random field:
+    w.configs = nil
+    w.save!
+
+    assert_equal w.open_source['status'], Website::OPEN_SOURCE_STATUS_APPROVED
+  end
+
+  test "open source status - should init to pending" do
+    w = default_website
+    orig_open_source = {
+      title: 'helloworld',
+      description: 'hellodesc',
+      repository_url: 'https://google.com/'
+    }
+    w.open_source = orig_open_source
+    w.save!
+
+    w.reload
+
+    # change random field:
+    w.configs = nil
+    w.save!
+
+    assert_equal w.open_source['status'], Website::OPEN_SOURCE_STATUS_PENDING
+    assert_equal w.open_source['title'], orig_open_source[:title]
+    assert_equal w.open_source['description'], orig_open_source[:description]
+    assert_equal w.open_source['repository_url'], orig_open_source[:repository_url]
+  end
+
   test "change_plan to open source - not enough words" do
     w = default_website
     w.open_source = {

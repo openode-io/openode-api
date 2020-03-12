@@ -16,7 +16,7 @@ class OpenSourceControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body.length, 1
     assert_equal response.parsed_body[0]["site_name"], w.site_name
     assert_equal response.parsed_body[0]["status"], w.status
-    assert_equal response.parsed_body[0]["open_source"], 'what' => 'asdf'
+    assert_equal response.parsed_body[0]["open_source"], 'what' => 'asdf', 'status' => 'pending'
     assert_equal response.parsed_body[0]["id"].present?, true
   end
 
@@ -33,7 +33,7 @@ class OpenSourceControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal response.parsed_body["site_name"], w.site_name
     assert_equal response.parsed_body["status"], w.status
-    assert_equal response.parsed_body["open_source"], 'what' => 'asdf'
+    assert_equal response.parsed_body["open_source"], 'what' => 'asdf', 'status' => 'pending'
     assert_equal response.parsed_body["id"].present?, true
   end
 

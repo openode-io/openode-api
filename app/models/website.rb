@@ -114,6 +114,7 @@ class Website < ApplicationRecord
   validates :status, inclusion: { in: STATUSES }
 
   before_validation :prepare_new_site, on: :create
+  before_validation :ensure_open_source_status
 
   def init_subdomain; end
 
@@ -338,13 +339,18 @@ class Website < ApplicationRecord
     errors.add(:account_type, "Invalid plan #{account_type}") unless found_plan
   end
 
-  def validate_open_source
+  def ensure_open_source_status
+    cpy_previous_open_source = open_source_was
+
+    cpy_previous_open_source ||= {}
     self.open_source ||= {}
 
-    unless open_source['status']
+    if !open_source['status'] && !cpy_previous_open_source['status']
       self.open_source['status'] = OPEN_SOURCE_STATUS_PENDING
     end
+  end
 
+  def validate_open_source
     # status
     unless OPEN_SOURCE_STATUSES.include?(open_source['status'])
       errors.add(:open_source, "invalid open source status (#{open_source['status']})")
@@ -496,12 +502,8 @@ class Website < ApplicationRecord
     self.status = new_status
   end
 
-  def change_plan(acc_type)
-    logger.info("website #{site_name} changing plan to #{acc_type}")
-    self.account_type = acc_type
-
-    self.open_source = open_source || {}
-    self.open_source['status'] ||= OPEN_SOURCE_STATUS_PENDING
+  def init_change_plan_to_open_source
+    self.open_source['status'] = OPEN_SOURCE_STATUS_PENDING
 
     if open_source['title'].blank?
       self.open_source['title'] = 'title here'
@@ -514,6 +516,13 @@ class Website < ApplicationRecord
     if open_source['repository_url'].blank?
       self.open_source['repository_url'] = 'https://repourl.com'
     end
+  end
+
+  def change_plan(acc_type)
+    logger.info("website #{site_name} changing plan to #{acc_type}")
+    self.account_type = acc_type
+
+    init_change_plan_to_open_source if open_source_plan?
 
     self.cloud_type = 'cloud'
   end
