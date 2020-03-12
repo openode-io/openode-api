@@ -336,20 +336,26 @@ class Website < ApplicationRecord
   def validate_account_type
     found_plan = Website.plan_of(account_type)
     errors.add(:account_type, "Invalid plan #{account_type}") unless found_plan
-
-    # make sure it's allowed to change to open source
-    if account_type == OPEN_SOURCE_ACCOUNT_TYPE && !open_source_approved?
-      errors.add(:account_type, "the open source project has not yet been approved")
-    end
   end
 
   def validate_open_source
     self.open_source ||= {}
 
+    unless open_source['status']
+      self.open_source['status'] = OPEN_SOURCE_STATUS_PENDING
+    end
+
+    # status
     unless OPEN_SOURCE_STATUSES.include?(open_source['status'])
       errors.add(:open_source, "invalid open source status (#{open_source['status']})")
     end
 
+    # title
+    if !open_source['title'] || open_source['title'].length < 7
+      errors.add(:open_source, "provide a project title")
+    end
+
+    # description
     min_description_words = 30
 
     description_words = open_source['description']&.scan(/\w+/)
@@ -358,6 +364,7 @@ class Website < ApplicationRecord
       errors.add(:open_source, "provide at least #{min_description_words} words description")
     end
 
+    # url
     unless open_source['repository_url'] =~ /\A#{URI.regexp(%w[http https])}\z/
       errors.add(:open_source, "invalid repository URL")
     end
@@ -492,6 +499,21 @@ class Website < ApplicationRecord
   def change_plan(acc_type)
     logger.info("website #{site_name} changing plan to #{acc_type}")
     self.account_type = acc_type
+
+    self.open_source = open_source || {}
+    self.open_source['status'] ||= OPEN_SOURCE_STATUS_PENDING
+
+    if open_source['title'].blank?
+      self.open_source['title'] = 'title here'
+    end
+
+    if open_source['description'].blank?
+      self.open_source['description'] = 'Description ' * 31
+    end
+
+    if open_source['repository_url'].blank?
+      self.open_source['repository_url'] = 'https://repourl.com'
+    end
 
     self.cloud_type = 'cloud'
   end

@@ -366,7 +366,6 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     set_dummy_secrets_to(LocationServer.all)
     prepare_default_ports
     website = default_website
-    puts "statusss #{website.status}"
 
     expect_global_container(dep_method)
     prepare_ssh_session(dep_method.kill_global_container(id: 'b3621dd9d4dd'),

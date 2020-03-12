@@ -113,11 +113,17 @@ class InstancesController < ApplicationController
 
   api!
   def update
-    @website.update!(website_params)
+    new_params = website_params
+
+    if new_params['open_source'] && !new_params['open_source']['status']
+      new_params['open_source']['status'] = @website.open_source['status']
+    end
+
+    @website.update!(new_params)
 
     @website_event_obj = {
       title: 'update-website',
-      changes: website_params
+      changes: new_params
     }
 
     json(result: 'success')
@@ -417,6 +423,8 @@ class InstancesController < ApplicationController
   end
 
   def website_params
-    params.require(:website).permit(:user_id, :crontab)
+    params.require(:website).permit(
+      :user_id, :crontab, open_source: {}
+    )
   end
 end

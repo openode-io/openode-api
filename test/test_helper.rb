@@ -519,6 +519,7 @@ class ActiveSupport::TestCase
   def sample_open_source_attributes
     {
       'status' => Website::OPEN_SOURCE_STATUS_APPROVED,
+      'title' => 'helloworld',
       'description' => " asdf " * 31,
       'repository_url' => "https://github.com/openode-io/openode-cli"
     }

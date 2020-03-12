@@ -312,6 +312,7 @@ class WebsiteTest < ActiveSupport::TestCase
     website = Website.find_by(site_name: 'testsite')
     website.open_source = {
       'status' => 'approved',
+      'title' => 'helloworld',
       'description' => 'a ' * 31,
       'repository_url' => 'http://google.com/'
     }
@@ -611,14 +612,6 @@ class WebsiteTest < ActiveSupport::TestCase
   end
 
   # change_plan!
-  test "change_plan to open source without activation should fail" do
-    w = default_website
-
-    assert_raise ActiveRecord::RecordInvalid do
-      w.change_plan!(Website::OPEN_SOURCE_ACCOUNT_TYPE)
-    end
-  end
-
   test "change_plan to open source - happy path" do
     w = default_website
     w.open_source = sample_open_source_attributes
