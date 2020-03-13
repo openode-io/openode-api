@@ -45,6 +45,14 @@ class UserMailer < ApplicationMailer
     mail(to: mail_to, subject: "#{@website.site_name}@opeNode stopped")
   end
 
+  def response_open_source_request
+    @user = params[:user]
+    @website = params[:website]
+    mail_to = @user.email
+
+    mail(to: mail_to, subject: "opeNode open source request updated")
+  end
+
   def stopped_due_no_credit_persistence
     @user = params[:user]
     @website = params[:website]
@@ -53,6 +61,7 @@ class UserMailer < ApplicationMailer
     mail(to: mail_to, subject: "#{@website.site_name}@opeNode persistence removed")
   end
 
+  # TODO: deprecate
   # ip, sitename, default_password, pubkey, privkey, mail_to
   def private_cloud_ready
     @ip = params[:ip]

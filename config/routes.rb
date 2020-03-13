@@ -16,6 +16,8 @@ Rails.application.routes.draw do
     get 'users', to: 'users#index'
 
     get 'websites', to: 'websites#index'
+    post 'websites/:id/update_open_source_request',
+         to: 'websites#update_open_source_request'
 
     get 'newsletters', to: 'newsletters#index'
     post 'newsletters', to: 'newsletters#create'

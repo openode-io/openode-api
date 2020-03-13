@@ -709,6 +709,7 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_includes mail_sent.body.raw_source, w.id.to_s
     assert_includes mail_sent.body.raw_source, w.site_name
     assert_includes mail_sent.body.raw_source, w.user.email
+    assert_equal mail_sent.to, ['info@openode.io']
   end
 
   test "not notify open source requested if changing to non open source" do
