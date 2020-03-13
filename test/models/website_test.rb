@@ -2,6 +2,10 @@
 require 'test_helper'
 
 class WebsiteTest < ActiveSupport::TestCase
+  setup do
+    reset_emails
+  end
+
   test 'invalid site_name with subdomain' do
     w = Website.new(
       site_name: 'thisisauniq.uesite',
@@ -684,5 +688,44 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_raise ActiveRecord::RecordInvalid do
       w.change_plan!(Website::OPEN_SOURCE_ACCOUNT_TYPE)
     end
+  end
+
+  test "notify open source requested" do
+    w = default_website
+
+    w.open_source = {
+      'status' => Website::OPEN_SOURCE_STATUS_APPROVED,
+      'title' => 'helloworld',
+      'description' => " asdf " * 200,
+      'repository_url' => "http://github.com/openode-io/openode-cli"
+    }
+
+    w.account_type = Website::OPEN_SOURCE_ACCOUNT_TYPE
+
+    w.save!
+
+    mail_sent = ActionMailer::Base.deliveries.first
+    assert_equal mail_sent.subject, 'Open source request'
+    assert_includes mail_sent.body.raw_source, w.id.to_s
+    assert_includes mail_sent.body.raw_source, w.site_name
+    assert_includes mail_sent.body.raw_source, w.user.email
+  end
+
+  test "not notify open source requested if changing to non open source" do
+    w = default_website
+
+    w.open_source = {
+      'status' => Website::OPEN_SOURCE_STATUS_APPROVED,
+      'title' => 'helloworld',
+      'description' => " asdf " * 200,
+      'repository_url' => "http://github.com/openode-io/openode-cli"
+    }
+
+    w.account_type = Website::DEFAULT_ACCOUNT_TYPE
+
+    w.save!
+
+    mail_sent = ActionMailer::Base.deliveries.first
+    assert_nil mail_sent
   end
 end

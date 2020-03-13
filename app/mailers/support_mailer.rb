@@ -6,8 +6,8 @@ class SupportMailer < ApplicationMailer
     attributes = params[:attributes].except('message')
     @content = JSON.pretty_generate(attributes)
 
-    mail_to = params[:email_to]
+    mail_to = params[:email_to] || ENV['DEFAULT_EMAIL']
 
-    mail(to: mail_to, subject: "opeNode Contact")
+    mail(to: mail_to, subject: params[:title] || "opeNode Contact")
   end
 end

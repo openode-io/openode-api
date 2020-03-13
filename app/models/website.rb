@@ -86,6 +86,41 @@ class Website < ApplicationRecord
     OPEN_SOURCE_STATUS_PENDING
   ].freeze
 
+  CONFIG_VARIABLES = [
+    {
+      variable: 'SSL_CERTIFICATE_PATH',
+      description: 'Certificate file. Example: certs/mysite.crt'
+    },
+    {
+      variable: 'SSL_CERTIFICATE_KEY_PATH',
+      description: 'Private key generated. Example: certs/privatekey.key'
+    },
+    {
+      variable: 'REDIR_HTTP_TO_HTTPS',
+      description: 'Will redirect HTTP traffic to HTTPS. An HTTPS server is required.',
+      type: 'website',
+      enum: ['true', 'false', '']
+    },
+    {
+      variable: 'TYPE',
+      description: 'Deployment method (internal)',
+      type: 'website',
+      enum: [TYPE_KUBERNETES, TYPE_DOCKER]
+    },
+    {
+      variable: 'MAX_BUILD_DURATION',
+      description: 'The build duration limit in seconds.',
+      min: 50,
+      default: 100,
+      max: 600
+    },
+    {
+      variable: 'SKIP_PORT_CHECK',
+      description: 'Skip the port verification while deploying.',
+      enum: ['true', 'false', '']
+    }
+  ].freeze
+
   validates :user, presence: true
   validates :site_name, presence: true
   validates_uniqueness_of :site_name, case_sensitive: true
@@ -115,6 +150,8 @@ class Website < ApplicationRecord
 
   before_validation :prepare_new_site, on: :create
   before_validation :ensure_open_source_status
+
+  after_save :notify_open_source_requested
 
   def init_subdomain; end
 
@@ -376,40 +413,19 @@ class Website < ApplicationRecord
     end
   end
 
-  CONFIG_VARIABLES = [
-    {
-      variable: 'SSL_CERTIFICATE_PATH',
-      description: 'Certificate file. Example: certs/mysite.crt'
-    },
-    {
-      variable: 'SSL_CERTIFICATE_KEY_PATH',
-      description: 'Private key generated. Example: certs/privatekey.key'
-    },
-    {
-      variable: 'REDIR_HTTP_TO_HTTPS',
-      description: 'Will redirect HTTP traffic to HTTPS. An HTTPS server is required.',
-      type: 'website',
-      enum: ['true', 'false', '']
-    },
-    {
-      variable: 'TYPE',
-      description: 'Deployment method (internal)',
-      type: 'website',
-      enum: [TYPE_KUBERNETES, TYPE_DOCKER]
-    },
-    {
-      variable: 'MAX_BUILD_DURATION',
-      description: 'The build duration limit in seconds.',
-      min: 50,
-      default: 100,
-      max: 600
-    },
-    {
-      variable: 'SKIP_PORT_CHECK',
-      description: 'Skip the port verification while deploying.',
-      enum: ['true', 'false', '']
-    }
-  ].freeze
+  def notify_open_source_requested
+    return if saved_changes['account_type'].blank?
+    return if saved_changes['account_type'][1] != Website::OPEN_SOURCE_ACCOUNT_TYPE
+
+    SupportMailer.with(
+      title: 'Open source request',
+      attributes: {
+        website_id: id,
+        site_name: site_name,
+        user: user.inspect
+      }
+    ).contact.deliver_now
+  end
 
   def self.config_def(var_name)
     Website::CONFIG_VARIABLES.find { |c| c[:variable] == var_name }
