@@ -102,7 +102,7 @@ module DeploymentMethod
         front_container_id: front_container[:ID],
         retry: {
           nb_max_trials: 15,
-          interval_between_trials: 2
+          interval_between_trials: 10
         }
       }
 
