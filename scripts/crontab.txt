@@ -1,18 +1,13 @@
 PATH_REPO=/var/www/openode-api/
 RAILS_ENV=production
-PATH=PATH=/bin:/usr/bin:/usr/local/rvm/rubies/ruby-2.6.3/bin/
-# */3 * * * * res=$(netstat -lnp | grep ':53 ' | wc -l) ; if [ $res -eq 1 ]; then echo 'allup'; else cd /root/dyn_nameserver && bash start.sh; fi
-30 12 * * * rm -f /root/openode-www/nameserver/scripts/*.log
-33 1 * * * docker system prune --volumes -f 
-0 1 * * * /usr/sbin/service docker restart
-* * * * * linesContainers=`docker ps -a | grep "CONTAINER ID" | wc -l` ; if [ "$linesContainers" -gt "0" ]; then echo ""; else /usr/sbin/service docker start; fi
+PATH=PATH=/bin:/usr/bin:/home/ubuntu/.rvm/rubies/ruby-2.7.0/bin/
 
 1 * * * * cd $PATH_REPO && rails db_stats:log_nb_sites_up
 # 3 * * * * cd $PATH_REPO && rails mailgun:check_failed_events
-0 */5 * * * cd $PATH_REPO && rails clean_db:old_executions
-0 */5 * * * cd $PATH_REPO && rails clean_db:old_histories
+# 0 */5 * * * cd $PATH_REPO && rails clean_db:old_executions
+# 0 */5 * * * cd $PATH_REPO && rails clean_db:old_histories
 #0 */6 * * * cd $PATH_REPO && rails background_notification:after_one_day_registration
-1 * * * * cd $PATH_REPO && rails background_notification:low_credit
+# 1 * * * * cd $PATH_REPO && rails background_notification:low_credit
 # 0 * * * * cd $PATH_REPO && rails credits:online_spend
 # 0 * * * * cd $PATH_REPO && rails credits:persistence_spend
 */3 * * * * cd $PATH_REPO && rails update:uptime_robot
