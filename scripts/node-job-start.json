@@ -7,7 +7,7 @@
   "args": " jobs:work",
   "exec_interpreter": "ruby",
   "max_memory_restart" : "2024M",
-  "instances": "1",
+  "instances": "5",
   "env": {
     "RAILS_ENV": "production"
   }
