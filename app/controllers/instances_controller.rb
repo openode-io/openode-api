@@ -67,7 +67,9 @@ class InstancesController < ApplicationController
         w_obj["ip"] = w.first_ip
 
         w_obj
-      end)
+      end
+      .sort_by { |w| w['created_at'] }
+      .reverse)
   end
 
   def show
