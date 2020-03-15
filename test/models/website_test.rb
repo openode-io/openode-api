@@ -314,6 +314,7 @@ class WebsiteTest < ActiveSupport::TestCase
 
   test 'can_deploy_to? should for open source even if no credit' do
     website = Website.find_by(site_name: 'testsite')
+    website.open_source_activated = true
     website.open_source = {
       'status' => 'approved',
       'title' => 'helloworld',
@@ -326,6 +327,23 @@ class WebsiteTest < ActiveSupport::TestCase
 
     can_deploy, = website.can_deploy_to?(website.website_locations.first)
     assert_equal can_deploy, true
+  end
+
+  test 'can_deploy_to? should not be able to if open source but not activated' do
+    website = Website.find_by(site_name: 'testsite')
+    website.open_source_activated = false
+    website.open_source = {
+      'status' => 'approved',
+      'title' => 'helloworld',
+      'description' => 'a ' * 31,
+      'repository_url' => 'http://google.com/'
+    }
+    website.change_plan!(Website::OPEN_SOURCE_ACCOUNT_TYPE)
+    website.user.credits = 0
+    website.user.save!
+
+    can_deploy, = website.can_deploy_to?(website.website_locations.first)
+    assert_equal can_deploy, false
   end
 
   test "can_deploy_to? can't if user not activated" do
@@ -430,11 +448,32 @@ class WebsiteTest < ActiveSupport::TestCase
 
     website.open_source = sample_open_source_attributes
     website.account_type = Website::OPEN_SOURCE_ACCOUNT_TYPE
+    website.open_source_activated = true
     website.save!
 
     website.spend_online_hourly_credits!
 
     assert_equal website.credit_actions.reload.length, 0
+  end
+
+  test 'spend hourly credits - not skip if open source and not activated' do
+    website = default_website
+    website.credit_actions.destroy_all
+    wl = default_website_location
+    wl.nb_cpus = 1
+    wl.extra_storage = 0
+    wl.save!
+
+    website.open_source = sample_open_source_attributes
+    website.account_type = Website::OPEN_SOURCE_ACCOUNT_TYPE
+    website.open_source_activated = false
+    website.save!
+
+    website.spend_online_hourly_credits!
+    website.reload
+    puts "website.credit_actions #{website.credit_actions.inspect}"
+
+    assert_equal website.credit_actions.length, 1
   end
 
   test 'spend hourly credits - with persistent services' do

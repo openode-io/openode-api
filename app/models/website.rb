@@ -597,7 +597,11 @@ class Website < ApplicationRecord
 
     return false, '*** User suspended' if user.suspended?
 
-    if !user.credits? && !open_source_plan?
+    if open_source_plan? && open_source_activated
+      return true, ''
+    end
+
+    unless user.credits?
       msg = 'No credit available. Please make sure to buy credits via the Administration ' \
             'dashboard in Billing - ' \
             "https://www.#{CloudProvider::Manager.base_hostname}/admin/billing"
@@ -659,7 +663,7 @@ class Website < ApplicationRecord
   def spend_hourly_credits!(spendings)
     current_plan = plan
 
-    return if !current_plan || open_source_plan?
+    return if !current_plan || (open_source_plan? && open_source_activated)
 
     consume_spendings(spendings)
   end

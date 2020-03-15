@@ -132,9 +132,9 @@ module CloudProvider
       list.map do |plan|
         plan[:short_name] = plan[:id]
         plan[:human_id] = plan[:id]
-        plan[:cost_per_minute] = calc_cost_per_minute(plan[:internal_id], plan[:ram])
-        plan[:cost_per_hour] = calc_cost_per_hour(plan[:internal_id], plan[:ram])
-        plan[:cost_per_month] = calc_cost_per_month(plan[:internal_id], plan[:ram])
+        plan[:cost_per_minute] = calc_cost_per_minute(plan[:ram])
+        plan[:cost_per_hour] = calc_cost_per_hour(plan[:ram])
+        plan[:cost_per_month] = calc_cost_per_month(plan[:ram])
         plan[:type] = Internal::TYPE
 
         plan

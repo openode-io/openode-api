@@ -41,9 +41,7 @@ module CloudProvider
         end
     end
 
-    def calc_cost_per_month(id, ram)
-      return 0 if id == Website::OPEN_SOURCE_ACCOUNT_TYPE
-
+    def calc_cost_per_month(ram)
       amount_ram_server = 2000
       cost_server = 5.16 # in $
 
@@ -58,16 +56,16 @@ module CloudProvider
       price - degressive_saving
     end
 
-    def credits_per_month(id, ram)
-      calc_cost_per_month(id, ram) * 100 # 1 cent per credit
+    def credits_per_month(ram)
+      calc_cost_per_month(ram) * 100 # 1 cent per credit
     end
 
-    def calc_cost_per_hour(id, ram)
-      calc_cost_per_month(id, ram) / (31.0 * 24.0)
+    def calc_cost_per_hour(ram)
+      calc_cost_per_month(ram) / (31.0 * 24.0)
     end
 
-    def calc_cost_per_minute(id, ram)
-      calc_cost_per_hour(id, ram) / 60.0
+    def calc_cost_per_minute(ram)
+      calc_cost_per_hour(ram) / 60.0
     end
 
     def plans
@@ -141,9 +139,9 @@ module CloudProvider
       list.map do |plan|
         plan[:short_name] = plan[:id]
         plan[:human_id] = plan[:id]
-        plan[:cost_per_minute] = calc_cost_per_minute(plan[:internal_id], plan[:ram])
-        plan[:cost_per_hour] = calc_cost_per_hour(plan[:internal_id], plan[:ram])
-        plan[:cost_per_month] = calc_cost_per_month(plan[:internal_id], plan[:ram])
+        plan[:cost_per_minute] = calc_cost_per_minute(plan[:ram])
+        plan[:cost_per_hour] = calc_cost_per_hour(plan[:ram])
+        plan[:cost_per_month] = calc_cost_per_month(plan[:ram])
         plan[:type] = Internal::TYPE
 
         plan
