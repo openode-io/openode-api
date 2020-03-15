@@ -192,6 +192,32 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal website.domain_type, 'subdomain'
   end
 
+  test '/instances/create with open source' do
+    post '/instances/create',
+         params: {
+           site_name: 'helloworld123',
+           account_type: 'open_source',
+           open_source_title: 'helloworld',
+           open_source_description: 'asdf ' * 50,
+           open_source_repository: 'http://google.com/'
+         },
+         as: :json,
+         headers: default_headers_auth
+
+    assert_response :success
+
+    website = Website.find(response.parsed_body['id'])
+
+    assert_equal website.id, response.parsed_body['id']
+    assert_equal website.account_type, 'open_source'
+    assert_equal website.site_name, 'helloworld123'
+    assert_equal website.domain_type, 'subdomain'
+    assert_equal website.open_source['status'], Website::OPEN_SOURCE_STATUS_PENDING
+    assert_equal website.open_source['title'], 'helloworld'
+    assert_equal website.open_source['description'], 'asdf ' * 50
+    assert_equal website.open_source['repository_url'], 'http://google.com/'
+  end
+
   test '/instances/create with initial location' do
     post '/instances/create',
          params: {

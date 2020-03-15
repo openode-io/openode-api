@@ -121,6 +121,8 @@ class Website < ApplicationRecord
     }
   ].freeze
 
+  before_validation :prepare_new_site, on: :create
+
   validates :user, presence: true
   validates :site_name, presence: true
   validates_uniqueness_of :site_name, case_sensitive: true
@@ -136,6 +138,9 @@ class Website < ApplicationRecord
   validate :validate_account_type
 
   with_options if: :open_source_plan? do
+    before_validation :force_open_source_status_pending_on_create, on: :create
+    before_validation :ensure_open_source_status
+
     validates :open_source, presence: true
     validate :validate_open_source
   end
@@ -147,9 +152,6 @@ class Website < ApplicationRecord
   validates :domain_type, inclusion: { in: DOMAIN_TYPES }
   validates :cloud_type, inclusion: { in: [CLOUD_TYPE_PRIVATE_CLOUD, CLOUD_TYPE_CLOUD] }
   validates :status, inclusion: { in: STATUSES }
-
-  before_validation :prepare_new_site, on: :create
-  before_validation :ensure_open_source_status
 
   after_save :notify_open_source_requested
 
@@ -197,7 +199,7 @@ class Website < ApplicationRecord
     self.type = TYPE_KUBERNETES
     self.redir_http_to_https = false
     self.instance_type = 'server' # to deprecate
-    self.open_source = { 'status' => 'active' }
+    self.open_source ||= {}
     self.domains = []
 
     if site_name.include?('.')
@@ -374,6 +376,11 @@ class Website < ApplicationRecord
   def validate_account_type
     found_plan = Website.plan_of(account_type)
     errors.add(:account_type, "Invalid plan #{account_type}") unless found_plan
+  end
+
+  def force_open_source_status_pending_on_create
+    self.open_source ||= {}
+    self.open_source['status'] = OPEN_SOURCE_STATUS_PENDING
   end
 
   def ensure_open_source_status

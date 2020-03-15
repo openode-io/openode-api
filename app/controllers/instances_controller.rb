@@ -78,7 +78,12 @@ class InstancesController < ApplicationController
     website = Website.create!(
       site_name: params['site_name'],
       account_type: params['account_type'],
-      user: @user
+      user: @user,
+      open_source: {
+        title: params['open_source_title'],
+        description: params['open_source_description'],
+        repository_url: params['open_source_repository']
+      }
     )
 
     # if a location is specified, create website location

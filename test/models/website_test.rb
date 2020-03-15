@@ -497,7 +497,6 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.site_name, 'helloworld'
     assert_equal website.account_type, Website::DEFAULT_ACCOUNT_TYPE
     assert_equal website.domains, []
-    assert_equal website.open_source['status'], 'active'
     assert_equal website.type, 'kubernetes'
   end
 
@@ -642,9 +641,10 @@ class WebsiteTest < ActiveSupport::TestCase
 
   test "open source status - should init to pending" do
     w = default_website
+    w.account_type = Website::OPEN_SOURCE_ACCOUNT_TYPE
     orig_open_source = {
       title: 'helloworld',
-      description: 'hellodesc',
+      description: 'hellodesc ' * 40,
       repository_url: 'https://google.com/'
     }
     w.open_source = orig_open_source
