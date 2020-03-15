@@ -18,7 +18,10 @@ class GlobalController < ApplicationController
     type = params['type']
 
     manager = if type
-                CloudProvider::Manager.instance.first_of_type(type)
+                # TODO: -> deprecate next line
+                real_type = type == 'docker' ? 'internal' : type
+
+                CloudProvider::Manager.instance.first_of_type(real_type)
               else
                 CloudProvider::Manager.instance
               end
