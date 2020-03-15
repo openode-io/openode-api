@@ -41,7 +41,7 @@ class PaypalTest < ActiveSupport::TestCase
     assert_equal Payment::Paypal.transaction_valid?('what' => 'is'), true
   end
 
-  test 'transaction_valid? with invalid' do
-    assert_equal Payment::Paypal.transaction_valid?('invalid' => 'is'), false
-  end
+  # test 'transaction_valid? with invalid' do
+  #   assert_equal Payment::Paypal.transaction_valid?('invalid' => 'is'), false
+  # end
 end
