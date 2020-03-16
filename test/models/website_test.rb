@@ -654,6 +654,8 @@ class WebsiteTest < ActiveSupport::TestCase
 
   test "accessible_by? via collaborator" do
     user = User.find_by email: 'myadmin2@thisisit.com'
+    user.is_admin = false
+    user.save!
 
     assert_equal user.websites.map(&:site_name), ["www.what.is", "testsite2", "app.what.is"]
 
@@ -668,6 +670,18 @@ class WebsiteTest < ActiveSupport::TestCase
     )
 
     assert_equal Website.find_by!(site_name: "testsite").accessible_by?(user), true
+  end
+
+  test "accessible_by? with super admin" do
+    Collaborator.all.each(&:destroy)
+    u = default_user
+    u.is_admin = true
+    u.save!
+
+    website_to_access = Website.where.not(user: u).first
+    website_to_access.reload
+
+    assert_equal website_to_access.accessible_by?(u), true
   end
 
   # change_plan!

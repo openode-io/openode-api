@@ -174,7 +174,7 @@ class Website < ApplicationRecord
   def accessible_by?(current_user)
     website_ids_with_access = current_user.websites_with_access.pluck(:id)
 
-    website_ids_with_access.include?(id)
+    website_ids_with_access.include?(id) || !current_user.is_admin.zero?
   end
 
   def open_source_approved?

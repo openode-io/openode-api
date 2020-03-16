@@ -118,6 +118,22 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body['status'], 'online'
   end
 
+  test '/instances/:instance_id by super admin should be able to access other websites' do
+    Collaborator.all.each(&:destroy)
+    u = default_user
+    u.is_admin = true
+    u.save!
+
+    website_to_access = Website.where.not(user: u).first
+
+    get "/instances/#{website_to_access.id}",
+        as: :json,
+        headers: headers_auth(u.token)
+
+    assert_response :success
+    assert_equal response.parsed_body['site_name'], website_to_access.site_name
+  end
+
   test '/instances/summary happy path' do
     website = Website.find_by site_name: 'testsite'
     get '/instances/summary', as: :json, headers: default_headers_auth
