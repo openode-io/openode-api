@@ -242,4 +242,51 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
     user.reload
     assert_equal user.reset_token != original_reset_token, true
   end
+
+  test 'POST /account/activate with valid information' do
+    user = default_user
+    user.redo_activation
+    user.save!
+
+    post "/account/activate/#{user.id}/#{user.activation_hash}",
+         as: :json
+
+    assert_response :success
+
+    user.reload
+
+    assert_equal user.activated, 1
+
+    assert response.parsed_body, {}
+  end
+
+  test 'POST /account/activate with invalid activation hash' do
+    user = default_user
+    user.redo_activation
+    user.save!
+
+    post "/account/activate/#{user.id}/invalid",
+         as: :json
+
+    assert_response :not_found
+
+    user.reload
+
+    assert_equal user.activated, 0
+  end
+
+  test 'POST /account/activate with invalid user id' do
+    user = default_user
+    user.redo_activation
+    user.save!
+
+    post "/account/activate/123456/#{user.activation_hash}",
+         as: :json
+
+    assert_response :not_found
+
+    user.reload
+
+    assert_equal user.activated, 0
+  end
 end

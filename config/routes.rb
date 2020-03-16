@@ -37,6 +37,7 @@ Rails.application.routes.draw do
     post 'forgot-password', to: 'account#forgot_password'
     post 'verify-reset-token', to: 'account#verify_reset_token'
     get 'spendings', to: 'account#spendings'
+    post 'activate/:user_id/:activation_hash', to: 'account#activate'
   end
 
   scope :billing do

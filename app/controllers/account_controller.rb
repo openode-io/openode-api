@@ -83,6 +83,16 @@ class AccountController < ApplicationController
     json(hash_entries.map { |k, v| { date: k, value: v } })
   end
 
+  def activate
+    user_to_activate = User.find_by! id: params['user_id'],
+                                     activation_hash: params['activation_hash']
+
+    user_to_activate.activated = true
+    user_to_activate.save!
+
+    json({})
+  end
+
   private
 
   def user_params
