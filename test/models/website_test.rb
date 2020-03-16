@@ -49,6 +49,23 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal w.save, false
   end
 
+  # valid_domain?
+  test 'domain_valid? - google.com' do
+    assert_equal Website.domain_valid?("google.com"), true
+  end
+
+  test 'domain_valid? - www.google.com' do
+    assert_equal Website.domain_valid?("www.google.com"), true
+  end
+
+  test 'domain_valid? - long last part' do
+    assert_equal Website.domain_valid?("rnd.wedding"), true
+  end
+
+  test 'domain_valid? - long last part, alternate' do
+    assert_equal Website.domain_valid?("rnd.wedding"), true
+  end
+
   # scopes
   test 'having extra storage' do
     reset_all_extra_storage

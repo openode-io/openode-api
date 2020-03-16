@@ -351,7 +351,7 @@ class Website < ApplicationRecord
   end
 
   def self.domain_valid?(domain)
-    (domain =~ %r{^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}(:[0-9]{1,5})?(/.*)?$})
+    (domain =~ %r{^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,10}(:[0-9]{1,5})?(/.*)?$})
       .andand.zero?
   end
 
