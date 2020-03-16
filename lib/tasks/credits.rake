@@ -41,8 +41,13 @@ namespace :credits do
         end
       end
 
-      website.credits_check_at = Time.zone.now
-      website.save!
+      begin
+        website.credits_check_at = Time.zone.now
+        website.save!
+      rescue StandardError => e
+        msg = "[#{name}] issue updating credits check at of #{website.site_name}: #{e}"
+        Rails.logger.error msg
+      end
     end
   end
 
