@@ -99,7 +99,7 @@ class Website < ApplicationRecord
       variable: 'REDIR_HTTP_TO_HTTPS',
       description: 'Will redirect HTTP traffic to HTTPS. An HTTPS server is required.',
       type: 'website',
-      enum: ['true', 'false', '']
+      enum: [true, false, 'true', 'false', '']
     },
     {
       variable: 'TYPE',
