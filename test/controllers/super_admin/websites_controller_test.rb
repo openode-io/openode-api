@@ -28,6 +28,23 @@ class SuperAdmin::WebsitesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body.length, 0
   end
 
+  test "GET /super_admin/websites/id" do
+    w = default_website
+    w.configs = {
+      what: 1234
+    }
+    w.save!
+
+    get "/super_admin/websites/#{w.id}",
+        as: :json,
+        headers: super_admin_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body['site_name'], w.site_name
+    assert_equal response.parsed_body['configs']['what'], 1234
+  end
+
   test "update_open_source_request approved" do
     w = default_website
 

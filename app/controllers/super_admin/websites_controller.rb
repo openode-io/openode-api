@@ -16,6 +16,12 @@ class SuperAdmin::WebsitesController < SuperAdmin::SuperAdminController
         .joins(:user))
   end
 
+  def retrieve
+    result = @website.attributes
+
+    json(result)
+  end
+
   def update_open_source_request
     req_open_source = open_source_request_params
 
