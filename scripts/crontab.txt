@@ -13,3 +13,4 @@ PATH=PATH=/bin:/usr/bin:/home/ubuntu/.rvm/rubies/ruby-2.7.0/bin/
 */3 * * * * cd $PATH_REPO && rails update:uptime_robot
 37 * * * * /bin/bash /home/ubuntu/backup-db.sh
 5 */3 * * * /usr/sbin/logrotate -s ~/logrotate.status /var/www/openode-api/scripts/logrotate.d/openode_api
+15 */3 * * * /usr/sbin/logrotate -s ~/openode-www-logrotate.status /var/www/openode-www/scripts/logrotate.d/openode_www
