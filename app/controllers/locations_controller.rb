@@ -1,6 +1,7 @@
 class LocationsController < InstancesController
   before_action only: %i[add_location remove_location] do
     requires_access_to(Website::PERMISSION_LOCATION)
+    requires_status_in [Website::STATUS_OFFLINE]
   end
 
   api!
@@ -43,10 +44,6 @@ class LocationsController < InstancesController
 
     unless @website.location_exists?(str_id)
       validation_error!('This instance does not have that location.')
-    end
-
-    unless @website.offline?
-      validation_error!('The instance must first be stopped to apply this action.')
     end
 
     @website.remove_location(Location.find_by!(str_id: str_id))

@@ -24,6 +24,9 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/add-location fail already have a location' do
+    w = Website.find_by site_name: 'testsite'
+    w.change_status! Website::STATUS_OFFLINE
+
     post '/instances/testsite/add-location',
          as: :json,
          params: { location_str_id: 'usa' },
@@ -46,6 +49,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
 
   test '/instances/:instance_id/add-location happy path' do
     w = default_website
+    w.change_status! Website::STATUS_OFFLINE
     w.website_locations.destroy_all
 
     post '/instances/testsite/add-location',
@@ -71,6 +75,18 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal w.events[0].obj['updates']['created'][0]['type'], 'A'
     assert_equal w.events[0].obj['updates']['created'][0]['value'], '127.0.0.1'
     assert_equal w.events[1].obj['title'], 'add-location'
+  end
+
+  test '/instances/:instance_id/add-location should not if online' do
+    w = default_website
+    w.change_status!(Website::STATUS_ONLINE)
+
+    post "/instances/#{w.site_name}/add-location",
+         as: :json,
+         params: { location_str_id: 'usa' },
+         headers: default_headers_auth
+
+    assert_response :bad_request
   end
 
   # remove location
