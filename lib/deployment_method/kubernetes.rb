@@ -778,6 +778,8 @@ module DeploymentMethod
       rescue StandardError => e
         Ex::Logger.info(e, 'Unable to finalize completely')
       end
+
+      notify('info', "\n\n*** Final Deployment state: #{runner&.execution&.status} ***\n")
     end
 
     # the following hooks are notification procs.

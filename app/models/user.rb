@@ -154,12 +154,12 @@ class User < ApplicationRecord
 
   def regen_api_token!
     self.token = SecureRandom.hex(16)
-    save
+    save!
   end
 
   def regen_reset_token!
     self.reset_token = SecureRandom.hex(32)
-    save
+    save!
   end
 
   def credits?
