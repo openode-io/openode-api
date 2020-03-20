@@ -15,29 +15,33 @@ namespace :credits do
       begin
         website.spend_online_hourly_credits!
       rescue StandardError => e
-        Rails.logger.error "[#{name}] #{e.message}"
+        begin
+          Rails.logger.error "[#{name}] #{e.message}"
 
-        if e.message.to_s.include?("No credits remaining")
-          # stop the instance:
-          openode_api = Api::Openode.new(token: website.user.token)
-          path_api = "/instances/#{website.site_name}/stop"
+          if e.message.to_s.include?("No credits remaining")
+            # stop the instance:
+            openode_api = Api::Openode.new(token: website.user.token)
+            path_api = "/instances/#{website.site_name}/stop"
 
-          website.website_locations.each do |website_location|
-            result_api_call = openode_api.execute(
-              :post, path_api,
-              params: { 'location_str_id' => website_location.location.str_id }
-            )
+            website.website_locations.each do |website_location|
+              result_api_call = openode_api.execute(
+                :post, path_api,
+                params: { 'location_str_id' => website_location.location.str_id }
+              )
 
-            website.create_event(title: 'Stopping instance (lacking credits)',
-                                 api_result: result_api_call)
+              website.create_event(title: 'Stopping instance (lacking credits)',
+                                   api_result: result_api_call)
+            end
+
+            # notify the user:
+
+            UserMailer.with(
+              user: website.user,
+              website: website
+            ).stopped_due_no_credit.deliver_now
           end
-
-          # notify the user:
-
-          UserMailer.with(
-            user: website.user,
-            website: website
-          ).stopped_due_no_credit.deliver_now
+        rescue StandardError => e
+          Rails.logger.error e.to_s
         end
       end
 
