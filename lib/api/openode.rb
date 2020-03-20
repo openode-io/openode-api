@@ -18,7 +18,7 @@ module Api
 
       JSON.parse(RestClient::Request.execute(method: method,
                                              url: url,
-                                             timeout: 10,
+                                             timeout: 120,
                                              payload: args[:payload],
                                              headers: headers))
     end
