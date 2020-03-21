@@ -336,7 +336,7 @@ class WebsiteTest < ActiveSupport::TestCase
       'status' => 'approved',
       'title' => 'helloworld',
       'description' => 'a ' * 31,
-      'repository_url' => 'http://google.com/'
+      'repository_url' => 'http://github.com/myrepo'
     }
     website.change_plan!(Website::OPEN_SOURCE_ACCOUNT_TYPE)
     website.user.credits = 0
@@ -353,7 +353,7 @@ class WebsiteTest < ActiveSupport::TestCase
       'status' => 'approved',
       'title' => 'helloworld',
       'description' => 'a ' * 31,
-      'repository_url' => 'http://google.com/'
+      'repository_url' => 'http://github.com/myrepo'
     }
     website.change_plan!(Website::OPEN_SOURCE_ACCOUNT_TYPE)
     website.user.credits = 0
@@ -715,7 +715,7 @@ class WebsiteTest < ActiveSupport::TestCase
     orig_open_source = {
       title: 'helloworld',
       description: 'hellodesc ' * 40,
-      repository_url: 'https://google.com/'
+      repository_url: 'http://github.com/myrepo'
     }
     w.open_source = orig_open_source
     w.save!
@@ -782,6 +782,23 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal mail_sent.to, ['info@openode.io']
   end
 
+  test "open source invalid due to missing back link" do
+    w = default_website
+
+    w.open_source = {
+      'status' => Website::OPEN_SOURCE_STATUS_APPROVED,
+      'title' => 'helloworld',
+      'description' => " asdf " * 200,
+      'repository_url' => "http://github.com/openode-io/openode-bad"
+    }
+
+    w.account_type = Website::OPEN_SOURCE_ACCOUNT_TYPE
+
+    w.save
+
+    assert_equal w.valid?, false
+  end
+
   test "not notify open source requested if changing to non open source" do
     w = default_website
 
@@ -798,5 +815,23 @@ class WebsiteTest < ActiveSupport::TestCase
 
     mail_sent = ActionMailer::Base.deliveries.first
     assert_nil mail_sent
+  end
+
+  test "contains_open_source_backlink - if present" do
+    result = Website.contains_open_source_backlink(
+      "http://github.com/openode-io/openode-cli",
+      "www.openode.io"
+    )
+
+    assert result
+  end
+
+  test "contains_open_source_backlink - if not present" do
+    result = Website.contains_open_source_backlink(
+      "http://github.com/openode-io/openode-bad",
+      "www.openode.io"
+    )
+
+    assert_equal result, false
   end
 end

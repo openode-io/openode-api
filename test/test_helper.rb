@@ -293,6 +293,46 @@ class ActiveSupport::TestCase
       content_type: 'text/html',
       response_status: 200,
       response_path: 'test/fixtures/http/payment/paypal/verified.txt'
+    },
+    {
+      url: 'http://github.com/openode-io/openode-cli',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'text/html',
+      response_status: 200,
+      response_path: 'test/fixtures/http/open_source/openode_cli.txt'
+    },
+    {
+      url: 'https://github.com/openode-io/openode-cli',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'text/html',
+      response_status: 200,
+      response_path: 'test/fixtures/http/open_source/openode_cli.txt'
+    },
+    {
+      url: 'http://github.com/openode-io/openode-bad',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'text/html',
+      response_status: 200,
+      response_path: 'test/fixtures/http/open_source/openode_bad.txt'
+    },
+    {
+      url: 'http://github.com/myrepo',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'text/html',
+      response_status: 200,
+      response_path: 'test/fixtures/http/open_source/openode_cli.txt'
     }
   ]
 

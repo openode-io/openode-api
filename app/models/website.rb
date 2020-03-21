@@ -1,4 +1,5 @@
 require 'uri'
+require 'rest-client'
 
 class Website < ApplicationRecord
   serialize :domains, JSON
@@ -394,6 +395,15 @@ class Website < ApplicationRecord
     end
   end
 
+  def self.contains_open_source_backlink(repo_url, required_str)
+    content_repo_readme = RestClient::Request.execute(method: :get, url: repo_url)
+
+    content_repo_readme.to_s.include?(required_str)
+  rescue StandardError => e
+    logger.error("Error verifying contains open source backlink, #{e}")
+    false
+  end
+
   def validate_open_source
     # status
     unless OPEN_SOURCE_STATUSES.include?(open_source['status'])
@@ -417,6 +427,12 @@ class Website < ApplicationRecord
     # url
     unless open_source['repository_url'] =~ /\A#{URI.regexp(%w[http https])}\z/
       errors.add(:open_source, "invalid repository URL")
+    end
+
+    # then url must contain www.openode.io
+    unless Website.contains_open_source_backlink(open_source['repository_url'],
+                                                 "www.openode.io")
+      errors.add(:open_source, "missing thanks link www.openode.io")
     end
   end
 

@@ -215,7 +215,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
            account_type: 'open_source',
            open_source_title: 'helloworld',
            open_source_description: 'asdf ' * 50,
-           open_source_repository: 'http://google.com/'
+           open_source_repository: 'http://github.com/openode-io/openode-cli'
          },
          as: :json,
          headers: default_headers_auth
@@ -231,7 +231,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal website.open_source['status'], Website::OPEN_SOURCE_STATUS_PENDING
     assert_equal website.open_source['title'], 'helloworld'
     assert_equal website.open_source['description'], 'asdf ' * 50
-    assert_equal website.open_source['repository_url'], 'http://google.com/'
+    assert_equal website.open_source['repository_url'],
+                 'http://github.com/openode-io/openode-cli'
   end
 
   test '/instances/create with initial location' do
