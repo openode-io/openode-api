@@ -18,6 +18,22 @@ class SuperAdmin::WebsitesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body[1]["site_name"], "testsite2"
   end
 
+  test "search by user id" do
+    w = default_website
+    user = w.user
+
+    get "/super_admin/websites?search=#{user.id}",
+        as: :json,
+        headers: super_admin_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body.length, user.websites.count
+
+    all_proper_user = response.parsed_body.all? { |site| site['user_id'] == user.id }
+    assert all_proper_user
+  end
+
   test "without match" do
     get '/super_admin/websites?search=ompleteasdf',
         as: :json,
