@@ -360,4 +360,33 @@ class WebsiteLocationTest < ActiveSupport::TestCase
 
     assert_equal wl.website.events.length, 1
   end
+
+  # change_storage
+  test 'change_storage with user having orders' do
+    website = default_website
+    wl = website.website_locations.first
+    before_extra_storage = wl.extra_storage
+    wl.change_storage!(1)
+
+    wl.reload
+
+    assert_equal wl.extra_storage, before_extra_storage + 1
+  end
+
+  test 'change_storage with user not having orders should fail' do
+    website = default_website
+    website.user.orders.each(&:destroy)
+    wl = website.website_locations.first
+    before_extra_storage = wl.extra_storage
+
+    assert_raises StandardError do
+      wl.change_storage!(1)
+    end
+
+    wl.reload
+
+    assert_equal wl.extra_storage, before_extra_storage
+  end
+
+  # TODO: other tests
 end

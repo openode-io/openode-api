@@ -23,6 +23,17 @@ class StoragesControllerTest < ActionDispatch::IntegrationTest
     assert_equal website.events[0].obj['total_extra_storage'], '3 GBs'
   end
 
+  test 'POST /instances/:instance_id/increase_storage fail if no user order' do
+    website = Website.find_by site_name: 'testsite'
+    website.user.orders.each(&:destroy)
+    payload = { amount_gb: 2 }
+
+    post "/instances/#{website.site_name}/increase-storage?location_str_id=canada",
+         params: payload, as: :json, headers: default_headers_auth
+
+    assert_response :bad_request
+  end
+
   test 'POST /instances/:instance_id/destroy-storage with valid info' do
     website = Website.find_by! site_name: 'testsite'
     website.type = Website::TYPE_KUBERNETES

@@ -166,6 +166,12 @@ class WebsiteLocation < ApplicationRecord
 
   ### storage
   def change_storage!(amount_gb)
+    if amount_gb.positive? && !website&.user&.orders?
+      msg_requires_paid_instance = "Persitence is only available for paid instances."
+      raise ValidationError, msg_requires_paid_instance
+
+    end
+
     self.extra_storage += amount_gb
     save!
   end

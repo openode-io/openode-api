@@ -209,6 +209,21 @@ class UserTest < ActiveSupport::TestCase
     assert_equal user.credits?, false
   end
 
+  test 'orders? when having orders' do
+    user = default_user
+
+    assert user.orders.count.positive?
+    assert user.orders?
+  end
+
+  test 'orders? when no order' do
+    user = default_user
+    user.orders.each(&:destroy)
+
+    assert user.orders.count.zero?
+    assert_equal user.orders?, false
+  end
+
   # can create new website
   test 'can create new website ' do
     user = User.find_by email: 'myadmin@thisisit.com'
