@@ -1,6 +1,6 @@
 class SuperAdmin::OrdersController < SuperAdmin::SuperAdminController
   def index
-    attributes_to_search = ["users.email", "content", "orders.id",
+    attributes_to_search = ["users.id", "users.email", "content", "orders.id",
                             "payment_status", "gateway"]
     search_for = "%#{params['search']}%"
 
