@@ -67,6 +67,30 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
     assert_equal u.account['company'], 'Microsse'
   end
 
+  test 'PATCH /account/me change password' do
+    u = User.find_by! token: '1234s56789'
+
+    new_password = 'Testtest12!'
+
+    patch '/account/me',
+          headers: default_headers_auth,
+          params: {
+            account: {
+              password: new_password,
+              password_confirmation: new_password
+            }
+          },
+          as: :json
+
+    u.reload
+
+    assert_response :success
+
+    u.reload
+
+    u.verify_authentication(new_password)
+  end
+
   test 'PATCH /account/me not allowed to change other fields' do
     u = User.find_by! token: '1234s56789'
     credits = u.credits
