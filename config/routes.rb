@@ -23,6 +23,8 @@ Rails.application.routes.draw do
     get 'newsletters', to: 'newsletters#index'
     post 'newsletters', to: 'newsletters#create'
     post 'newsletters/:id/send', to: 'newsletters#deliver'
+
+    get 'stats/spendings', to: 'stats#spendings'
   end
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
