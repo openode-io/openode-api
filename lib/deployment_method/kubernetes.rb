@@ -203,13 +203,16 @@ module DeploymentMethod
     end
 
     def retrieve_dotenv_cmd(options = {})
-      project_path = options[:project_path]
+      website = options[:website]
 
-      retrieve_file_cmd(path: "#{project_path}.env")
+      project_path = website.repo_dir
+      dotenv_relative_filepath = website.dotenv_filepath
+
+      retrieve_file_cmd(path: "#{project_path}#{dotenv_relative_filepath}")
     end
 
     def retrieve_dotenv(website)
-      dotenv_content = ex_stdout("retrieve_dotenv_cmd", project_path: website.repo_dir)
+      dotenv_content = ex_stdout("retrieve_dotenv_cmd", website: website)
 
       Dotenv::Parser.call(dotenv_content || '')
     end

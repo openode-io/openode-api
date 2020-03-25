@@ -26,6 +26,9 @@ Rails/HasManyOrHasOneDependent:
 Style/FormatString:
   Enabled: false
 
+Style/Next:
+  Enabled: false
+
 Style/FormatStringToken:
   Enabled: false
 

@@ -90,10 +90,12 @@ class Website < ApplicationRecord
   CONFIG_VARIABLES = [
     {
       variable: 'SSL_CERTIFICATE_PATH',
+      type: 'file_in_repo',
       description: 'Certificate file. Example: certs/mysite.crt'
     },
     {
       variable: 'SSL_CERTIFICATE_KEY_PATH',
+      type: 'file_in_repo',
       description: 'Private key generated. Example: certs/privatekey.key'
     },
     {
@@ -119,6 +121,12 @@ class Website < ApplicationRecord
       variable: 'SKIP_PORT_CHECK',
       description: 'Skip the port verification while deploying.',
       enum: ['true', 'false', '']
+    },
+    {
+      variable: 'DOTENV_FILEPATH',
+      type: 'file_in_repo',
+      description: 'Relative dotenv (.env) file path. Example: .production.env',
+      default: '.env'
     }
   ].freeze
 
@@ -269,13 +277,21 @@ class Website < ApplicationRecord
         errors.add(:configs, "Invalid value, valid ones: #{config[:enum]}")
       end
 
-      next unless config[:min] && config[:max]
+      if config[:min] && config[:max]
+        parsed_val = value.to_f
 
-      parsed_val = value.to_f
+        unless parsed_val.present? && parsed_val >= config[:min] &&
+               parsed_val <= config[:max]
+          errors.add(:configs, "Invalid value, , min = #{config[:min]}, max = #{config[:max]}")
+        end
+      end
 
-      unless parsed_val.present? && parsed_val >= config[:min] &&
-             parsed_val <= config[:max]
-        errors.add(:configs, "Invalid value, , min = #{config[:min]}, max = #{config[:max]}")
+      if value.present? && config[:type] == 'file_in_repo'
+        cur_dir = "#{repo_dir}#{value}"
+
+        unless Io::Path.secure?(repo_dir, cur_dir)
+          errors.add(:configs, "Invalid config value")
+        end
       end
     end
   end
@@ -480,6 +496,11 @@ class Website < ApplicationRecord
       Website.config_def('MAX_BUILD_DURATION')[:max]
     ]
       .min
+  end
+
+  def dotenv_filepath
+    self.configs ||= {}
+    configs['DOTENV_FILEPATH'] || Website.config_def('DOTENV_FILEPATH')[:default]
   end
 
   def repo_dir

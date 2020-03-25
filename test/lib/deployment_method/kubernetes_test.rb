@@ -107,12 +107,22 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
   # DOTENV
 
   test 'retrieve_dotenv_cmd' do
-    generated_cmd = kubernetes_method.retrieve_dotenv_cmd(project_path: '/home/what/')
-    assert_equal generated_cmd, "cat /home/what/.env"
+    w = default_website
+    generated_cmd = kubernetes_method.retrieve_dotenv_cmd(website: w)
+    assert_equal generated_cmd, "cat #{w.repo_dir}.env"
+  end
+
+  test 'retrieve_dotenv_cmd with custom dotenv filepath' do
+    w = default_website
+    w.configs ||= {}
+    w.configs['DOTENV_FILEPATH'] = '.production.env'
+    w.save!
+    generated_cmd = kubernetes_method.retrieve_dotenv_cmd(website: w)
+    assert_equal generated_cmd, "cat #{w.repo_dir}.production.env"
   end
 
   test 'retrieve_dotenv without dotenv' do
-    generated_cmd = kubernetes_method.retrieve_dotenv_cmd(project_path: @website.repo_dir)
+    generated_cmd = kubernetes_method.retrieve_dotenv_cmd(website: @website)
 
     prepare_ssh_session(generated_cmd, '')
 
@@ -125,7 +135,7 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
   end
 
   test 'retrieve_dotenv with dotenv' do
-    generated_cmd = kubernetes_method.retrieve_dotenv_cmd(project_path: @website.repo_dir)
+    generated_cmd = kubernetes_method.retrieve_dotenv_cmd(website: @website)
 
     dotenv_content = '
 
@@ -586,7 +596,7 @@ VAR2=5678
   end
 
   test 'generate_instance_yml - basic' do
-    cmd_get_dotenv = kubernetes_method.retrieve_dotenv_cmd(project_path: @website.repo_dir)
+    cmd_get_dotenv = kubernetes_method.retrieve_dotenv_cmd(website: @website)
     prepare_ssh_session(cmd_get_dotenv, '')
     @website_location.change_storage!(3)
 
@@ -609,7 +619,7 @@ VAR2=5678
   end
 
   test 'generate_instance_yml - without namespace object/pvc' do
-    cmd_get_dotenv = kubernetes_method.retrieve_dotenv_cmd(project_path: @website.repo_dir)
+    cmd_get_dotenv = kubernetes_method.retrieve_dotenv_cmd(website: @website)
     prepare_ssh_session(cmd_get_dotenv, '')
 
     assert_scripted do
