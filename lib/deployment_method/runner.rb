@@ -140,6 +140,12 @@ module DeploymentMethod
       end
     end
 
+    def execute_raw_ssh(cmd)
+      @ssh ||= Remote::Ssh.new(ssh_configs)
+
+      @ssh.exec([cmd])
+    end
+
     def execute_ssh(cmds)
       results = []
 
