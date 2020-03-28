@@ -13,6 +13,9 @@ class LibBuildCleanTest < ActiveSupport::TestCase
     prepare_ssh_session("ls /home/",
                         "#{website.user.id}\n #{website2.user.id}\n 1122\n docker")
 
+    prepare_ssh_session("ls /home/#{website.user.id}/", "site1\n site2")
+    prepare_ssh_session("ls /home/#{website2.user.id}/", "site1\n site2")
+
     prepare_ssh_session("rm -rf /home/#{website.user.id}/#{website.site_name}/", "")
     prepare_ssh_session("rm -rf /home/1122/", "")
 

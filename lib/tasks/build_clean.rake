@@ -1,4 +1,13 @@
 
+def get_files_list_in(runner, path)
+  cmd = "ls #{path}"
+
+  runner.execute_raw_ssh(cmd)
+        .first[:stdout]
+        .lines
+        .map(&:strip)
+end
+
 namespace :build_clean do
   desc ''
   task synced_files: :environment do
@@ -18,20 +27,21 @@ namespace :build_clean do
 
       runner = DeploymentMethod::Runner.new(Website::TYPE_KUBERNETES, "cloud", configs)
 
-      cmd_user_ids = "ls #{Website::REPOS_BASE_DIR}"
-
-      user_ids = runner.execute_raw_ssh(cmd_user_ids)
-                       .first[:stdout]
-                       .lines
-                       .map(&:strip)
-                       .select { |item| item.to_i.to_s == item.to_s }
+      user_ids = get_files_list_in(runner, Website::REPOS_BASE_DIR)
+                 .select { |item| item.to_i.to_s == item.to_s }
 
       folders_to_remove = []
 
       user_ids.each do |user_id|
         user = User.find_by id: user_id
 
-        if !user || user.websites.count.zero?
+        files_in_user_dir = if user
+                              get_files_list_in(runner, "#{Website::REPOS_BASE_DIR}#{user.id}/")
+                            else
+                              []
+        end
+
+        if !user || user.websites.count.zero? || files_in_user_dir.count.zero?
           folders_to_remove << "#{Website::REPOS_BASE_DIR}#{user_id}/"
           next
         end
