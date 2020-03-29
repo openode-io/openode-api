@@ -22,11 +22,11 @@ class InstancesController < ApplicationController
     requires_docker_deployment
   end
 
-  before_action only: %i[stop logs cmd reload] do
+  before_action only: %i[stop cmd reload] do
     requires_status_in [Website::STATUS_ONLINE]
   end
 
-  before_action only: [:restart] do
+  before_action only: [:restart, :logs] do
     requires_status_in [Website::STATUS_ONLINE, Website::STATUS_OFFLINE]
   end
 
@@ -300,17 +300,31 @@ class InstancesController < ApplicationController
   def logs
     nb_lines = params['nbLines'].present? ? params['nbLines'].to_i : 100
 
-    cmds = [{
-      cmd_name: 'logs',
-      options: {
-        website: @website,
-        website_location: @website_location || @website.website_locations.first,
-        nb_lines: nb_lines
-      }
-    }]
-    logs = @runner.execute(cmds)
+    result = if @website.online?
+               # get live logs when online
+               cmds = [{
+                 cmd_name: 'logs',
+                 options: {
+                   website: @website,
+                   website_location: @website_location || @website.website_locations.first,
+                   nb_lines: nb_lines
+                 }
+               }]
+               logs = @runner.execute(cmds)
 
-    json(logs: logs.first[:result][:stdout])
+               logs.first[:result][:stdout]
+             else
+               # when offline, print latest deployment
+               latest_deployment = @website.deployments.last
+
+               s_latest_deployment = "*** \nInstance offline... " \
+                                     "printing latest deployment ***\n\n" +
+                                     latest_deployment&.humanize_events.to_s
+
+               latest_deployment ? s_latest_deployment : "No deployment logs available."
+             end
+
+    json(logs: result)
   end
 
   api!

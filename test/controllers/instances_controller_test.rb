@@ -367,6 +367,55 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test '/instances/:instance_id/logs offline, without deployment' do
+    set_dummy_secrets_to(LocationServer.all)
+    w = default_website
+    w.status = Website::STATUS_OFFLINE
+    w.save!
+
+    w.deployments.each(&:destroy)
+
+    get "/instances/#{w.id}/logs?location_str_id=canada",
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :success
+
+    assert_includes response.parsed_body['logs'], 'No deployment logs available'
+  end
+
+  test '/instances/:instance_id/logs offline, with deployment' do
+    set_dummy_secrets_to(LocationServer.all)
+    w = default_website
+    w.status = Website::STATUS_OFFLINE
+    w.save!
+
+    dep = Deployment.new
+
+    dep.status = 'success'
+    dep.website = w
+    dep.website_location = w.website_locations.last
+    dep.result = {
+      what: {
+        is: 2
+      }
+    }
+    dep.events = [
+      { "status": "running", "level": "info", "update": "Verifying allowed to deploy..." },
+      { "status": "running", "level": "info", "update": "Preparing instance image..." }
+    ]
+    dep.save!
+
+    get "/instances/#{w.id}/logs?location_str_id=canada",
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :success
+
+    assert_includes response.parsed_body['logs'], 'printing latest deployment'
+    assert_includes response.parsed_body['logs'], 'Verifying allowed'
+  end
+
   # /cmd with docker compose
   test '/instances/:instance_id/cmd with subdomain' do
     set_dummy_secrets_to(LocationServer.all)
