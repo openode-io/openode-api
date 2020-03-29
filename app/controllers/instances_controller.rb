@@ -22,11 +22,11 @@ class InstancesController < ApplicationController
     requires_docker_deployment
   end
 
-  before_action only: %i[stop logs cmd reload] do
+  before_action only: %i[stop cmd reload] do
     requires_status_in [Website::STATUS_ONLINE]
   end
 
-  before_action only: [:restart] do
+  before_action only: [:restart, :logs] do
     requires_status_in [Website::STATUS_ONLINE, Website::STATUS_OFFLINE]
   end
 

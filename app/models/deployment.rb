@@ -11,4 +11,12 @@ class Deployment < Execution
     Deployment.count + # active ones
       Deployment.nb_archived_deployments # + archived
   end
+
+  def humanize_events
+    return "" unless events
+
+    events
+      .map { |e| e["update"] || "" }
+      .join("\n\n")
+  end
 end
