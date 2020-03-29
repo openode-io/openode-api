@@ -458,6 +458,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     set_dummy_secrets_to(LocationServer.all)
     prepare_default_ports
     website = default_website
+    website.executions.each(&:destroy)
 
     expect_global_container(dep_method)
     prepare_ssh_session(dep_method.kill_global_container(id: 'b3621dd9d4dd'),
@@ -467,6 +468,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
     assert_scripted do
       begin_ssh
+
       post '/instances/testsite/stop?location_str_id=canada',
            as: :json,
            params: {},
@@ -475,7 +477,9 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
       assert_response :success
       assert_equal response.parsed_body['result'], 'success'
 
-      assert_equal website.executions.last.type, 'Task'
+      Delayed::Job.first.invoke_job
+
+      assert_equal website.executions.reload.last.type, 'Task'
     end
   end
 

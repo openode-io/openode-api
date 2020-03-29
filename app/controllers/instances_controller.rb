@@ -248,7 +248,7 @@ class InstancesController < ApplicationController
 
   api!
   def stop
-    @runner&.execute([{ cmd_name: 'stop', options: { is_complex: true } }])
+    @runner&.delay&.execute([{ cmd_name: 'stop', options: { is_complex: true } }])
 
     json(result: 'success')
   end

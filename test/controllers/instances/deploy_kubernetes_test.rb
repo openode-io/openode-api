@@ -119,6 +119,8 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert_response :success
       assert_equal response.parsed_body['result'], 'success'
 
+      Delayed::Job.first.invoke_job
+
       @website.reload
 
       assert_equal @website.status, Website::STATUS_OFFLINE
