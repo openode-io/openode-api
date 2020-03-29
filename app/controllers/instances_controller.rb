@@ -315,7 +315,7 @@ class InstancesController < ApplicationController
                logs.first[:result][:stdout]
              else
                # when offline, print latest deployment
-               latest_deployment = @website.deployments.last
+               latest_deployment = @website.deployments.last(10).find(&:events)
 
                s_latest_deployment = "*** \nInstance offline... " \
                                      "printing latest deployment ***\n\n" +
