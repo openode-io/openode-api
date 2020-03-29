@@ -315,10 +315,11 @@ class InstancesController < ApplicationController
                logs.first[:result][:stdout]
              else
                # when offline, print latest deployment
-               latest_deployment = @website.deployments.last(10).find(&:events)
+               latest_deployment = @website.deployments.last(10).select(&:events).last
 
                s_latest_deployment = "*** \nInstance offline... " \
-                                     "printing latest deployment ***\n\n" +
+                                     "printing latest deployment " \
+                                     "(#{latest_deployment&.created_at}) ***\n\n" +
                                      latest_deployment&.humanize_events.to_s
 
                latest_deployment ? s_latest_deployment : "No deployment logs available."
