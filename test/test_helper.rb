@@ -245,50 +245,40 @@ class ActiveSupport::TestCase
       response_path: 'test/fixtures/http/openode_api/destroy-storage.json'
     },
     {
-      url: 'https://ipnpb.paypal.com/cgi-bin/webscr?cmd=_notify-validate&what=is',
-      method: :get,
+      url: 'https://ipnpb.paypal.com/cgi-bin/webscr?cmd=_notify-validate',
+      method: :post,
       with: {
-        body: {}
+        body: ""
       },
       content_type: 'text/html',
       response_status: 200,
       response_path: 'test/fixtures/http/payment/paypal/verified.txt'
     },
     {
-      url: 'https://ipnpb.paypal.com/cgi-bin/webscr?cmd=_notify-validate&invalid=is',
-      method: :get,
+      url: 'https://ipnpb.paypal.com/cgi-bin/webscr?cmd=_notify-validate',
+      method: :post,
       with: {
-        body: {}
+        body: "{\"mc_gross\":\"2.00\",\"protection_eligibility\":\"Eligible\",\"address_status\":\"confirmed\",\"payer_id\":\"7GBYJ8696D738\",\"address_street\":\"145 ROAD\",\"payment_date\":\"04:15:29 Oct 26, 2019 PDT\",\"payment_status\":\"Completed\",\"charset\":\"windows-1252\",\"address_zip\":\"S7 4LE\",\"first_name\":\"Elvis\",\"option_selection1\":\"200 Credits\",\"mc_fee\":\"0.17\",\"address_country_code\":\"GB\",\"address_name\":\"Martin L\",\"notify_version\":\"3.9\",\"custom\":113629430,\"payer_status\":\"verified\",\"business\":\"info@openode.io\",\"address_country\":\"Canada\",\"address_city\":\"Mtl\",\"quantity\":\"1\",\"verify_sign\":\"AZuQXZZkuk7frhfirfxxTkj0BDLGARX0B64SyhEeW2wnN8KZ.HyIs8r2\",\"payer_email\":\"123456@gmail.com\",\"option_name1\":\"Amount of Credits\",\"txn_id\":\"1XN491692K554135N\",\"payment_type\":\"instant\",\"last_name\":\"LL-S\",\"address_state\":\"\",\"receiver_email\":\"info@openode.io\",\"payment_fee\":\"0.17\",\"shipping_discount\":\"0.00\",\"insurance_amount\":\"0.00\",\"receiver_id\":\"JS2SF9ESDQKCG\",\"txn_type\":\"web_accept\",\"item_name\":\"opeNode Credits Purchase\",\"discount\":\"0.00\",\"mc_currency\":\"USD\",\"item_number\":\"\",\"residence_country\":\"CA\",\"shipping_method\":\"Default\",\"transaction_subject\":\"\",\"payment_gross\":\"2.00\",\"ipn_track_id\":\"b41138e1a5519\"}"
+      },
+      content_type: 'text/html',
+      response_status: 200,
+      response_path: 'test/fixtures/http/payment/paypal/verified.txt'
+    },
+    {
+      url: 'https://ipnpb.paypal.com/cgi-bin/webscr?cmd=_notify-validate',
+      method: :post,
+      with: {
+        body: "\"\""
       },
       content_type: 'text/html',
       response_status: 200,
       response_path: 'test/fixtures/http/payment/paypal/invalid.txt'
     },
     {
-      url: 'https://ipnpb.paypal.com/cgi-bin/webscr?cmd=_notify-validate&mc_gross=2.00&protection_eligibility=Eligible&address_status=confirmed&payer_id=7GBYJ8696D738&address_street=145 ROAD&payment_date=04:15:29 Oct 26, 2019 PDT&payment_status=Completed&charset=windows-1252&address_zip=S7 4LE&first_name=Elvis&option_selection1=200 Credits&mc_fee=0.17&address_country_code=GB&address_name=Martin L&notify_version=3.9&custom=113629430&payer_status=verified&business=info@openode.io&address_country=Canada&address_city=Mtl&quantity=1&verify_sign=AZuQXZZkuk7frhfirfxxTkj0BDLGARX0B64SyhEeW2wnN8KZ.HyIs8r2&payer_email=123456@gmail.com&option_name1=Amount of Credits&txn_id=1XN491692K554135N&payment_type=instant&last_name=LL-S&address_state=&receiver_email=info@openode.io&payment_fee=0.17&shipping_discount=0.00&insurance_amount=0.00&receiver_id=JS2SF9ESDQKCG&txn_type=web_accept&item_name=opeNode Credits Purchase&discount=0.00&mc_currency=USD&item_number=&residence_country=CA&shipping_method=Default&transaction_subject=&payment_gross=2.00&ipn_track_id=b41138e1a5519',
-      method: :get,
+      url: 'https://ipnpb.paypal.com/cgi-bin/webscr?cmd=_notify-validate',
+      method: :post,
       with: {
-        body: {}
-      },
-      content_type: 'text/html',
-      response_status: 200,
-      response_path: 'test/fixtures/http/payment/paypal/verified.txt'
-    },
-    {
-      url: 'https://ipnpb.paypal.com/cgi-bin/webscr?cmd=_notify-validate&mc_gross=2.00&protection_eligibility=Eligible&address_status=confirmed&payer_id=7GBYJ8696D738&address_street=145 ROAD&payment_date=04:15:29 Oct 26, 2019 PDT&payment_status=not completed&charset=windows-1252&address_zip=S7 4LE&first_name=Elvis&option_selection1=200 Credits&mc_fee=0.17&address_country_code=GB&address_name=Martin L&notify_version=3.9&custom=10000&payer_status=verified&business=info@openode.io&address_country=Canada&address_city=Mtl&quantity=1&verify_sign=AZuQXZZkuk7frhfirfxxTkj0BDLGARX0B64SyhEeW2wnN8KZ.HyIs8r2&payer_email=123456@gmail.com&option_name1=Amount of Credits&txn_id=1XN491692K554135N&payment_type=instant&last_name=LL-S&address_state=&receiver_email=info@openode.io&payment_fee=0.17&shipping_discount=0.00&insurance_amount=0.00&receiver_id=JS2SF9ESDQKCG&txn_type=web_accept&item_name=opeNode Credits Purchase&discount=0.00&mc_currency=USD&item_number=&residence_country=CA&shipping_method=Default&transaction_subject=&payment_gross=2.00&ipn_track_id=b41138e1a5519',
-      method: :get,
-      with: {
-        body: {}
-      },
-      content_type: 'text/html',
-      response_status: 200,
-      response_path: 'test/fixtures/http/payment/paypal/verified.txt'
-    },
-    {
-      url: 'https://ipnpb.paypal.com/cgi-bin/webscr?_json=&cmd=_notify-validate',
-      method: :get,
-      with: {
-        body: {}
+        body: "{\"mc_gross\":\"2.00\",\"protection_eligibility\":\"Eligible\",\"address_status\":\"confirmed\",\"payer_id\":\"7GBYJ8696D738\",\"address_street\":\"145 ROAD\",\"payment_date\":\"04:15:29 Oct 26, 2019 PDT\",\"payment_status\":\"not completed\",\"charset\":\"windows-1252\",\"address_zip\":\"S7 4LE\",\"first_name\":\"Elvis\",\"option_selection1\":\"200 Credits\",\"mc_fee\":\"0.17\",\"address_country_code\":\"GB\",\"address_name\":\"Martin L\",\"notify_version\":\"3.9\",\"custom\":\"10000\",\"payer_status\":\"verified\",\"business\":\"info@openode.io\",\"address_country\":\"Canada\",\"address_city\":\"Mtl\",\"quantity\":\"1\",\"verify_sign\":\"AZuQXZZkuk7frhfirfxxTkj0BDLGARX0B64SyhEeW2wnN8KZ.HyIs8r2\",\"payer_email\":\"123456@gmail.com\",\"option_name1\":\"Amount of Credits\",\"txn_id\":\"1XN491692K554135N\",\"payment_type\":\"instant\",\"last_name\":\"LL-S\",\"address_state\":\"\",\"receiver_email\":\"info@openode.io\",\"payment_fee\":\"0.17\",\"shipping_discount\":\"0.00\",\"insurance_amount\":\"0.00\",\"receiver_id\":\"JS2SF9ESDQKCG\",\"txn_type\":\"web_accept\",\"item_name\":\"opeNode Credits Purchase\",\"discount\":\"0.00\",\"mc_currency\":\"USD\",\"item_number\":\"\",\"residence_country\":\"CA\",\"shipping_method\":\"Default\",\"transaction_subject\":\"\",\"payment_gross\":\"2.00\",\"ipn_track_id\":\"b41138e1a5519\"}"
       },
       content_type: 'text/html',
       response_status: 200,

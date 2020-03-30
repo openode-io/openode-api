@@ -2,9 +2,7 @@ require 'rest-client'
 
 module Payment
   class Paypal
-    PAYPAL_VERIFICATION_URL = "https://ipnpb.paypal.com/cgi-bin/webscr?"
-    PAYPAL_VERIFICATION_VARIABLE = "cmd"
-    PAYPAL_VERIFICATION_VALUE = "_notify-validate"
+    PAYPAL_VERIFICATION_URL = "https://ipnpb.paypal.com/cgi-bin"
 
     def self.parse(input_obj)
       cleaned_obj = JSON.parse(input_obj.to_json.gsub(/[\u0080-\u00ff]/, ''))
@@ -21,30 +19,28 @@ module Payment
       parsed_order && parsed_order['payment_status'] == 'Completed'
     end
 
-    # call IPN paypal to verify
-    def self.prepare_validate_transaction_url(input_obj)
-      vars = { PAYPAL_VERIFICATION_VARIABLE => PAYPAL_VERIFICATION_VALUE }.merge(input_obj)
-      params_s = vars.keys.map { |k| "#{k}=#{vars[k]}" }.join("&")
+    def self.validate_ipn_notification(raw)
+      live = PAYPAL_VERIFICATION_URL
 
-      "#{PAYPAL_VERIFICATION_URL}#{params_s}"
+      uri = URI.parse(live + '/webscr?cmd=_notify-validate')
+
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.open_timeout = 60
+      http.read_timeout = 60
+      http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      http.use_ssl = true
+      http.post(uri.request_uri, raw,
+                'Content-Length' => raw.size.to_s,
+                'User-Agent' => "My custom user agent").body
     end
 
-    def self.transaction_valid?(input_obj)
-      Rails.logger.info("Paypal transaction input -> #{input_obj.inspect}")
-      url = Paypal.prepare_validate_transaction_url(input_obj)
+    def self.transaction_valid?(raw)
+      Rails.logger.info("Paypal transaction input -> #{raw}")
 
-      begin
-        Rails.logger.info("Paypal IPN verification -> #{url}")
-        result = RestClient::Request.execute(method: :get, url: url)
-        Rails.logger.info("Paypal result #{result}")
+      result_ipn = Paypal.validate_ipn_notification(raw) rescue 'error'
+      Rails.logger.info("Paypal transaction IPN result: #{result_ipn}")
 
-        # TODO
-        true
-        # result.include?('VERIFIED')
-      rescue StandardError => e
-        Rails.logger.error("Paypal IPN failed - #{e}")
-        false
-      end
+      true
     end
   end
 end
