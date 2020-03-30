@@ -38,6 +38,6 @@ class OrderControllerTest < ActionDispatch::IntegrationTest
     post '/order/paypal', params: '', as: :json
 
     assert_response :success
-    assert_includes response.parsed_body.to_s, 'not completed'
+    assert_includes response.parsed_body.to_s, 'Order invalid'
   end
 end

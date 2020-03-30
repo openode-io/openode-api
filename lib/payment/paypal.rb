@@ -40,7 +40,7 @@ module Payment
       result_ipn = Paypal.validate_ipn_notification(raw) rescue 'error'
       Rails.logger.info("Paypal transaction IPN result: #{result_ipn}")
 
-      true
+      result_ipn == 'VERIFIED'
     end
   end
 end
