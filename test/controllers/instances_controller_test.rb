@@ -657,7 +657,6 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
                         'killed b3621dd9d4dd')
     prepare_ssh_session(dep_method.kill_global_container(id: '32bfe26a2712'),
                         'killed 32bfe26a2712')
-    prepare_ssh_session(dep_method.clear_repository(website: website), '')
 
     assert_scripted do
       begin_ssh

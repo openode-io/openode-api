@@ -107,10 +107,6 @@ class InstancesController < ApplicationController
                          { cmd_name: 'stop', options: { is_complex: true } }
                        ])
       end
-
-      runner.execute([
-                       { cmd_name: 'clear_repository' }
-                     ])
     end
 
     @website.destroy
@@ -261,6 +257,7 @@ class InstancesController < ApplicationController
     json(result: 'success', msg: 'operation in progress')
   end
 
+  # TODO: deprecate
   def docker_compose
     content = if [true, 'true'].include?(params['has_env_file'])
                 DeploymentMethod::DockerCompose.default_docker_compose_file(
