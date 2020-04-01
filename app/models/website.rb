@@ -21,6 +21,9 @@ class Website < ApplicationRecord
   has_many :website_bandwidth_daily_stats, foreign_key: :ref_id,
                                            class_name: :WebsiteBandwidthDailyStat,
                                            dependent: :destroy
+  has_many :statuses, foreign_key: :ref_id,
+                                           class_name: :WebsiteStatus,
+                                           dependent: :destroy
 
   scope :custom_domain, -> { where(domain_type: 'custom_domain') }
   scope :having_extra_storage, lambda {
