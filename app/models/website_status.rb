@@ -1,8 +1,8 @@
-class WebsiteUtilizationLog < History
+class WebsiteStatus < History
   belongs_to :website, foreign_key: :ref_id
 
   def self.log(website, data)
-    WebsiteUtilizationLog.create(
+    WebsiteStatus.create(
       ref_id: website.id,
       obj: data
     )
