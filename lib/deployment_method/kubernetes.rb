@@ -219,7 +219,7 @@ module DeploymentMethod
 
     def dotenv_vars_to_s(variables)
       vars_s = variables.keys.map do |v|
-        "  #{v}: \"#{variables[v].to_s.gsub('"', '\\"')}\""
+        "  #{v}: \"#{variables[v].to_s.gsub('\\', '\\\\\\').gsub('"', '\\"')}\""
       end
 
       vars_s.join("\n")

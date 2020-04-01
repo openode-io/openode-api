@@ -160,11 +160,13 @@ VAR2=5678
   test 'dotenv_vars_to_s with variables' do
     vars = {
       'var1': 'val1',
+      'var12': 'val\\12',
       'var2': 2,
       'va_r3': 'va"l'
     }
 
     expected = "  var1: \"val1\"\n" \
+    "  var12: \"val\\\\12\"\n" \
     "  var2: \"2\"\n" \
     "  va_r3: \"va\\\"l\""
 
