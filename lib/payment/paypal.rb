@@ -4,8 +4,20 @@ module Payment
   class Paypal
     PAYPAL_VERIFICATION_URL = "https://ipnpb.paypal.com/cgi-bin"
 
+    def self.strip_input_obj(input_obj)
+      input_obj.each do |k, v|
+        input_obj[k] = if v&.class == String
+                         v.dup.force_encoding('ISO-8859-1').encode('UTF-8')
+                       else
+                         v
+          end
+      end
+    end
+
     def self.parse(input_obj)
-      cleaned_obj = JSON.parse(input_obj.to_json.gsub(/[\u0080-\u00ff]/, ''))
+      cleaned_obj = JSON.parse(
+        strip_input_obj(input_obj).to_json.gsub(/[\u0080-\u00ff]/, '')
+      )
 
       {
         'content' => cleaned_obj,

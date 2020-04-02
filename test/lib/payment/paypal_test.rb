@@ -26,6 +26,32 @@ class PaypalTest < ActiveSupport::TestCase
     assert_equal Payment::Paypal.completed?(parsed_order), true
   end
 
+  test 'parse with malformed' do
+    input = {
+      "mc_gross" => "10.00",
+      "protection_eligibility" => "Eligible",
+      "address_status" => "confirmed",
+      "payer_id" => "IIOOUUII",
+      "address_street" => "Sicili\xEBboulevard 500",
+      "payment_date" => "02:37:44 Apr 02, 2020 PDT",
+      "payment_status" => "Completed",
+      "charset" => "windows-1252",
+      "address_zip" => "889 XT",
+      "first_name" => "Martin",
+      "option_selection1" => "800 Credits",
+      "mc_fee" => "0.29",
+      "address_country_code" => "NL",
+      "address_name" => "XXX",
+      "notify_version" => "3.9",
+      "custom" => "13555"
+    }
+
+    parsed_order = Payment::Paypal.parse(input)
+
+    assert_equal parsed_order['content']['mc_gross'], '10.00'
+    assert_equal parsed_order['content']['address_street'], 'Siciliboulevard 500'
+  end
+
   test 'transaction_valid? with verified' do
     assert_equal Payment::Paypal.transaction_valid?(""), true
   end
