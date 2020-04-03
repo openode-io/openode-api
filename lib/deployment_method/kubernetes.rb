@@ -550,6 +550,7 @@ module DeploymentMethod
           namespace: #{namespace_of(website)}
           annotations:
             kubernetes.io/ingress.class: "nginx"
+            nginx.org/websocket-services: "main-service"
             # cert-manager.io/cluster-issuer: "letsencrypt-prod"
         spec:
         #{generate_tls_specs_ingress_yml(website, rules_domains) if certificate?(website)}
