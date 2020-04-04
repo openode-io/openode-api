@@ -106,7 +106,7 @@ module DeploymentMethod
 
         result = @runner.execute([{ cmd_name: 'push_cmd', options: opts }])
 
-        ensure_no_execution_error("pusing the image", result.first)
+        ensure_no_execution_error("pushing the image", result.first)
 
         result
       end
