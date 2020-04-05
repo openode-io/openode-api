@@ -63,4 +63,16 @@ class OrderTest < ActiveSupport::TestCase
     assert_includes order.errors.inspect.to_s, 'is not included in the list'
     assert_equal order.valid?, false
   end
+
+  test 'gateway credit' do
+    order = Order.create!(
+      user: User.first,
+      amount: 10.0,
+      payment_status: 'Completed',
+      gateway: 'credit',
+      content: { 'payment_status' => 'Completed' }
+    )
+
+    assert_equal order.gateway, 'credit'
+  end
 end
