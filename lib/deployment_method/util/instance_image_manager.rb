@@ -80,7 +80,7 @@ module DeploymentMethod
       def ensure_no_execution_error(step_name, result)
         unless result[:result][:exit_code].zero?
           msg = "Failed at #{step_name}. \n#{result.dig(:result, :stdout)}" \
-                " \n#{result.dig(:result, :stderr)}"
+                " \n#{result.dig(:result, :stderr)}, exit code = #{result[:result][:exit_code]}"
           raise msg
         end
       end
@@ -104,11 +104,13 @@ module DeploymentMethod
             "#{docker_images_location['repository_name']}"
         }
 
-        result = @runner.execute([{ cmd_name: 'push_cmd', options: opts }])
+        Ex::Retry.n_times(nb_trials: 3, sleep_n: 2) do
+          result = @runner.execute([{ cmd_name: 'push_cmd', options: opts }])
 
-        ensure_no_execution_error("pushing the image", result.first)
+          ensure_no_execution_error("pushing the image", result.first)
 
-        result
+          result
+        end
       end
     end
   end

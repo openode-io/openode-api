@@ -140,4 +140,24 @@ class InstanceImageManagerTest < ActiveSupport::TestCase
       assert_equal result[0][:result][:stdout], "successfully pushed"
     end
   end
+
+  test 'push when failing' do
+    expected_cmd = "echo t123456 | sudo docker login -u test docker.io --password-stdin && " \
+      "sudo docker push docker.io/openode_prod/#{@website.site_name}" \
+      ":#{@website.site_name}--#{@website.id}--#{@deployment.id}"
+
+    prepare_ssh_session(expected_cmd, 'failed to push', 1)
+    prepare_ssh_session(expected_cmd, 'failed to push', 2)
+    prepare_ssh_session(expected_cmd, 'failed to push', 3)
+
+    assert_scripted do
+      begin_ssh
+
+      @manager.push
+
+    rescue StandardError => e
+      assert_includes e.to_s, "Failed at pushing the image"
+      assert_includes e.to_s, "exit code = 3"
+    end
+  end
 end
