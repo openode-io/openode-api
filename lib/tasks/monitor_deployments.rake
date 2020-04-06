@@ -18,7 +18,7 @@ namespace :monitor_deployments do
       result = exec_method.get_pods_json(website: website, website_location: wl)
 
       status = result.dig('items').first.dig('status')
-      
+
       WebsiteStatus.log(website, status)
     rescue StandardError => e
       Ex::Logger.error(e, "[#{name}] failed with website #{website.site_name}")

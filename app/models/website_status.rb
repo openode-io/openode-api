@@ -16,4 +16,17 @@ class WebsiteStatus < History
       )
     end
   end
+
+  def simplified_container_statuses
+    statuses = obj&.dig('containerStatuses')
+    return {} unless statuses
+
+    statuses.each do |s|
+      s.delete("containerID")
+      s.delete("image")
+      s.delete("imageID")
+    end
+
+    statuses
+  end
 end
