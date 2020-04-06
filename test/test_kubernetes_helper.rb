@@ -131,4 +131,10 @@ class ActiveSupport::TestCase
 
     prepare_ssh_session(cmd, expected_result)
   end
+
+  def get_kubernetes_method(website)
+    runner = prepare_kubernetes_runner(website, website.website_locations.first)
+
+    runner.get_execution_method
+  end
 end

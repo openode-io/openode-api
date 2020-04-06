@@ -1,7 +1,7 @@
 require 'test_helper'
 
 class LibBuildCleanTest < ActiveSupport::TestCase
-  test "spend persistence - one to process, does not lack credits" do
+  test "build clean synched files" do
     website = Website.find_by site_name: 'www.what.is'
 
     website2 = Website.find_by site_name: 'testsite'

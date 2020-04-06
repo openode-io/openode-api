@@ -157,7 +157,6 @@ module DeploymentMethod
       namespace = options[:with_namespace] ? "-n #{namespace_of(website)} " : ""
 
       cmd = "KUBECONFIG=#{config_path} kubectl #{namespace}#{options[:s_arguments]}"
-
       cmd
     end
 
