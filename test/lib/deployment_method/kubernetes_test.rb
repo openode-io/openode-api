@@ -323,6 +323,34 @@ VAR2=5678
     assert_includes yml, "namespace: instance-12345"
     assert_includes yml, "  var1: \"v1\""
     assert_includes yml, "  var2: \"v2\""
+
+    assert Io::Yaml.valid?(yml)
+  end
+
+  test 'generate_config_map_yml - with special characters' do
+    yml = kubernetes_method.generate_config_map_yml(
+      name: "dotenv",
+      namespace: "instance-12345",
+      variables: {
+        'var1': 'v"1',
+        'var2': 'v\\2',
+        'var3': 'v&2',
+        'var4': 'v?2',
+        'var5': 'v\'2',
+        'var6': 'v=2'
+      }
+    )
+
+    assert_includes yml, "name: dotenv"
+    assert_includes yml, "namespace: instance-12345"
+    assert_includes yml, "  var1: \"v\\\"1\""
+    assert_includes yml, "  var2: \"v\\\\2\""
+    assert_includes yml, "  var3: \"v&2\""
+    assert_includes yml, "  var4: \"v?2\""
+    assert_includes yml, "  var5: \"v\'2\""
+    assert_includes yml, "  var6: \"v=2\""
+
+    assert Io::Yaml.valid?(yml)
   end
 
   test 'namespace_of website' do
