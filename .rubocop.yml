@@ -90,6 +90,10 @@ Metrics/BlockLength:
     - 'db/migrate/*.rb'
     - 'config/routes.rb'
 
+Metrics/ParameterLists:
+  Exclude:
+    - 'test/**/*.rb'
+
 Metrics/ClassLength:
   Max: 1000
   Exclude:

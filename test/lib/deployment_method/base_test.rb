@@ -160,4 +160,26 @@ class DeploymentMethodBaseTest < ActiveSupport::TestCase
 
     assert_equal cmd, "mkdir -p /home/1234/what/"
   end
+
+  test 'begin_stop - happy path' do
+    website = default_website
+    website.change_status!(Website::STATUS_OFFLINE)
+
+    @base_dep_method.begin_stop website
+
+    assert website.reload.stopping?
+  end
+
+  test 'begin_stop - multiple times should fail' do
+    website = default_website
+    website.change_status!(Website::STATUS_OFFLINE)
+
+    @base_dep_method.begin_stop website
+
+    assert_raises StandardError do
+      @base_dep_method.stop(website: website, website_location: website.website_locations.first)
+    end
+
+    assert website.reload.stopping?
+  end
 end

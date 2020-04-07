@@ -47,7 +47,7 @@ class ActiveSupport::TestCase
   end
 
   def prepare_action_yml(kubernetes_method, website_location, filename, s_arguments,
-                         expected_result)
+                         expected_result, expected_exit_code = 0)
     DeploymentMethod::Kubernetes.set_kubectl_file_path(filename)
 
     begin_sftp
@@ -56,7 +56,7 @@ class ActiveSupport::TestCase
       website_location: website_location,
       s_arguments: s_arguments
     )
-    prepare_ssh_session(cmd, expected_result)
+    prepare_ssh_session(cmd, expected_result, expected_exit_code)
 
     prepare_ssh_session("rm -rf \"#{filename}\" ; ", "")
   end
