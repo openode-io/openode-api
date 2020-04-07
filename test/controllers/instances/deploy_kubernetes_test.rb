@@ -101,7 +101,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     end
   end
 
-  # stop with docker compose internal
+  # stop with kubernetes
   test '/instances/:instance_id/stop ' do
     prepare_make_secret(@kubernetes_method, @website, @website_location, "result")
     prepare_get_dotenv(@kubernetes_method, @website, "VAR1=12")
@@ -125,6 +125,31 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
       assert_equal @website.status, Website::STATUS_OFFLINE
       assert_equal @website.executions.last.type, 'Task'
+    end
+  end
+
+  test '/instances/:instance_id/stop - if kube stop fail, should put back to online' do
+    prepare_make_secret(@kubernetes_method, @website, @website_location, "result")
+    prepare_get_dotenv(@kubernetes_method, @website, "VAR1=12")
+
+    prepare_action_yml(@kubernetes_method, @website_location, "apply.yml",
+                       "delete -f apply.yml", 'success', 1)
+
+    assert_scripted do
+      begin_ssh
+      post "/instances/#{@website.site_name}/stop?location_str_id=canada",
+           as: :json,
+           params: {},
+           headers: default_headers_auth
+
+      assert_response :success
+      assert_equal response.parsed_body['result'], 'success'
+
+      Delayed::Job.first.invoke_job
+
+      @website.reload
+
+      assert_equal @website.status, Website::STATUS_ONLINE
     end
   end
 end

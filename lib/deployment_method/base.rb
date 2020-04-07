@@ -120,11 +120,24 @@ module DeploymentMethod
       raise 'must be implemented in child class'
     end
 
+    def begin_stop(website)
+      raise "Already stopping" if website.reload.stopping?
+
+      website.change_status!(Website::STATUS_STOPPING)
+    end
+
     def stop(options = {})
       website, = get_website_fields(options)
 
-      # stop based on the deployment method (ex. docker compose)
-      runner.execution_method.do_stop(options)
+      begin_stop(website)
+
+      begin
+        # stop based on the deployment method (ex. docker compose)
+        runner.execution_method.do_stop(options)
+      rescue StandardError => e
+        Ex::Logger.error(e, "Issue to stop the instance #{website.site_name}")
+        return website.change_status!(Website::STATUS_ONLINE)
+      end
 
       # stop based on the cloud provider
       runner.cloud_provider.stop(options)

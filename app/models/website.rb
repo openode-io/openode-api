@@ -39,7 +39,8 @@ class Website < ApplicationRecord
   STATUS_ONLINE = 'online'
   STATUS_OFFLINE = 'N/A'
   STATUS_STARTING = 'starting'
-  STATUSES = [STATUS_ONLINE, STATUS_OFFLINE, STATUS_STARTING].freeze
+  STATUS_STOPPING = 'stopping'
+  STATUSES = [STATUS_ONLINE, STATUS_OFFLINE, STATUS_STARTING, STATUS_STOPPING].freeze
 
   DEFAULT_STATUS = STATUS_OFFLINE
 
@@ -595,6 +596,10 @@ class Website < ApplicationRecord
 
   def online?
     status == STATUS_ONLINE
+  end
+
+  def stopping?
+    status == STATUS_STOPPING
   end
 
   def offline?
