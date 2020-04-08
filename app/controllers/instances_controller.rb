@@ -39,8 +39,9 @@ class InstancesController < ApplicationController
     requires_access_to(Website::PERMISSION_DEPLOY)
   end
 
-  before_action only: [:destroy] do
+  before_action only: [:destroy_instance] do
     requires_access_to(Website::PERMISSION_ROOT)
+    requires_status_in [Website::STATUS_OFFLINE]
   end
 
   before_action only: [:update] do
@@ -98,17 +99,7 @@ class InstancesController < ApplicationController
   end
 
   api!
-  def destroy
-    @website.website_locations.each do |website_location|
-      runner = website_location.prepare_runner
-
-      if @website.online?
-        runner.execute([
-                         { cmd_name: 'stop', options: { is_complex: true } }
-                       ])
-      end
-    end
-
+  def destroy_instance
     @website.destroy
 
     json(result: 'success')

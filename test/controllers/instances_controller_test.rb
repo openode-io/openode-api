@@ -644,35 +644,43 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
   end
 
   # DELETE /sitename
-  test 'DEL /instances/:instance_id/' do
-    dep_method = prepare_default_execution_method
+  test 'DEL /instances/:instance_id/ - happy path' do
     set_dummy_secrets_to(LocationServer.all)
     prepare_default_ports
 
     website = default_website
+    website.change_status!(Website::STATUS_OFFLINE)
     website_location = default_website_location
 
-    expect_global_container(dep_method)
-    prepare_ssh_session(dep_method.kill_global_container(id: 'b3621dd9d4dd'),
-                        'killed b3621dd9d4dd')
-    prepare_ssh_session(dep_method.kill_global_container(id: '32bfe26a2712'),
-                        'killed 32bfe26a2712')
+    website_id = website.id
+    website_location_id = website_location.id
 
-    assert_scripted do
-      begin_ssh
+    delete "/instances/#{website.id}/?location_str_id=canada",
+           as: :json,
+           headers: default_headers_auth
 
-      website_id = website.id
-      website_location_id = website_location.id
+    assert_response :success
 
-      delete '/instances/testsite/?location_str_id=canada',
-             as: :json,
-             headers: default_headers_auth
+    assert_nil Website.find_by(id: website_id)
+    assert_nil WebsiteLocation.find_by(id: website_location_id)
+  end
 
-      assert_response :success
+  test 'DEL /instances/:instance_id/ - fail if online' do
+    website = default_website
+    website.change_status!(Website::STATUS_ONLINE)
+    website_location = default_website_location
 
-      assert_nil Website.find_by(id: website_id)
-      assert_nil WebsiteLocation.find_by(id: website_location_id)
-    end
+    website_id = website.id
+    website_location_id = website_location.id
+
+    delete "/instances/#{website.id}/?location_str_id=canada",
+           as: :json,
+           headers: default_headers_auth
+
+    assert_response :bad_request
+
+    assert Website.find_by(id: website_id)
+    assert WebsiteLocation.find_by(id: website_location_id)
   end
 
   # PATCH /sitename
