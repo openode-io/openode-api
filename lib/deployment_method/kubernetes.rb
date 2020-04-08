@@ -468,10 +468,12 @@ module DeploymentMethod
     def generate_manual_tls_secret_yml(website)
       return "" if website.certs.blank?
 
-      crt = ex_stdout("retrieve_file_cmd",
-                      path: "#{website.repo_dir}#{website.certs[:cert_path]}")
-      crt_key = ex_stdout("retrieve_file_cmd",
-                          path: "#{website.repo_dir}#{website.certs[:cert_key_path]}")
+      crt = ex("retrieve_file_cmd",
+               ensure_exit_code: 0,
+               path: "#{website.repo_dir}#{website.certs[:cert_path]}")[:stdout]
+      crt_key = ex("retrieve_file_cmd",
+                   ensure_exit_code: 0,
+                   path: "#{website.repo_dir}#{website.certs[:cert_key_path]}")[:stdout]
 
       generate_tls_secret_yml(website,
                               name: certificate_secret_name(website),
