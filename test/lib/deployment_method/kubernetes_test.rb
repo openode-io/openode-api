@@ -555,6 +555,41 @@ VAR2=5678
     end
   end
 
+  test 'generate_manual_tls_secret_yml - with missing crt should fail' do
+    set_website_certs(@website)
+
+    cmd_get_crt = kubernetes_method.retrieve_file_cmd(path: "#{@website.repo_dir}cert/crt")
+    prepare_ssh_session(cmd_get_crt, "", 1)
+
+    assert_scripted do
+      begin_ssh
+
+      kubernetes_method.generate_manual_tls_secret_yml(@website)
+
+    rescue StandardError => e
+      assert_includes e.to_s, "Failed to run retrieve_file_cmd"
+    end
+  end
+
+  test 'generate_manual_tls_secret_yml - with missing crt key should fail' do
+    set_website_certs(@website)
+
+    cmd_get_crt = kubernetes_method.retrieve_file_cmd(path: "#{@website.repo_dir}cert/crt")
+    prepare_ssh_session(cmd_get_crt, "")
+
+    cmd_get_key = kubernetes_method.retrieve_file_cmd(path: "#{@website.repo_dir}cert/key")
+    prepare_ssh_session(cmd_get_key, "", 1)
+
+    assert_scripted do
+      begin_ssh
+
+      kubernetes_method.generate_manual_tls_secret_yml(@website)
+
+    rescue StandardError => e
+      assert_includes e.to_s, "Failed to run retrieve_file_cmd"
+    end
+  end
+
   test 'generate_manual_tls_secret_yml - without certificate' do
     @website.configs = {}
     @website.configs['SSL_CERTIFICATE_PATH'] = nil
