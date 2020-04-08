@@ -1,7 +1,6 @@
 require 'yaml'
 
 module Io
-  # Cmd input utils
   class Yaml
     def self.valid?(input)
       YAML.safe_load(input)
