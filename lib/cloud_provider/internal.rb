@@ -64,14 +64,6 @@ module CloudProvider
     def plans
       list = [
         {
-          id: 'sandbox',
-          internal_id: 'free',
-          name: 'Sandbox',
-          ram: 100,
-          storage: 1000,
-          bandwidth: 10
-        },
-        {
           id: 'open-source',
           internal_id: Website::OPEN_SOURCE_ACCOUNT_TYPE,
           name: 'Open Source',

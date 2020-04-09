@@ -52,7 +52,7 @@ class Website < ApplicationRecord
   TYPE_KUBERNETES = 'kubernetes'
   TYPES = ['nodejs', TYPE_DOCKER, TYPE_KUBERNETES].freeze
 
-  DEFAULT_ACCOUNT_TYPE = 'free'
+  DEFAULT_ACCOUNT_TYPE = 'second'
   OPEN_SOURCE_ACCOUNT_TYPE = 'open_source'
 
   CLOUD_TYPE_PRIVATE_CLOUD = 'private-cloud'
@@ -199,6 +199,7 @@ class Website < ApplicationRecord
     return unless site_name
 
     self.account_type ||= DEFAULT_ACCOUNT_TYPE
+    self.account_type = DEFAULT_ACCOUNT_TYPE if self.account_type == 'free'
     change_plan(account_type)
 
     self.status ||= DEFAULT_STATUS
@@ -544,10 +545,6 @@ class Website < ApplicationRecord
     website_locations.first.location_server.ip
   rescue StandardError
     "N/A"
-  end
-
-  def free_sandbox?
-    account_type == 'free'
   end
 
   def change_status!(new_status)

@@ -346,10 +346,6 @@ class InstancesController < ApplicationController
     end
   end
 
-  def requires_paid_instance
-    validation_error!("This feature can't be used with a free sandbox.") if @website.free_sandbox?
-  end
-
   def requires_location_server
     unless @website_location.andand.location_server
       validation_error!('This feature requires a server already allocated.')

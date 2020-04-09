@@ -235,7 +235,7 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     plans = website_location.available_plans
 
     assert_equal plans.length, expected_plans.length
-    assert_equal plans[0][:id], 'sandbox'
+    assert_equal plans[0][:id], 'open-source'
   end
 
   # allocate_ports!

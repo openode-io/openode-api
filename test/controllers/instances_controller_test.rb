@@ -583,8 +583,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
         headers: default_headers_auth
 
     assert_response :success
-    assert_equal response.parsed_body.length, 8
-    assert_equal response.parsed_body[0]['id'], 'sandbox'
+    assert_equal response.parsed_body.length, 7
+    assert_equal response.parsed_body[0]['id'], 'open-source'
   end
 
   # /set-plan
