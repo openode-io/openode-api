@@ -30,8 +30,6 @@ class WebsiteTest < ActiveSupport::TestCase
       domain_type: 'subdomain'
     )
 
-    puts "w acc type #{w.account_type}"
-
     w.save!
     w.reload
 
