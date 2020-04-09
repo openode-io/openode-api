@@ -6,8 +6,8 @@ module Remote
     @@conn_test = nil
 
     def self.set_conn_test(conn)
-      @@conn_test = conn if ENV['RAILS_ENV'] == 'test'
-      @@test_uploaded_files = [] if ENV['RAILS_ENV'] == 'test'
+      @@conn_test = conn if Rails.env.test?
+      @@test_uploaded_files = [] if Rails.env.test?
     end
 
     def self.get_conn_test

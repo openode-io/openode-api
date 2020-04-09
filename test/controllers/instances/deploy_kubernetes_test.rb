@@ -149,7 +149,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
       @website.reload
 
-      assert_equal @website.status, Website::STATUS_ONLINE
+      assert_equal @website.status, Website::STATUS_OFFLINE
     end
   end
 end

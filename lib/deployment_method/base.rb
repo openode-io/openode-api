@@ -136,7 +136,7 @@ module DeploymentMethod
         runner.execution_method.do_stop(options)
       rescue StandardError => e
         Ex::Logger.error(e, "Issue to stop the instance #{website.site_name}")
-        return website.change_status!(Website::STATUS_ONLINE)
+        # return website.change_status!(Website::STATUS_ONLINE)
       end
 
       # stop based on the cloud provider
@@ -280,7 +280,7 @@ module DeploymentMethod
 
       if options[:default_retry_scheme]
         options[:retry] = {
-          nb_max_trials: 3,
+          nb_max_trials: Rails.env.test? ? 1 : 3,
           interval_between_trials: 2
         }
       end
@@ -302,7 +302,7 @@ module DeploymentMethod
 
         if options[:retry]
           Rails.logger.info("Waiting for #{options[:retry][:interval_between_trials]}")
-          sleep options[:retry][:interval_between_trials]
+          sleep options[:retry][:interval_between_trials] unless Rails.env.test?
         end
 
         if options[:retry] && trial_i == options[:retry][:nb_max_trials]

@@ -138,10 +138,9 @@ module DeploymentMethod
                                        with_namespace_object: with_namespace_object,
                                        with_pvc_object: false,
                                        image_name_tag: image_manager.image_name_tag)
-
       # then delete the yml
       kubectl_yml_action(website_location, "delete", kube_yml,
-                         ensure_exit_code: 0,
+                         default_retry_scheme: true,
                          skip_notify_errors: options[:skip_notify_errors])
     end
 
