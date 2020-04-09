@@ -786,7 +786,7 @@ module DeploymentMethod
         Ex::Logger.info(e, 'Unable to finalize completely')
       end
 
-      notify('info', "\n\n*** Final Deployment state: #{runner&.execution&.status} ***\n")
+      notify('info', "\n\n*** Final Deployment state: #{runner&.execution&.status&.upcase} ***\n")
     end
 
     # the following hooks are notification procs.

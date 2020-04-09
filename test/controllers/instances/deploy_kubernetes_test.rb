@@ -80,7 +80,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
           "update" => "...instance verification finished." },
         { "status" => "running", "level" => "info", "update" => "Finalizing..." },
         { "status" => "success", "level" => "info",
-          "update" => "\n\n*** Final Deployment state: success ***\n" },
+          "update" => "\n\n*** Final Deployment state: SUCCESS ***\n" },
         { "status" => "success", "level" => "info", "update" => "...finalized." }
       ]
 

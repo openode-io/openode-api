@@ -752,7 +752,7 @@ VAR2=5678
       assert_equal exec.events.length, 3
       assert_equal exec.events[0]['update'], "hello logs"
       assert_equal exec.events[1]['update']['details']['result'], 'success'
-      assert_includes exec.events[2]['update'], 'Final Deployment state: success'
+      assert_includes exec.events[2]['update'], 'Final Deployment state: SUCCESS'
     end
   end
 
