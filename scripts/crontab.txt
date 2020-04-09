@@ -1,6 +1,6 @@
 PATH_REPO=/var/www/openode-api/
 RAILS_ENV=production
-PATH=PATH=/bin:/usr/bin:/home/ubuntu/.rvm/rubies/ruby-2.7.0/bin/
+PATH=PATH=/bin:/usr/bin:/home/ubuntu/.rvm/rubies/ruby-2.7.1/bin/
 
 1 * * * * cd $PATH_REPO && rails db_stats:log_nb_sites_up
 3 * * * * cd $PATH_REPO && rails mailgun:check_failed_events
