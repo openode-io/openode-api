@@ -182,4 +182,14 @@ class DeploymentMethodBaseTest < ActiveSupport::TestCase
 
     assert website.reload.stopping?
   end
+
+  test 'notify_or_soft_log - with notification + exception' do
+    assert_raises StandardError do
+      @base_dep_method.notify_or_soft_log("hello", false)
+    end
+  end
+
+  test 'notify_or_soft_log - without notification + exception' do
+    @base_dep_method.notify_or_soft_log("hello", true)
+  end
 end

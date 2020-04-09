@@ -808,8 +808,41 @@ VAR2=5678
         website: @website,
         website_location: @website_location
       )
+    end
+  end
+
+  test 'finalize - when failing should stop and not output error if kubectl delete fails' do
+    @website.status = Website::STATUS_OFFLINE
+    @website.save!
+
+    get_pods_json_content = IO.read('test/fixtures/kubernetes/1_pod_alive.json')
+    prepare_get_pods_json(kubernetes_method, @website, @website_location, get_pods_json_content,
+                          0)
+    prepare_kubernetes_logs(kubernetes_method, "hello logs", 0,
+                            website: @website,
+                            website_location: @website_location,
+                            pod_name: "www-deployment-5889df69dc-xg9xl",
+                            nb_lines: 1_000)
+    prepare_make_secret(kubernetes_method, @website, @website_location, "success")
+    prepare_get_dotenv(kubernetes_method, @website, "VAR=123")
+
+    err_msg_kubectl = 'fail kubectl!!!'
+    prepare_action_yml(kubernetes_method, @website_location, "apply.yml",
+                       "delete -f apply.yml", err_msg_kubectl, 1)
+
+    assert_scripted do
+      begin_ssh
+
+      kubernetes_method.finalize(
+        website: @website,
+        website_location: @website_location
+      )
 
       expect_file_sent("apply.yml")
+
+      execution = @website.reload.executions.last
+
+      assert_not_includes execution.events.to_s, err_msg_kubectl
     end
   end
 

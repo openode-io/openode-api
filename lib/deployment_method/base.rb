@@ -264,6 +264,14 @@ module DeploymentMethod
       result
     end
 
+    def notify_or_soft_log(msg, skip_notify_errors)
+      if skip_notify_errors
+        Rails.logger.error(msg)
+      else
+        error!(msg)
+      end
+    end
+
     protected
 
     def ex(cmd, options = {})
@@ -285,7 +293,8 @@ module DeploymentMethod
 
         if options[:ensure_exit_code].present?
           if result && result[:exit_code] != options[:ensure_exit_code]
-            error!("Failed to run #{cmd}, result=#{result.inspect}")
+            msg = "Failed to run #{cmd}, result=#{result.inspect}"
+            notify_or_soft_log(msg, options[:skip_notify_errors])
           end
         end
 
@@ -297,7 +306,8 @@ module DeploymentMethod
         end
 
         if options[:retry] && trial_i == options[:retry][:nb_max_trials]
-          error!("Max trial reached (#{options[:retry][:nb_max_trials]})... terminating")
+          msg = "Max trial reached (#{options[:retry][:nb_max_trials]})... terminating"
+          notify_or_soft_log(msg, options[:skip_notify_errors])
         end
       end
 
