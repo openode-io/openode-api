@@ -90,11 +90,6 @@ class WebsiteLocation < ApplicationRecord
   end
 
   def domain_subdomain
-    if website.type == Website::TYPE_KUBERNETES
-      # temporarily, remove when beta finished
-      return "#{website.site_name}.dev.#{CloudProvider::Manager.base_hostname}"
-    end
-
     location_subdomain = Location::SUBDOMAIN[location.str_id.to_sym]
 
     first_part = if location_subdomain && location_subdomain != ''

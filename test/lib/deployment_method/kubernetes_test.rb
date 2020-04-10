@@ -509,9 +509,7 @@ VAR2=5678
   end
 
   test 'certificate? - if subdomain' do
-    # TODO: put back true when beta finished
-    # assert_equal kubernetes_method.certificate?(@website), true
-    assert_equal kubernetes_method.certificate?(@website), false
+    assert_equal kubernetes_method.certificate?(@website), true
   end
 
   test 'certificate_secret_name - if certificate provided' do
@@ -521,8 +519,7 @@ VAR2=5678
   end
 
   test 'certificate_secret_name - if subdomain' do
-    # TODO: change nil to wildcard when beta finished
-    assert_equal kubernetes_method.certificate_secret_name(@website), nil # "wildcard-certificate"
+    assert_equal kubernetes_method.certificate_secret_name(@website), "wildcard-certificate"
   end
 
   def assert_contains_certificate_secret(yml, secret_name, crt, key)
@@ -600,8 +597,6 @@ VAR2=5678
   end
 
   test 'generate_wildcard_subdomain_tls_secret_yaml' do
-    @website.type = Website::TYPE_DOCKER # TODO: remove when beta finished
-
     @website.configs = {}
     @website.configs['SSL_CERTIFICATE_PATH'] = nil
     @website.configs['SSL_CERTIFICATE_KEY_PATH'] = nil
@@ -640,9 +635,8 @@ VAR2=5678
 
       yml = kubernetes_method.generate_ingress_yml(@website, @website_location)
 
-      # TODO: put back with_certificate_secret: true when beta finished
       assert_contains_ingress_yml(yml, @website, @website_location,
-                                  with_certificate_secret: false)
+                                  with_certificate_secret: true)
     end
   end
 
@@ -678,8 +672,7 @@ VAR2=5678
       assert_contains_deployment_yml(yml, @website, @website_location, with_probes: true)
       assert_contains_service_yml(yml, @website)
       assert_contains_ingress_yml(yml, @website, @website_location,
-                                  with_certificate_secret: false)
-      # TODO: put back with_certificate_secret: true when beta finished
+                                  with_certificate_secret: true)
     end
   end
 
@@ -700,8 +693,7 @@ VAR2=5678
       assert_contains_deployment_yml(yml, @website, @website_location, with_probes: true)
       assert_contains_service_yml(yml, @website)
       assert_contains_ingress_yml(yml, @website, @website_location,
-                                  with_certificate_secret: false)
-      # TODO: put back with_certificate_secret: true when beta finished
+                                  with_certificate_secret: true)
     end
   end
 

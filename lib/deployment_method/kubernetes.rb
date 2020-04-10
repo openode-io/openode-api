@@ -106,13 +106,6 @@ module DeploymentMethod
 
       notify("info", "Applying instance environment...")
 
-      if website.subdomain? && website.type == Website::TYPE_KUBERNETES
-        notify("info",
-               "Important notice: subdomains have <your sitename>.dev.openode.io " \
-               "without SSL during the beta phase. Soon they will be replaced with " \
-               "<your sitename>.openode.io and with HTTPS.")
-      end
-
       # then apply the yml
       result = kubectl_yml_action(website_location, "apply", kube_yml, ensure_exit_code: 0)
 
@@ -242,8 +235,6 @@ module DeploymentMethod
       assert !opts[:with_pvc_object].nil?
       dotenv_vars = retrieve_dotenv(website)
 
-      # TODO: REMOVE && type kubernetes when beta finished
-
       <<~END_YML
         ---
         #{generate_namespace_yml(website) if opts[:with_namespace_object]}
@@ -252,7 +243,7 @@ module DeploymentMethod
         ---
         #{generate_manual_tls_secret_yml(website)}
         ---
-        #{generate_wildcard_subdomain_tls_secret_yaml(website) if website.subdomain? && website.type != Website::TYPE_KUBERNETES}
+        #{generate_wildcard_subdomain_tls_secret_yaml(website) if website.subdomain?}
         ---
         #{generate_config_map_yml(
           name: 'dotenv',
@@ -437,15 +428,13 @@ module DeploymentMethod
     end
 
     def certificate?(website)
-      # TODO: remove && website.type when beta finished
-      website.certs.present? || (website.subdomain? && website.type != Website::TYPE_KUBERNETES)
+      website.certs.present? || website.subdomain?
     end
 
     def certificate_secret_name(website)
       if website.certs.present?
         "manual-certificate"
-      elsif website.subdomain? && website.type != Website::TYPE_KUBERNETES
-        # TODO: remove && when beta finished
+      elsif website.subdomain?
         "wildcard-certificate"
       end
     end
