@@ -399,7 +399,7 @@ class Website < ApplicationRecord
     return errors.add(:account_type, "Invalid plan #{account_type}") unless found_plan
 
     if found_plan.dig(:ram) &&
-        found_plan[:ram] > MAX_RAM_PLAN_WITHOUT_PAID_ORDER && !user.orders?
+       found_plan[:ram] > MAX_RAM_PLAN_WITHOUT_PAID_ORDER && !user.orders?
       errors.add(:account_type,
                  "Maximum available plan without a paid order is " \
                  "#{MAX_RAM_PLAN_WITHOUT_PAID_ORDER} MB RAM.")

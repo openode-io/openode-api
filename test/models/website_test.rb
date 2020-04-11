@@ -70,7 +70,7 @@ class WebsiteTest < ActiveSupport::TestCase
   test 'using large plans successfully' do
     plans = CloudProvider::Manager.instance.available_plans
     large_plan = plans.find { |p| p[:ram] > Website::MAX_RAM_PLAN_WITHOUT_PAID_ORDER }
-    
+
     assert default_user.orders?
 
     w = Website.new(
