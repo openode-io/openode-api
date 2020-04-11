@@ -26,4 +26,15 @@ class LibTasksDbCleanTest < ActiveSupport::TestCase
     nb_too_old = History.where('created_at < ?', 62.days.ago).count
     assert_equal nb_too_old, 0
   end
+
+  test "should remove old credit_actions" do
+    invoke_task "db_clean:old_credit_actions"
+
+    global_stat = GlobalStat.first
+
+    assert_equal global_stat.obj['nb_archived_credit_actions'], 1
+
+    nb_too_old = CreditAction.where('created_at < ?', 45.days.ago).count
+    assert_equal nb_too_old, 0
+  end
 end

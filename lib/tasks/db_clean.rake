@@ -51,4 +51,19 @@ namespace :db_clean do
       stat_name: "nb_archived_histories"
     )
   end
+
+  desc ''
+  task old_credit_actions: :environment do
+    name = "Task db_clean__old_credit_actions"
+    Rails.logger.info "[#{name}] begin"
+
+    days_retention = 45
+
+    clean_table(
+      Model: CreditAction,
+      days_retention: days_retention,
+      name: name,
+      stat_name: "nb_archived_credit_actions"
+    )
+  end
 end

@@ -13,3 +13,4 @@ two:
   action_type: consume
   credits_spent: 1.5
   credits_remaining: 1.5
+  created_at: <%= 47.day.ago.to_s(:db) %>
