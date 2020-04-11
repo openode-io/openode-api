@@ -392,9 +392,18 @@ class Website < ApplicationRecord
     end
   end
 
+  MAX_RAM_PLAN_WITHOUT_PAID_ORDER = 100
+
   def validate_account_type
     found_plan = Website.plan_of(account_type)
-    errors.add(:account_type, "Invalid plan #{account_type}") unless found_plan
+    return errors.add(:account_type, "Invalid plan #{account_type}") unless found_plan
+
+    if found_plan.dig(:ram) &&
+        found_plan[:ram] > MAX_RAM_PLAN_WITHOUT_PAID_ORDER && !user.orders?
+      errors.add(:account_type,
+                 "Maximum available plan without a paid order is " \
+                 "#{MAX_RAM_PLAN_WITHOUT_PAID_ORDER} MB RAM.")
+    end
   end
 
   def force_open_source_status_pending_on_create

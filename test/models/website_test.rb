@@ -49,6 +49,41 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal w.save, false
   end
 
+  test 'large plans are only for paid users' do
+    plans = CloudProvider::Manager.instance.available_plans
+    large_plan = plans.find { |p| p[:ram] > Website::MAX_RAM_PLAN_WITHOUT_PAID_ORDER }
+    default_user.orders.each(&:destroy)
+
+    w = Website.new(
+      site_name: 'test3344',
+      cloud_type: 'cloud',
+      user_id: default_user.id,
+      domain_type: 'subdomain',
+      account_type: large_plan[:internal_id]
+    )
+
+    assert_equal w.save, false
+    assert_includes w.errors.inspect.to_s, "Maximum available plan"
+    assert_includes w.errors.inspect.to_s, "100 MB RAM"
+  end
+
+  test 'using large plans successfully' do
+    plans = CloudProvider::Manager.instance.available_plans
+    large_plan = plans.find { |p| p[:ram] > Website::MAX_RAM_PLAN_WITHOUT_PAID_ORDER }
+    
+    assert default_user.orders?
+
+    w = Website.new(
+      site_name: 'test3344',
+      cloud_type: 'cloud',
+      user_id: default_user.id,
+      domain_type: 'subdomain',
+      account_type: large_plan[:internal_id]
+    )
+
+    assert_equal w.save, true
+  end
+
   # valid_domain?
   test 'domain_valid? - google.com' do
     assert_equal Website.domain_valid?("google.com"), true
