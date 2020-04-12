@@ -520,6 +520,30 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.valid?, false
   end
 
+  test 'status_probe_period default' do
+    website = default_website
+
+    assert_equal website.status_probe_period, 20
+  end
+
+  test 'status_probe_period custom' do
+    website = default_website
+    website.configs ||= {}
+    website.configs['STATUS_PROBE_PERIOD'] = 30
+    website.save!
+
+    assert_equal website.status_probe_period, 30
+  end
+
+  test 'status_probe_period invalid value' do
+    website = default_website
+    website.configs ||= {}
+    website.configs['STATUS_PROBE_PERIOD'] = 300
+    website.save
+
+    assert_equal website.valid?, false
+  end
+
   # extra storage
   test 'extra storage with extra storage' do
     website = default_website

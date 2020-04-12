@@ -125,6 +125,13 @@ class Website < ApplicationRecord
       default: '/'
     },
     {
+      variable: 'STATUS_PROBE_PERIOD',
+      description: 'Interval where the STATUS_PROBE_PATH is checked.',
+      min: 10,
+      max: 60,
+      default: 20
+    },
+    {
       variable: 'SKIP_PORT_CHECK',
       description: 'Skip the port verification while deploying.',
       enum: ['true', 'false', '']
@@ -532,6 +539,10 @@ class Website < ApplicationRecord
 
   def status_probe_path
     get_config("STATUS_PROBE_PATH")
+  end
+
+  def status_probe_period
+    get_config("STATUS_PROBE_PERIOD")
   end
 
   def repo_dir

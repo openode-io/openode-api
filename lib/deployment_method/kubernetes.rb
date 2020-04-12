@@ -332,8 +332,8 @@ module DeploymentMethod
           httpGet:
             path: #{website.status_probe_path}
             port: 80
-          periodSeconds: 10
-          initialDelaySeconds: 5
+          periodSeconds: #{website.status_probe_period}
+          initialDelaySeconds: 10
       "
     end
 

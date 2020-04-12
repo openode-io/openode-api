@@ -464,6 +464,7 @@ VAR2=5678
     assert_includes yml, "livenessProbe:"
     assert_includes yml, "path: /"
     assert_includes yml, "readinessProbe:"
+    assert_includes yml, "periodSeconds: 20"
   end
 
   test 'generate_deployment_probes_yml - with probes, custom path' do
@@ -474,6 +475,16 @@ VAR2=5678
     assert_includes yml, "livenessProbe:"
     assert_includes yml, "path: /status"
     assert_includes yml, "readinessProbe:"
+    assert_includes yml, "periodSeconds: 20"
+  end
+
+  test 'generate_deployment_probes_yml - with custom period seconds' do
+    @website.configs ||= {}
+    @website.configs['STATUS_PROBE_PERIOD'] = 55
+    @website.save!
+    yml = kubernetes_method.generate_deployment_probes_yml(@website)
+
+    assert_includes yml, "periodSeconds: 55"
   end
 
   test 'generate_deployment_probes_yml - without probes' do
