@@ -968,4 +968,49 @@ class WebsiteTest < ActiveSupport::TestCase
 
     assert_equal result, false
   end
+
+  # active?
+  test "active? - false if not online and no storage" do
+    w = default_website
+    wl = default_website_location
+    wl.extra_storage = 0
+    wl.save!
+
+    w.change_status!(Website::STATUS_OFFLINE)
+
+    assert_equal w.active?, false
+  end
+
+  test "active? - true if online and no storage" do
+    w = default_website
+    wl = default_website_location
+    wl.extra_storage = 0
+    wl.save!
+
+    w.change_status!(Website::STATUS_ONLINE)
+
+    assert_equal w.active?, true
+  end
+
+  test "active? - true if not online and with storage" do
+    w = default_website
+    wl = default_website_location
+    wl.extra_storage = 1
+    wl.save!
+
+    w.change_status!(Website::STATUS_OFFLINE)
+
+    assert_equal w.active?, true
+  end
+
+  test "active? - true if online and with storage" do
+    w = default_website
+    wl = default_website_location
+    wl.extra_storage = 1
+    wl.save!
+
+    w.change_status!(Website::STATUS_ONLINE)
+
+    assert_equal w.active?, true
+  end
 end

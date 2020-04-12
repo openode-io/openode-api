@@ -651,6 +651,10 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     website = default_website
     website.change_status!(Website::STATUS_OFFLINE)
     website_location = default_website_location
+    website_location.extra_storage = 0
+    website_location.save!
+
+    assert_not website.active?
 
     website_id = website.id
     website_location_id = website_location.id
@@ -669,6 +673,25 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     website = default_website
     website.change_status!(Website::STATUS_ONLINE)
     website_location = default_website_location
+
+    website_id = website.id
+    website_location_id = website_location.id
+
+    delete "/instances/#{website.id}/?location_str_id=canada",
+           as: :json,
+           headers: default_headers_auth
+
+    assert_response :bad_request
+
+    assert Website.find_by(id: website_id)
+    assert WebsiteLocation.find_by(id: website_location_id)
+  end
+
+  test 'DEL /instances/:instance_id/ - fail if extra storage' do
+    website = default_website
+    website.change_status!(Website::STATUS_OFFLINE)
+    website_location = default_website_location
+    website_location.change_storage!(1)
 
     website_id = website.id
     website_location_id = website_location.id

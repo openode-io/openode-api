@@ -42,6 +42,7 @@ class InstancesController < ApplicationController
   before_action only: [:destroy_instance] do
     requires_access_to(Website::PERMISSION_ROOT)
     requires_status_in [Website::STATUS_OFFLINE]
+    requires_website_inactive!
   end
 
   before_action only: [:update] do
@@ -343,6 +344,12 @@ class InstancesController < ApplicationController
   def requires_status_in(statuses)
     unless statuses.include?(@website.status)
       validation_error!("The instance must be in status #{statuses}.")
+    end
+  end
+
+  def requires_website_inactive!
+    if @website.active?
+      validation_error!("The instance should not be deployed and with no active storage.")
     end
   end
 

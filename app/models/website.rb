@@ -704,6 +704,10 @@ class Website < ApplicationRecord
     )
   end
 
+  def active?
+    extra_storage? || online?
+  end
+
   def total_extra_cpus
     website_locations.sum { |wl| (wl.nb_cpus || 1) - 1 }
   end
