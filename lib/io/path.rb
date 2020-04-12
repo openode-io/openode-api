@@ -1,3 +1,5 @@
+require 'uri'
+
 module Io
   # Path
   class Path
@@ -7,6 +9,12 @@ module Io
 
     def self.filter_secure(in_dir, files)
       files.select { |file| Path.secure?(in_dir, file) }
+    end
+
+    def self.valid?(path)
+      URI.parse(path)&.path&.present?
+    rescue StandardError
+      false
     end
   end
 end

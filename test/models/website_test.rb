@@ -493,6 +493,33 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.valid?, false
   end
 
+  test 'status_probe_path default' do
+    website = default_website
+    website.save!
+    website.reload
+
+    assert_equal website.status_probe_path, '/'
+  end
+
+  test 'status_probe_path custom' do
+    website = default_website
+    website.configs ||= {}
+    website.configs['STATUS_PROBE_PATH'] = '/status'
+    website.save!
+    website.reload
+
+    assert_equal website.status_probe_path, '/status'
+  end
+
+  test 'status_probe_path fail setting if invalid' do
+    website = default_website
+    website.configs ||= {}
+    website.configs['STATUS_PROBE_PATH'] = '/sta\ntus'
+    website.save
+
+    assert_equal website.valid?, false
+  end
+
   # extra storage
   test 'extra storage with extra storage' do
     website = default_website

@@ -119,6 +119,12 @@ class Website < ApplicationRecord
       max: 600
     },
     {
+      variable: 'STATUS_PROBE_PATH',
+      description: 'Status probe path called regularly to verify if the instance is healthy.',
+      type: 'path',
+      default: '/'
+    },
+    {
       variable: 'SKIP_PORT_CHECK',
       description: 'Skip the port verification while deploying.',
       enum: ['true', 'false', '']
@@ -292,6 +298,12 @@ class Website < ApplicationRecord
         cur_dir = "#{repo_dir}#{value}"
 
         unless Io::Path.secure?(repo_dir, cur_dir)
+          errors.add(:configs, "Invalid config value")
+        end
+      end
+
+      if value.present? && config[:type] == 'path'
+        unless Io::Path.valid?(value)
           errors.add(:configs, "Invalid config value")
         end
       end
@@ -509,9 +521,17 @@ class Website < ApplicationRecord
       .min
   end
 
-  def dotenv_filepath
+  def get_config(config_name)
     self.configs ||= {}
-    configs['DOTENV_FILEPATH'] || Website.config_def('DOTENV_FILEPATH')[:default]
+    configs[config_name] || Website.config_def(config_name)[:default]
+  end
+
+  def dotenv_filepath
+    get_config("DOTENV_FILEPATH")
+  end
+
+  def status_probe_path
+    get_config("STATUS_PROBE_PATH")
   end
 
   def repo_dir

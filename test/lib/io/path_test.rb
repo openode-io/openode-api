@@ -32,4 +32,13 @@ class PathTest < ActiveSupport::TestCase
     assert_equal result.length, 1
     assert_equal result[0], '/home/14/test.txt'
   end
+
+  test 'valid? happy path' do
+    assert Io::Path.valid?("/what")
+    assert Io::Path.valid?("/what/test.json")
+  end
+
+  test 'valid? with newlines' do
+    assert_equal Io::Path.valid?("/wh\nat"), false
+  end
 end

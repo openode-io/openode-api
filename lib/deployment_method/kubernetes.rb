@@ -319,10 +319,10 @@ module DeploymentMethod
     def generate_deployment_probes_yml(website)
       return '' if website.skip_port_check?
 
-      '
+      "
         livenessProbe:
           httpGet:
-            path: /
+            path: #{website.status_probe_path}
             port: 80
           initialDelaySeconds: 120
           periodSeconds: 600
@@ -330,11 +330,11 @@ module DeploymentMethod
           failureThreshold: 1
         readinessProbe:
           httpGet:
-            path: /
+            path: #{website.status_probe_path}
             port: 80
           periodSeconds: 10
           initialDelaySeconds: 5
-      '
+      "
     end
 
     def storage_volumes?(website, website_location)

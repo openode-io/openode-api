@@ -462,6 +462,17 @@ VAR2=5678
     yml = kubernetes_method.generate_deployment_probes_yml(@website)
 
     assert_includes yml, "livenessProbe:"
+    assert_includes yml, "path: /"
+    assert_includes yml, "readinessProbe:"
+  end
+
+  test 'generate_deployment_probes_yml - with probes, custom path' do
+    @website.configs ||= {}
+    @website.configs['STATUS_PROBE_PATH'] = '/status'
+    yml = kubernetes_method.generate_deployment_probes_yml(@website)
+
+    assert_includes yml, "livenessProbe:"
+    assert_includes yml, "path: /status"
     assert_includes yml, "readinessProbe:"
   end
 
