@@ -23,7 +23,7 @@ class User < ApplicationRecord
   attr_accessor   :password
   attr_accessor   :password_confirmation
 
-  has_many :websites
+  has_many :websites, dependent: :destroy
   has_many :orders
   has_many :viewed_notifications, dependent: :destroy
 
@@ -57,6 +57,7 @@ class User < ApplicationRecord
   after_create :send_registration_email
   after_update :send_registration_email_on_mail_changed
   before_update :mark_changing_email
+  before_destroy :ensure_no_active_website, prepend: true
 
   def password?
     password.present?
@@ -125,6 +126,16 @@ class User < ApplicationRecord
 
   def type
     [1, true].include?(is_admin) ? 'admin' : 'regular'
+  end
+
+  def has_active_websites?
+    websites.any? { |w| w.active? }
+  end
+
+  def ensure_no_active_website
+    if has_active_websites?
+      raise ValidationError, "Some websites are still active (online or with storage)."
+    end
   end
 
   def distribute_free_credits

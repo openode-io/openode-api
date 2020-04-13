@@ -110,6 +110,15 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
     assert_equal u.credits, credits
   end
 
+  test 'DELETE /account/me - happy path' do
+    u = User.find_by! token: '1234s56789'
+    delete '/account/me', headers: default_headers_auth, as: :json
+
+    assert_response :success
+
+    assert_equal response.parsed_body['status'], 'success'
+  end
+
   test 'GET /account/spendings - happy path' do
     get '/account/spendings',
         headers: default_headers_auth,

@@ -155,6 +155,33 @@ class UserTest < ActiveSupport::TestCase
     assert_equal User.create(attribs).valid?, false
   end
 
+  # has active websites?
+  test 'has_active_websites? with no website' do
+    u = default_user
+    u.websites.each(&:destroy)
+
+    assert u.has_active_websites?, false
+  end
+
+  test 'has_active_websites? with one inactive website' do
+    u = default_user
+    w = u.websites.first!
+    w.change_status!(Website::STATUS_OFFLINE)
+    wl = w.website_locations.first
+    wl.extra_storage = 0
+    wl.save!
+
+    assert u.has_active_websites?, false
+  end
+
+  test 'has_active_websites? with one active website' do
+    u = default_user
+    w = u.websites.first!
+    w.change_status!(Website::STATUS_ONLINE)
+
+    assert u.has_active_websites?, true
+  end
+
   test 'regen api token' do
     attribs = {
       email: 'USER13@site.com',
@@ -463,5 +490,51 @@ class UserTest < ActiveSupport::TestCase
 
     mail_sent = ActionMailer::Base.deliveries.first
     assert_nil mail_sent
+  end
+
+  # destroy
+
+  test "destroy - without website" do
+    user = default_user
+    user.websites.each(&:destroy)
+    user.websites.reload
+
+    uid = user.id
+    user.destroy
+
+    assert_nil User.find_by(id: uid)
+  end
+
+  test "destroy - with active website should fail" do
+    user = default_user
+    w = user.websites.first
+
+    w.change_status!(Website::STATUS_ONLINE)
+
+    assert_raise ApplicationRecord::ValidationError do
+      user.destroy
+    end
+
+    assert user.reload
+    assert w.reload
+  end
+
+  test "destroy - with inactive websites should work" do
+    user = default_user
+    first_website = user.websites.first
+    
+    user.websites.each do |w|
+      w.change_status!(Website::STATUS_OFFLINE)
+
+      w.website_locations.each do |wl|
+        wl.extra_storage = 0
+        wl.save!
+      end
+    end
+
+    user.destroy
+
+    assert_nil User.find_by(id: user.id)
+    assert_nil Website.find_by(id: first_website.id)
   end
 end

@@ -1,5 +1,5 @@
 class AccountController < ApplicationController
-  before_action only: [:me, :update, :regenerate_token, :spendings] do
+  before_action only: [:me, :update, :regenerate_token, :spendings, :destroy] do
     authorize
   end
 
@@ -32,6 +32,12 @@ class AccountController < ApplicationController
 
   def update
     @user.update!(user_params)
+
+    json(status: 'success')
+  end
+
+  def destroy
+    @user.destroy
 
     json(status: 'success')
   end
