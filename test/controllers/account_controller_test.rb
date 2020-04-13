@@ -110,6 +110,38 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
     assert_equal u.credits, credits
   end
 
+  test 'DELETE /account/me - happy path' do
+    u = User.find_by! token: '1234s56789'
+
+    u.websites.each do |w|
+      w.change_status!(Website::STATUS_OFFLINE)
+      wl = w.website_locations.first
+      wl.extra_storage = 0
+      wl.save!
+    end
+
+    delete '/account/me', headers: default_headers_auth, as: :json
+
+    assert_response :success
+
+    assert_equal response.parsed_body['status'], 'success'
+    assert_nil User.find_by(id: u.id)
+  end
+
+  test 'DELETE /account/me - fail with active websites' do
+    u = User.find_by! token: '1234s56789'
+
+    u.websites.each do |w|
+      w.change_status!(Website::STATUS_ONLINE)
+    end
+
+    delete '/account/me', headers: default_headers_auth, as: :json
+
+    assert_response :bad_request
+
+    assert User.find_by(id: u.id)
+  end
+
   test 'GET /account/spendings - happy path' do
     get '/account/spendings',
         headers: default_headers_auth,
