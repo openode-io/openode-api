@@ -156,14 +156,14 @@ class UserTest < ActiveSupport::TestCase
   end
 
   # has active websites?
-  test 'has_active_websites? with no website' do
+  test 'active_websites? with no website' do
     u = default_user
     u.websites.each(&:destroy)
 
-    assert u.has_active_websites?, false
+    assert u.active_websites?, false
   end
 
-  test 'has_active_websites? with one inactive website' do
+  test 'active_websites? with one inactive website' do
     u = default_user
     w = u.websites.first!
     w.change_status!(Website::STATUS_OFFLINE)
@@ -171,15 +171,15 @@ class UserTest < ActiveSupport::TestCase
     wl.extra_storage = 0
     wl.save!
 
-    assert u.has_active_websites?, false
+    assert u.active_websites?, false
   end
 
-  test 'has_active_websites? with one active website' do
+  test 'active_websites? with one active website' do
     u = default_user
     w = u.websites.first!
     w.change_status!(Website::STATUS_ONLINE)
 
-    assert u.has_active_websites?, true
+    assert u.active_websites?, true
   end
 
   test 'regen api token' do
@@ -522,7 +522,7 @@ class UserTest < ActiveSupport::TestCase
   test "destroy - with inactive websites should work" do
     user = default_user
     first_website = user.websites.first
-    
+
     user.websites.each do |w|
       w.change_status!(Website::STATUS_OFFLINE)
 

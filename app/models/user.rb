@@ -128,12 +128,12 @@ class User < ApplicationRecord
     [1, true].include?(is_admin) ? 'admin' : 'regular'
   end
 
-  def has_active_websites?
-    websites.any? { |w| w.active? }
+  def active_websites?
+    websites.any?(&:active?)
   end
 
   def ensure_no_active_website
-    if has_active_websites?
+    if active_websites?
       raise ValidationError, "Some websites are still active (online or with storage)."
     end
   end
