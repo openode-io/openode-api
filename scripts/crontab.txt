@@ -10,6 +10,7 @@ PATH=PATH=/bin:/usr/bin:/home/ubuntu/.rvm/rubies/ruby-2.7.1/bin/
 0 */6 * * * cd $PATH_REPO && rails background_notification:after_one_day_registration
 10 3 * * * cd $PATH_REPO && rails build_clean:synced_files
 30 */1 * * * cd $PATH_REPO && rails monitor_deployments:pod_status
+45 */1 * * * cd $PATH_REPO && rails monitor_deployments:bandwidth
 1 * * * * cd $PATH_REPO && rails background_notification:low_credit
 0 * * * * cd $PATH_REPO && rails credits:online_spend
 0 * * * * cd $PATH_REPO && rails credits:persistence_spend
