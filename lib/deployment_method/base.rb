@@ -272,8 +272,6 @@ module DeploymentMethod
       end
     end
 
-    protected
-
     def ex(cmd, options = {})
       Rails.logger.info("Deployment Method ex #{cmd}, options=#{options.inspect}")
       result = nil
