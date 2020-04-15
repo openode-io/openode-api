@@ -60,15 +60,15 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     website = Website.find_by site_name: 'testsite2'
     wl = website.website_locations[0]
 
-    assert wl.main_domain == 'testsite2.us.openode.io'
+    assert wl.main_domain == 'testsite2.openode.io'
   end
 
-  test 'domain with kubernetes (beta) subdomain' do
+  test 'domain with kubernetes subdomain' do
     website = Website.find_by site_name: 'testsite2'
     website.type = Website::TYPE_KUBERNETES
     wl = website.website_locations[0]
 
-    assert wl.main_domain == 'testsite2.dev.openode.io'
+    assert wl.main_domain == 'testsite2.openode.io'
   end
 
   test 'domain with usa custom domain' do
@@ -100,7 +100,7 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     website = Website.find_by site_name: 'testsite2'
     wl = website.website_locations[0]
 
-    assert wl.compute_domains == ['testsite2.us.openode.io']
+    assert wl.compute_domains == ['testsite2.openode.io']
   end
 
   test 'compute_a_record_dns with two domains' do

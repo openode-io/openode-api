@@ -58,7 +58,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert_equal deployment.result['errors'].length, 0
 
       # should also have a deployment with events
-      assert_equal deployment.events.length, 15
+      assert_equal deployment.events.length, 14
 
       allowed_to = dep_event_exists?(deployment.events,
                                      'running', 'allowed to dep')
@@ -97,7 +97,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
       assert_not_nil final_details_event
       assert_equal(final_details_event['update']['details']['url'],
-                   "http://#{@website.site_name}.dev.#{CloudProvider::Manager.base_hostname}/")
+                   "http://#{@website.site_name}.#{CloudProvider::Manager.base_hostname}/")
     end
   end
 
