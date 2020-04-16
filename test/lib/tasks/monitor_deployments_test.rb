@@ -38,6 +38,7 @@ class LibMonitorDeploymentsTest < ActiveSupport::TestCase
       invoke_task "monitor_deployments:pod_status"
 
       status = website.statuses.last
+      puts "status = #{status.inspect}"
       statuses = status.simplified_container_statuses
 
       assert_equal status.ref_id, website.id

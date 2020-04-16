@@ -164,6 +164,32 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal site_to_check['last_deployment_id'], nil
   end
 
+  test '/instances/status happy path' do
+    website = default_website
+    WebsiteStatus.create!(
+      website: website,
+      obj: JSON.parse(IO.read('test/fixtures/kubernetes/status.json'))
+    )
+
+    get "/instances/#{website.id}/status", as: :json, headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body.count, 1
+    assert_equal response.parsed_body.first.dig('name'), 'www'
+    assert_equal response.parsed_body.first.dig('ready'), true
+  end
+
+  test '/instances/status without recorded status' do
+    website = default_website
+
+    get "/instances/#{website.id}/status", as: :json, headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body.count, 0
+  end
+
   test '/instances/:instance_id with custom domain' do
     user = default_user
     site = Website.find_by! site_name: 'www.what.is'

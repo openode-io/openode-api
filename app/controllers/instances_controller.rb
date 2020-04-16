@@ -74,6 +74,11 @@ class InstancesController < ApplicationController
       .reverse)
   end
 
+  api!
+  def status
+    json(@website.statuses.last&.simplified_container_statuses || {})
+  end
+
   def show
     json(@website)
   end
