@@ -96,6 +96,7 @@ Rails.application.routes.draw do
 
     get '/:site_name/stats', to: 'instance_stat#index'
     get '/:site_name/stats/spendings', to: 'instance_stat#spendings'
+    get '/:site_name/stats/network', to: 'instance_stat#network'
 
     get '/:site_name/get-config', to: 'configs#get_config'
     post '/:site_name/set-config', to: 'configs#set_config'

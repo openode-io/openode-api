@@ -92,4 +92,40 @@ class LocationsTest < ActionDispatch::IntegrationTest
 
     assert_equal response.parsed_body.length, 0
   end
+
+  # network
+  test '/instances/:instance_id/stats/network - happy path' do
+    WebsiteBandwidthDailyStat.all.each(&:destroy)
+
+    w = default_website
+
+    WebsiteBandwidthDailyStat.create(
+      website: w,
+      obj: {
+        "rcv_bytes" => 100.0,
+        "tx_bytes" => 10.0
+      },
+      created_at: Time.zone.now - 1.day
+    )
+
+    WebsiteBandwidthDailyStat.create(
+      website: w,
+      obj: {
+        "rcv_bytes" => 102.0,
+        "tx_bytes" => 12.0
+      }
+    )
+
+    get "/instances/#{w.site_name}/stats/network",
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body.length, 2
+    assert_equal response.parsed_body[0]['obj']['rcv_bytes'], 100.0
+    assert_equal response.parsed_body[0]['obj']['tx_bytes'], 10.0
+    assert_equal response.parsed_body[1]['obj']['rcv_bytes'], 102.0
+    assert_equal response.parsed_body[1]['obj']['tx_bytes'], 12.0
+  end
 end

@@ -22,6 +22,17 @@ class InstanceStatController < InstancesController
     json(hash_entries.map { |k, v| { date: k, value: v } })
   end
 
+  api!
+  def network
+    nb_days = (params['nb_days'] || 30).to_i
+
+    entries = WebsiteBandwidthDailyStat
+              .where(ref_id: @website.id)
+              .where('created_at > ?', nb_days.days.ago)
+
+    json(entries)
+  end
+
   protected
 
   def extract_specific_stats(rows, metric_name)
