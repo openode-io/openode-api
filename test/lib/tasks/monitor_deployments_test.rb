@@ -90,7 +90,7 @@ class LibMonitorDeploymentsTest < ActiveSupport::TestCase
     assert_equal WebsiteStatus.count, 0
   end
 
-  test "monitor deployments bandwidth - happy path" do
+  test "monitor deployments bandwidth - happy path with previous week network stats" do
     Website.all.each do |w|
       w.status = Website::STATUS_OFFLINE
       w.save!
@@ -103,6 +103,23 @@ class LibMonitorDeploymentsTest < ActiveSupport::TestCase
 
     WebsiteBandwidthDailyStat.all.each(&:destroy)
 
+    WebsiteBandwidthDailyStat.create(
+      website: w,
+      obj: {
+        "previous_network_metrics" => [
+          {
+            "interface" => "eth0",
+            "rcv_bytes" => 84_363_193.0 - 1000,
+            "tx_bytes" => 9_758_564.0 - 100
+          }
+        ],
+        "rcv_bytes" => 100.0,
+        "tx_bytes" => 10.0
+      },
+      created_at: Time.zone.now - 1.week,
+      updated_at: Time.zone.now - 1.week
+    )
+
     kubernetes_method = get_kubernetes_method(w)
 
     prepare_get_pods_happy(kubernetes_method, w.website_locations.first)
@@ -113,6 +130,12 @@ class LibMonitorDeploymentsTest < ActiveSupport::TestCase
       s_arguments: "exec www-deployment-5889df69dc-xg9xl -- cat /proc/net/dev"
     )
 
+    # new proc net is
+    # {
+    #   "interface" => "eth0",
+    #   "rcv_bytes" => 84363193.0,
+    #   "tx_bytes" => 9758564.0
+    # }
     prepare_ssh_session(cmd, IO.read('test/fixtures/net/proc_net_dev/1'))
 
     assert_scripted do
@@ -127,8 +150,73 @@ class LibMonitorDeploymentsTest < ActiveSupport::TestCase
       assert_equal stat.obj['previous_network_metrics'].first['interface'], 'eth0'
       assert_equal stat.obj['previous_network_metrics'].first['rcv_bytes'], 84_363_193.0
       assert_equal stat.obj['previous_network_metrics'].first['tx_bytes'], 9_758_564
-      assert_equal stat.obj['rcv_bytes'], 84_363_193
-      assert_equal stat.obj['tx_bytes'], 9_758_564
+      assert_equal stat.obj['rcv_bytes'], 1000
+      assert_equal stat.obj['tx_bytes'], 100
+    end
+  end
+
+  test "monitor deployments bandwidth - happy path reusing today network stats" do
+    Website.all.each do |w|
+      w.status = Website::STATUS_OFFLINE
+      w.save!
+    end
+
+    w = default_website
+    w.change_status!(Website::STATUS_ONLINE)
+    w.type = Website::TYPE_KUBERNETES
+    w.save!
+
+    WebsiteBandwidthDailyStat.all.each(&:destroy)
+
+    today_stat = WebsiteBandwidthDailyStat.create(
+      website: w,
+      obj: {
+        "previous_network_metrics" => [
+          {
+            "interface" => "eth0",
+            "rcv_bytes" => 84_363_193.0 - 1000,
+            "tx_bytes" => 9_758_564.0 - 100
+          }
+        ],
+        "rcv_bytes" => 100.0,
+        "tx_bytes" => 10.0
+      }
+    )
+
+    kubernetes_method = get_kubernetes_method(w)
+
+    prepare_get_pods_happy(kubernetes_method, w.website_locations.first)
+
+    cmd = kubernetes_method.kubectl(
+      website_location: w.website_locations.first,
+      with_namespace: true,
+      s_arguments: "exec www-deployment-5889df69dc-xg9xl -- cat /proc/net/dev"
+    )
+
+    # new proc net is
+    # {
+    #   "interface" => "eth0",
+    #   "rcv_bytes" => 84363193.0,
+    #   "tx_bytes" => 9758564.0
+    # }
+    prepare_ssh_session(cmd, IO.read('test/fixtures/net/proc_net_dev/1'))
+
+    assert_scripted do
+      begin_ssh
+
+      invoke_task "monitor_deployments:bandwidth"
+
+      stat = WebsiteBandwidthDailyStat.last
+
+      assert_equal today_stat.id, stat.id
+
+      assert_equal stat.ref_id, w.id
+      assert_equal stat.obj['previous_network_metrics'].length, 1
+      assert_equal stat.obj['previous_network_metrics'].first['interface'], 'eth0'
+      assert_equal stat.obj['previous_network_metrics'].first['rcv_bytes'], 84_363_193.0
+      assert_equal stat.obj['previous_network_metrics'].first['tx_bytes'], 9_758_564
+      assert_equal stat.obj['rcv_bytes'], 1000 + 100
+      assert_equal stat.obj['tx_bytes'], 100 + 10
     end
   end
 end

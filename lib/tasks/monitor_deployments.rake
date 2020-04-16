@@ -46,7 +46,7 @@ namespace :monitor_deployments do
       new_network_metrics = Io::Net.parse_proc_net_dev(result, exclude_interfaces: ['lo'])
 
       previous_net_metrics =
-        WebsiteBandwidthDailyStat.last_stat_of(website)&.obj&.dig('previous_network_metrics')
+        website.website_bandwidth_daily_stats.last&.obj&.dig('previous_network_metrics')
 
       network_metrics = Io::Net.diff(new_network_metrics, previous_net_metrics)
 
