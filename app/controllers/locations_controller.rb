@@ -1,7 +1,7 @@
 class LocationsController < InstancesController
   before_action only: %i[add_location remove_location] do
     requires_access_to(Website::PERMISSION_LOCATION)
-    requires_status_in [Website::STATUS_OFFLINE]
+    requires_website_inactive!
   end
 
   api!

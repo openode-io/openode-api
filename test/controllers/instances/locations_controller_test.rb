@@ -26,6 +26,9 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   test '/instances/:instance_id/add-location fail already have a location' do
     w = Website.find_by site_name: 'testsite'
     w.change_status! Website::STATUS_OFFLINE
+    wl = w.website_locations.first
+    wl.extra_storage = 0
+    wl.save!
 
     post '/instances/testsite/add-location',
          as: :json,
@@ -106,10 +109,11 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
 
   test '/instances/:instance_id/remove-location forbidden' do
     w, = prepare_forbidden_test(Website::PERMISSION_DNS)
+    wl = w.website_locations.first
 
     post "/instances/#{w.site_name}/remove-location",
          as: :json,
-         params: { location_str_id: 'usa' },
+         params: { location_str_id: wl.location.str_id },
          headers: default_headers_auth
 
     assert_response :forbidden
@@ -118,10 +122,26 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   test '/instances/:instance_id/remove-location should not if online' do
     w = default_website
     w.change_status!(Website::STATUS_ONLINE)
+    wl = w.website_locations.first
 
     post "/instances/#{w.site_name}/remove-location",
          as: :json,
-         params: { location_str_id: 'usa' },
+         params: { location_str_id: wl.location.str_id },
+         headers: default_headers_auth
+
+    assert_response :bad_request
+  end
+
+  test '/instances/:instance_id/remove-location should not if has storage' do
+    w = default_website
+    w.change_status!(Website::STATUS_OFFLINE)
+    wl = w.website_locations.first
+    wl.extra_storage = 0
+    wl.change_storage!(2)
+
+    post "/instances/#{w.site_name}/remove-location",
+         as: :json,
+         params: { location_str_id: wl.location.str_id },
          headers: default_headers_auth
 
     assert_response :bad_request
@@ -130,6 +150,9 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   test '/instances/:instance_id/remove-location happy path' do
     w = default_website
     w.change_status!(Website::STATUS_OFFLINE)
+    wl = w.website_locations.first
+    wl.extra_storage = 0
+    wl.save!
 
     post '/instances/testsite/remove-location',
          as: :json,
