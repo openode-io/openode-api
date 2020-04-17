@@ -136,6 +136,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   test '/instances/summary happy path' do
     website = Website.find_by site_name: 'testsite'
+    website.storage_areas = ['/opt/app/data/']
+    website.save!
     get '/instances/summary', as: :json, headers: default_headers_auth
 
     assert_response :success
@@ -148,6 +150,33 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal site_to_check['plan_name'], '100 MB'
     assert_equal site_to_check['nb_collaborators'], website.collaborators.count
     assert_equal site_to_check['last_deployment_id'], website.deployments.last.id
+    assert_equal site_to_check['active'], true
+    assert_equal site_to_check['persistence']['extra_storage'], 1
+    assert_equal site_to_check['persistence']['storage_areas'], ['/opt/app/data/']
+  end
+
+  test '/instances/summary happy path, without persistence and offline' do
+    website = Website.find_by site_name: 'testsite'
+    wl = website.website_locations.first
+    wl.extra_storage = 0
+    wl.save!
+
+    website.change_status!(Website::STATUS_OFFLINE)
+
+    get '/instances/summary', as: :json, headers: default_headers_auth
+
+    assert_response :success
+
+    site_to_check = response.parsed_body.find { |w| w['site_name'] == website.site_name }
+    assert_equal site_to_check['site_name'], 'testsite'
+    assert_equal site_to_check['ip'], '127.0.0.1'
+    assert_equal site_to_check['location']['full_name'], 'Montreal (Canada)'
+    assert_equal site_to_check['price'], '0.80'
+    assert_equal site_to_check['plan_name'], '100 MB'
+    assert_equal site_to_check['nb_collaborators'], website.collaborators.count
+    assert_equal site_to_check['last_deployment_id'], website.deployments.last.id
+    assert_equal site_to_check['active'], false
+    assert_equal site_to_check['persistence'].present?, false
   end
 
   test '/instances/summary happy path without last deployment' do
