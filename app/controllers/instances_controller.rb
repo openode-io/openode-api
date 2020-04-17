@@ -71,7 +71,7 @@ class InstancesController < ApplicationController
 
         extra_storage = w.website_locations&.first&.extra_storage || 0
 
-        if extra_storage > 0
+        if extra_storage.positive?
           w_obj["persistence"] = {
             extra_storage: extra_storage,
             storage_areas: w.storage_areas || []
