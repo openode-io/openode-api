@@ -10,9 +10,9 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
   end
 
   def kubernetes_method
-    runner = prepare_kubernetes_runner(@website, @website_location)
+    @runner ||= prepare_kubernetes_runner(@website, @website_location)
 
-    runner.get_execution_method
+    @runner.get_execution_method
   end
 
   def prepare_get_pods_happy(_website_location)
@@ -173,6 +173,55 @@ VAR2=5678
     result = kubernetes_method.dotenv_vars_to_s(vars)
 
     assert_equal result, expected
+  end
+
+  # retrieve_remote_file
+  test 'retrieve_remote_file - without parent execution' do
+    prepare_ssh_session("cat #{@website.repo_dir}.env", "TEST=123")
+
+    assert_scripted do
+      begin_ssh
+
+      result = kubernetes_method.retrieve_remote_file(
+        name: 'dotenv',
+        cmd: 'retrieve_dotenv_cmd',
+        website: @website
+      )
+
+      assert_equal result, "TEST=123"
+    end
+  end
+
+  test 'retrieve_remote_file - with parent execution' do
+    parent_execution = Deployment.create!(
+      website: @website,
+      website_location: @website_location,
+      status: Deployment::STATUS_RUNNING
+    )
+
+    assert_scripted do
+      begin_ssh
+
+      kubernetes_method.runner.init_execution!('Deployment', {
+                                                 'parent_execution_id' => parent_execution.id
+                                               })
+
+      execution = kubernetes_method.runner.execution
+
+      execution.parent_execution = parent_execution
+      execution.save
+
+      # add dotenv in the vault
+      execution.parent_execution.save_secret!(dotenv: 'TITI=toto')
+
+      result = kubernetes_method.retrieve_remote_file(
+        name: 'dotenv',
+        cmd: 'retrieve_dotenv_cmd',
+        website: @website
+      )
+
+      assert_equal result, "TITI=toto"
+    end
   end
 
   test 'get_pods_json - happy path' do

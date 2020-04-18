@@ -335,7 +335,7 @@ class InstancesController < ApplicationController
   api!
   def restart
     # run in background:
-    @runner.init_execution!('Deployment')
+    @runner.init_execution!('Deployment', params)
     DeploymentMethod::Deployer.delay.run(@website_location, @runner)
 
     json(result: 'success', deploymentId: @runner.execution.id)

@@ -13,7 +13,7 @@ class ExecutionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body.length, deployments.length
 
     assert_equal response.parsed_body[0].keys,
-                 %w[id website_id status created_at type]
+                 %w[id website_id status created_at obj parent_execution_id type]
   end
 
   test '/instances/:instance_id/executions/id - exists' do

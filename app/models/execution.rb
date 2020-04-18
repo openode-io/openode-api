@@ -1,9 +1,14 @@
 class Execution < ApplicationRecord
   serialize :result, JSON
   serialize :events, JSON
+  serialize :obj, JSON
 
   belongs_to :website
   belongs_to :website_location
+
+  belongs_to :parent_execution, foreign_key: :parent_execution_id,
+                                class_name: :Execution,
+                                optional: true
 
   before_create :initialize_status
 
@@ -43,6 +48,12 @@ class Execution < ApplicationRecord
                         Str::Encode.strip_invalid_chars(current_result)
                       end
 
+    save
+  end
+
+  def save_extra_attrib!(attrib_name, value)
+    self.obj ||= {}
+    self.obj[attrib_name] = value
     save
   end
 
