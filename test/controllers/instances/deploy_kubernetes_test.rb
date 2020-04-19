@@ -27,9 +27,8 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       prepare_check_repo_size(kubernetes_method, website, "1231 /what")
       prepare_build_image(kubernetes_method, website, deployment, "new image built")
       prepare_push_image(kubernetes_method, website, deployment, "result")
+      prepare_get_dotenv(kubernetes_method, website, "VAR1=12")
     end
-
-    prepare_get_dotenv(kubernetes_method, website, "VAR1=12")
 
     prepare_action_yml(kubernetes_method, website_location, "apply.yml",
                        "apply -f apply.yml", 'success')

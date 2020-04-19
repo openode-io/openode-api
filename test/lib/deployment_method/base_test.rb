@@ -63,14 +63,6 @@ class DeploymentMethodBaseTest < ActiveSupport::TestCase
     end
   end
 
-  # store_
-  test 'verify_can_deploy without failure' do
-    website = default_website
-    website_location = website.website_locations.first
-
-    @base_dep_method.verify_can_deploy(website: website, website_location: website_location)
-  end
-
   test 'finalize when success, nothing running' do
     website = default_website
     website_location = default_website_location
