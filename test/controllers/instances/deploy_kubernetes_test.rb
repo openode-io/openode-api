@@ -16,16 +16,19 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     @kubernetes_method = runner.get_execution_method
   end
 
-  def prepare_launch_happy_path(kubernetes_method, website, website_location)
+  def prepare_launch_happy_path(kubernetes_method, website, website_location,
+                                parent_deployment = nil)
     prepare_make_namespace(kubernetes_method, website, website_location, "result")
     prepare_make_secret(kubernetes_method, website, website_location, "result")
-    prepare_check_repo_size(kubernetes_method, website, "1231 /what")
 
     deployment = website.deployments.last
 
-    prepare_build_image(kubernetes_method, website, deployment, "new image built")
-    prepare_push_image(kubernetes_method, website, deployment, "result")
-    prepare_get_dotenv(kubernetes_method, website, "VAR1=12")
+    unless parent_deployment
+      prepare_check_repo_size(kubernetes_method, website, "1231 /what")
+      prepare_build_image(kubernetes_method, website, deployment, "new image built")
+      prepare_push_image(kubernetes_method, website, deployment, "result")
+      prepare_get_dotenv(kubernetes_method, website, "VAR1=12")
+    end
 
     prepare_action_yml(kubernetes_method, website_location, "apply.yml",
                        "apply -f apply.yml", 'success')
@@ -64,6 +67,13 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
                                      'running', 'allowed to dep')
       assert_equal allowed_to, true
 
+      assert deployment.obj['image_name_tag'].present?
+      assert_includes deployment.obj['image_name_tag'],
+                      'docker.io/openode_prod/testkubernetes-type:testkubernetes-type'
+
+      # check dotenv saved
+      assert_equal deployment.secret[:dotenv], "VAR1=12"
+
       steps_to_verify = [
         { "status" => "running", "level" => "info", "update" => "Verifying allowed to deploy..." },
         { "status" => "running", "level" => "info", "update" => "Preparing instance image..." },
@@ -98,6 +108,39 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert_not_nil final_details_event
       assert_equal(final_details_event['update']['details']['url'],
                    "http://#{@website.site_name}.#{CloudProvider::Manager.base_hostname}/")
+    end
+  end
+
+  test '/instances/:instance_id/restart - rollback' do
+    @website.crontab = ''
+    @website.save!
+
+    parent_deployment = @website.deployments.last
+    parent_deployment.obj ||= {}
+    parent_deployment.obj['image_name_tag'] = 'mypreviousimage'
+    parent_deployment.save!
+
+    post "/instances/#{@website.site_name}/restart",
+         as: :json,
+         params: base_params.merge(parent_execution_id: parent_deployment.id),
+         headers: default_headers_auth
+
+    prepare_launch_happy_path(@kubernetes_method, @website,
+                              @website_location, parent_deployment)
+
+    assert_scripted do
+      begin_ssh
+      run_deployer_job
+
+      deployment = @website.deployments.last
+      @website.reload
+
+      assert_equal @website.status, Website::STATUS_ONLINE
+      assert_equal deployment.status, Deployment::STATUS_SUCCESS
+
+      assert_equal deployment.parent_execution.id, parent_deployment.id
+      assert_equal deployment.obj.dig('image_name_tag'),
+                   parent_deployment.obj.dig('image_name_tag')
     end
   end
 

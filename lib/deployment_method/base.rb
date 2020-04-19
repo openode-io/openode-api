@@ -13,6 +13,18 @@ module DeploymentMethod
       raise msg
     end
 
+    def save_extra_execution_attrib(attrib_name, value)
+      runner.execution&.save_extra_attrib!(attrib_name, value)
+    end
+
+    def store_remote_file(name, content)
+      current_secret = runner.execution.secret || {}
+
+      current_secret[name] = content
+
+      runner.execution.save_secret!(current_secret)
+    end
+
     def verify_can_deploy(options = {})
       website, website_location = get_website_fields(options)
 

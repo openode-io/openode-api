@@ -15,12 +15,13 @@ module DeploymentMethod
       @cloud_provider = get_cloud_provider
     end
 
-    def init_execution!(type)
+    def init_execution!(type, args = {})
       self.execution = Execution.create!(
         website: @website,
         website_location_id: @website_location&.id,
         status: Execution::STATUS_RUNNING,
-        type: type
+        type: type,
+        parent_execution_id: args['parent_execution_id']
       )
 
       execution.status = Execution::STATUS_SUCCESS

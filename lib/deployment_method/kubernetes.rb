@@ -81,28 +81,45 @@ module DeploymentMethod
                 s_arguments: "create namespace #{namespace_of(website)}")
     end
 
+    def prepare_image_name_tag(website, website_location, parent_execution)
+      image_manager = prepare_image_manager(website, website_location)
+
+      if parent_execution
+        parent_execution&.obj&.dig('image_name_tag')
+      else
+        notify("info", "Preparing instance image...")
+        image_manager.verify_size_repo
+        result_build = image_manager.build
+        notify("info", result_build.first&.dig(:result, :stdout)) if result_build&.first
+        notify("info", "Instance image ready.")
+
+        # then push it to the registry
+        notify("info", "Pushing instance image...")
+        image_manager.push
+        notify("info", "Instance image pushed successfully.")
+
+        image_manager.image_name_tag
+      end
+    end
+
     def launch(options = {})
       website, website_location = get_website_fields(options)
 
       initialize_ns(options)
-      image_manager = prepare_image_manager(website, website_location)
 
-      notify("info", "Preparing instance image...")
-      image_manager.verify_size_repo
-      result_build = image_manager.build
-      notify("info", result_build.first&.dig(:result, :stdout)) if result_build&.first
-      notify("info", "Instance image ready.")
+      image_name_tag = prepare_image_name_tag(website, website_location,
+                                              runner.execution&.parent_execution)
 
-      # then push it to the registry
-      notify("info", "Pushing instance image...")
-      image_manager.push
-      notify("info", "Instance image pushed successfully.")
+      raise 'Missing instance image build' unless image_name_tag
+
+      # save the image name tag
+      save_extra_execution_attrib('image_name_tag', image_name_tag)
 
       # generate the yml to the build machine
       kube_yml = generate_instance_yml(website, website_location,
                                        with_namespace_object: true,
                                        with_pvc_object: true,
-                                       image_name_tag: image_manager.image_name_tag)
+                                       image_name_tag: image_name_tag)
 
       notify("info", "Applying instance environment...")
 
@@ -204,8 +221,28 @@ module DeploymentMethod
       retrieve_file_cmd(path: "#{project_path}#{dotenv_relative_filepath}")
     end
 
+    def retrieve_remote_file(options = {})
+      assert options[:cmd]
+      assert options[:name]
+
+      result = if runner.execution&.parent_execution
+                 # if there is a parent execution, we get the content from the saved vault
+                 runner.execution&.parent_execution&.secret&.dig(options[:name].to_sym) || ""
+               else
+                 ex(options[:cmd], options)[:stdout]
+      end
+
+      store_remote_file(options[:name], result)
+
+      result
+    end
+
     def retrieve_dotenv(website)
-      dotenv_content = ex_stdout("retrieve_dotenv_cmd", website: website)
+      dotenv_content = retrieve_remote_file(
+        name: 'dotenv',
+        cmd: "retrieve_dotenv_cmd",
+        website: website
+      )
 
       Dotenv::Parser.call(dotenv_content || '')
     end
@@ -458,12 +495,19 @@ module DeploymentMethod
     def generate_manual_tls_secret_yml(website)
       return "" if website.certs.blank?
 
-      crt = ex("retrieve_file_cmd",
-               ensure_exit_code: 0,
-               path: "#{website.repo_dir}#{website.certs[:cert_path]}")[:stdout]
-      crt_key = ex("retrieve_file_cmd",
-                   ensure_exit_code: 0,
-                   path: "#{website.repo_dir}#{website.certs[:cert_key_path]}")[:stdout]
+      crt = retrieve_remote_file(
+        name: 'cert_crt',
+        cmd: "retrieve_file_cmd",
+        ensure_exit_code: 0,
+        path: "#{website.repo_dir}#{website.certs[:cert_path]}"
+      )
+
+      crt_key = retrieve_remote_file(
+        name: 'cert_key',
+        cmd: "retrieve_file_cmd",
+        ensure_exit_code: 0,
+        path: "#{website.repo_dir}#{website.certs[:cert_key_path]}"
+      )
 
       generate_tls_secret_yml(website,
                               name: certificate_secret_name(website),

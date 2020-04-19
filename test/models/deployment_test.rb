@@ -33,6 +33,44 @@ class DeploymentTest < ActiveSupport::TestCase
     assert_equal dep.result['errors'], []
   end
 
+  test 'save extra attribute' do
+    website = default_website
+    website_location = default_website_location
+    dep = Deployment.create!(
+      website: website,
+      website_location: website_location,
+      status: Deployment::STATUS_RUNNING
+    )
+
+    dep.save_extra_attrib!('image_name_tag', 'asdf/tag')
+
+    dep.reload
+
+    assert_equal dep.obj['image_name_tag'], 'asdf/tag'
+  end
+
+  test 'parent_execution' do
+    website = default_website
+    website_location = default_website_location
+
+    dep1 = Deployment.create!(
+      website: website,
+      website_location: website_location,
+      status: Deployment::STATUS_RUNNING
+    )
+
+    dep = Deployment.create!(
+      website: website,
+      website_location: website_location,
+      status: Deployment::STATUS_RUNNING,
+      parent_execution_id: dep1.id
+    )
+
+    dep.reload
+
+    puts "dep #{dep.parent_execution.inspect}"
+  end
+
   test 'Create fails with invalid status' do
     website = default_website
     website_location = default_website_location
