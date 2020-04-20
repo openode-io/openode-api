@@ -823,8 +823,6 @@ VAR2=5678
     w = default_custom_domain_website
     website_location = w.website_locations.first
 
-    prepare_get_services_default_happy(kubernetes_method, website_location)
-
     assert_scripted do
       begin_ssh
 
@@ -833,16 +831,15 @@ VAR2=5678
         website_location: website_location
       )
 
-      expected_cname = "6ojq5t5np0.lb.c1.bhs5.k8s.ovh.net"
-
       expected_result = {
         "result" => "success",
         "url" => "http://www.what.is/",
-        "A Record" => expected_cname,
         "CNAME Record" => 'usa.openode.io'
       }
 
       assert_equal result_details, expected_result
+      assert_includes kubernetes_method.runner.execution.events.first['update'],
+                      "The DNS documentation is available"
     end
   end
 

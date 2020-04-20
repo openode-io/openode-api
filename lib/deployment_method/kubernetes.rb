@@ -770,17 +770,11 @@ module DeploymentMethod
       result['url'] = "http://#{website_location.main_domain}/"
 
       if website.domain_type == 'custom_domain'
-        default_services = get_services_json(
-          website: website,
-          website_location: website_location,
-          with_namespace: false
-        )
-
-        load_balancer = find_first_load_balancer!(default_services)
+        notify('info', 'Custom domain - The DNS documentation is available at ' \
+                        'https://www.openode.io/docs/platform/dns.md')
 
         kconfs_at = Kubernetes.kube_configs_at_location(website_location.location.str_id)
 
-        result['A Record'] = load_balancer
         result['CNAME Record'] = kconfs_at['cname']
       end
 
