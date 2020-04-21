@@ -112,7 +112,7 @@ module DeploymentMethod
       website, = get_website_fields(options)
 
       mark_accessed(options)
-      website.change_status!(Website::STATUS_STARTING)
+      website.change_status!(Website::STATUS_STARTING, skip_validations: true)
     end
 
     def send_crontab(options = {})
@@ -135,7 +135,7 @@ module DeploymentMethod
     def begin_stop(website)
       raise "Already stopping" if website.reload.stopping?
 
-      website.change_status!(Website::STATUS_STOPPING)
+      website.change_status!(Website::STATUS_STOPPING, skip_validations: true)
     end
 
     def stop(options = {})
@@ -148,13 +148,12 @@ module DeploymentMethod
         runner.execution_method.do_stop(options)
       rescue StandardError => e
         Ex::Logger.error(e, "Issue to stop the instance #{website.site_name}")
-        # return website.change_status!(Website::STATUS_ONLINE)
       end
 
       # stop based on the cloud provider
       runner.cloud_provider.stop(options)
 
-      website.change_status!(Website::STATUS_OFFLINE)
+      website.change_status!(Website::STATUS_OFFLINE, skip_validations: true)
     end
 
     def instance_up_cmd(_options = {})
@@ -210,7 +209,7 @@ module DeploymentMethod
       website.valid = is_up
       website.http_port_available = is_up
       website.save!
-      website.change_status!(Website::STATUS_ONLINE) if is_up
+      website.change_status!(Website::STATUS_ONLINE, skip_validations: true) if is_up
     end
 
     def port_info_for_new_deployment(website_location)
@@ -243,7 +242,7 @@ module DeploymentMethod
       if website.online?
         website_location.running_port = port_info[:port]
       else
-        website.change_status!(Website::STATUS_OFFLINE)
+        website.change_status!(Website::STATUS_OFFLINE, skip_validations: true)
         website_location.running_port = nil
       end
 

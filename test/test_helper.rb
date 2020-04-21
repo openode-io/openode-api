@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 
 ENV['RAILS_ENV'] = 'test'
 require_relative '../config/environment'
@@ -323,6 +322,16 @@ class ActiveSupport::TestCase
       content_type: 'text/html',
       response_status: 200,
       response_path: 'test/fixtures/http/open_source/openode_cli.txt'
+    },
+    {
+      url: 'http://github.com/invalid',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'text/html',
+      response_status: 200,
+      response_path: 'test/fixtures/http/open_source/openode_bad.txt'
     }
   ]
 

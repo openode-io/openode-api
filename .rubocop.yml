@@ -23,6 +23,9 @@ Rails/InverseOf:
 Rails/HasManyOrHasOneDependent:
   Enabled: false
 
+Rails/SkipsModelValidations:
+  Enabled: false
+
 Style/FormatString:
   Enabled: false
 

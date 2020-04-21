@@ -587,10 +587,14 @@ class Website < ApplicationRecord
     "N/A"
   end
 
-  def change_status!(new_status)
+  def change_status!(new_status, args = {})
     change_status(new_status)
 
-    save!
+    if args[:skip_validations]
+      save(validate: false)
+    else
+      save!
+    end
   end
 
   def change_status(new_status)

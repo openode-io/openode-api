@@ -195,4 +195,37 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert_equal @website.status, Website::STATUS_OFFLINE
     end
   end
+
+  test '/instances/:instance_id/stop - should still stop if site is invalid' do
+    @website.update_attribute('account_type', 'open_source')
+    @website.update_attribute('open_source', {
+                                'status' => 'approved',
+                                'title' => 'helloworld',
+                                'description' => 'a ' * 31,
+                                'repository_url' => 'http://github.com/invalid'
+                              })
+
+    prepare_make_secret(@kubernetes_method, @website, @website_location, "result")
+    prepare_get_dotenv(@kubernetes_method, @website, "VAR1=12")
+
+    prepare_action_yml(@kubernetes_method, @website_location, "apply.yml",
+                       "delete -f apply.yml", 'success')
+
+    assert_scripted do
+      begin_ssh
+      post "/instances/#{@website.site_name}/stop?location_str_id=canada",
+           as: :json,
+           params: {},
+           headers: default_headers_auth
+
+      assert_response :success
+      assert_equal response.parsed_body['result'], 'success'
+
+      Delayed::Job.first.invoke_job
+
+      @website.reload
+
+      assert_equal @website.reload.status, Website::STATUS_OFFLINE
+    end
+  end
 end
