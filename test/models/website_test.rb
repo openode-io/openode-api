@@ -457,7 +457,7 @@ class WebsiteTest < ActiveSupport::TestCase
   test "can_deploy_to? can't if too many concurrent deployments" do
     website = default_website
 
-    (1..Deployment::MAX_CONCURRENT_BUILDS_PER_USER+1).each do
+    (1..Deployment::MAX_CONCURRENT_BUILDS_PER_USER + 1).each do
       Deployment.create!(
         website: website,
         website_location: website.website_locations.first,

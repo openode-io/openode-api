@@ -45,8 +45,8 @@ class DeploymentTest < ActiveSupport::TestCase
 
     deployments = Deployment.by_user(website.user)
 
-    assert deployments.any? { |d| d.id == new_dep.id }
-    
+    assert(deployments.any? { |d| d.id == new_dep.id })
+
     deployments.each do |dep|
       assert_equal dep.website.user, website.user
     end
@@ -63,7 +63,7 @@ class DeploymentTest < ActiveSupport::TestCase
 
     deployments = Deployment.running.by_user(website.user).active
 
-    assert deployments.any? { |d| d.id == new_dep.id }
+    assert(deployments.any? { |d| d.id == new_dep.id })
   end
 
   test 'save extra attribute' do

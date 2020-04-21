@@ -1,5 +1,4 @@
 class Deployment < Execution
-
   MAX_RUN_TIME = 20.minutes
   MAX_CONCURRENT_BUILDS_PER_USER = 2
 
