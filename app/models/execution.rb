@@ -3,6 +3,11 @@ class Execution < ApplicationRecord
   serialize :events, JSON
   serialize :obj, JSON
 
+  STATUS_SUCCESS = 'success'
+  STATUS_FAILED = 'failed'
+  STATUS_RUNNING = 'running'
+  STATUSES = [STATUS_SUCCESS, STATUS_FAILED, STATUS_RUNNING].freeze
+
   belongs_to :website
   belongs_to :website_location
 
@@ -12,10 +17,13 @@ class Execution < ApplicationRecord
 
   before_create :initialize_status
 
-  STATUS_SUCCESS = 'success'
-  STATUS_FAILED = 'failed'
-  STATUS_RUNNING = 'running'
-  STATUSES = [STATUS_SUCCESS, STATUS_FAILED, STATUS_RUNNING].freeze
+  scope :by_user, lambda { |user|
+    where(website_id: user.websites)
+  }
+
+  scope :running, lambda {
+    where(status: STATUS_RUNNING)
+  }
 
   validates :status, inclusion: { in: STATUSES }
 

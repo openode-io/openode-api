@@ -687,6 +687,12 @@ class Website < ApplicationRecord
       return false, "*** #{msg}"
     end
 
+    nb_active_deployments = Deployment.running.by_user(user).active.count
+
+    if nb_active_deployments > Deployment::MAX_CONCURRENT_BUILDS_PER_USER
+      return false, "*** Maximum number of concurrent builds per user reached."
+    end
+
     [true, '']
   end
 
