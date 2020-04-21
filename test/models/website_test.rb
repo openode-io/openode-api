@@ -471,6 +471,30 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_includes msg, 'Maximum number of concurrent'
   end
 
+  test "can_deploy_to? can if on the limit with one not active temporally" do
+    website = default_website
+
+    (1..Deployment::MAX_CONCURRENT_BUILDS_PER_USER).each do
+      Deployment.create!(
+        website: website,
+        website_location: website.website_locations.first,
+        status: Deployment::STATUS_RUNNING
+      )
+    end
+
+    # this deployment is too old, so it's not counted.
+    Deployment.create!(
+      website: website,
+      website_location: website.website_locations.first,
+      status: Deployment::STATUS_RUNNING,
+      created_at: (Deployment::MAX_RUN_TIME + 1.minute).ago
+    )
+
+    can_deploy, = website.can_deploy_to?(website.website_locations.first)
+
+    assert_equal can_deploy, true
+  end
+
   # max build duration
   test 'max build duration with default' do
     website = Website.find_by(site_name: 'testsite')

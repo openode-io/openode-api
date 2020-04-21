@@ -2,19 +2,19 @@ PATH_REPO=/var/www/openode-api/
 RAILS_ENV=production
 PATH=PATH=/bin:/usr/bin:/home/ubuntu/.rvm/rubies/ruby-2.7.1/bin/
 
-1 * * * * cd $PATH_REPO && rails db_stats:log_nb_sites_up
-3 * * * * cd $PATH_REPO && rails mailgun:check_failed_events
-0 */5 * * * cd $PATH_REPO && rails db_clean:old_executions
-2 */5 * * * cd $PATH_REPO && rails db_clean:old_histories
-4 */5 * * * cd $PATH_REPO && rails db_clean:old_credit_actions
-0 */6 * * * cd $PATH_REPO && rails background_notification:after_one_day_registration
-10 3 * * * cd $PATH_REPO && rails build_clean:synced_files
-30 */1 * * * cd $PATH_REPO && rails monitor_deployments:pod_status
-45 */1 * * * cd $PATH_REPO && rails monitor_deployments:bandwidth
-1 * * * * cd $PATH_REPO && rails background_notification:low_credit
-0 * * * * cd $PATH_REPO && rails credits:online_spend
-0 * * * * cd $PATH_REPO && rails credits:persistence_spend
-*/3 * * * * cd $PATH_REPO && rails update:uptime_robot
+1 * * * * cd $PATH_REPO && rails db_stats:log_nb_sites_up >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+3 * * * * cd $PATH_REPO && rails mailgun:check_failed_events >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+0 */5 * * * cd $PATH_REPO && rails db_clean:old_executions >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+2 */5 * * * cd $PATH_REPO && rails db_clean:old_histories >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+4 */5 * * * cd $PATH_REPO && rails db_clean:old_credit_actions >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+0 */6 * * * cd $PATH_REPO && rails background_notification:after_one_day_registration >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+10 3 * * * cd $PATH_REPO && rails build_clean:synced_files >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+30 */1 * * * cd $PATH_REPO && rails monitor_deployments:pod_status >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+45 */1 * * * cd $PATH_REPO && rails monitor_deployments:bandwidth >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+1 * * * * cd $PATH_REPO && rails background_notification:low_credit >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+0 * * * * cd $PATH_REPO && rails credits:online_spend >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+0 * * * * cd $PATH_REPO && rails credits:persistence_spend >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+*/3 * * * * cd $PATH_REPO && rails update:uptime_robot >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 37 * * * * /bin/bash /home/ubuntu/backup-db.sh
 5 */3 * * * /usr/sbin/logrotate -s ~/logrotate.status /var/www/openode-api/scripts/logrotate.d/openode_api
 15 */3 * * * /usr/sbin/logrotate -s ~/openode-www-logrotate.status /var/www/openode-www/scripts/logrotate.d/openode_www
