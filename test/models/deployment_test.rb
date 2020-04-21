@@ -33,6 +33,39 @@ class DeploymentTest < ActiveSupport::TestCase
     assert_equal dep.result['errors'], []
   end
 
+  # scope by user
+  test 'by user with user websites' do
+    website = default_website
+    website_location = default_website_location
+    new_dep = Deployment.create!(
+      website: website,
+      website_location: website_location,
+      status: Deployment::STATUS_RUNNING
+    )
+
+    deployments = Deployment.by_user(website.user)
+
+    assert deployments.any? { |d| d.id == new_dep.id }
+    
+    deployments.each do |dep|
+      assert_equal dep.website.user, website.user
+    end
+  end
+
+  test 'active deployments by user' do
+    website = default_website
+    website_location = default_website_location
+    new_dep = Deployment.create!(
+      website: website,
+      website_location: website_location,
+      status: Deployment::STATUS_RUNNING
+    )
+
+    deployments = Deployment.running.by_user(website.user).active
+
+    assert deployments.any? { |d| d.id == new_dep.id }
+  end
+
   test 'save extra attribute' do
     website = default_website
     website_location = default_website_location
