@@ -93,6 +93,13 @@ class InstancesController < ApplicationController
     json(@website)
   end
 
+  api :POST, 'instances/create'
+  description 'To be functional, a location needs to be added also. See the Location section.'
+  param :site_name, String, desc: 'Instance site name. ' \
+                                  '<site_name>.openode.io for subdomains and ' \
+                                  'domain for custom domains.', required: true
+  param :account_type, String, desc: 'Plan internal id. Use /global/available-plans to ' \
+                                      'get the list.', required: true
   def create_instance
     website = Website.create!(
       site_name: params['site_name'],

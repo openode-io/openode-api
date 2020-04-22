@@ -17,7 +17,11 @@ class LocationsController < InstancesController
     json(result)
   end
 
-  api!
+  api :POST, 'instances/:id/add-location'
+  description ''
+  param :location_str_id, String, desc: 'Use /global/available-locations to get ' \
+                                        'the list of locations.', required: true
+  returns code: 200, desc: ""
   def add_location
     str_id = params['location_str_id']
 
@@ -38,7 +42,10 @@ class LocationsController < InstancesController
     json(result: 'success')
   end
 
-  api!
+  api :POST, 'instances/:id/remove-location'
+  description ''
+  param :location_str_id, String, desc: 'Use /global/available-locations to get ' \
+                                        'the list of locations.', required: true
   def remove_location
     str_id = params['location_str_id']
 
