@@ -19,7 +19,7 @@ class InstanceStatController < InstancesController
                    .group("DATE(created_at)")
                    .sum(:credits_spent)
 
-    json(hash_entries.map { |k, v| { date: k, value: v } })
+    json(hash_entries.map { |k, v| { date: k, value: v } }.sort_by { |e| e[:date] })
   end
 
   api!

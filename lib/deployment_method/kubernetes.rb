@@ -237,6 +237,14 @@ module DeploymentMethod
       result
     end
 
+    def prepare_dotenv_hash(website, dotenv_file_content)
+      env_from_file = Dotenv::Parser.call(dotenv_file_content || '')
+
+      stored_env = website.env
+
+      env_from_file.merge(stored_env)
+    end
+
     def retrieve_dotenv(website)
       dotenv_content = retrieve_remote_file(
         name: 'dotenv',
@@ -244,7 +252,7 @@ module DeploymentMethod
         website: website
       )
 
-      Dotenv::Parser.call(dotenv_content || '')
+      prepare_dotenv_hash(website, dotenv_content)
     end
 
     def dotenv_vars_to_s(variables)

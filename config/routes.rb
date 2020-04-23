@@ -142,6 +142,11 @@ Rails.application.routes.draw do
     get '/:site_name/plans', to: 'instances#plans'
     post '/:site_name/set-plan', to: 'instances#set_plan'
 
+    # ENV
+    get '/:site_name/env_variables', to: 'env_variables#index'
+    post '/:site_name/env_variables/:name', to: 'env_variables#save_env_variable'
+    delete '/:site_name/env_variables/:name', to: 'env_variables#destroy_env_variable'
+
     # executions
     get '/:site_name/executions/list/:type', to: 'executions#index'
     get '/:site_name/executions/:id', to: 'executions#retrieve'

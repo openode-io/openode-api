@@ -11,7 +11,7 @@ class DeploymentMethodBaseTest < ActiveSupport::TestCase
     website = Website.find_by site_name: 'testsite'
     base_dep_method = DeploymentMethod::Base.new
 
-    website.last_access_at = nil
+    website.last_access_at = Time.zone.now
     website.save!
 
     base_dep_method.mark_accessed(website: website)
@@ -23,7 +23,7 @@ class DeploymentMethodBaseTest < ActiveSupport::TestCase
   test 'initialization' do
     website = Website.find_by site_name: 'testsite'
 
-    website.last_access_at = nil
+    website.last_access_at = Time.zone.now
     website.save!
     website.change_status!(Website::STATUS_OFFLINE)
     website_location = website.website_locations.first

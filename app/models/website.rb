@@ -537,6 +537,28 @@ class Website < ApplicationRecord
     get_config("DOTENV_FILEPATH")
   end
 
+  # ENV stored in the db
+  def env
+    ((secret || {}).dig(:env) || {})
+      .stringify_keys
+  end
+
+  def store_env_variable!(variable, value)
+    current_env_variables = env
+    current_env_variables[variable] = value
+    merge_secret!(env: current_env_variables)
+
+    env
+  end
+
+  def destroy_env_variable!(variable)
+    current_env_variables = env
+    current_env_variables.delete(variable)
+    merge_secret!(env: current_env_variables)
+
+    env
+  end
+
   def status_probe_path
     get_config("STATUS_PROBE_PATH")
   end

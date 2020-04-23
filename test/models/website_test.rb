@@ -36,6 +36,24 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal w.status, Website::DEFAULT_STATUS
   end
 
+  test 'destroying a website should destroy its secret if any' do
+    w = Website.create(
+      site_name: 'thisisauniquesite',
+      cloud_type: 'cloud',
+      user_id: default_user.id,
+      type: 'docker',
+      domain_type: 'subdomain'
+    )
+
+    w.save_secret!(what: 'is')
+
+    vault = w.vault
+
+    w.destroy
+
+    assert_equal Vault.exists?(id: vault.id), false
+  end
+
   test 'invalid site_name with custom domain' do
     w = Website.new(
       site_name: 'thisisauniq.--=uesite',
@@ -1053,5 +1071,45 @@ class WebsiteTest < ActiveSupport::TestCase
     w.change_status!(Website::STATUS_ONLINE)
 
     assert_equal w.active?, true
+  end
+
+  # saving env variables
+  test "env - retrieve without already stored ENV" do
+    assert_equal default_website.env, {}
+  end
+
+  test "env - saving a single variable" do
+    w = default_website
+    w.save_secret!({ test: 1234 })
+    w.store_env_variable!('MY_var', 'value1')
+
+    assert_equal w.env.dig('MY_var'), 'value1'
+    assert_equal w.secret[:test], 1234
+  end
+
+  test "env - saving variables multiple times" do
+    w = default_website
+    w.store_env_variable!('MY_var', 'value1')
+
+    assert_equal w.env.dig('MY_var'), 'value1'
+
+    w.reload
+    w.store_env_variable!('MY_var2', 'value2')
+    assert_equal w.env.dig('MY_var'), 'value1'
+    assert_equal w.env.dig('MY_var2'), 'value2'
+  end
+
+  test "env - removing variable" do
+    w = default_website
+    w.save_secret!({ test: 1234 })
+    w.store_env_variable!('MY_var', 'value1')
+    w.store_env_variable!('MY_var2', 'value2')
+
+    w.destroy_env_variable!('MY_var')
+
+    assert_nil w.env.dig('MY_var')
+    assert_equal w.env.dig('MY_var2'), 'value2'
+
+    assert_equal w.secret[:test], 1234
   end
 end

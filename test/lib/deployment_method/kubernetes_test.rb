@@ -153,6 +153,28 @@ VAR2=5678
     end
   end
 
+  test 'retrieve_dotenv with dotenv and stored env' do
+    @website.store_env_variable!("VAR2", "56789")
+    @website.store_env_variable!("VAR3", "HIWORLD")
+    generated_cmd = kubernetes_method.retrieve_dotenv_cmd(website: @website)
+
+    dotenv_content = '
+
+VAR1=1234
+VAR2=5678
+    '
+    prepare_ssh_session(generated_cmd, dotenv_content)
+
+    assert_scripted do
+      begin_ssh
+      dotenv_result = kubernetes_method.retrieve_dotenv(@website)
+
+      assert_equal dotenv_result["VAR1"], "1234"
+      assert_equal dotenv_result["VAR2"], "56789"
+      assert_equal dotenv_result["VAR3"], "HIWORLD"
+    end
+  end
+
   test 'dotenv_vars_to_s without variable' do
     assert_equal kubernetes_method.dotenv_vars_to_s({}), ""
   end
