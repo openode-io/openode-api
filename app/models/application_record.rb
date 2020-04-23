@@ -27,6 +27,13 @@ class ApplicationRecord < ActiveRecord::Base
     secret_vault
   end
 
+  def merge_secret!(hash)
+    # takes the original secret if any, and merge the passed hash
+    my_secret = (secret || {}).merge(hash)
+
+    save_secret!(my_secret)
+  end
+
   def secret
     return nil unless vault
 
