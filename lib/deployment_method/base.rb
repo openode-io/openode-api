@@ -7,6 +7,10 @@ module DeploymentMethod
     REMOTE_PATH_API_LIB = '/root/openode-www/api/lib'
     DEFAULT_CRONTAB_FILENAME = '.openode.cron'
 
+    def deployment_id
+      (runner&.execution&.id || 'not_available').to_s
+    end
+
     def error!(msg)
       Rails.logger.error(msg)
       notify('error', msg)

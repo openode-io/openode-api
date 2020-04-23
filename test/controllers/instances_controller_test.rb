@@ -353,6 +353,19 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test '/instances/:instance_id/changes skip if referenced image' do
+    website = default_website
+    set_reference_image_website(website, Website.last)
+
+    post '/instances/testsite/changes?location_str_id=canada',
+         params: { files: '[{"path":"test/what.txt","type":"F","checksum":"123456"}]' },
+         as: :json,
+         headers: default_headers_auth
+
+    assert_response :success
+    assert_equal response.parsed_body.length, 0
+  end
+
   # send_compressed_file
   test '/instances/:instance_id/send_compressed_file ' do
     set_dummy_secrets_to(LocationServer.all)

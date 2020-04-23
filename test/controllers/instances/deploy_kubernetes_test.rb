@@ -23,7 +23,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
     deployment = website.deployments.last
 
-    unless parent_deployment
+    if !parent_deployment && website.reference_website_image.blank?
       prepare_check_repo_size(kubernetes_method, website, "1231 /what")
       prepare_build_image(kubernetes_method, website, deployment, "new image built")
       prepare_push_image(kubernetes_method, website, deployment, "result")
@@ -141,6 +141,47 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert_equal deployment.parent_execution.id, parent_deployment.id
       assert_equal deployment.obj.dig('image_name_tag'),
                    parent_deployment.obj.dig('image_name_tag')
+    end
+  end
+
+  test '/instances/:instance_id/restart - with reference_website_image' do
+    @website.crontab = ''
+    @website.save!
+
+    referenced_website = Website.last
+
+    img_name_tag = 'mypretty/image'
+
+    Deployment.create!(
+      website: referenced_website,
+      website_location: referenced_website.website_locations.first,
+      status: Deployment::STATUS_RUNNING,
+      obj: {
+        image_name_tag: img_name_tag
+      }
+    )
+
+    set_reference_image_website(@website, referenced_website)
+
+    post "/instances/#{@website.site_name}/restart",
+         as: :json,
+         params: base_params,
+         headers: default_headers_auth
+
+    prepare_launch_happy_path(@kubernetes_method, @website,
+                              @website_location)
+
+    assert_scripted do
+      begin_ssh
+      run_deployer_job
+
+      deployment = @website.deployments.last
+      @website.reload
+
+      assert_equal @website.status, Website::STATUS_ONLINE
+      assert_equal deployment.status, Deployment::STATUS_SUCCESS
+
+      assert_equal deployment.obj.dig('image_name_tag'), img_name_tag
     end
   end
 

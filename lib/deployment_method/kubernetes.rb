@@ -5,6 +5,7 @@ module DeploymentMethod
   class Kubernetes < Base
     KUBECONFIGS_BASE_PATH = "config/kubernetes/"
     CERTS_BASE_PATH = "config/certs/"
+    KUBE_TMP_PATH = "/home/tmp/"
 
     def initialize; end
 
@@ -86,6 +87,8 @@ module DeploymentMethod
 
       if parent_execution
         parent_execution&.obj&.dig('image_name_tag')
+      elsif website.reference_website_image.present?
+        website.latest_reference_website_image_tag_address
       else
         notify("info", "Preparing instance image...")
         image_manager.verify_size_repo
@@ -179,7 +182,7 @@ module DeploymentMethod
 
     def self.yml_remote_file_path(action)
       if !@@test_kubectl_file_path
-        tmp_file = Tempfile.new("kubectl-#{action}")
+        tmp_file = Tempfile.new("kubectl-#{action}", KUBE_TMP_PATH)
 
         tmp_file.path
       else
@@ -188,7 +191,6 @@ module DeploymentMethod
     end
 
     def kubectl_yml_action(website_location, action, content, opts = {})
-      # upload(local_path, remote_path)
       tmp_file_path = Kubernetes.yml_remote_file_path(action)
       runner.upload_content_to(content, tmp_file_path)
 
@@ -224,10 +226,15 @@ module DeploymentMethod
     def retrieve_remote_file(options = {})
       assert options[:cmd]
       assert options[:name]
+      assert options[:website]
 
       result = if runner.execution&.parent_execution
                  # if there is a parent execution, we get the content from the saved vault
                  runner.execution&.parent_execution&.secret&.dig(options[:name].to_sym) || ""
+               elsif options[:website].reference_website_image.present?
+                 # we are referenced to the last execution of a website
+                 latest_deployment = options[:website]&.latest_reference_website_image_deployment
+                 latest_deployment&.secret&.dig(options[:name].to_sym) || ""
                else
                  ex(options[:cmd], options)[:stdout]
       end
@@ -426,6 +433,7 @@ module DeploymentMethod
             metadata:
               labels:
                 app: www
+                deploymentId: "#{deployment_id}"
             spec:
               imagePullSecrets:
               - name: regcred
@@ -507,14 +515,16 @@ module DeploymentMethod
         name: 'cert_crt',
         cmd: "retrieve_file_cmd",
         ensure_exit_code: 0,
-        path: "#{website.repo_dir}#{website.certs[:cert_path]}"
+        path: "#{website.repo_dir}#{website.certs[:cert_path]}",
+        website: website
       )
 
       crt_key = retrieve_remote_file(
         name: 'cert_key',
         cmd: "retrieve_file_cmd",
         ensure_exit_code: 0,
-        path: "#{website.repo_dir}#{website.certs[:cert_key_path]}"
+        path: "#{website.repo_dir}#{website.certs[:cert_key_path]}",
+        website: website
       )
 
       generate_tls_secret_yml(website,

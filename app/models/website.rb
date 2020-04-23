@@ -141,6 +141,11 @@ class Website < ApplicationRecord
       type: 'file_in_repo',
       description: 'Relative dotenv (.env) file path. Example: .production.env',
       default: '.env'
+    },
+    {
+      variable: 'REFERENCE_WEBSITE_IMAGE',
+      type: 'site_name',
+      description: 'Use the image of a specified website site name'
     }
   ].freeze
 
@@ -301,19 +306,35 @@ class Website < ApplicationRecord
         end
       end
 
-      if value.present? && config[:type] == 'file_in_repo'
-        cur_dir = "#{repo_dir}#{value}"
-
-        unless Io::Path.secure?(repo_dir, cur_dir)
-          errors.add(:configs, "Invalid config value")
-        end
+      if value.present? && config[:type].present?
+        # call method based on type type, see below
+        send("config_#{config[:type]}_must_comply", config, value)
       end
+    end
+  end
 
-      if value.present? && config[:type] == 'path'
-        unless Io::Path.valid?(value)
-          errors.add(:configs, "Invalid config value")
-        end
-      end
+  def config_path_must_comply(_config, value)
+    unless Io::Path.valid?(value)
+      errors.add(:configs, "Invalid config value")
+    end
+  end
+
+  def config_file_in_repo_must_comply(_config, value)
+    cur_dir = "#{repo_dir}#{value}"
+
+    unless Io::Path.secure?(repo_dir, cur_dir)
+      errors.add(:configs, "Invalid config value")
+    end
+  end
+
+  def config_website_must_comply(config, value)
+    # is setting an attribute in website object
+    self[config[:variable].downcase] = value
+  end
+
+  def config_site_name_must_comply(_config, value)
+    unless Website.exists?(site_name: value)
+      errors.add(:configs, "website #{value} not found")
     end
   end
 
@@ -535,6 +556,18 @@ class Website < ApplicationRecord
 
   def dotenv_filepath
     get_config("DOTENV_FILEPATH")
+  end
+
+  def reference_website_image
+    Website.find_by(site_name: get_config("REFERENCE_WEBSITE_IMAGE"))
+  end
+
+  def latest_reference_website_image_deployment
+    reference_website_image&.deployments&.last
+  end
+
+  def latest_reference_website_image_tag_address
+    latest_reference_website_image_deployment&.obj&.dig('image_name_tag')
   end
 
   # ENV stored in the db

@@ -175,15 +175,20 @@ class InstancesController < ApplicationController
   api!
   def changes
     validation_error!('Missing files') unless params['files']
-    files_client = JSON.parse(params['files'])
-    files_server = JSON.parse(@runner.execute([
-                                                {
-                                                  cmd_name: 'files_listing',
-                                                  options: { path: @website.repo_dir }
-                                                }
-                                              ]).first[:result][:stdout])
 
-    changes = Io::Dir.diff(files_client, files_server, @website.normalized_storage_areas)
+    changes = if @website.reference_website_image.present?
+                []
+              else
+                files_client = JSON.parse(params['files'])
+                files_server = JSON.parse(@runner.execute([
+                                                            {
+                                                              cmd_name: 'files_listing',
+                                                              options: { path: @website.repo_dir }
+                                                            }
+                                                          ]).first[:result][:stdout])
+
+                Io::Dir.diff(files_client, files_server, @website.normalized_storage_areas)
+    end
 
     @website_event_obj = { title: 'sync-changes', changes: changes }
 

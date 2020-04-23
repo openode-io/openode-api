@@ -15,16 +15,10 @@ class ConfigsController < InstancesController
 
   api!
   def set_config
-    config = Website.config_def(@var_name)
     value = params['value']
 
     @website.configs ||= {}
     @website.configs[@var_name.to_s] = value
-
-    if config[:type] == 'website'
-      # save in website object
-      @website[@var_name.downcase] = value
-    end
 
     @website.save!
 

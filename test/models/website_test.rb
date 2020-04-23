@@ -552,6 +552,56 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.valid?, false
   end
 
+  test 'set config REFERENCE_WEBSITE_IMAGE - happy path' do
+    referencing_to_website = Website.last
+
+    website = default_website
+    website.configs ||= {}
+    website.configs['REFERENCE_WEBSITE_IMAGE'] = referencing_to_website.site_name
+    website.save
+
+    assert_equal website.valid?, true
+
+    website.reload
+
+    assert_equal website.reference_website_image, referencing_to_website
+  end
+
+  test 'set config REFERENCE_WEBSITE_IMAGE - fail if site not found' do
+    website = default_website
+    website.configs ||= {}
+    website.configs['REFERENCE_WEBSITE_IMAGE'] = 'invalidsitename'
+    website.save
+
+    assert_equal website.valid?, false
+  end
+
+  test 'latest_reference_website_image_tag_address - happy path' do
+    referencing_to_website = Website.last
+
+    img_name_tag = 'my/image:1234'
+
+    Deployment.create!(
+      website: referencing_to_website,
+      website_location: referencing_to_website.website_locations.first,
+      status: Deployment::STATUS_RUNNING,
+      obj: {
+        image_name_tag: img_name_tag
+      }
+    )
+
+    website = default_website
+    website.configs ||= {}
+    website.configs['REFERENCE_WEBSITE_IMAGE'] = referencing_to_website.site_name
+    website.save
+
+    assert_equal website.valid?, true
+
+    website.reload
+
+    assert_equal website.latest_reference_website_image_tag_address, img_name_tag
+  end
+
   test 'status_probe_path default' do
     website = default_website
     website.save!
