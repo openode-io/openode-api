@@ -587,6 +587,12 @@ class ActiveSupport::TestCase
     website.save!
   end
 
+  def set_reference_image_website(website, referenced_website)
+    website.configs ||= {}
+    website.configs['REFERENCE_WEBSITE_IMAGE'] = referenced_website.site_name
+    website.save!
+  end
+
   def invoke_task(task_name)
     OpenodeApi::Application.load_tasks unless defined?(Rake::Task)
 

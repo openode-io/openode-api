@@ -134,10 +134,12 @@ Metrics/AbcSize:
     - 'lib/io/dir.rb' # to refactor
     - 'lib/deployment_method/runner.rb' # to refactor
     - 'lib/deployment_method/docker_compose.rb' # to refactor
+    - 'lib/deployment_method/kubernetes.rb'
     - 'lib/deployment_method/deployer.rb'
     - 'lib/deployment_method/base.rb'
     - 'db/migrate/*.rb'
     - 'app/models/website.rb'
+    - 'test/lib/deployment_method/kubernetes_test.rb'
 
 Style/Documentation:
   Enabled: false

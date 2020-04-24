@@ -246,6 +246,40 @@ VAR2=5678
     end
   end
 
+  test 'retrieve_remote_file - with reference_website_image' do
+    referenced_website = Website.last
+
+    img_name_tag = 'mypretty/image'
+
+    original_deployment = Deployment.create!(
+      website: referenced_website,
+      website_location: @website_location,
+      status: Deployment::STATUS_RUNNING,
+      obj: {
+        image_name_tag: img_name_tag
+      }
+    )
+
+    set_reference_image_website(@website, referenced_website)
+
+    assert_scripted do
+      begin_ssh
+
+      kubernetes_method.runner.init_execution!('Deployment')
+
+      # add dotenv in the vault
+      original_deployment.save_secret!(dotenv: 'TITI=toto')
+
+      result = kubernetes_method.retrieve_remote_file(
+        name: 'dotenv',
+        cmd: 'retrieve_dotenv_cmd',
+        website: @website
+      )
+
+      assert_equal result, "TITI=toto"
+    end
+  end
+
   test 'get_pods_json - happy path' do
     prepare_get_pods_happy(@website_location)
 
@@ -446,6 +480,7 @@ VAR2=5678
     assert_includes yml, "  livenessProbe:" if opts[:with_probes]
     assert_includes yml, "  readinessProbe:" if opts[:with_probes]
     assert_includes yml, "  resources:"
+    assert_includes yml, "deploymentId: \"#{kubernetes_method.deployment_id}\""
 
     # docker registry secret
     assert_includes yml, "imagePullSecrets:"
