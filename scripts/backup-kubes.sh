@@ -1,8 +1,7 @@
-
-ROOT_PATH=/home/martin/works/openode-api/
+ROOT_PATH=/var/www/openode-api/
 KUBE_CONFIGS_PATH=$ROOT_PATH"config/kubernetes/"
-PREFIX_CONFIG_FILES=development-
-OUTPUT_BACKUP=/home/martin/backup-kubes/
+PREFIX_CONFIG_FILES=production-
+OUTPUT_BACKUP=/home/ubuntu/backup-kubes/
 
 echo "--- "
 echo "Configs:"
@@ -21,7 +20,7 @@ do
 
   nss=`KUBECONFIG=$kube_config_file kubectl get namespaces | awk '{print $1}' | grep "^instance-"`
 
-  for namespace in "instance-19217" #$nss
+  for namespace in $nss
   do
     ns_yml_file="$cur_dir/ns-$namespace.yml"
     ns_main_yml_file="$cur_dir/$namespace.yml"
