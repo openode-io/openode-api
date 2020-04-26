@@ -15,9 +15,9 @@ class AccountController < ApplicationController
   # returns the logged in user
   api :GET, 'account/me'
   description 'Provides the authenticated user information'
-  returns :code => 200, :desc => "" do
-    property :id, Integer, :desc => "User id"
-    property :email, String, :desc => "User email"
+  returns code: 200, desc: "" do
+    property :id, Integer, desc: "User id"
+    property :email, String, desc: "User email"
   end
   def me
     result = @user.attributes
