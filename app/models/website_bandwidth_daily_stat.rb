@@ -8,6 +8,18 @@ class WebsiteBandwidthDailyStat < History
     ).last
   end
 
+  def self.last_days(website, days = 31)
+    WebsiteBandwidthDailyStat
+    .where(ref_id: website.id)
+    .where(created_at: (days.days.ago)..Time.zone.now)
+  end
+
+  def self.sum_variable(stats, variable_name)
+    return 0 unless stats
+
+    stats.map { |s| s.obj[variable_name] || 0 }.sum
+  end
+
   def self.log(website, data)
     last_stat = WebsiteBandwidthDailyStat.last_stat_of(website)
 
