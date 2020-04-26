@@ -17,6 +17,8 @@ class AccountController < ApplicationController
     result = @user.attributes
     result['type'] = @user.type
 
+    result.delete('password_hash')
+
     json(result)
   end
 

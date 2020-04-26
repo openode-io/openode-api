@@ -33,6 +33,7 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal response.parsed_body['type'], u.type
     assert_equal response.parsed_body['email'], u.email
+    assert_nil response.parsed_body['password_hash']
   end
 
   test 'PATCH /account/me with valid' do
