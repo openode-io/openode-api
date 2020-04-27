@@ -757,6 +757,30 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_in_delta credits_actions[0].credits_spent, expected_credits_spent, 0.0000001
   end
 
+  # spend_exceeding_traffic
+  test 'spend_exceeding_traffic - happy path' do
+    website = default_website
+    website.credit_actions.destroy_all
+    orig_credits = website.user.credits
+
+    bytes = 5_000_000
+    website.spend_exceeding_traffic!(bytes)
+
+    c = CreditAction.last
+
+    assert_equal c.action_type, 'consume-bandwidth'
+
+    cost = 100 * CloudProvider::Helpers::Pricing.cost_for_extra_bandwidth_bytes(bytes)
+
+    assert_equal c.credits_spent, cost
+    assert_equal website.user.credits, orig_credits - cost
+  end
+
+  # plan
+  test 'plan - happy path' do
+    assert_equal default_website.plan[:id], '100-MB'
+  end
+
   # memory
   test 'memory with 100 MB plan' do
     assert_equal default_website.account_type, "second"
@@ -768,6 +792,11 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal default_website.cpus, 1
   end
 
+  test 'bandwidth_limit_in_bytes' do
+    expected_limit = default_website.plan[:bandwidth] * 1000 * 1000 * 1000
+    assert_equal default_website.bandwidth_limit_in_bytes, expected_limit
+  end
+
   test 'cpus with extra cpus' do
     website = default_website
     wl = default_website_location
@@ -775,6 +804,15 @@ class WebsiteTest < ActiveSupport::TestCase
     wl.save!
 
     assert_equal website.cpus, 2
+  end
+
+  test 'exceeds_bandwidth_limit? - not exceeding' do
+    assert_equal Website.exceeds_bandwidth_limit?(default_website, 10), false
+  end
+
+  test 'exceeds_bandwidth_limit? - exceeding' do
+    consumed = default_website.bandwidth_limit_in_bytes + 10
+    assert_equal Website.exceeds_bandwidth_limit?(default_website, consumed), true
   end
 
   # create website

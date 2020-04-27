@@ -38,7 +38,6 @@ class LibMonitorDeploymentsTest < ActiveSupport::TestCase
       invoke_task "monitor_deployments:pod_status"
 
       status = website.statuses.last
-      puts "status = #{status.inspect}"
       statuses = status.simplified_container_statuses
 
       assert_equal status.ref_id, website.id
@@ -217,6 +216,62 @@ class LibMonitorDeploymentsTest < ActiveSupport::TestCase
       assert_equal stat.obj['previous_network_metrics'].first['tx_bytes'], 9_758_564
       assert_equal stat.obj['rcv_bytes'], 1000 + 100
       assert_equal stat.obj['tx_bytes'], 100 + 10
+    end
+  end
+
+  test "monitor deployments bandwidth - with exceeding traffic" do
+    Website.all.each do |w|
+      w.status = Website::STATUS_OFFLINE
+      w.save!
+    end
+
+    w = default_website
+    w.change_status!(Website::STATUS_ONLINE)
+    w.type = Website::TYPE_KUBERNETES
+    w.save!
+
+    WebsiteBandwidthDailyStat.all.each(&:destroy)
+    CreditAction.all.each(&:destroy)
+
+    WebsiteBandwidthDailyStat.create(
+      website: w,
+      obj: {
+        "previous_network_metrics" => [
+          {
+            "interface" => "eth0",
+            "rcv_bytes" => 84_363_193.0 - 1000,
+            "tx_bytes" => 9_758_564.0 - 100
+          }
+        ],
+        "rcv_bytes" => 200_000_000_000.0,
+        "tx_bytes" => 1_000_000_000.0
+      }
+    )
+
+    kubernetes_method = get_kubernetes_method(w)
+
+    prepare_get_pods_happy(kubernetes_method, w.website_locations.first)
+
+    cmd = kubernetes_method.kubectl(
+      website_location: w.website_locations.first,
+      with_namespace: true,
+      s_arguments: "exec www-deployment-5889df69dc-xg9xl -- cat /proc/net/dev"
+    )
+
+    prepare_ssh_session(cmd, IO.read('test/fixtures/net/proc_net_dev/1'))
+
+    assert_scripted do
+      begin_ssh
+
+      invoke_task "monitor_deployments:bandwidth"
+
+      # c = CreditAction.last
+
+      # expected_cost =
+      #   100 * CloudProvider::Helpers::Pricing.cost_for_extra_bandwidth_bytes(1100)
+
+      # assert_equal c.action_type, 'consume-bandwidth'
+      # assert_in_delta c.credits_spent, expected_cost, 0.000001
     end
   end
 end

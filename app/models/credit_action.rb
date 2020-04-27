@@ -6,7 +6,8 @@ class CreditAction < ApplicationRecord
 
   TYPE_CONSUME_PLAN = 'consume-plan'
   TYPE_CONSUME_STORAGE = 'consume-storage'
-  ACTION_TYPES = [TYPE_CONSUME_PLAN, TYPE_CONSUME_STORAGE].freeze
+  TYPE_CONSUME_BANDWIDTH = 'consume-bandwidth'
+  ACTION_TYPES = [TYPE_CONSUME_PLAN, TYPE_CONSUME_STORAGE, TYPE_CONSUME_BANDWIDTH].freeze
 
   validates :action_type, inclusion: { in: ACTION_TYPES }
 

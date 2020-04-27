@@ -624,10 +624,19 @@ class Website < ApplicationRecord
     (1 + total_extra_cpus).to_i
   end
 
+  def bandwidth_limit_in_bytes
+    # original is in Gb
+    plan[:bandwidth].to_i * 1000 * 1000 * 1000
+  end
+
   def plan_name
     "#{plan[:ram]} MB"
   rescue StandardError
     "N/A"
+  end
+
+  def self.exceeds_bandwidth_limit?(website, bytes_consumed)
+    bytes_consumed > website.bandwidth_limit_in_bytes
   end
 
   def price
@@ -812,6 +821,19 @@ class Website < ApplicationRecord
     current_plan = plan
 
     return if !current_plan || (open_source_plan? && open_source_activated)
+
+    consume_spendings(spendings)
+  end
+
+  def spend_exceeding_traffic!(bytes)
+    spendings = [
+      {
+        action_type: CreditAction::TYPE_CONSUME_BANDWIDTH,
+        credits_cost: Website.cost_price_to_credits(
+          CloudProvider::Helpers::Pricing.cost_for_extra_bandwidth_bytes(bytes)
+        )
+      }
+    ]
 
     consume_spendings(spendings)
   end
