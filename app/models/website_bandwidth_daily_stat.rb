@@ -10,8 +10,8 @@ class WebsiteBandwidthDailyStat < History
 
   def self.last_days(website, days = 31)
     WebsiteBandwidthDailyStat
-    .where(ref_id: website.id)
-    .where(created_at: (days.days.ago)..Time.zone.now)
+      .where(ref_id: website.id)
+      .where(created_at: (days.days.ago)..Time.zone.now)
   end
 
   def self.sum_variable(stats, variable_name)
@@ -33,6 +33,8 @@ class WebsiteBandwidthDailyStat < History
       end
 
       last_stat.save
+
+      last_stat
     else
       WebsiteBandwidthDailyStat.create(
         ref_id: website.id,

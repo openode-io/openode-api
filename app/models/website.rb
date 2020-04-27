@@ -825,6 +825,19 @@ class Website < ApplicationRecord
     consume_spendings(spendings)
   end
 
+  def spend_exceeding_traffic!(bytes)
+    spendings = [
+      {
+        action_type: CreditAction::TYPE_CONSUME_BANDWIDTH,
+        credits_cost: Website.cost_price_to_credits(
+          CloudProvider::Helpers::Pricing.cost_for_extra_bandwidth_bytes(bytes)
+        )
+      }
+    ]
+
+    consume_spendings(spendings)
+  end
+
   def consume_spendings(spendings)
     spendings.each do |spending|
       if spending[:credits_cost] != 0

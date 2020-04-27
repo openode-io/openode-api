@@ -757,6 +757,25 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_in_delta credits_actions[0].credits_spent, expected_credits_spent, 0.0000001
   end
 
+  # spend_exceeding_traffic
+  test 'spend_exceeding_traffic - happy path' do
+    website = default_website
+    website.credit_actions.destroy_all
+    orig_credits = website.user.credits
+
+    bytes = 5_000_000
+    website.spend_exceeding_traffic!(bytes)
+
+    c = CreditAction.last
+
+    assert_equal c.action_type, 'consume-bandwidth'
+
+    cost = 100 * CloudProvider::Helpers::Pricing.cost_for_extra_bandwidth_bytes(bytes)
+
+    assert_equal c.credits_spent, cost
+    assert_equal website.user.credits, orig_credits - cost
+  end
+
   # plan
   test 'plan - happy path' do
     assert_equal default_website.plan[:id], '100-MB'

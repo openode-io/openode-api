@@ -47,7 +47,7 @@ class WebsiteBandwidthDailyStatTest < ActiveSupport::TestCase
         'rcv_bytes' => 150,
         'tx_bytes' => 33
       },
-      created_at: 1.days.ago
+      created_at: 1.day.ago
     )
 
     s2 = WebsiteBandwidthDailyStat.create(
@@ -84,7 +84,7 @@ class WebsiteBandwidthDailyStatTest < ActiveSupport::TestCase
         'rcv_bytes' => 150,
         'tx_bytes' => 33
       },
-      created_at: 1.days.ago
+      created_at: 1.day.ago
     )
 
     WebsiteBandwidthDailyStat.create(
@@ -107,7 +107,7 @@ class WebsiteBandwidthDailyStatTest < ActiveSupport::TestCase
 
     stats = WebsiteBandwidthDailyStat.last_days(w)
 
-    assert_equal WebsiteBandwidthDailyStat.sum_variable(stats, 'rcv_bytes'), 150+151
-    assert_equal WebsiteBandwidthDailyStat.sum_variable(stats, 'tx_bytes'), 33+35
+    assert_equal WebsiteBandwidthDailyStat.sum_variable(stats, 'rcv_bytes'), 150 + 151
+    assert_equal WebsiteBandwidthDailyStat.sum_variable(stats, 'tx_bytes'), 33 + 35
   end
 end
