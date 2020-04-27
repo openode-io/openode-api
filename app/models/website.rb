@@ -15,7 +15,6 @@ class Website < ApplicationRecord
   has_many :collaborators
   has_many :website_locations, dependent: :destroy
   has_many :events, foreign_key: :ref_id, class_name: :WebsiteEvent, dependent: :destroy
-  has_many :deployments
   has_many :executions
   has_many :credit_actions
   has_many :website_bandwidth_daily_stats, foreign_key: :ref_id,
@@ -24,6 +23,10 @@ class Website < ApplicationRecord
   has_many :statuses, foreign_key: :ref_id,
                       class_name: :WebsiteStatus,
                       dependent: :destroy
+
+  def deployments
+    Deployment.type_dep.where(website: self)
+  end
 
   scope :custom_domain, -> { where(domain_type: 'custom_domain') }
   scope :having_extra_storage, lambda {
@@ -755,7 +758,7 @@ class Website < ApplicationRecord
       return false, "*** #{msg}"
     end
 
-    nb_active_deployments = Deployment.running.by_user(user).active.count
+    nb_active_deployments = Deployment.type_dep.running.by_user(user).active.count
 
     if nb_active_deployments > Deployment::MAX_CONCURRENT_BUILDS_PER_USER
       return false, "*** Maximum number of concurrent builds per user reached."

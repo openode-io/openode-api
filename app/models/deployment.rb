@@ -6,6 +6,10 @@ class Deployment < Execution
     where("created_at >= ?", MAX_RUN_TIME.ago)
   }
 
+  scope :type_dep, lambda {
+    where(type: 'Deployment')
+  }
+
   def self.nb_archived_deployments
     stat = GlobalStat.first
 
@@ -15,7 +19,7 @@ class Deployment < Execution
   end
 
   def self.total_nb
-    Deployment.count + # active ones
+    Deployment.type_dep.count + # active ones
       Deployment.nb_archived_deployments # + archived
   end
 

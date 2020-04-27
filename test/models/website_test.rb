@@ -498,6 +498,11 @@ class WebsiteTest < ActiveSupport::TestCase
         website_location: website.website_locations.first,
         status: Deployment::STATUS_RUNNING
       )
+      Task.create!(
+        website: website,
+        website_location: website.website_locations.first,
+        status: Deployment::STATUS_RUNNING
+      )
     end
 
     # this deployment is too old, so it's not counted.
@@ -587,6 +592,16 @@ class WebsiteTest < ActiveSupport::TestCase
       status: Deployment::STATUS_RUNNING,
       obj: {
         image_name_tag: img_name_tag
+      }
+    )
+
+    # should ignore this one even if it's the latest execution!
+    Task.create!(
+      website: referencing_to_website,
+      website_location: referencing_to_website.website_locations.first,
+      status: Deployment::STATUS_RUNNING,
+      obj: {
+        test: 'fail'
       }
     )
 
