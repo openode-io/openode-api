@@ -490,6 +490,10 @@ VAR2=5678
     assert_includes yml, "memory: #{opts[:requested_memory]}Mi" if opts[:requested_memory]
     assert_includes yml, "memory: #{opts[:limited_memory]}Mi" if opts[:limited_memory]
 
+    # Deployment strategy
+    assert_includes yml, "type: RollingUpdate" if website.memory <= 1000
+    assert_includes yml, "type: Recreate" if website.memory > 1000
+
     # dotenv
     assert_includes yml, "envFrom:"
     assert_includes yml, "- configMapRef:"
@@ -511,6 +515,23 @@ VAR2=5678
         assert_not_includes yml, s
       end
     end
+  end
+
+  # deployment strategy
+  test 'deployment_strategy - with rolling update' do
+    assert @website.memory <= 1000
+    strategy = kubernetes_method.deployment_strategy(@website.memory)
+
+    assert_equal strategy, "RollingUpdate"
+  end
+
+  test 'deployment_strategy - with Recreate' do
+    @website.account_type = "sixth"
+    @website.save!
+    assert @website.memory > 1000
+    strategy = kubernetes_method.deployment_strategy(@website.memory)
+
+    assert_equal strategy, "Recreate"
   end
 
   test 'generate_deployment_yml - basic' do

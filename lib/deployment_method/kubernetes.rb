@@ -417,6 +417,16 @@ module DeploymentMethod
       yml + generate_deployment_mount_paths_yml(website, website_location)
     end
 
+    def deployment_strategy(memory)
+      kube_cloud = Kubernetes.kube_configs
+      attr_limit_memory = 'limit_memory_for_rolling_update_strategy'
+      limit_mem_rolling_update = kube_cloud[attr_limit_memory]
+
+      raise "Missing #{attr_limit_memory}" if limit_mem_rolling_update.blank?
+
+      memory <= limit_mem_rolling_update ? "RollingUpdate" : "Recreate"
+    end
+
     def generate_deployment_yml(website, website_location, opts)
       <<~END_YML
         apiVersion: apps/v1
@@ -429,6 +439,8 @@ module DeploymentMethod
             matchLabels:
               app: www
           replicas: 1
+          strategy:
+            type: #{deployment_strategy(website.memory)}
           template:
             metadata:
               labels:

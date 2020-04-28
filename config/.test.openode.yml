@@ -47,6 +47,7 @@ application:
               disk_gb: 200
     - type: kubernetes
       storage_class_name: do-block-storage
+      limit_memory_for_rolling_update_strategy: 1000 # if >=, will use Recreate strategy
       locations:
         - str_id: canada
           full_name: Montreal (Canada2)
