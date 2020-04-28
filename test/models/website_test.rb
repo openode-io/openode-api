@@ -572,6 +572,46 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.reference_website_image, referencing_to_website
   end
 
+  test 'set config REFERENCE_WEBSITE_IMAGE - with collaborator access' do
+    Collaborator.all.each(&:destroy)
+    website = default_website
+
+    referencing_to_website = Website.last
+    user_referencing = User.where("id <> #{website.user_id}").first
+    referencing_to_website.user = user_referencing
+    referencing_to_website.save!
+
+    Collaborator.create!(
+      website: referencing_to_website,
+      user: website.user,
+      permissions: [Website::PERMISSION_ROOT]
+    )
+
+    website.configs ||= {}
+    website.configs['REFERENCE_WEBSITE_IMAGE'] = referencing_to_website.site_name
+    website.save!
+
+    website.reload
+
+    assert_equal website.reference_website_image, referencing_to_website
+  end
+
+  test 'set config REFERENCE_WEBSITE_IMAGE - without access' do
+    Collaborator.all.each(&:destroy)
+    website = default_website
+
+    referencing_to_website = Website.last
+    user_referencing = User.where("id <> #{website.user_id}").first
+    referencing_to_website.user = user_referencing
+    referencing_to_website.save!
+
+    website.configs ||= {}
+    website.configs['REFERENCE_WEBSITE_IMAGE'] = referencing_to_website.site_name
+    website.save
+
+    assert_equal website.valid?, false
+  end
+
   test 'set config REFERENCE_WEBSITE_IMAGE - fail if site not found' do
     website = default_website
     website.configs ||= {}

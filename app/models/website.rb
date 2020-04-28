@@ -336,6 +336,10 @@ class Website < ApplicationRecord
   end
 
   def config_site_name_must_comply(_config, value)
+    unless user.websites_with_access.any? { |w| w.site_name == value }
+      errors.add(:configs, "Unauthorized access to #{value} from #{site_name}")
+    end
+
     unless Website.exists?(site_name: value)
       errors.add(:configs, "website #{value} not found")
     end
