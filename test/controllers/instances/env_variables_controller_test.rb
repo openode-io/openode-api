@@ -27,7 +27,7 @@ class EnvVariablesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
-    assert_equal response.parsed_body, { "VAR1" => 1234, "VAR2" => 12_345 }
+    assert_equal response.parsed_body, "VAR1" => 1234, "VAR2" => 12_345
   end
 
   test 'POST /instances/:instance_id/env_variables/:name - happy path' do
@@ -58,6 +58,34 @@ class EnvVariablesControllerTest < ActionDispatch::IntegrationTest
          headers: default_headers_auth
 
     assert_equal w.env['VAR2'], 'test12345'
+  end
+
+  test 'PUT /instances/:instance_id/env_variables/ - happy path' do
+    w = default_website
+
+    w.store_env_variable!('hi', 'world')
+
+    put "/instances/#{w.id}/env_variables/",
+        as: :json,
+        params: {
+          variables: {
+            VAR1: 'test123',
+            VAR2: 'tteesstt'
+          }
+        },
+        headers: default_headers_auth
+
+    assert_response :success
+
+    w.reload
+
+    assert_equal response.parsed_body, {}
+    assert_equal w.env['VAR1'], 'test123'
+    assert_equal w.env['VAR2'], 'tteesstt'
+    assert_equal w.env.keys, %w[VAR1 VAR2]
+
+    assert_equal w.reload.events.count, 1
+    assert_equal w.events.first.obj['title'], 'ENV Variables changed'
   end
 
   test 'DELETE /instances/:instance_id/env_variables/:name - happy path' do
