@@ -30,9 +30,8 @@ class ConfigsControllerTest < ActionDispatch::IntegrationTest
          headers: default_headers_auth
 
     assert_response :success
-    w = Website.find_by site_name: 'testsite'
 
-    puts "  #{w.configs['REDIR_HTTP_TO_HTTPS']}"
+    w = Website.find_by site_name: 'testsite'
 
     assert_equal w.configs['REDIR_HTTP_TO_HTTPS'], 'true'
     assert_equal w.redir_http_to_https, true

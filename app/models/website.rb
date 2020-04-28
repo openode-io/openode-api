@@ -583,6 +583,12 @@ class Website < ApplicationRecord
       .stringify_keys
   end
 
+  def overwrite_env_variables!(variables)
+    merge_secret!(env: variables)
+
+    env
+  end
+
   def store_env_variable!(variable, value)
     current_env_variables = env
     current_env_variables[variable] = value
