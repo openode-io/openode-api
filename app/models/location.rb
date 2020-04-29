@@ -6,6 +6,7 @@ class Location < ApplicationRecord
   validates :cloud_provider, inclusion: { in: %w[internal vultr kubernetes] }
 
   SUBDOMAIN = {
-    usa: ''
+    usa: '',
+    eu: 'eu'
   }.freeze
 end

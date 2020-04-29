@@ -17,3 +17,9 @@ usa:
   full_name: New York (USA)
   country_fullname: United States
   cloud_provider: internal
+
+eu:
+  str_id: eu
+  full_name: Amsterdam (Netherlands, Europe)
+  country_fullname: Netherlands
+  cloud_provider: internal

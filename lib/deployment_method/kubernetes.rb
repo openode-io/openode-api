@@ -295,7 +295,7 @@ module DeploymentMethod
         ---
         #{generate_manual_tls_secret_yml(website)}
         ---
-        #{generate_wildcard_subdomain_tls_secret_yaml(website) if website.subdomain?}
+        #{generate_wildcard_subdomain_tls_secret_yaml(website, website_location) if website.subdomain?}
         ---
         #{generate_config_map_yml(
           name: 'dotenv',
@@ -545,11 +545,13 @@ module DeploymentMethod
                               key: crt_key)
     end
 
-    def generate_wildcard_subdomain_tls_secret_yaml(website)
+    def generate_wildcard_subdomain_tls_secret_yaml(website, website_location)
+      location_str_id = website_location.location.str_id
+
       wildcard_crt_path =
-        Rails.root.join("#{CERTS_BASE_PATH}#{ENV['RAILS_ENV']}-wildcard.crt")
+        Rails.root.join("#{CERTS_BASE_PATH}#{ENV['RAILS_ENV']}-wildcard-#{location_str_id}.crt")
       wildcard_key_path =
-        Rails.root.join("#{CERTS_BASE_PATH}#{ENV['RAILS_ENV']}-wildcard.key")
+        Rails.root.join("#{CERTS_BASE_PATH}#{ENV['RAILS_ENV']}-wildcard-#{location_str_id}.key")
 
       return "" if !File.exist?(wildcard_crt_path) || !File.exist?(wildcard_key_path)
 

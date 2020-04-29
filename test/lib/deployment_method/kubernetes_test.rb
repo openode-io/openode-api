@@ -751,10 +751,13 @@ VAR2=5678
     @website.configs['SSL_CERTIFICATE_KEY_PATH'] = nil
     @website.save!
 
-    yml = kubernetes_method.generate_wildcard_subdomain_tls_secret_yaml(@website)
+    wl = @website.website_locations.first
 
-    crt_b64 = Base64.strict_encode64(IO.read("config/certs/test-wildcard.crt"))
-    key_b64 = Base64.strict_encode64(IO.read("config/certs/test-wildcard.key"))
+    yml = kubernetes_method.generate_wildcard_subdomain_tls_secret_yaml(@website, wl)
+    location_str_id = @website.website_locations.first.location.str_id
+
+    crt_b64 = Base64.strict_encode64(IO.read("config/certs/test-wildcard-#{location_str_id}.crt"))
+    key_b64 = Base64.strict_encode64(IO.read("config/certs/test-wildcard-#{location_str_id}.key"))
 
     assert_contains_certificate_secret(yml, "wildcard-certificate", crt_b64, key_b64)
   end
