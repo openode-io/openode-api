@@ -99,7 +99,7 @@ class InstancesController < ApplicationController
                                   '<site_name>.openode.io for subdomains and ' \
                                   'domain for custom domains.', required: true
   param :account_type, String, desc: 'Plan internal id. Use /global/available-plans to ' \
-                                      'get the list.', required: true
+                                      'get the list.', required: false
   def create_instance
     website = Website.create!(
       site_name: params['site_name'],
