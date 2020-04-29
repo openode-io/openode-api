@@ -94,14 +94,14 @@ class EnvVariablesControllerTest < ActionDispatch::IntegrationTest
     w.store_env_variable!('hi', 'world')
 
     post "/instances/#{w.id}/env_variables/",
-        as: :json,
-        params: {
-          variables: {
-            VAR1: 'test123',
-            VAR2: 'tteesstt'
-          }
-        },
-        headers: default_headers_auth
+         as: :json,
+         params: {
+           variables: {
+             VAR1: 'test123',
+             VAR2: 'tteesstt'
+           }
+         },
+         headers: default_headers_auth
 
     assert_response :success
 

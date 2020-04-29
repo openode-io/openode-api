@@ -1255,12 +1255,12 @@ class WebsiteTest < ActiveSupport::TestCase
   test "env - update a set of variables" do
     w = default_website
     w.save_secret!({ test: 1234 })
-    w.update_env_variables!({ 'test3' => 12343 })
+    w.update_env_variables!({ 'test3' => 12_343 })
     w.update_env_variables!({ 'test1' => 1234, 'test2' => 'tt' })
 
     assert_equal w.env.dig('test1'), 1234
     assert_equal w.env.dig('test2'), 'tt'
-    assert_equal w.env.dig('test3'), 12343
+    assert_equal w.env.dig('test3'), 12_343
     assert_equal w.secret[:test], 1234
   end
 
