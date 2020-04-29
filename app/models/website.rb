@@ -589,6 +589,14 @@ class Website < ApplicationRecord
     env
   end
 
+  def update_env_variables!(variables)
+    current_env_variables = env
+    current_env_variables.merge!(variables)
+    merge_secret!(env: current_env_variables)
+
+    env
+  end
+
   def store_env_variable!(variable, value)
     current_env_variables = env
     current_env_variables[variable] = value

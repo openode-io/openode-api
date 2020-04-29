@@ -11,9 +11,9 @@ class EnvVariablesController < InstancesController
 
   api :PUT, 'instances/:id/env_variables'
   description 'Update environment variables ({ key:value }). ' \
-              'Existing variables not provided in the list are removed.'
+              'Existing variables not provided in the hash are removed.'
   param :variables, Hash, desc: "Key-value hash of variables.", required: true
-  def update_env_variables
+  def overwrite_env_variables
     variables = params[:variables]
 
     @website_event_obj = {
@@ -21,6 +21,22 @@ class EnvVariablesController < InstancesController
       variables: variables
     }
     @website.overwrite_env_variables!(variables)
+
+    json({})
+  end
+
+  api :POST, 'instances/:id/env_variables'
+  description 'Update environment variables ({ key:value }). ' \
+              'Existing variables not provided in the hash are unchanged.'
+  param :variables, Hash, desc: "Key-value hash of variables.", required: true
+  def update_env_variables
+    variables = params[:variables].to_unsafe_h
+
+    @website_event_obj = {
+      title: "ENV Variables changed",
+      variables: variables
+    }
+    @website.update_env_variables!(variables)
 
     json({})
   end

@@ -144,7 +144,8 @@ Rails.application.routes.draw do
 
     # ENV
     get '/:site_name/env_variables', to: 'env_variables#index'
-    put '/:site_name/env_variables/', to: 'env_variables#update_env_variables'
+    put '/:site_name/env_variables/', to: 'env_variables#overwrite_env_variables'
+    post '/:site_name/env_variables/', to: 'env_variables#update_env_variables'
     post '/:site_name/env_variables/:name', to: 'env_variables#save_env_variable'
     delete '/:site_name/env_variables/:name', to: 'env_variables#destroy_env_variable'
 
