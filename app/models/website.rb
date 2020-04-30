@@ -769,7 +769,7 @@ class Website < ApplicationRecord
       return true, ''
     end
 
-    unless user.credits?
+    unless user.credits?(Website.cost_price_to_credits(plan[:cost_per_hour]))
       msg = 'No credit available. Please make sure to buy credits via the Administration ' \
             'dashboard in Billing - ' \
             "https://www.#{CloudProvider::Manager.base_hostname}/admin/billing"

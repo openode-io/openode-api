@@ -231,6 +231,21 @@ class UserTest < ActiveSupport::TestCase
     assert_equal user.credits?, true
   end
 
+  test 'credits? with minimum limit too high' do
+    user = User.find_by email: 'myadmin@thisisit.com'
+    assert_equal user.credits?(user.credits + 1), false
+  end
+
+  test 'credits? with minimum limit lower' do
+    user = User.find_by email: 'myadmin@thisisit.com'
+    assert_equal user.credits?(user.credits - 1), true
+  end
+
+  test 'credits? with minimum limit eq' do
+    user = User.find_by email: 'myadmin@thisisit.com'
+    assert_equal user.credits?(user.credits), true
+  end
+
   test 'has_credits? when no credit' do
     user = User.find_by email: 'myadmin2@thisisit.com'
     assert_equal user.credits?, false
