@@ -173,8 +173,8 @@ class User < ApplicationRecord
     save!
   end
 
-  def credits?
-    credits.positive?
+  def credits?(minimum_required_credits = 0)
+    credits >= minimum_required_credits
   end
 
   def orders?

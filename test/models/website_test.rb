@@ -472,6 +472,29 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_includes msg, 'No credit available'
   end
 
+  test "can_deploy_to? can't if user does not have enough credit" do
+    website = Website.find_by(site_name: 'testsite')
+    website.user.credits = Website.cost_price_to_credits(website.plan[:cost_per_hour]) - 0.001
+    website.user.save!
+    website.user.reload
+
+    can_deploy, msg = website.can_deploy_to?(website.website_locations.first)
+
+    assert_equal can_deploy, false
+    assert_includes msg, 'No credit available'
+  end
+
+  test "can_deploy_to? can if user have enough credit" do
+    website = Website.find_by(site_name: 'testsite')
+    website.user.credits = Website.cost_price_to_credits(website.plan[:cost_per_hour]) + 0.001
+    website.user.save!
+    website.user.reload
+
+    can_deploy, = website.can_deploy_to?(website.website_locations.first)
+
+    assert_equal can_deploy, true
+  end
+
   test "can_deploy_to? can't if too many concurrent deployments" do
     website = default_website
 
