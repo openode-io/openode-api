@@ -6,6 +6,7 @@ class User < ApplicationRecord
 
   NotAuthorized = Class.new(StandardError)
   Forbidden = Class.new(StandardError)
+  TooManyRequests = Class.new(StandardError)
 
   DISALLOWED_EMAIL_DOMAINS = [
     'cuvox.de',

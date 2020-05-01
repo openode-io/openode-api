@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::API
   include Response
   include ExceptionHandler
+  include ApiRateLimit
 
   def validation_error!(msg)
     raise ApplicationRecord::ValidationError, msg
@@ -20,6 +21,8 @@ class ApplicationController < ActionController::API
     authorization_error!("No token provided") unless token
 
     @user = User.find_by!(token: token)
+
+    rate_limit(@user, response: response)
   end
 
   def default_listing(model, attributes, opts = {})

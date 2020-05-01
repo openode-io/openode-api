@@ -19,6 +19,10 @@ module ExceptionHandler
       json({ error: e.message }, :unauthorized)
     end
 
+    rescue_from User::TooManyRequests do |e|
+      json({ error: e.message }, :too_many_requests)
+    end
+
     rescue_from User::Forbidden do |e|
       json({ error: e.message }, :forbidden)
     end
