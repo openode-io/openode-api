@@ -17,6 +17,19 @@ module Apipie
 
     <p><b>The API token must be provided using the following
     HTTP header: x-auth-token: YOUR_TOKEN.</b></p>
+
+    <hr />
+
+    <p>Requests through the API are rate limited per user token.</p>
+    <ul>
+      <li>' + ApiRateLimit::PER_MINUTE_RATE_LIMIT.to_s + ' Requests per minute</li>
+    </ul>
+    <p>Some headers are set on responses:</p>
+    <ul>
+      <li><strong>' + ApiRateLimit::HEADER_NAME_REMAINING + '</strong></li>
+      <li><strong>' + ApiRateLimit::HEADER_NAME_LIMIT + '</strong></li>
+      <li><strong>' + ApiRateLimit::HEADER_NAME_REMAINING + '</strong></li>
+    </ul>
     '
   end
 end
