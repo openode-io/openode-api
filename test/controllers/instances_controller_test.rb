@@ -263,6 +263,22 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal website.domain_type, 'subdomain'
   end
 
+  test '/instances/create with id instead of internal id' do
+    post '/instances/create',
+         params: { site_name: 'helloworld123', account_type: '100-MB' },
+         as: :json,
+         headers: default_headers_auth
+
+    assert_response :success
+
+    website = Website.find(response.parsed_body['id'])
+
+    assert_equal website.id, response.parsed_body['id']
+    assert_equal website.site_name, 'helloworld123'
+    assert_equal website.domain_type, 'subdomain'
+    assert_equal website.account_type, Website::DEFAULT_ACCOUNT_TYPE
+  end
+
   test '/instances/create without account type should be allowed' do
     post '/instances/create',
          params: { site_name: 'helloworld123' },
@@ -341,7 +357,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
          as: :json,
          headers: default_headers_auth
 
-    assert_response :unprocessable_entity
+    assert_response :success
   end
 
   # /changes

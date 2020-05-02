@@ -101,9 +101,11 @@ class InstancesController < ApplicationController
   param :account_type, String, desc: 'Plan internal id. Use /global/available-plans to ' \
                                       'get the list.', required: false
   def create_instance
+    plan = Website.plan_of(params['account_type'])
+
     website = Website.create!(
       site_name: params['site_name'],
-      account_type: params['account_type'],
+      account_type: plan&.dig(:internal_id),
       user: @user,
       open_source: {
         title: params['open_source_title'],
@@ -154,8 +156,7 @@ class InstancesController < ApplicationController
   def set_plan
     plan_id = params['plan']
 
-    all_plans = @website_location.available_plans
-    plan = all_plans.find { |p| [p[:id], p[:internal_id]].include?(plan_id) }
+    plan = Website.plan_of(plan_id)
 
     validation_error!('Unavailable plan') unless plan
 
