@@ -160,12 +160,13 @@ class InstancesController < ApplicationController
 
     validation_error!('Unavailable plan') unless plan
 
+    orig_account_type = @website.account_type
     @website.change_plan!(plan[:internal_id])
 
     @website_event_obj = {
       title: 'change-plan',
       new_value: plan[:id],
-      original_value: @website.account_type
+      original_value: Website.plan_of(orig_account_type).dig(:id)
     }
 
     @runner&.delay&.execute([{ cmd_name: 'stop', options: { is_complex: true } }])
