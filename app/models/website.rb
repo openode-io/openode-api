@@ -508,6 +508,8 @@ class Website < ApplicationRecord
                                                  "www.openode.io")
       errors.add(:open_source, "missing thanks link www.openode.io")
     end
+
+    errors.count.zero?
   end
 
   def notify_open_source_requested
