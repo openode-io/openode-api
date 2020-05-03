@@ -705,15 +705,19 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
       begin_ssh
       post '/instances/testsite/set-plan', # works without location str id
            as: :json,
-           params: { plan: '100-MB' },
+           params: { plan: '200-MB' },
            headers: default_headers_auth
 
       assert_response :success
 
       Delayed::Job.first.invoke_job
       website.reload
-      assert_equal website.account_type, 'second'
+      assert_equal website.account_type, 'third'
       assert_equal website.cloud_type, 'cloud'
+
+      event = website.events.first
+      assert_equal event.obj['original_value'], "100-MB"
+      assert_equal event.obj['new_value'], "200-MB"
     end
   end
 
