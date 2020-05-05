@@ -265,13 +265,13 @@ class LibMonitorDeploymentsTest < ActiveSupport::TestCase
 
       invoke_task "monitor_deployments:bandwidth"
 
-      # c = CreditAction.last
+      c = CreditAction.last
 
-      # expected_cost =
-      #   100 * CloudProvider::Helpers::Pricing.cost_for_extra_bandwidth_bytes(1100)
+      expected_cost =
+        100 * CloudProvider::Helpers::Pricing.cost_for_extra_bandwidth_bytes(1100)
 
-      # assert_equal c.action_type, 'consume-bandwidth'
-      # assert_in_delta c.credits_spent, expected_cost, 0.000001
+      assert_equal c.action_type, 'consume-bandwidth'
+      assert_in_delta c.credits_spent, expected_cost, 0.000001
     end
   end
 end

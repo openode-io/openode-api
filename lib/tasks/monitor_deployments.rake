@@ -74,8 +74,7 @@ namespace :monitor_deployments do
         Rails.logger.info "[#{name}] exceeding bandwidth limit " \
                           "for website #{website.site_name}, new bytes = #{new_bytes}"
 
-        # TODO: put back test also
-        # website.spend_exceeding_traffic!(new_bytes)
+        website.spend_exceeding_traffic!(new_bytes)
       end
     rescue StandardError => e
       Ex::Logger.error(e, "[#{name}] failed with website #{website.site_name} - #{e}")
