@@ -900,6 +900,56 @@ VAR2=5678
     end
   end
 
+  test 'analyse_pod_status_for_lack_memory - with killed' do
+    status = {
+      'lastState' => {
+        'terminated' => {
+          'reason' => 'OOMKilled'
+        }
+      }
+    }
+
+    result_msg = kubernetes_method.analyse_pod_status_for_lack_memory('testt', status)
+
+    assert_includes result_msg, 'FATAL'
+    assert_includes result_msg, 'Lack of memory detected'
+  end
+
+  test 'analyse_pod_status_for_lack_memory - without mem issue' do
+    status = {}
+
+    result_msg = kubernetes_method.analyse_pod_status_for_lack_memory('testt', status)
+
+    assert_nil result_msg
+  end
+
+  # analyze_final_pods_state
+
+  test 'analyze_final_pods_state - with killed' do
+    pods = {
+      'items' => [
+        {
+          'status' => {
+            'containerStatuses' => [
+              {
+                'lastState' => {
+                  'terminated' => {
+                    'reason' => 'OOMKilled'
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+
+    kubernetes_method.analyze_final_pods_state(pods)
+
+    last_event = kubernetes_method.runner.execution.events.last
+    assert_includes last_event['update'], 'Lack of memory'
+  end
+
   test 'final_instance_details - with custom domain' do
     w = default_custom_domain_website
     website_location = w.website_locations.first
