@@ -826,8 +826,18 @@ module DeploymentMethod
       website.reload
 
       begin
+        pods = get_pods_json(
+          website: website,
+          website_location: website_location
+        )
+
+        analyze_final_pods_state(pods)
+
+        latest_pod_name = get_latest_pod_name_in(pods)
+
         ex_stdout('logs', website: website,
                           website_location: website_location,
+                          pod_name: latest_pod_name,
                           nb_lines: 1_000)
       rescue StandardError => e
         Ex::Logger.info(e, 'Unable to retrieve the logs')
@@ -845,6 +855,29 @@ module DeploymentMethod
       end
 
       notify('info', "\n\n*** Final Deployment state: #{runner&.execution&.status&.upcase} ***\n")
+    end
+
+    def analyse_pod_status_for_lack_memory(name, status)
+      reason = status.dig('lastState', 'terminated', 'reason')&.downcase
+
+      return unless reason == "oomkilled"
+
+      msg = "\n\n*** FATAL: Lack of memory detected on application #{name}! " \
+            "Consider upgrading your plan. ***\n"
+
+      notify('info', msg)
+
+      msg
+    end
+
+    def analyze_final_pods_state(pods)
+      pods['items'].each do |pod|
+        pod.dig('status', 'containerStatuses').each do |st|
+          analyse_pod_status_for_lack_memory(st['name'], st)
+        end
+      end
+    rescue StandardError => e
+      Ex::Logger.error(e, 'Issue analysing the pods state')
     end
 
     # the following hooks are notification procs.

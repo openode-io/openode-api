@@ -2,6 +2,7 @@ ROOT_PATH=/var/www/openode-api/
 KUBE_CONFIGS_PATH=$ROOT_PATH"config/kubernetes/"
 PREFIX_CONFIG_FILES=production-
 OUTPUT_BACKUP=/home/ubuntu/backup-kubes/
+PATH=$PATH:/bin:/usr/bin
 
 echo "--- "
 echo "Configs:"
