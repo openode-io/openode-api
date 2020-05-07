@@ -332,6 +332,36 @@ class ActiveSupport::TestCase
       content_type: 'text/html',
       response_status: 200,
       response_path: 'test/fixtures/http/open_source/openode_bad.txt'
+    },
+    {
+      url: 'https://api.digitalocean.com/v2/kubernetes/clusters?page=1&per_page=20',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/do/clusters.json'
+    },
+    {
+      url: 'https://api.digitalocean.com/v2/kubernetes/clusters/bd5f5959-5e1e-4205-a714-a914373942af/node_pools',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/do/cluster_node_pools.json'
+    },
+    {
+      url: 'https://api.digitalocean.com/v2/droplets?page=1&per_page=20',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/do/droplets.json'
     }
   ]
 

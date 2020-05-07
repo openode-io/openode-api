@@ -14,22 +14,6 @@ class GlobalController < ApplicationController
   end
 
   api!
-  def available_locations
-    type = params['type'] || 'kubernetes'
-
-    manager = if type
-                # TODO: -> deprecate next line
-                real_type = type == 'docker' ? 'internal' : type
-                real_type = 'kubernetes' unless %w[internal kubernetes].include?(real_type)
-                CloudProvider::Manager.instance.first_of_type(real_type)
-              else
-                CloudProvider::Manager.instance
-              end
-
-    json(manager.available_locations)
-  end
-
-  api!
   def available_plans
     json(CloudProvider::Manager.instance.available_plans)
   end

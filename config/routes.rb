@@ -64,7 +64,9 @@ Rails.application.routes.draw do
     get '/services/down', to: 'global#services_down'
     get '/services', to: 'global#services'
 
-    get 'available-locations', to: 'global#available_locations'
+    get 'available-locations', to: 'available_locations#index'
+    get 'available-locations/:str_id/ips', to: 'available_locations#ips'
+
     get 'available-configs', to: 'global#available_configs'
     get 'available-plans', to: 'global#available_plans'
     get 'available-plans-at/:type/:location_str_id', to: 'global#available_plans_at'

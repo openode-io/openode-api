@@ -1,0 +1,19 @@
+{
+  "kubernetes_clusters": [
+    {
+      "id": "bd5f5959-5e1e-4205-a714-a914373942af",
+      "name": "k8s-eu",
+      "region": "nyc1",
+      "version": "1.14.1-do.4"
+    },
+    {
+      "id": "bd5f5959-5e1e-4205-a714-a914373942ae",
+      "name": "k8s-usa",
+      "region": "nyc1",
+      "version": "1.14.1-do.4"
+    }
+  ],
+  "meta": {
+    "total": 2
+  }
+}
