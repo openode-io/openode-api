@@ -1,0 +1,130 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Node",
+            "metadata": {
+                "annotations": {
+                    "alpha.kubernetes.io/provided-node-ip": "10.110.0.3",
+                    "csi.volume.kubernetes.io/nodeid": "{\"dobs.csi.digitalocean.com\":\"190387281\"}",
+                    "io.cilium.network.ipv4-cilium-host": "10.244.0.72",
+                    "io.cilium.network.ipv4-health-ip": "10.244.0.61",
+                    "io.cilium.network.ipv4-pod-cidr": "10.244.0.0/25",
+                    "node.alpha.kubernetes.io/ttl": "0",
+                    "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+                },
+                "creationTimestamp": "2020-04-29T13:37:43Z",
+                "labels": {
+                    "beta.kubernetes.io/arch": "amd64",
+                    "beta.kubernetes.io/instance-type": "s-4vcpu-8gb",
+                    "beta.kubernetes.io/os": "linux",
+                    "doks.digitalocean.com/node-id": "04ce7a72-b73c-4ee2-95ea-ac7ac22934bb",
+                    "doks.digitalocean.com/node-pool": "pool-jetf8t6fc",
+                    "doks.digitalocean.com/node-pool-id": "624e2468-47e6-44db-b085-581e45319306",
+                    "doks.digitalocean.com/version": "1.16.6-do.2",
+                    "failure-domain.beta.kubernetes.io/region": "ams3",
+                    "kubernetes.io/arch": "amd64",
+                    "kubernetes.io/hostname": "pool-jetf8t6fc-38akt",
+                    "kubernetes.io/os": "linux",
+                    "region": "ams3"
+                },
+                "name": "pool-jetf8t6fc-38akt",
+                "resourceVersion": "890907",
+                "selfLink": "/api/v1/nodes/pool-jetf8t6fc-38akt",
+                "uid": "df210d45-1eb8-44f5-9fad-037f97df9869"
+            },
+            "spec": {
+                "podCIDR": "10.244.0.0/25",
+                "podCIDRs": [
+                    "10.244.0.0/25"
+                ],
+                "providerID": "digitalocean://190387281"
+            },
+            "status": {
+                "addresses": [
+                    {
+                        "address": "pool-jetf8t6fc-38akt",
+                        "type": "Hostname"
+                    },
+                    {
+                        "address": "10.110.0.3",
+                        "type": "InternalIP"
+                    },
+                    {
+                        "address": "134.209.85.59",
+                        "type": "ExternalIP"
+                    }
+                ],
+                "allocatable": {
+                    "cpu": "4",
+                    "ephemeral-storage": "152161143761",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "6694Mi",
+                    "pods": "110"
+                },
+                "capacity": {
+                    "cpu": "4",
+                    "ephemeral-storage": "165105408Ki",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "8170116Ki",
+                    "pods": "110"
+                },
+                "conditions": [
+                    {
+                        "lastHeartbeatTime": "2020-04-29T13:37:51Z",
+                        "lastTransitionTime": "2020-04-29T13:37:51Z",
+                        "message": "Cilium is running on this node",
+                        "reason": "CiliumIsUp",
+                        "status": "False",
+                        "type": "NetworkUnavailable"
+                    },
+                    {
+                        "lastHeartbeatTime": "2020-05-09T01:55:52Z",
+                        "lastTransitionTime": "2020-04-29T13:37:43Z",
+                        "message": "kubelet has sufficient memory available",
+                        "reason": "KubeletHasSufficientMemory",
+                        "status": "False",
+                        "type": "MemoryPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2020-05-09T01:55:52Z",
+                        "lastTransitionTime": "2020-04-29T13:37:43Z",
+                        "message": "kubelet has no disk pressure",
+                        "reason": "KubeletHasNoDiskPressure",
+                        "status": "False",
+                        "type": "DiskPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2020-05-09T01:55:52Z",
+                        "lastTransitionTime": "2020-04-29T13:37:43Z",
+                        "message": "kubelet has sufficient PID available",
+                        "reason": "KubeletHasSufficientPID",
+                        "status": "False",
+                        "type": "PIDPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2020-05-09T01:55:52Z",
+                        "lastTransitionTime": "2020-04-29T13:37:53Z",
+                        "message": "kubelet is posting ready status",
+                        "reason": "KubeletReady",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "daemonEndpoints": {
+                    "kubeletEndpoint": {
+                        "Port": 10250
+                    }
+                }
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": "",
+        "selfLink": ""
+    }
+}

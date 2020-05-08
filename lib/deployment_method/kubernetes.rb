@@ -166,11 +166,20 @@ module DeploymentMethod
       assert options[:s_arguments]
       website = options[:website_location].website
 
-      config_path = kubeconfig_path(options[:website_location])
+      config_path = kubeconfig_path(options[:website_location].location)
 
       namespace = options[:with_namespace] ? "-n #{namespace_of(website)} " : ""
 
       cmd = "KUBECONFIG=#{config_path} kubectl #{namespace}#{options[:s_arguments]}"
+      cmd
+    end
+
+    def raw_kubectl(options = {})
+      assert options[:s_arguments]
+
+      config_path = kubeconfig_path(options[:location] || location)
+
+      cmd = "KUBECONFIG=#{config_path} kubectl #{options[:s_arguments]}"
       cmd
     end
 
@@ -953,8 +962,8 @@ module DeploymentMethod
       ]
     end
 
-    def kubeconfig_path(website_location)
-      location_str_id = website_location.location.str_id
+    def kubeconfig_path(location)
+      location_str_id = location.str_id
       configs = Kubernetes.kube_configs_at_location(location_str_id)
 
       raise "missing kubeconfig for #{location_str_id}" unless configs

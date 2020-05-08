@@ -362,6 +362,26 @@ class ActiveSupport::TestCase
       content_type: 'application/json',
       response_status: 200,
       response_path: 'test/fixtures/http/do/droplets.json'
+    },
+    {
+      url: 'https://api.digitalocean.com/v2/kubernetes/clusters/bd5f5959-5e1e-4205-a714-a914373942ae/node_pools',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/do/get_node_pools.json'
+    },
+    {
+      url: 'https://api.digitalocean.com/v2/kubernetes/clusters/bd5f5959-5e1e-4205-a714-a914373942ae/node_pools/cdda885e-7663-40c8-bc74-3a036c66545d',
+      method: :put,
+      with: {
+        body: "{\"name\":\"frontend-pool\",\"size\":\"s-1vcpu-2gb\",\"count\":4,\"tags\":[\"k8s\",\"k8s:bd5f5959-5e1e-4205-a714-a914373942af\",\"k8s:worker\",\"production\",\"web-team\"],\"labels\":null,\"auto_scale\":null,\"min_nodes\":null,\"max_nodes\":null}"
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/do/empty.txt'
     }
   ]
 
