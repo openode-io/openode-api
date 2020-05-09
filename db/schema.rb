@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_18_044324) do
+ActiveRecord::Schema.define(version: 2020_05_08_210607) do
 
   create_table "collaborators", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "website_id"
@@ -58,8 +58,8 @@ ActiveRecord::Schema.define(version: 2020_04_18_044324) do
   end
 
   create_table "executions", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
-    t.bigint "website_id", null: false
-    t.bigint "website_location_id", null: false
+    t.bigint "website_id"
+    t.bigint "website_location_id"
     t.string "status"
     t.text "result", size: :medium
     t.datetime "created_at", precision: 6, null: false

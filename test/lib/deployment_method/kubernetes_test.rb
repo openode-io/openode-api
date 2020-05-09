@@ -29,9 +29,8 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
   test 'kubeconfig_path' do
     dep_method = kubernetes_method
     location = Location.find_by str_id: 'usa'
-    wl = location.website_locations.first
 
-    path = dep_method.kubeconfig_path(wl)
+    path = dep_method.kubeconfig_path(location)
 
     assert_equal path, '/var/www/openode-api/config/kubernetes/production-usa.yml'
   end

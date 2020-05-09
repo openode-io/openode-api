@@ -8,8 +8,8 @@ class Execution < ApplicationRecord
   STATUS_RUNNING = 'running'
   STATUSES = [STATUS_SUCCESS, STATUS_FAILED, STATUS_RUNNING].freeze
 
-  belongs_to :website
-  belongs_to :website_location
+  belongs_to :website, optional: true
+  belongs_to :website_location, optional: true
 
   belongs_to :parent_execution, foreign_key: :parent_execution_id,
                                 class_name: :Execution,

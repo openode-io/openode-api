@@ -13,6 +13,10 @@ module DeploymentMethod
       @website_location = @configs[:website_location]
       @execution_method = get_execution_method
       @cloud_provider = get_cloud_provider
+
+      if @execution_method&.respond_to?('location')
+        @execution_method.location = configs[:location]
+      end
     end
 
     def init_execution!(type, args = {})
