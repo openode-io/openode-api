@@ -1,0 +1,16 @@
+ kube-system                 coredns-84c79f5fb4-fz65t                    100m (2%)     0 (0%)      70Mi (1%)        170Mi (2%)     9d
+  kube-system                 coredns-84c79f5fb4-wdjqj                    100m (2%)     0 (0%)      70Mi (1%)        170Mi (2%)     9d
+  kube-system                 csi-do-node-w7qxx                           0 (0%)        0 (0%)      70Mi (1%)        0 (0%)         9d
+  kube-system                 do-node-agent-j6xrg                         102m (2%)     102m (2%)   80Mi (1%)        100Mi (1%)     9d
+  kube-system                 kube-proxy-fmfrz                            0 (0%)        0 (0%)      125Mi (1%)       0 (0%)         9d
+  kube-system                 kubelet-rubber-stamp-7f966c6779-kb4qf       0 (0%)        0 (0%)      0 (0%)           0 (0%)         9d
+Allocated resources:
+  (Total limits may be over 100 percent, i.e., overcommitted.)
+  Resource           Requests      Limits
+  --------           --------      ------
+  cpu                602m (15%)    102m (2%)
+  memory             1515Mi (22%)  1240Mi (18%)
+  ephemeral-storage  900Mi (0%)    900Mi (0%)
+  hugepages-1Gi      0 (0%)        0 (0%)
+  hugepages-2Mi      0 (0%)        0 (0%)
+Events:              <none>

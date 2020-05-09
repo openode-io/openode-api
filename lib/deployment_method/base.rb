@@ -3,6 +3,7 @@ module DeploymentMethod
     RuntimeError = Class.new(StandardError)
 
     attr_accessor :runner
+    attr_accessor :location
 
     REMOTE_PATH_API_LIB = '/root/openode-www/api/lib'
     DEFAULT_CRONTAB_FILENAME = '.openode.cron'
