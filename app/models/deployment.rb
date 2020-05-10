@@ -1,6 +1,7 @@
 class Deployment < Execution
   MAX_RUN_TIME = 20.minutes
   MAX_CONCURRENT_BUILDS_PER_USER = 2
+  NB_JOB_QUEUES = 5
 
   scope :active, lambda {
     where("created_at >= ?", MAX_RUN_TIME.ago)

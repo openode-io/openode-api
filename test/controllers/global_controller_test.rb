@@ -8,6 +8,25 @@ class GlobalControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test '/global/status/job-queues - not full' do
+    get '/global/status/job-queues', as: :json
+
+    assert_response :success
+  end
+
+  test '/global/status/job-queues - full' do
+    (1..Deployment::NB_JOB_QUEUES + 6).each do
+      post "/instances/#{default_website.site_name}/restart",
+           as: :json,
+           params: base_params,
+           headers: default_headers_auth
+    end
+
+    get '/global/status/job-queues', as: :json
+
+    assert_response :internal_server_error
+  end
+
   test '/documentation' do
     get '/documentation'
 

@@ -60,6 +60,7 @@ Rails.application.routes.draw do
   scope :global do
     get 'test', to: 'global#test'
     get 'version', to: 'global#version'
+    get 'status/job-queues', to: 'global#status_job_queues'
 
     get '/services/down', to: 'global#services_down'
     get '/services', to: 'global#services'

@@ -14,6 +14,13 @@ class GlobalController < ApplicationController
   end
 
   api!
+  def status_job_queues
+    is_too_full = Delayed::Job.count > Deployment::NB_JOB_QUEUES + 5
+
+    json({}, is_too_full ? :internal_server_error : :ok)
+  end
+
+  api!
   def available_plans
     json(CloudProvider::Manager.instance.available_plans)
   end
