@@ -7,6 +7,8 @@ module DeploymentMethod
       attr_accessor :deployment
 
       LIMIT_REPOSITORY_BYTES = 1024 * 1024 * 1024 # MB * KB * B -> 1 GB
+      MAX_BUILD_TIMEOUT = 180
+      TIMEOUT_EXIT_CODE = 124
 
       def initialize(args)
         assert args[:runner]
@@ -43,7 +45,7 @@ module DeploymentMethod
         project_path = options[:project_path]
 
         "cd #{project_path} && " \
-        "sudo docker build -t #{image_name_tag} ."
+        "sudo timeout #{MAX_BUILD_TIMEOUT}s docker build -t #{image_name_tag} ."
       end
 
       def push_cmd(_options = {})
@@ -79,8 +81,14 @@ module DeploymentMethod
 
       def ensure_no_execution_error(step_name, result)
         unless result[:result][:exit_code].zero?
+          specific_msg = if result[:result][:exit_code] == TIMEOUT_EXIT_CODE
+                           "\nFATAL: Docker timeout reached (#{MAX_BUILD_TIMEOUT} seconds)"
+          end
+
           msg = "Failed at #{step_name}. \n#{result.dig(:result, :stdout)}" \
-                " \n#{result.dig(:result, :stderr)}, exit code = #{result[:result][:exit_code]}"
+                " \n#{result.dig(:result, :stderr)}, " \
+                "exit code = #{result[:result][:exit_code]}" \
+                "#{specific_msg}"
           raise msg
         end
       end

@@ -28,8 +28,13 @@ class ActiveSupport::TestCase
   end
 
   def prepare_build_image(_kubernetes_method, website, deployment, expected_result)
+    timeout_part = "timeout " \
+                   "#{DeploymentMethod::Util::InstanceImageManager::MAX_BUILD_TIMEOUT}s "
+
+    build_cmd = "sudo #{timeout_part}docker build -t docker.io/openode_prod/testkubernetes-type:"
+
     prepare_ssh_session("cd /home/#{website.user_id}/#{website.site_name}/ && " \
-                        "sudo docker build -t docker.io/openode_prod/testkubernetes-type:" \
+                        "#{build_cmd}" \
                         "#{website.site_name}--#{website.id}--#{deployment.id} .",
                         expected_result)
   end

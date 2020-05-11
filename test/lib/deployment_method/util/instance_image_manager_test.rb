@@ -28,6 +28,9 @@ class InstanceImageManagerTest < ActiveSupport::TestCase
     )
 
     runner.set_execution_method(@manager)
+
+    @timeout_part = "timeout " \
+                    "#{DeploymentMethod::Util::InstanceImageManager::MAX_BUILD_TIMEOUT}s "
   end
 
   test 'verify image size cmd' do
@@ -94,6 +97,25 @@ class InstanceImageManagerTest < ActiveSupport::TestCase
 
     assert_includes exception.inspect.to_s, "stdout msg"
     assert_includes exception.inspect.to_s, "stderr msg"
+    assert_not_includes exception.inspect.to_s, "Docker timeout reached"
+  end
+
+  test 'ensure_no_execution_error with exit timeout' do
+    obj = {
+      result: {
+        exit_code: DeploymentMethod::Util::InstanceImageManager::TIMEOUT_EXIT_CODE,
+        stdout: 'stdout msg',
+        stderr: 'stderr msg'
+      }
+    }
+
+    exception = assert_raises StandardError do
+      @manager.ensure_no_execution_error("step name..", obj)
+    end
+
+    assert_includes exception.inspect.to_s, "stdout msg"
+    assert_includes exception.inspect.to_s, "stderr msg"
+    assert_includes exception.inspect.to_s, "Docker timeout reached"
   end
 
   test 'build cmd' do
@@ -102,13 +124,16 @@ class InstanceImageManagerTest < ActiveSupport::TestCase
     )
 
     assert_includes cmd, 'cd /home/123456/what'
-    assert_includes cmd, "sudo docker build -t docker.io/openode_prod/#{@website.site_name}:" \
+
+    build_cmd = "sudo #{@timeout_part}docker build -t docker.io/openode_prod/#{@website.site_name}:"
+
+    assert_includes cmd, "#{build_cmd}" \
                           "#{@website.site_name}--#{@website.id}--#{@deployment.id} ."
   end
 
   test 'build' do
     expected_cmd = "cd /home/#{@website.user.id}/#{@website.site_name}/ && " \
-      "sudo docker build " \
+      "sudo #{@timeout_part}docker build " \
       "-t docker.io/openode_prod/#{@website.site_name}" \
       ":#{@website.site_name}--#{@website.id}--#{@deployment.id} ."
     prepare_ssh_session(expected_cmd, 'successfully built')
