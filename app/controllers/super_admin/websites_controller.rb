@@ -12,8 +12,12 @@ class SuperAdmin::WebsitesController < SuperAdmin::SuperAdminController
     ]
 
     json(default_listing(Website, attributes_to_search, order: "websites.id DESC")
+        .includes(website_locations: :location)
         .preload(:user)
-        .joins(:user))
+        .joins(:user)
+        .map do |w|
+          w.attributes.merge(locations: w.website_locations.map(&:location))
+        end)
   end
 
   def retrieve
