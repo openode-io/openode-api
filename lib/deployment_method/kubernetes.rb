@@ -854,6 +854,7 @@ module DeploymentMethod
 
       begin
         if website.online?
+          store_services(website: website, website_location: website_location)
           notify_final_instance_details(options)
         else
           # stop it
@@ -887,6 +888,21 @@ module DeploymentMethod
       end
     rescue StandardError => e
       Ex::Logger.error(e, 'Issue analysing the pods state')
+    end
+
+    def store_services(options = {})
+      wl = options.dig(:website_location)
+
+      args = {
+        website_location: wl,
+        with_namespace: true,
+        s_arguments: "get services -o json"
+      }
+
+      services = JSON.parse(ex_stdout("kubectl", args))
+      wl.obj ||= {}
+      wl.obj['services'] = services
+      wl.save
     end
 
     # the following hooks are notification procs.
