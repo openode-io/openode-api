@@ -1,0 +1,45 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"Service\",\"metadata\":{\"annotations\":{},\"name\":\"main-service\",\"namespace\":\"instance-21880\"},\"spec\":{\"ports\":[{\"port\":80,\"protocol\":\"TCP\",\"targetPort\":80}],\"selector\":{\"app\":\"www\"},\"type\":\"NodePort\"}}\n"
+                },
+                "creationTimestamp": "2020-04-15T18:31:23Z",
+                "name": "main-service",
+                "namespace": "instance-21880",
+                "resourceVersion": "3163737",
+                "selfLink": "/api/v1/namespaces/instance-21880/services/main-service",
+                "uid": "415f315e-2d41-4270-9abd-49011b26bfc6"
+            },
+            "spec": {
+                "clusterIP": "10.245.87.60",
+                "externalTrafficPolicy": "Cluster",
+                "ports": [
+                    {
+                        "nodePort": 30715,
+                        "port": 80,
+                        "protocol": "TCP",
+                        "targetPort": 80
+                    }
+                ],
+                "selector": {
+                    "app": "www"
+                },
+                "sessionAffinity": "None",
+                "type": "NodePort"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": "",
+        "selfLink": ""
+    }
+}

@@ -209,6 +209,41 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body.first.dig('ready'), true
   end
 
+  test '/instances/routes happy path' do
+    website = default_website
+    wl = website.website_locations.first
+    wl.obj = { "services" => { "apiVersion" => "v1",
+                               "items" => [{ "apiVersion" => "v1", "kind" => "Service",
+                                             "metadata" => {
+                                               "name" => "main-service"
+                                             },
+                                             "spec" => {
+                                               "clusterIP" => "10.245.26.165",
+                                               "externalTrafficPolicy" => "Cluster"
+                                             } }] } }
+    wl.save!
+
+    get "/instances/#{website.id}/routes", as: :json, headers: default_headers_auth
+
+    assert_response :success
+
+    website_custom_domain = Website.find_by site_name: 'testprivatecloud'
+
+    result = response.parsed_body
+
+    assert_equal result[website.site_name]['host'], '10.245.26.165'
+    assert_equal result[website.site_name]['type'], 'private_ip'
+    assert_equal result[website.site_name]['protocol'], 'http'
+
+    w_location = website.website_locations.first.location
+    assert_not_equal website_custom_domain.website_locations.first.location, w_location
+
+    main_domain_custom = website_custom_domain.website_locations.first.main_domain
+    assert_equal result[website_custom_domain.site_name]['host'], main_domain_custom
+    assert_equal result[website_custom_domain.site_name]['type'], 'hostname'
+    assert_equal result[website_custom_domain.site_name]['protocol'], 'https'
+  end
+
   test '/instances/status without recorded status' do
     website = default_website
 

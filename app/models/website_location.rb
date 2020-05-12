@@ -1,6 +1,10 @@
 require 'public_suffix'
 
 class WebsiteLocation < ApplicationRecord
+  serialize :obj, JSON
+
+  MAIN_SERVICE_NAME = 'main-service'
+
   belongs_to :website
   belongs_to :location
   belongs_to :location_server, optional: true
@@ -17,6 +21,16 @@ class WebsiteLocation < ApplicationRecord
     greater_than_or_equal_to: 0,
     less_than_or_equal_to: 10
   }
+
+  def main_service
+    obj&.dig('services', 'items')&.find do |item|
+      item&.dig('metadata', 'name') == MAIN_SERVICE_NAME
+    end
+  end
+
+  def cluster_ip
+    main_service&.dig('spec', 'clusterIP')
+  end
 
   def validate_nb_cpus
     return unless location_server

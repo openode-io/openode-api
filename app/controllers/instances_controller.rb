@@ -89,6 +89,40 @@ class InstancesController < ApplicationController
     json(@website.statuses.last&.simplified_container_statuses || [])
   end
 
+  api :GET, 'instances/:id/routes'
+  description 'Returns the routes from the current site to all available sites.'
+  returns code: 200,
+          desc: "Hash following this format: { site_name: { host, protocol, type } }"
+  def routes
+    websites_with_access = @user.websites_with_access
+    sites_ids = websites_with_access.map(&:id)
+    website_locations = WebsiteLocation.where(website_id: sites_ids)
+
+    wls_lookup = {}
+
+    website_locations.each do |wl|
+      wls_lookup[wl.website_id] = wl
+    end
+
+    result = {}
+    website_location = @website.website_locations.first
+
+    websites_with_access.each do |w|
+      wl = wls_lookup[w.id]
+
+      same_location = website_location&.location == wl&.location
+      has_cert = w.subdomain? || (w.custom_domain? && w.certs.present?)
+
+      result[w.site_name] = {
+        host: same_location ? wl&.cluster_ip : wl&.main_domain,
+        protocol: same_location || !has_cert ? 'http' : 'https',
+        type: same_location ? 'private_ip' : 'hostname'
+      }
+    end
+
+    json(result)
+  end
+
   def show
     json(@website)
   end

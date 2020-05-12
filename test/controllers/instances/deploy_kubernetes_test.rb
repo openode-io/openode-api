@@ -34,6 +34,18 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
                        "apply -f apply.yml", 'success')
     prepare_node_alive(kubernetes_method, website, website_location, 'success', 1)
     prepare_instance_up(kubernetes_method, website, website_location, 'success', 0)
+
+    get_pods_json_content = IO.read('test/fixtures/kubernetes/1_pod_alive.json')
+    prepare_get_pods_json(kubernetes_method, website, website_location, get_pods_json_content,
+                          0)
+    prepare_kubernetes_logs(kubernetes_method, "hello logs", 0,
+                            website: website,
+                            website_location: website_location,
+                            pod_name: "www-deployment-5889df69dc-xg9xl",
+                            nb_lines: 1_000)
+
+    prepare_get_services_json(kubernetes_method, website, website_location,
+                              IO.read('test/fixtures/kubernetes/get_services.json'))
   end
 
   test '/instances/:instance_id/restart - happy path' do
@@ -56,12 +68,12 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
       assert_equal @website.status, Website::STATUS_ONLINE
       assert_equal deployment.status, Deployment::STATUS_SUCCESS
-      assert_equal deployment.result['steps'].length, 15 # global, 2 kills, finalize
+      assert_equal deployment.result['steps'].length, 18 # global, 2 kills, finalize
 
       assert_equal deployment.result['errors'].length, 0
 
       # should also have a deployment with events
-      assert_equal deployment.events.length, 14
+      assert_equal deployment.events.length, 15
 
       allowed_to = dep_event_exists?(deployment.events,
                                      'running', 'allowed to dep')
@@ -89,10 +101,13 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
         { "status" => "running", "level" => "info",
           "update" => "...instance verification finished." },
         { "status" => "running", "level" => "info", "update" => "Finalizing..." },
+        { "status" => "success", "level" => "info", "update" => "hello logs" },
         { "status" => "success", "level" => "info",
           "update" => "\n\n*** Final Deployment state: SUCCESS ***\n" },
         { "status" => "success", "level" => "info", "update" => "...finalized." }
       ]
+
+      puts "events #{deployment.events.inspect}"
 
       steps_to_verify.each do |step|
         Rails.logger.info "checking step .. #{step.inspect}"

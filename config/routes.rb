@@ -96,6 +96,7 @@ Rails.application.routes.draw do
     patch '/:site_name/', to: 'instances#update'
     delete '/:site_name/', to: 'instances#destroy_instance'
     get '/:site_name/status', to: 'instances#status'
+    get '/:site_name/routes', to: 'instances#routes'
 
     get '/:site_name/stats', to: 'instance_stat#index'
     get '/:site_name/stats/spendings', to: 'instance_stat#spendings'

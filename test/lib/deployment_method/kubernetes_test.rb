@@ -882,6 +882,9 @@ VAR2=5678
                             pod_name: "www-deployment-5889df69dc-xg9xl",
                             nb_lines: 1_000)
 
+    prepare_get_services_json(kubernetes_method, @website, @website_location,
+                              IO.read('test/fixtures/kubernetes/get_services.json'))
+
     assert_scripted do
       begin_ssh
 
@@ -896,6 +899,8 @@ VAR2=5678
       assert_equal exec.events[0]['update'], "hello logs"
       assert_equal exec.events[1]['update']['details']['result'], 'success'
       assert_includes exec.events[2]['update'], 'Final Deployment state: SUCCESS'
+
+      assert_equal @website_location.reload.cluster_ip, '10.245.87.60'
     end
   end
 

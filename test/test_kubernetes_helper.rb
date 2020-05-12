@@ -76,6 +76,16 @@ class ActiveSupport::TestCase
     prepare_ssh_session(cmd, expected_result, expected_exit_code)
   end
 
+  def prepare_get_services_json(kubernetes_method, website, website_location, expected_result,
+                                expected_exit_code = 0)
+    cmd = kubernetes_method.kubectl(
+      website_location: website_location,
+      s_arguments: "-n instance-#{website.id} get services -o json"
+    )
+
+    prepare_ssh_session(cmd, expected_result, expected_exit_code)
+  end
+
   def prepare_kubernetes_logs(kubernetes_method,
                               expected_result,
                               expected_exit_code,
