@@ -114,9 +114,6 @@ Rails.application.routes.draw do
     post '/:site_name/add-alias', to: 'dns#add_alias'
     post '/:site_name/del-alias', to: 'dns#del_alias'
 
-    get '/:site_name/list-dns', to: 'dns#list_dns'  # to deprecate
-    post '/:site_name/add-dns', to: 'dns#add_dns'   # to deprecate
-    delete '/:site_name/del-dns', to: 'dns#del_dns' # to deprecate
     get '/:site_name/dns', to: 'dns#settings'
 
     post '/:site_name/changes', to: 'instances#changes'
