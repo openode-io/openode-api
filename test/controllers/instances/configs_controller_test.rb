@@ -108,4 +108,26 @@ class ConfigsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :forbidden
   end
+
+  # change multiple configs
+  test 'POST /instances/:instance_id/configs - happy path' do
+    w = default_website
+
+    post "/instances/#{w.site_name}/configs",
+         as: :json,
+         params: {
+           configs: {
+             TYPE: 'kubernetes',
+             MAX_BUILD_DURATION: '60'
+           }
+         },
+         headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal w.reload.type, 'kubernetes'
+    assert_equal w.configs['MAX_BUILD_DURATION'], '60'
+
+    assert_includes w.events[0].obj['title'], 'Config values changed'
+  end
 end
