@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 
 require 'test_helper'
 
@@ -153,6 +152,21 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal site_to_check['active'], true
     assert_equal site_to_check['persistence']['extra_storage'], 1
     assert_equal site_to_check['persistence']['storage_areas'], ['/opt/app/data/']
+    assert_nil site_to_check['env']
+  end
+
+  test '/instances/summary happy path - with env' do
+    website = default_website
+    website.overwrite_env_variables!(TEST: 1234)
+
+    get '/instances/summary?with=env', as: :json, headers: default_headers_auth
+
+    assert_response :success
+
+    site_to_check = response.parsed_body.find { |w| w['site_name'] == website.site_name }
+
+    assert_equal site_to_check['site_name'], 'testsite'
+    assert_equal site_to_check['env']['TEST'], 1234
   end
 
   test '/instances/summary happy path, without persistence and offline' do

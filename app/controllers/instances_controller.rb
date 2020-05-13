@@ -54,8 +54,14 @@ class InstancesController < ApplicationController
     json(@user.websites_with_access)
   end
 
-  api!
+  api :GET, 'instances/summary'
+  description 'List instances summary.'
+  param :with, String, desc: "List of extra fields to include, comma separated. " \
+                              "Supported: env",
+                       required: false
   def summary
+    extra_fields = params[:with]&.split(',') || []
+
     json(@user.websites_with_access
       .map do |w|
         w_obj = w.attributes
@@ -68,6 +74,7 @@ class InstancesController < ApplicationController
         w_obj["last_deployment_id"] = w.deployments.last&.id
         w_obj["ip"] = w.first_ip
         w_obj["active"] = w.active?
+        w_obj["env"] = (w.env || {}) if extra_fields.include?('env')
 
         extra_storage = w.website_locations&.first&.extra_storage || 0
 
