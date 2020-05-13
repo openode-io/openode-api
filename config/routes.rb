@@ -104,6 +104,7 @@ Rails.application.routes.draw do
 
     get '/:site_name/get-config', to: 'configs#get_config'
     post '/:site_name/set-config', to: 'configs#set_config'
+    post '/:site_name/configs', to: 'configs#update_configs'
 
     get '/:site_name/locations', to: 'locations#index'
     post '/:site_name/add-location', to: 'locations#add_location'
