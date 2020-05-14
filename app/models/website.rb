@@ -5,7 +5,6 @@ class Website < ApplicationRecord
   serialize :domains, JSON
   serialize :open_source, JSON
   serialize :configs, JSON
-  serialize :dns, JSON
   serialize :storage_areas, JSON
   serialize :data, JSON
 
@@ -63,7 +62,6 @@ class Website < ApplicationRecord
 
   PERMISSION_ROOT = 'root' # all permissions
   PERMISSION_DEPLOY = 'deploy'
-  PERMISSION_DNS = 'dns'
   PERMISSION_ALIAS = 'alias'
   PERMISSION_STORAGE_AREA = 'storage_area'
   PERMISSION_LOCATION = 'location'
@@ -73,7 +71,6 @@ class Website < ApplicationRecord
   PERMISSIONS = [
     PERMISSION_ROOT,
     PERMISSION_DEPLOY,
-    PERMISSION_DNS,
     PERMISSION_ALIAS,
     PERMISSION_STORAGE_AREA,
     PERMISSION_LOCATION,
@@ -163,7 +160,6 @@ class Website < ApplicationRecord
 
   validate :configs_must_comply
   validate :storage_areas_must_be_secure
-  validate :validate_dns
   validate :validate_domains
   validate :validate_site_name
   validate :validate_account_type
@@ -262,15 +258,11 @@ class Website < ApplicationRecord
   def add_location(location)
     location_server = location.location_servers.first
 
-    website_location = WebsiteLocation.create!(
+    WebsiteLocation.create!(
       website: self,
       location: location,
       location_server: location_server
     )
-
-    if location_server && type != TYPE_KUBERNETES
-      website_location.update_remote_dns(with_auto_a: true)
-    end
 
     self.cloud_type = CLOUD_TYPE_CLOUD
     save!
@@ -279,13 +271,7 @@ class Website < ApplicationRecord
   def remove_location(location)
     website_location = website_locations.to_a.find { |wl| wl.location_id == location.id }
 
-    if website_location
-      if type != TYPE_KUBERNETES
-        website_location.update_remote_dns(dns_entries: [])
-      end
-
-      website_location.destroy
-    end
+    website_location&.destroy
   end
 
   def configs_must_comply
@@ -363,28 +349,6 @@ class Website < ApplicationRecord
 
   def custom_domain?
     domain_type == DOMAIN_TYPE_CUSTOM_DOMAIN
-  end
-
-  def validate_dns
-    return if domain_type == 'subdomain'
-
-    self.dns ||= []
-
-    self.dns.each do |dns_entry|
-      unless domains.include?(dns_entry['domainName'])
-        errors.add(:dns, "Invalid domain (#{dns_entry['domainName']}), " \
-                          "available domains: #{domains.inspect}")
-      end
-
-      valid_types = %w[
-        A CNAME TXT AAAA MX CAA NS SRV SSHFP TXT
-      ]
-
-      unless valid_types.include?(dns_entry['type'])
-        errors.add(:dns, "Invalid type (#{dns_entry['type']}), " \
-                          "available types: #{valid_types.inspect}")
-      end
-    end
   end
 
   def can_use_root_domain
@@ -743,18 +707,6 @@ class Website < ApplicationRecord
   def remove_storage_area(storage_area)
     self.storage_areas ||= []
     self.storage_areas.delete(storage_area)
-  end
-
-  def remove_dns_entry(entry)
-    self.dns ||= []
-
-    entry_found = self.dns.find do |d|
-      d['domainName'] == entry['domainName'] &&
-        d['type'] == entry['type'] &&
-        d['value'] == entry['value']
-    end
-
-    self.dns.delete(entry_found) if entry_found
   end
 
   # true/false, msg

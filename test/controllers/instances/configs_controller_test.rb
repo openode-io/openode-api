@@ -99,7 +99,7 @@ class ConfigsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/set-config forbidden' do
-    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
+    w, = prepare_forbidden_test(Website::PERMISSION_PLAN)
 
     post "/instances/#{w.site_name}/set-config",
          as: :json,

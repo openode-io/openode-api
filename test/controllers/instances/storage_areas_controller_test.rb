@@ -39,7 +39,7 @@ class StorageAreasControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'POST /instances/:instance_id/add-storage-area forbidden' do
-    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
+    w, = prepare_forbidden_test(Website::PERMISSION_PLAN)
 
     post "/instances/#{w.site_name}/add-storage-area",
          as: :json,
@@ -70,7 +70,7 @@ class StorageAreasControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'POST /instances/:instance_id/del-storage-area forbidden' do
-    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
+    w, = prepare_forbidden_test(Website::PERMISSION_PLAN)
 
     post "/instances/#{w.site_name}/del-storage-area",
          as: :json,

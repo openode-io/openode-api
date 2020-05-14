@@ -6,7 +6,7 @@ class CollaboratorsControllerTest < ActionDispatch::IntegrationTest
     website = default_website
     collab_user = User.where('id != ?', website.user_id).first
 
-    collaborator = add_collaborator_for(collab_user, website, Website::PERMISSION_DNS)
+    collaborator = add_collaborator_for(collab_user, website, Website::PERMISSION_PLAN)
 
     get '/instances/testsite/collaborators',
         as: :json,
@@ -18,7 +18,7 @@ class CollaboratorsControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body[0]['id'], collaborator.id
     assert_equal response.parsed_body[0]['user']['id'], collab_user.id
     assert_equal response.parsed_body[0]['user']['email'], collab_user.email
-    assert_equal response.parsed_body[0]['permissions'], ['dns']
+    assert_equal response.parsed_body[0]['permissions'], ['plan']
   end
 
   test 'POST /instances/:instance_id/collaborators' do
@@ -28,7 +28,7 @@ class CollaboratorsControllerTest < ActionDispatch::IntegrationTest
 
     post "/instances/#{website.site_name}/collaborators",
          as: :json,
-         params: { collaborator: { user_id: collab_user.id, permissions: ['dns'] } },
+         params: { collaborator: { user_id: collab_user.id, permissions: ['plan'] } },
          headers: default_headers_auth
 
     assert_response :success
@@ -37,7 +37,7 @@ class CollaboratorsControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal website.collaborators.length, 1
     assert_equal website.collaborators[0].user, collab_user
-    assert_equal website.collaborators[0].permissions, ['dns']
+    assert_equal website.collaborators[0].permissions, ['plan']
   end
 
   test 'POST /instances/:instance_id/collaborators by email with existing user' do
@@ -47,7 +47,7 @@ class CollaboratorsControllerTest < ActionDispatch::IntegrationTest
 
     post "/instances/#{website.site_name}/collaborators",
          as: :json,
-         params: { collaborator: { email: collab_user.email, permissions: ['dns'] } },
+         params: { collaborator: { email: collab_user.email, permissions: ['plan'] } },
          headers: default_headers_auth
 
     assert_response :success
@@ -56,7 +56,7 @@ class CollaboratorsControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal website.collaborators.length, 1
     assert_equal website.collaborators[0].user, collab_user
-    assert_equal website.collaborators[0].permissions, ['dns']
+    assert_equal website.collaborators[0].permissions, ['plan']
   end
 
   test 'POST /instances/:instance_id/collaborators by email without existing user' do
@@ -68,7 +68,7 @@ class CollaboratorsControllerTest < ActionDispatch::IntegrationTest
 
     post "/instances/#{website.site_name}/collaborators",
          as: :json,
-         params: { collaborator: { email: collab_email, permissions: ['dns'] } },
+         params: { collaborator: { email: collab_email, permissions: ['plan'] } },
          headers: default_headers_auth
 
     assert_response :success
@@ -93,14 +93,14 @@ class CollaboratorsControllerTest < ActionDispatch::IntegrationTest
 
     patch "/instances/#{website.site_name}/collaborators/#{c.id}",
           as: :json,
-          params: { collaborator: { permissions: [Website::PERMISSION_DNS] } },
+          params: { collaborator: { permissions: [Website::PERMISSION_PLAN] } },
           headers: default_headers_auth
 
     assert_response :success
 
     collaborator = Collaborator.find_by! id: c.id
 
-    assert_equal collaborator.permissions, [Website::PERMISSION_DNS]
+    assert_equal collaborator.permissions, [Website::PERMISSION_PLAN]
   end
 
   test 'DELETE /instances/:instance_id/collaborators/id' do

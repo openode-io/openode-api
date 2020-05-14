@@ -40,7 +40,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/add-location forbidden' do
-    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
+    w, = prepare_forbidden_test(Website::PERMISSION_PLAN)
 
     post "/instances/#{w.site_name}/add-location",
          as: :json,
@@ -68,16 +68,8 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal w.website_locations[0].location.str_id, 'canada'
     assert_equal w.website_locations[0].location_server.ip, '127.0.0.1'
 
-    assert_equal w.events.length, 2
-    assert_equal w.events[0].obj['title'], 'DNS update'
-    assert_equal w.events[0].obj['updates']['deleted'].length, 1
-    assert_equal w.events[0].obj['updates']['deleted'][0]['domainName'], 'testsite.openode.io'
-    assert_equal w.events[0].obj['updates']['deleted'][0]['type'], 'A'
-    assert_equal w.events[0].obj['updates']['deleted'][0]['value'], '127.0.0.10'
-    assert_equal w.events[0].obj['updates']['created'][0]['domainName'], 'testsite.openode.io'
-    assert_equal w.events[0].obj['updates']['created'][0]['type'], 'A'
-    assert_equal w.events[0].obj['updates']['created'][0]['value'], '127.0.0.1'
-    assert_equal w.events[1].obj['title'], 'add-location'
+    assert_equal w.events.length, 1
+    assert_equal w.events[0].obj['title'], 'add-location'
   end
 
   test '/instances/:instance_id/add-location should not if online' do
@@ -108,7 +100,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/remove-location forbidden' do
-    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
+    w, = prepare_forbidden_test(Website::PERMISSION_PLAN)
     wl = w.website_locations.first
 
     post "/instances/#{w.site_name}/remove-location",
@@ -166,12 +158,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal w.website_locations.length, 0
 
-    assert_equal w.events.length, 2
-    assert_equal w.events[0].obj['title'], 'DNS update'
-    assert_equal w.events[0].obj['updates']['created'].length, 0
-    assert_equal w.events[0].obj['updates']['deleted'][0]['domainName'], 'testsite.openode.io'
-    assert_equal w.events[0].obj['updates']['deleted'][0]['type'], 'A'
-    assert_equal w.events[0].obj['updates']['deleted'][0]['value'], '127.0.0.10'
-    assert_equal w.events[1].obj['title'], 'remove-location'
+    assert_equal w.events.length, 1
+    assert_equal w.events[0].obj['title'], 'remove-location'
   end
 end

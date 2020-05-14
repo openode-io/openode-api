@@ -1,9 +1,6 @@
 application:
   base_hostname: openode.io
   hostname_private_cloud: openode.dev
-  dns:
-    type: vultr
-    api_key: xxxxx
   docker:
     build_servers:
       - ip: 127.0.0.1

@@ -786,7 +786,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/set-plan forbidden' do
-    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
+    w, = prepare_forbidden_test(Website::PERMISSION_LOCATION)
 
     post "/instances/#{w.site_name}/set-plan?location_str_id=usa",
          as: :json,

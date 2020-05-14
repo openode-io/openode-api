@@ -8,7 +8,6 @@ class DnsControllerTest < ActionDispatch::IntegrationTest
   test '/instances/:instance_id/add-alias with custom domain' do
     w = Website.find_by site_name: 'www.what.is'
     w.domains = ['www.what.is', 'www2.www.what.is']
-    w.dns = []
     w.save!
 
     add_collaborator_for(default_user, w, Website::PERMISSION_ALIAS)
@@ -29,7 +28,7 @@ class DnsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/add-alias with custom domain - forbidden' do
-    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
+    w, = prepare_forbidden_test(Website::PERMISSION_PLAN)
 
     post "/instances/#{w.site_name}/add-alias",
          as: :json,
@@ -43,7 +42,6 @@ class DnsControllerTest < ActionDispatch::IntegrationTest
   test '/instances/:instance_id/del-alias with custom domain' do
     w = Website.find_by site_name: 'www.what.is'
     w.domains = ['www.what.is', 'www2.www.what.is', 'www3.www.what.is']
-    w.dns = []
     w.save!
 
     add_collaborator_for(default_user, w)
@@ -64,7 +62,7 @@ class DnsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/del-alias with custom domain - forbidden' do
-    w, = prepare_forbidden_test(Website::PERMISSION_DNS)
+    w, = prepare_forbidden_test(Website::PERMISSION_PLAN)
 
     post "/instances/#{w.site_name}/del-alias",
          as: :json,

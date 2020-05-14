@@ -135,33 +135,6 @@ class WebsiteLocation < ApplicationRecord
     end
   end
 
-  def self.dns_entry_to_id(entry)
-    Digest::MD5.hexdigest(entry.to_json)
-  end
-
-  def compute_dns(opts = {})
-    result = (website.dns || []).clone
-
-    if opts[:with_auto_a] && (opts[:location_server] || location_server)
-      server = opts[:location_server] || location_server
-      computed_domains = compute_domains
-
-      result += WebsiteLocation.compute_a_record_dns(server, computed_domains)
-    end
-
-    result
-      .map do |r|
-        r['id'] = WebsiteLocation.dns_entry_to_id(r)
-        r
-      end
-      .uniq { |r| r['id'] }
-  end
-
-  def find_dns_entry_by_id(id)
-    compute_dns
-      .find { |entry| entry['id'] == id }
-  end
-
   def gen_ssh_key!
     k = SSHKey.generate
 
@@ -197,21 +170,6 @@ class WebsiteLocation < ApplicationRecord
     parts.first.delete_suffix('.')
   end
 
-  def self.compute_a_record_dns(location_server, computed_domains)
-    result = []
-
-    computed_domains.each do |domain|
-      result << {
-        'name' => WebsiteLocation.name_of_domain(domain),
-        'domainName' => domain,
-        'type' => 'A',
-        'value' => location_server.ip
-      }
-    end
-
-    result
-  end
-
   def allocate_ports!
     return if (port && second_port) || !location_server_id
 
@@ -226,38 +184,9 @@ class WebsiteLocation < ApplicationRecord
     save!
   end
 
-  def add_server!(attribs = {})
-    server = LocationServer.find_by ip: attribs[:ip]
-    return server if server
-
-    attribs[:location_id] = location_id
-    server = LocationServer.create!(attribs)
-
-    self.location_server_id = server.id
-    save!
-
-    reload
-    update_remote_dns(with_auto_a: true)
-
-    server
-  end
-
   def ports
     [port, second_port]
       .select(&:present?)
-  end
-
-  def update_remote_dns(opts = {})
-    actions_done = Remote::Dns::Base.instance.update(
-      root_domain,
-      main_domain,
-      opts[:dns_entries] || compute_dns(with_auto_a: opts[:with_auto_a]),
-      location_server.andand.ip
-    )
-
-    website.create_event(title: 'DNS update', updates: actions_done)
-
-    actions_done
   end
 
   protected

@@ -283,26 +283,6 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal w.valid?, false
   end
 
-  # dns validation
-
-  test 'dns fail if domain not in list' do
-    w = Website.where(site_name: 'www.what.is').first
-    w.domains = ['www.what.is']
-    w.dns = [{ domainName: 'www2.what.is', type: 'A', value: '123' }]
-    w.save
-
-    assert_equal w.valid?, false
-  end
-
-  test 'dns fail if type invalid' do
-    w = Website.where(site_name: 'www.what.is').first
-    w.domains = ['www.what.is']
-    w.dns = [{ domainName: 'wwww.what.is', type: 'B', value: '123' }]
-    w.save
-
-    assert_equal w.valid?, false
-  end
-
   # locations
 
   test 'locations for a given website' do

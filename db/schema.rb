@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_05_11_230805) do
+ActiveRecord::Schema.define(version: 2020_05_13_233440) do
 
   create_table "collaborators", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "website_id"
@@ -261,7 +261,6 @@ ActiveRecord::Schema.define(version: 2020_05_11_230805) do
     t.text "open_source"
     t.string "instance_type", limit: 50, default: "server"
     t.string "sub_status"
-    t.text "dns"
     t.string "cloud_type", limit: 150, default: "cloud"
     t.text "init_script"
     t.boolean "open_source_activated", default: false
