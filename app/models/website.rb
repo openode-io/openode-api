@@ -23,6 +23,17 @@ class Website < ApplicationRecord
                       class_name: :WebsiteStatus,
                       dependent: :destroy
 
+  # collaborators data plus user information
+  def pretty_collaborators_h
+    collaborators
+      .includes(:user)
+      .map do |c|
+        current = c.attributes
+        current['user'] = { id: c.user.id, email: c.user.email }
+        current
+      end
+  end
+
   def deployments
     Deployment.type_dep.where(website: self)
   end

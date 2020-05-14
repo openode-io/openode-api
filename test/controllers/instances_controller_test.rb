@@ -169,6 +169,26 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal site_to_check['env']['TEST'], 1234
   end
 
+  test '/instances/summary happy path - with collaborators' do
+    website = default_website
+    collaborators = website.collaborators
+    puts "collaborators #{collaborators.inspect}"
+    website.overwrite_env_variables!(TEST: 1234)
+
+    get '/instances/summary?with=collaborators',
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :success
+
+    site_to_check = response.parsed_body.find { |w| w['site_name'] == website.site_name }
+
+    assert_equal site_to_check['site_name'], 'testsite'
+    assert_equal site_to_check['collaborators'].count, collaborators.count
+    assert_equal site_to_check['collaborators'].first.dig('user', 'email'),
+                 'myadmin@thisisit.com'
+  end
+
   test '/instances/summary happy path, without persistence and offline' do
     website = Website.find_by site_name: 'testsite'
     wl = website.website_locations.first
