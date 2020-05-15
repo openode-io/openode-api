@@ -474,7 +474,7 @@ class Website < ApplicationRecord
     end
 
     # url
-    unless open_source['repository_url'] =~ /\A#{URI.regexp(%w[http https])}\z/
+    unless open_source['repository_url'] =~ /\A#{URI::DEFAULT_PARSER.make_regexp(%w[http https])}\z/
       errors.add(:open_source, "invalid repository URL")
     end
 
