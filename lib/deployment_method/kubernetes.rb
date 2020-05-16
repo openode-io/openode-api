@@ -627,6 +627,7 @@ module DeploymentMethod
           annotations:
             kubernetes.io/ingress.class: "nginx"
             nginx.org/websocket-services: "main-service"
+            ingress.kubernetes.io/ssl-redirect: "#{website.get_config('REDIR_HTTP_TO_HTTPS')}"
             # cert-manager.io/cluster-issuer: "letsencrypt-prod"
         spec:
         #{generate_tls_specs_ingress_yml(website, rules_domains) if certificate?(website)}

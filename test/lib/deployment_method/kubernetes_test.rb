@@ -769,6 +769,10 @@ VAR2=5678
     assert_includes yml, "namespace: #{kubernetes_method.namespace_of(website)}"
     assert_includes yml, "ingress.class: \"nginx\""
 
+    if opts[:ssl_redirect].present?
+      assert_includes yml, "ingress.kubernetes.io/ssl-redirect: \"#{opts[:ssl_redirect]}\""
+    end
+
     domains.each do |domain|
       assert_includes yml, "- host: #{domain}"
     end
@@ -787,7 +791,42 @@ VAR2=5678
       yml = kubernetes_method.generate_ingress_yml(@website, @website_location)
 
       assert_contains_ingress_yml(yml, @website, @website_location,
-                                  with_certificate_secret: true)
+                                  with_certificate_secret: true,
+                                  ssl_redirect: true)
+    end
+  end
+
+  test 'generate_ingress_yml - without ssl redirect' do
+    assert_scripted do
+      begin_ssh
+
+      yml = kubernetes_method.generate_ingress_yml(@website, @website_location)
+
+      @website.configs = {
+        'REDIR_HTTP_TO_HTTPS': false
+      }
+      @website.save!
+
+      assert_contains_ingress_yml(yml, @website, @website_location,
+                                  with_certificate_secret: true,
+                                  ssl_redirect: false)
+    end
+  end
+
+  test 'generate_ingress_yml - with ssl redirect if empty' do
+    assert_scripted do
+      begin_ssh
+
+      yml = kubernetes_method.generate_ingress_yml(@website, @website_location)
+
+      @website.configs = {
+        'REDIR_HTTP_TO_HTTPS': ''
+      }
+      @website.save!
+
+      assert_contains_ingress_yml(yml, @website, @website_location,
+                                  with_certificate_secret: true,
+                                  ssl_redirect: true)
     end
   end
 
