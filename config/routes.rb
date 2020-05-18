@@ -25,6 +25,7 @@ Rails.application.routes.draw do
     post 'newsletters/:id/send', to: 'newsletters#deliver'
 
     get 'stats/spendings', to: 'stats#spendings'
+    get 'stats/nb_online', to: 'stats#nb_online'
   end
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
