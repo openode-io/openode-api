@@ -265,6 +265,8 @@ class Website < ApplicationRecord
 
   def create_event(obj)
     WebsiteEvent.create(ref_id: id, obj: obj)
+  rescue StandardError => e
+    Rails.logger.error(e)
   end
 
   def add_location(location)
