@@ -67,6 +67,7 @@ class InstancesController < ApplicationController
         w_obj = w.attributes
 
         w_obj['location'] = w.website_locations&.first&.location
+        w_obj['hostname'] = w.website_locations&.first&.main_domain
         w_obj["plan"] = w.plan
         w_obj["price"] = w.price
         w_obj["plan_name"] = w.plan_name

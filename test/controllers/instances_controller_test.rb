@@ -143,6 +143,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
     site_to_check = response.parsed_body.find { |w| w['site_name'] == website.site_name }
     assert_equal site_to_check['site_name'], 'testsite'
+    assert_equal site_to_check['hostname'], 'testsite.openode.io'
     assert_equal site_to_check['ip'], '127.0.0.1'
     assert_equal site_to_check['location']['full_name'], 'Montreal (Canada)'
     assert_equal site_to_check['price'], '0.80'
