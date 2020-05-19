@@ -3,7 +3,7 @@ module ApplicationCable
     identified_by :current_user
 
     def connect
-      token = request.headers['token']
+      token = request.headers['token'] || request.params['token']
       self.current_user = User.find_by token: token
 
       reject_unauthorized_connection unless current_user
