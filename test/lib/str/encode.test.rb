@@ -23,4 +23,18 @@ class StrEncodeTest < ActiveSupport::TestCase
     assert_equal result[:what], ',b8dc2'
     assert_equal result[:is], ',b8dc2'
   end
+
+  test 'simple obj - strip invalid chars' do
+    obj = {
+      what: "titi",
+      is: "toto",
+      tt: "hey\xD0\xBF\xD0\xB2\xD0\xBF"
+    }
+
+    result = Str::Encode.strip_invalid_chars(obj, encoding: 'ASCII')
+
+    assert_equal result[:what], 'titi'
+    assert_equal result[:is], 'toto'
+    assert_equal result[:tt], 'hey'
+  end
 end

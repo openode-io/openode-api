@@ -298,6 +298,22 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.location_exists?('canada'), true
   end
 
+  # create_event
+  test 'create_event - happy path' do
+    website = default_website
+    website.create_event(test1: 1234, test2: 456)
+    assert_equal website.events.first.obj.dig('test1'), 1234
+    assert_equal website.events.first.obj.dig('test2'), 456
+  end
+
+  test 'create_event - with special chars' do
+    website = default_website
+    website.create_event(test1: "what1\xD0\xBF\xD0\xB2\xD0\xBF", test2: 'what')
+
+    assert_equal website.events.first.obj.dig('test1'), 'what1'
+    assert_equal website.events.first.obj.dig('test2'), 'what'
+  end
+
   # add_location
   test 'add location happy path' do
     website = default_website

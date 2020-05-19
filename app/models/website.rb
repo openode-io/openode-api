@@ -264,7 +264,9 @@ class Website < ApplicationRecord
   end
 
   def create_event(obj)
-    WebsiteEvent.create(ref_id: id, obj: obj)
+    stripped_obj = Str::Encode.strip_invalid_chars(obj, encoding: 'ASCII')
+
+    WebsiteEvent.create(ref_id: id, obj: stripped_obj)
   rescue StandardError => e
     Rails.logger.error(e)
   end
