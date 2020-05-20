@@ -137,7 +137,9 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     website = Website.find_by site_name: 'testsite'
     website.storage_areas = ['/opt/app/data/']
     website.save!
-    get '/instances/summary', as: :json, headers: default_headers_auth
+    get '/instances/summary?with=last_deployment',
+      as: :json,
+      headers: default_headers_auth
 
     assert_response :success
 
@@ -155,6 +157,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal site_to_check['persistence']['storage_areas'], ['/opt/app/data/']
     assert_nil site_to_check['env']
     assert_nil site_to_check['events']
+
+    assert site_to_check['last_deployment']
   end
 
   test '/instances/summary happy path - with env' do
