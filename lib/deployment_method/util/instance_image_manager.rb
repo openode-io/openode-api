@@ -7,7 +7,7 @@ module DeploymentMethod
       attr_accessor :deployment
 
       LIMIT_REPOSITORY_BYTES = 1024 * 1024 * 1024 # MB * KB * B -> 1 GB
-      MAX_BUILD_TIMEOUT = 180
+      MAX_BUILD_TIMEOUT = 360
       TIMEOUT_EXIT_CODE = 124
 
       def initialize(args)
