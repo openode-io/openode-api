@@ -57,7 +57,7 @@ class InstancesController < ApplicationController
   api :GET, 'instances/summary'
   description 'List instances summary.'
   param :with, String, desc: "List of extra fields to include, comma separated. " \
-                              "Supported: env, collaborators",
+                              "Supported: env, collaborators, events",
                        required: false
   def summary
     extras = params[:with]&.split(',') || []
@@ -75,8 +75,6 @@ class InstancesController < ApplicationController
         w_obj["last_deployment_id"] = w.deployments.last&.id
         w_obj["ip"] = w.first_ip
         w_obj["active"] = w.active?
-        w_obj["env"] = (w.env || {}) if extras.include?('env')
-        w_obj["collaborators"] = w.pretty_collaborators_h if extras.include?('collaborators')
 
         extra_storage = w.website_locations&.first&.extra_storage || 0
 
@@ -86,6 +84,11 @@ class InstancesController < ApplicationController
             storage_areas: w.storage_areas || []
           }
         end
+
+        # conditional extra fields
+        w_obj["env"] = (w.env || {}) if extras.include?('env')
+        w_obj["collaborators"] = w.pretty_collaborators_h if extras.include?('collaborators')
+        w_obj["events"] = w.events.last(10) if extras.include?('events')
 
         w_obj
       end
