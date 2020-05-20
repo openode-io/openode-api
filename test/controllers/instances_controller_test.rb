@@ -138,8 +138,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     website.storage_areas = ['/opt/app/data/']
     website.save!
     get '/instances/summary?with=last_deployment',
-      as: :json,
-      headers: default_headers_auth
+        as: :json,
+        headers: default_headers_auth
 
     assert_response :success
 
