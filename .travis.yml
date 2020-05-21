@@ -5,6 +5,7 @@ language: ruby
 
 before_script:
 - sudo apt-get install -qq sshpass
+- npm i -g openode
 
 script:
   - bundle exec rubocop
