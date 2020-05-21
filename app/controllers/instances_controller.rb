@@ -189,6 +189,22 @@ class InstancesController < ApplicationController
     json(result: 'success')
   end
 
+  api :POST, 'instances/:id/crontab'
+  description 'Update the crontab given a list of lines.'
+  param :crontab, Array, desc: 'Array of strings, one line per item.', required: true
+  def update_crontab
+    lines = params[:crontab] || []
+    @website.crontab = lines.join("\n")
+    @website.save!
+
+    @website_event_obj = {
+      title: 'update-crontab',
+      new_crontab: @website.crontab
+    }
+
+    json(result: 'success')
+  end
+
   api!
   def plan
     json(@website.plan)

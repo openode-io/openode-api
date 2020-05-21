@@ -924,6 +924,31 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal website.crontab, new_crontab
   end
 
+  test 'post /instances/:instance_id/crontab' do
+    website = default_website
+    website.crontab = ""
+    website.save!
+
+    new_crontab = "12 * * * * * ls -la\n8 * * * * * ls -la2"
+
+    post "/instances/#{website.id}/crontab",
+          as: :json,
+          params: {
+            crontab: [
+              '12 * * * * * ls -la',
+              '8 * * * * * ls -la2',
+            ]
+          },
+          headers: default_headers_auth
+
+    assert_response :success
+
+    website.reload
+
+    assert_equal website.crontab, new_crontab
+    assert_equal website.events.last.obj.dig('title'), 'update-crontab'
+  end
+
   test 'DEL /instances/:instance_id/ forbidden' do
     w, = prepare_forbidden_test(Website::PERMISSION_PLAN)
 
