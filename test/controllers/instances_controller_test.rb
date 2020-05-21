@@ -932,14 +932,14 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     new_crontab = "12 * * * * * ls -la\n8 * * * * * ls -la2"
 
     post "/instances/#{website.id}/crontab",
-          as: :json,
-          params: {
-            crontab: [
-              '12 * * * * * ls -la',
-              '8 * * * * * ls -la2',
-            ]
-          },
-          headers: default_headers_auth
+         as: :json,
+         params: {
+           crontab: [
+             '12 * * * * * ls -la',
+             '8 * * * * * ls -la2'
+           ]
+         },
+         headers: default_headers_auth
 
     assert_response :success
 
