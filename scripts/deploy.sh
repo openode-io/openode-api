@@ -19,3 +19,11 @@ ssh -i id_rsa_tmp -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST \
   "cd $PROJECT_PATH && cat scripts/crontab.txt | crontab -"
 
 rm -f id_rsa_tmp
+
+# deploy a test site
+cd scripts/test-prod
+
+openode ci-conf $OPENODE_TOKEN $OPENODE_SITE_NAME
+openode deploy
+sleep 2
+openode stop
