@@ -126,8 +126,13 @@ module DeploymentMethod
 
       if website.crontab.present?
         Rails.logger.info('updating crontab')
-        runner.upload_content_to(website.crontab,
-                                 "#{website.repo_dir}#{Base::DEFAULT_CRONTAB_FILENAME}")
+        begin
+          runner.upload_content_to(website.crontab,
+                                   "#{website.repo_dir}#{Base::DEFAULT_CRONTAB_FILENAME}")
+        rescue StandardError => e
+          Rails.logger.error("Failed to copy crontab file #{e}")
+          notify("warn", "Unable to copy the crontab file")
+        end
       else
         Rails.logger.info('skipping crontab update (empty)')
       end
