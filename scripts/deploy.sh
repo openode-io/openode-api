@@ -23,7 +23,11 @@ rm -f id_rsa_tmp
 # deploy a test site
 cd scripts/test-prod
 
+sleep 15
+
 openode ci-conf $OPENODE_TOKEN $OPENODE_SITE_NAME
+pwd
+ls -la
 openode deploy
 sleep 2
 openode stop
