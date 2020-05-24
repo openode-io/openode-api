@@ -98,6 +98,7 @@ Rails.application.routes.draw do
     delete '/:site_name/', to: 'instances#destroy_instance'
     post '/:site_name/crontab', to: 'instances#update_crontab'
     get '/:site_name/status', to: 'instances#status'
+    get '/:site_name/summary', to: 'instances#instance_summary'
     get '/:site_name/routes', to: 'instances#routes'
 
     get '/:site_name/stats', to: 'instance_stat#index'

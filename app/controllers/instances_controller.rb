@@ -54,47 +54,68 @@ class InstancesController < ApplicationController
     json(@user.websites_with_access)
   end
 
+  INSTANCE_SUMMARY_WITH_DESC = "List of extra fields to include, comma separated. " \
+                              "Supported: env, collaborators, events, last_deployment"
+
+  def summarize_website(website, extras = [])
+    w = website
+    w_obj = w.attributes
+
+    w_obj['location'] = w.website_locations&.first&.location
+    w_obj['hostname'] = w.website_locations&.first&.main_domain
+    w_obj["plan"] = w.plan
+    w_obj["price"] = w.price
+    w_obj["plan_name"] = w.plan_name
+    w_obj["nb_collaborators"] = w.collaborators.count
+    w_obj["last_deployment_id"] = w.deployments.last&.id
+    w_obj["ip"] = w.first_ip
+    w_obj["active"] = w.active?
+
+    extra_storage = w.website_locations&.first&.extra_storage || 0
+
+    if extra_storage.positive?
+      w_obj["persistence"] = {
+        extra_storage: extra_storage,
+        storage_areas: w.storage_areas || []
+      }
+    end
+
+    # conditional extra fields
+    w_obj["env"] = (w.env || {}) if extras.include?('env')
+    w_obj["collaborators"] = w.pretty_collaborators_h if extras.include?('collaborators')
+    w_obj["events"] = w.events.last(10) if extras.include?('events')
+    w_obj["last_deployment"] = w.deployments.last if extras.include?('last_deployment')
+
+    w_obj
+  end
+
+  def extra_fields_summary(with_param)
+    with_param&.split(',') || []
+  end
+
   api :GET, 'instances/summary'
   description 'List instances summary.'
-  param :with, String, desc: "List of extra fields to include, comma separated. " \
-                              "Supported: env, collaborators, events, last_deployment",
+  param :with, String, desc: INSTANCE_SUMMARY_WITH_DESC,
                        required: false
   def summary
-    extras = params[:with]&.split(',') || []
+    extras = extra_fields_summary(params[:with])
 
     json(@user.websites_with_access
       .map do |w|
-        w_obj = w.attributes
-
-        w_obj['location'] = w.website_locations&.first&.location
-        w_obj['hostname'] = w.website_locations&.first&.main_domain
-        w_obj["plan"] = w.plan
-        w_obj["price"] = w.price
-        w_obj["plan_name"] = w.plan_name
-        w_obj["nb_collaborators"] = w.collaborators.count
-        w_obj["last_deployment_id"] = w.deployments.last&.id
-        w_obj["ip"] = w.first_ip
-        w_obj["active"] = w.active?
-
-        extra_storage = w.website_locations&.first&.extra_storage || 0
-
-        if extra_storage.positive?
-          w_obj["persistence"] = {
-            extra_storage: extra_storage,
-            storage_areas: w.storage_areas || []
-          }
-        end
-
-        # conditional extra fields
-        w_obj["env"] = (w.env || {}) if extras.include?('env')
-        w_obj["collaborators"] = w.pretty_collaborators_h if extras.include?('collaborators')
-        w_obj["events"] = w.events.last(10) if extras.include?('events')
-        w_obj["last_deployment"] = w.deployments.last if extras.include?('last_deployment')
-
-        w_obj
+        summarize_website(w, extras)
       end
       .sort_by { |w| w['created_at'] }
       .reverse)
+  end
+
+  api :GET, 'instances/:id/summary'
+  description 'Instance summary.'
+  param :with, String, desc: INSTANCE_SUMMARY_WITH_DESC,
+                       required: false
+  def instance_summary
+    extras = extra_fields_summary(params[:with])
+
+    json(summarize_website(@website, extras))
   end
 
   api!

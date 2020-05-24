@@ -249,6 +249,22 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal site_to_check['last_deployment_id'], nil
   end
 
+  test '/instances/:id/summary happy path' do
+    website = Website.find_by site_name: 'testsite'
+
+    get "/instances/#{website.id}/summary?with=last_deployment",
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :success
+
+    site_to_check = response.parsed_body
+    puts "si #{site_to_check.inspect}"
+    assert_equal site_to_check['site_name'], 'testsite'
+
+    assert site_to_check['last_deployment']
+  end
+
   test '/instances/status happy path' do
     website = default_website
     WebsiteStatus.create!(
