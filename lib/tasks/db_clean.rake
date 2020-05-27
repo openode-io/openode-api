@@ -10,20 +10,22 @@ namespace :db_clean do
     end
   end
 
+  def hard_clean_table(args)
+    result = args[:Model].where('created_at < ?', args[:days_retention].days.ago)
+    Rails.logger.info "[#{args[:name]}] hard clean table #{args[:stat_name]} count=#{result.count}"
+    result.destroy_all
+  end
+
   desc ''
-  task old_executions: :environment do
-    name = "Task db_clean__old_executions"
+  task old_deployments: :environment do
+    name = "Task db_clean__old_deployments"
     Rails.logger.info "[#{name}] begin"
     days_retention = 31
 
     objects = [
       {
-        model: Deployment,
+        model: Deployment.type_dep,
         stat_name: "nb_archived_deployments"
-      },
-      {
-        model: Execution,
-        stat_name: "nb_archived_executions"
       }
     ]
 
@@ -35,6 +37,20 @@ namespace :db_clean do
         stat_name: object_to_archived[:stat_name]
       )
     end
+  end
+
+  desc ''
+  task old_task_executions: :environment do
+    name = "Task db_clean__old_task_executions"
+    Rails.logger.info "[#{name}] begin"
+    days_retention = 1
+
+    hard_clean_table(
+      Model: Execution.not_types(['Deployment']),
+      days_retention: days_retention,
+      name: name,
+      stat_name: "nb_archived_task_executions"
+    )
   end
 
   desc ''
