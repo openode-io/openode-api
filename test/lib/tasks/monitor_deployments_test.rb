@@ -35,6 +35,9 @@ class LibMonitorDeploymentsTest < ActiveSupport::TestCase
 
     assert_scripted do
       begin_ssh
+
+      Execution.all.each(&:destroy)
+
       invoke_task "monitor_deployments:pod_status"
 
       status = website.statuses.last
@@ -43,6 +46,8 @@ class LibMonitorDeploymentsTest < ActiveSupport::TestCase
       assert_equal status.ref_id, website.id
       assert_equal statuses.length, 1
       assert_equal statuses.first['name'], "www"
+
+      assert_equal Execution.count, 0
     end
   end
 
@@ -140,6 +145,9 @@ class LibMonitorDeploymentsTest < ActiveSupport::TestCase
     assert_scripted do
       begin_ssh
 
+      Execution.all.each(&:destroy)
+      assert_equal Execution.count, 0
+
       invoke_task "monitor_deployments:bandwidth"
 
       stat = WebsiteBandwidthDailyStat.last
@@ -151,6 +159,8 @@ class LibMonitorDeploymentsTest < ActiveSupport::TestCase
       assert_equal stat.obj['previous_network_metrics'].first['tx_bytes'], 9_758_564
       assert_equal stat.obj['rcv_bytes'], 1000
       assert_equal stat.obj['tx_bytes'], 100
+
+      assert_equal Execution.count, 0
     end
   end
 

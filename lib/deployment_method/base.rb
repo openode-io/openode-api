@@ -12,6 +12,12 @@ module DeploymentMethod
       (runner&.execution&.id || 'not_available').to_s
     end
 
+    def destroy_execution
+      Rails.logger.info "Destroying execution"
+      result = runner&.execution&.destroy
+      Rails.logger.info "Execution destroyed" if result.present?
+    end
+
     def error!(msg)
       Rails.logger.error(msg)
       notify('error', msg)

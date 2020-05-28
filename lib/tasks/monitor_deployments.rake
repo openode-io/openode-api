@@ -22,6 +22,8 @@ namespace :monitor_deployments do
       WebsiteStatus.log(website, status)
     rescue StandardError => e
       Ex::Logger.error(e, "[#{name}] failed with website #{website.site_name}")
+    ensure
+      exec_method&.destroy_execution
     end
   end
 
@@ -78,6 +80,8 @@ namespace :monitor_deployments do
       end
     rescue StandardError => e
       Ex::Logger.error(e, "[#{name}] failed with website #{website.site_name} - #{e}")
+    ensure
+      exec_method&.destroy_execution
     end
   end
 end
