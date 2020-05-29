@@ -321,8 +321,14 @@ module DeploymentMethod
       END_YML
     end
 
-    def namespace_of(website)
-      "instance-#{website.id}"
+    def namespace_of(website = nil)
+      "instance-#{website&.id}"
+    end
+
+    def website_from_namespace(namespace)
+      parts = namespace.split('-')
+
+      Website.find_by id: parts.second
     end
 
     def generate_namespace_yml(website)

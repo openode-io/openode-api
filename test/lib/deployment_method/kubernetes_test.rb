@@ -461,6 +461,26 @@ VAR2=5678
     assert_equal kubernetes_method.namespace_of(@website), "instance-#{@website.id}"
   end
 
+  test 'website_from_namespace with valid website' do
+    w = default_website
+
+    found_website = kubernetes_method.website_from_namespace("instance-#{w.id}")
+
+    assert_equal w, found_website
+  end
+
+  test 'website_from_namespace with not found website' do
+    found_website = kubernetes_method.website_from_namespace("instance-123456")
+
+    assert_nil found_website
+  end
+
+  test 'website_from_namespace with invalid namespace' do
+    found_website = kubernetes_method.website_from_namespace("instance123")
+
+    assert_nil found_website
+  end
+
   def assert_contains_namespace_yml(yml, website)
     assert_includes yml, "kind: Namespace"
     assert_includes yml, "  name: #{kubernetes_method.namespace_of(website)}"
