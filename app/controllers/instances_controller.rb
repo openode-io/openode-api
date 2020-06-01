@@ -18,10 +18,6 @@ class InstancesController < ApplicationController
   before_action :prepare_record_website_event
   after_action :record_website_event
 
-  before_action only: %i[reload] do
-    requires_docker_deployment
-  end
-
   before_action only: %i[stop cmd reload] do
     requires_status_in [Website::STATUS_ONLINE]
   end
@@ -356,10 +352,16 @@ class InstancesController < ApplicationController
 
   api!
   def reload
-    @runner.delay.execute([{ cmd_name: 'reload', options: { is_complex: true } }])
-    @website_event_obj = { title: 'instance-reload' }
+    @runner.init_execution!('Deployment', params)
+    execution = @runner.execution
+    execution.status = Execution::STATUS_RUNNING
+    execution.save
 
-    json(result: 'success', msg: 'operation in progress')
+    @runner.delay.execute([{ cmd_name: 'reload', options: { is_complex: true } }])
+
+    @website_event_obj = { title: 'instance-reload', deployment_id: @runner.execution&.id }
+
+    json(result: 'success', msg: 'operation in progress', deployment_id: execution&.id)
   end
 
   # TODO: deprecate
@@ -446,12 +448,6 @@ class InstancesController < ApplicationController
 
   def ensure_location
     @website_location ||= @website.website_locations.first
-  end
-
-  def requires_docker_deployment
-    unless @website.type == Website::TYPE_DOCKER
-      validation_error!("The instance must be of docker type.")
-    end
   end
 
   def requires_status_in(statuses)

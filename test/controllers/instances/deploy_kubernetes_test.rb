@@ -284,4 +284,62 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert_equal @website.reload.status, Website::STATUS_OFFLINE
     end
   end
+
+  test '/instances/:instance_id/reload - with last deployment' do
+    parent_deployment = @website.deployments.last
+    parent_deployment.obj ||= {}
+    parent_deployment.obj['image_name_tag'] = 'mypreviousimage'
+    parent_deployment.save!
+
+    prepare_make_secret(@kubernetes_method, @website, @website_location, "result")
+    prepare_action_yml(@kubernetes_method, @website_location, "apply.yml",
+                       "apply -f apply.yml", 'success')
+
+    assert_scripted do
+      begin_ssh
+      post "/instances/#{default_kube_website.site_name}/reload?location_str_id=canada",
+           as: :json,
+           params: {},
+           headers: default_headers_auth
+
+      deployment = @website.deployments.last
+
+      assert_response :success
+      assert_equal response.parsed_body['result'], 'success'
+      assert_equal response.parsed_body['deployment_id'], deployment.id
+
+      Delayed::Job.first.invoke_job
+
+      deployment.reload
+
+      assert_not_equal deployment, parent_deployment
+      assert_equal deployment.status, Execution::STATUS_SUCCESS
+      assert_equal deployment.obj.dig('image_name_tag'), 'mypreviousimage'
+    end
+  end
+
+  test '/instances/:instance_id/reload - without latest image' do
+    prepare_make_secret(@kubernetes_method, @website, @website_location, "result")
+
+    assert_scripted do
+      begin_ssh
+      post "/instances/#{default_kube_website.site_name}/reload?location_str_id=canada",
+           as: :json,
+           params: {},
+           headers: default_headers_auth
+
+      deployment = @website.deployments.last
+
+      assert_response :success
+      assert_equal response.parsed_body['result'], 'success'
+      assert_equal response.parsed_body['deployment_id'], deployment.id
+
+      Delayed::Job.first.invoke_job
+
+      deployment.reload
+
+      assert_equal deployment.status, Execution::STATUS_FAILED
+      assert_includes deployment.events.first.dig('update'), 'Missing instance image'
+    end
+  end
 end

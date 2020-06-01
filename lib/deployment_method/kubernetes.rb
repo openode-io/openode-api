@@ -108,7 +108,7 @@ module DeploymentMethod
     def launch(options = {})
       website, website_location = get_website_fields(options)
 
-      initialize_ns(options)
+      initialize_ns(options) unless options[:skip_initialize_ns]
 
       image_name_tag = prepare_image_name_tag(website, website_location,
                                               runner.execution&.parent_execution)
@@ -158,7 +158,25 @@ module DeploymentMethod
     end
 
     def reload(options = {})
-      launch(options)
+      website = options[:website]
+
+      if website.reference_website_image.blank?
+        runner.execution.parent_execution_id = website.deployments.success.last&.id
+        runner.execution.save
+      end
+
+      result = launch((options || {}).merge(skip_initialize_ns: true))
+
+      runner.execution.status = Execution::STATUS_SUCCESS
+      runner.execution.save
+
+      result
+    rescue StandardError => e
+      notify("error", "Failed, #{e}")
+      runner.execution.status = Execution::STATUS_FAILED
+      runner.execution.save
+
+      { result: "Failed, error: #{e}" }
     end
 
     def kubectl(options = {})

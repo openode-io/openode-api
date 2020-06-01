@@ -25,6 +25,10 @@ class Execution < ApplicationRecord
     where(status: STATUS_RUNNING)
   }
 
+  scope :success, lambda {
+    where(status: STATUS_SUCCESS)
+  }
+
   scope :not_types, lambda { |specified_types|
     where.not(type: specified_types)
   }
