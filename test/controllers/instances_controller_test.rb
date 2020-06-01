@@ -736,17 +736,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
       assert_response :success
       assert_equal response.parsed_body['result'], 'success'
-      assert_equal Deployment.last.status, Deployment::STATUS_SUCCESS
+      assert_equal Deployment.last.status, Deployment::STATUS_RUNNING
     end
-  end
-
-  test '/instances/:instance_id/reload not available for kubernetes' do
-    post "/instances/#{default_kube_website.site_name}/reload?location_str_id=canada",
-         as: :json,
-         params: {},
-         headers: default_headers_auth
-
-    assert_response :bad_request
   end
 
   # /erase-all with docker compose
