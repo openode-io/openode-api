@@ -714,7 +714,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
-  # reload with docker compose internal
+  # reload
   test '/instances/:instance_id/reload with internal' do
     dep_method = prepare_default_execution_method
     set_dummy_secrets_to(LocationServer.all)
@@ -723,6 +723,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     prepare_ssh_session(dep_method.down(front_container_id: '123456789'), '123456789')
     prepare_ssh_session(dep_method.docker_compose(front_container_id: '123456789'),
                         '123456789')
+
+    website = Website.find_by site_name: 'testsite'
 
     assert_scripted do
       begin_ssh
@@ -736,6 +738,9 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
       assert_response :success
       assert_equal response.parsed_body['result'], 'success'
+      assert_equal response.parsed_body.dig('website', 'id'), website.id
+      assert_equal response.parsed_body.dig('website', 'site_name'), website.site_name
+      assert response.parsed_body.dig('deploymentId')
       assert_equal Deployment.last.status, Deployment::STATUS_RUNNING
     end
   end
