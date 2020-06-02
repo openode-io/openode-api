@@ -306,7 +306,8 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
       assert_response :success
       assert_equal response.parsed_body['result'], 'success'
-      assert_equal response.parsed_body['deployment_id'], deployment.id
+      assert_equal response.parsed_body['deploymentId'], deployment.id
+      assert_equal response.parsed_body.dig('website', 'site_name'), default_kube_website.site_name
 
       Delayed::Job.first.invoke_job
 
@@ -332,7 +333,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
       assert_response :success
       assert_equal response.parsed_body['result'], 'success'
-      assert_equal response.parsed_body['deployment_id'], deployment.id
+      assert_equal response.parsed_body['deploymentId'], deployment.id
 
       Delayed::Job.first.invoke_job
 

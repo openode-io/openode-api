@@ -350,20 +350,6 @@ class InstancesController < ApplicationController
     json(result: 'success')
   end
 
-  api!
-  def reload
-    @runner.init_execution!('Deployment', params)
-    execution = @runner.execution
-    execution.status = Execution::STATUS_RUNNING
-    execution.save
-
-    @runner.delay.execute([{ cmd_name: 'reload', options: { is_complex: true } }])
-
-    @website_event_obj = { title: 'instance-reload', deployment_id: @runner.execution&.id }
-
-    json(result: 'success', msg: 'operation in progress', deployment_id: execution&.id)
-  end
-
   # TODO: deprecate
   def docker_compose
     content = if [true, 'true'].include?(params['has_env_file'])
@@ -432,16 +418,44 @@ class InstancesController < ApplicationController
     json(logs: result)
   end
 
+  def deployment_response(args = {})
+    {
+      result: 'success',
+      website: {
+        id: @website.id,
+        site_name: @website.site_name
+      }
+    }.merge(args)
+  end
+
   api!
   def restart
     # run in background:
     @runner.init_execution!('Deployment', params)
     DeploymentMethod::Deployer.delay.run(@website_location, @runner)
 
-    json(result: 'success', deploymentId: @runner.execution.id)
+    json(
+      deployment_response(deploymentId: @runner.execution.id)
+    )
   rescue StandardError => e
     Ex::Logger.error(e, 'Issue starting deploying')
     raise e
+  end
+
+  api!
+  def reload
+    @runner.init_execution!('Deployment', params)
+    execution = @runner.execution
+    execution.status = Execution::STATUS_RUNNING
+    execution.save
+
+    @runner.delay.execute([{ cmd_name: 'reload', options: { is_complex: true } }])
+
+    @website_event_obj = { title: 'instance-reload', deployment_id: @runner.execution&.id }
+
+    json(
+      deployment_response(deploymentId: execution&.id)
+    )
   end
 
   protected
