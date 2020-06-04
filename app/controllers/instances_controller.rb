@@ -428,7 +428,9 @@ class InstancesController < ApplicationController
     }.merge(args)
   end
 
-  api!
+  api :POST, 'instances/:id/restart'
+  description 'Rebuild and spawn the instance.'
+  param :parent_execution_id, String, desc: 'Rollback to parent_execution_id', required: false
   def restart
     # run in background:
     @runner.init_execution!('Deployment', params)

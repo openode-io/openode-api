@@ -137,7 +137,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
     post "/instances/#{@website.site_name}/restart",
          as: :json,
-         params: base_params.merge(parent_execution_id: parent_deployment.id),
+         params: base_params.merge(parent_execution_id: parent_deployment.id.to_s),
          headers: default_headers_auth
 
     prepare_launch_happy_path(@kubernetes_method, @website,
