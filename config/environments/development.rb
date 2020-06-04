@@ -63,4 +63,6 @@ Rails.application.configure do
     api_key: ENV['MAILGUN_API_KEY'],
     domain: ENV['MAILGUN_DOMAIN']
   }
+
+  config.hosts << "api.openode.io"
 end

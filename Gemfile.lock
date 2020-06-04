@@ -175,6 +175,8 @@ GEM
     puma (4.3.5)
       nio4r (~> 2.0)
     rack (2.2.2)
+    rack-cors (1.1.1)
+      rack (>= 2.0.0)
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
     rack-timeout (0.6.0)
@@ -310,6 +312,7 @@ DEPENDENCIES
   paypal-checkout-sdk
   public_suffix
   puma
+  rack-cors
   rack-timeout
   rails (~> 6.0.3)
   redis
