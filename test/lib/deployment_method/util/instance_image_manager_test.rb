@@ -100,6 +100,24 @@ class InstanceImageManagerTest < ActiveSupport::TestCase
     assert_not_includes exception.inspect.to_s, "Docker timeout reached"
   end
 
+  test 'ensure_no_execution_error with non exit zero, with diagnostic' do
+    obj = {
+      result: {
+        exit_code: 1,
+        stdout: 'stdout msg',
+        stderr: 'stderr msg You need to install the latest version of Python'
+      }
+    }
+
+    exception = assert_raises StandardError do
+      @manager.ensure_no_execution_error("step name..", obj)
+    end
+
+    assert_includes exception.inspect.to_s, "stdout msg"
+    assert_includes exception.inspect.to_s, "stderr msg"
+    assert_includes exception.inspect.to_s, "Python package is missing"
+  end
+
   test 'ensure_no_execution_error with exit timeout' do
     obj = {
       result: {

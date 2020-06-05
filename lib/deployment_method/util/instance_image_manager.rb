@@ -89,7 +89,7 @@ module DeploymentMethod
                 " \n#{result.dig(:result, :stderr)}, " \
                 "exit code = #{result[:result][:exit_code]}" \
                 "#{specific_msg}"
-          raise msg
+          raise msg + OutputDiagnostic.analyze("build_image", msg)
         end
       end
 
