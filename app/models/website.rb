@@ -266,7 +266,12 @@ class Website < ApplicationRecord
   def create_event(obj)
     stripped_obj = Str::Encode.strip_invalid_chars(obj, encoding: 'ASCII')
 
-    WebsiteEvent.create(ref_id: id, obj: stripped_obj)
+    website_event = WebsiteEvent.create(ref_id: id, obj: stripped_obj)
+
+    WebsiteEventsChannel.broadcast_to(
+      WebsiteEventsChannel.id_channel(self),
+      website_event
+    )
   rescue StandardError => e
     Rails.logger.error(e)
   end
