@@ -347,6 +347,8 @@ class InstancesController < ApplicationController
   def stop
     @runner&.delay&.execute([{ cmd_name: 'stop', options: { is_complex: true } }])
 
+    @website_event_obj = { title: 'instance-stop' }
+
     json(result: 'success')
   end
 
@@ -435,6 +437,11 @@ class InstancesController < ApplicationController
     # run in background:
     @runner.init_execution!('Deployment', params)
     DeploymentMethod::Deployer.delay.run(@website_location, @runner)
+
+    @website_event_obj = {
+      title: 'instance-restart',
+      deployment_id: @runner.execution.id
+    }
 
     json(
       deployment_response(deploymentId: @runner.execution.id)
