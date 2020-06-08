@@ -22,20 +22,24 @@ namespace :db_clean do
     Rails.logger.info "[#{name}] begin"
     days_retention = 31
 
-    objects = [
-      {
-        model: Deployment.type_dep,
-        stat_name: "nb_archived_deployments"
-      }
-    ]
+    deployments_to_consider =
+      Deployment.type_dep.where('created_at < ?', days_retention.days.ago)
 
-    objects.each do |object_to_archived|
-      clean_table(
-        Model: object_to_archived[:model],
-        days_retention: days_retention,
-        name: name,
-        stat_name: object_to_archived[:stat_name]
-      )
+    deployments_to_consider.each do |deployment|
+      Rails.logger.info "[#{name}] removing entity #{deployment.id}"
+
+      if deployment.website
+        last_successful_deployment = deployment.website.deployments.success.last
+
+        if last_successful_deployment == deployment
+          Rails.logger.info "[#{name}] keeping latest #{deployment.id}"
+
+          next
+        end
+      end
+
+      GlobalStat.increase!("nb_archived_deployments", 1)
+      deployment.destroy
     end
   end
 

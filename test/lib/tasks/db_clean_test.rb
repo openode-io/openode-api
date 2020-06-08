@@ -15,6 +15,34 @@ class LibTasksDbCleanTest < ActiveSupport::TestCase
     assert_equal Execution.where('created_at < ?', 29.days.ago).count, 1
   end
 
+  test "should not remove latest successful deployment" do
+    Execution.destroy_all
+
+    w = default_website
+
+    latest_deployment = Deployment.create(
+      website: w,
+      status: 'success',
+      created_at: 34.days.ago
+    )
+    latest_deployment.status = 'success'
+    latest_deployment.save!
+
+    latest_deployment_2 = Deployment.create(
+      website: w,
+      status: 'success',
+      created_at: 32.days.ago
+    )
+
+    latest_deployment_2.status = 'success'
+    latest_deployment_2.save!
+
+    invoke_task "db_clean:old_deployments"
+
+    assert Deployment.find(latest_deployment_2.id)
+    assert_nil Deployment.find_by(id: latest_deployment.id)
+  end
+
   test "should remove old task executions" do
     Task.create!(created_at: 2.days.ago, status: 'success')
     deployment = Deployment.create!(created_at: 2.days.ago, status: 'success')
