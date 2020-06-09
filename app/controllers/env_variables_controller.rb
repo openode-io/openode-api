@@ -12,7 +12,7 @@ class EnvVariablesController < InstancesController
   api :PUT, 'instances/:id/env_variables'
   description 'Update environment variables ({ key:value }). ' \
               'Existing variables not provided in the hash are removed.'
-  param :variables, Hash, desc: "Key-value hash of variables.", required: true
+  param :variables, Hash, desc: "Key-value hash of variables.", required: false
   def overwrite_env_variables
     variables = params[:variables]
 
