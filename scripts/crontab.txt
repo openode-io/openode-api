@@ -15,6 +15,7 @@ PATH=PATH=/bin:/usr/bin:/home/ubuntu/.rvm/rubies/ruby-2.7.1/bin/
 1 * * * * cd $PATH_REPO && rails background_notification:low_credit >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 0 * * * * cd $PATH_REPO && rails credits:online_spend >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 0 * * * * cd $PATH_REPO && rails credits:persistence_spend >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+0 10 * * * cd $PATH_REPO && rails credits:verify_expired_open_source >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 */3 * * * * cd $PATH_REPO && rails update:uptime_robot >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 10 22 * * * cd $PATH_REPO && rails verify_website_environment:open_source_activated >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 5 * * * * cd $PATH_REPO && rails kube_maintenance:scale_clusters >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
