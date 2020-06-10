@@ -113,7 +113,7 @@ namespace :credits do
 
     websites = Website
                .in_statuses([Website::STATUS_ONLINE])
-               .where(open_source_activated: true)
+               .where(account_type: Website::OPEN_SOURCE_ACCOUNT_TYPE)
 
     Rails.logger.info "[#{name}] #{websites.count} to process"
 

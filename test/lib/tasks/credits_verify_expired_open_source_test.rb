@@ -24,7 +24,13 @@ class LibTasksCreditsTest < ActiveSupport::TestCase
   test "verify_expired_open_source - one no deployment" do
     website = default_website
     website.status = Website::STATUS_ONLINE
-    website.open_source_activated = true
+    website.account_type = Website::OPEN_SOURCE_ACCOUNT_TYPE
+    website.open_source = {
+      'status' => 'approved',
+      'title' => 'helloworld',
+      'description' => 'a ' * 31,
+      'repository_url' => 'http://github.com/myrepo'
+    }
     website.save!
 
     invoke_task "credits:verify_expired_open_source"
