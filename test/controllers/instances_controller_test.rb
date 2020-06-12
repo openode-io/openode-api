@@ -792,36 +792,27 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   # /set-plan
   test '/instances/:instance_id/set-plan to a new one' do
-    dep_method = prepare_default_execution_method
     set_dummy_secrets_to(LocationServer.all)
     prepare_default_ports
 
     website = default_website
+    website.status = Website::STATUS_OFFLINE
+    website.save!
 
-    expect_global_container(dep_method)
-    prepare_ssh_session(dep_method.kill_global_container(id: 'b3621dd9d4dd'),
-                        'killed b3621dd9d4dd')
-    prepare_ssh_session(dep_method.kill_global_container(id: '32bfe26a2712'),
-                        'killed 32bfe26a2712')
+    post '/instances/testsite/set-plan', # works without location str id
+         as: :json,
+         params: { plan: '200-MB' },
+         headers: default_headers_auth
 
-    assert_scripted do
-      begin_ssh
-      post '/instances/testsite/set-plan', # works without location str id
-           as: :json,
-           params: { plan: '200-MB' },
-           headers: default_headers_auth
+    assert_response :success
 
-      assert_response :success
+    website.reload
+    assert_equal website.account_type, 'third'
+    assert_equal website.cloud_type, 'cloud'
 
-      Delayed::Job.first.invoke_job
-      website.reload
-      assert_equal website.account_type, 'third'
-      assert_equal website.cloud_type, 'cloud'
-
-      event = website.events.first
-      assert_equal event.obj['original_value'], "100-MB"
-      assert_equal event.obj['new_value'], "200-MB"
-    end
+    event = website.events.first
+    assert_equal event.obj['original_value'], "100-MB"
+    assert_equal event.obj['new_value'], "200-MB"
   end
 
   test '/instances/:instance_id/set-plan to an invalid one should fail' do
