@@ -249,9 +249,9 @@ class InstancesController < ApplicationController
       original_value: Website.plan_of(orig_account_type).dig(:id)
     }
 
-    @runner&.delay&.execute([{ cmd_name: 'stop', options: { is_complex: true } }])
+    process_reload_latest_deployment if @website.online?
 
-    json(result: 'success', msg: 'Instance will stop, make sure to redeploy it')
+    json(result: 'success')
   end
 
   api!
@@ -451,8 +451,16 @@ class InstancesController < ApplicationController
     raise e
   end
 
-  api!
-  def reload
+  def process_reload_latest_deployment
+    latest_deployment_id = @website.deployments.success.last&.id
+
+    if latest_deployment_id
+      params['parent_execution_id'] = latest_deployment_id
+      process_reload
+    end
+  end
+
+  def process_reload
     @runner.init_execution!('Deployment', params)
     execution = @runner.execution
     execution.status = Execution::STATUS_RUNNING
@@ -461,9 +469,14 @@ class InstancesController < ApplicationController
     @runner.delay.execute([{ cmd_name: 'reload', options: { is_complex: true } }])
 
     @website_event_obj = { title: 'instance-reload', deployment_id: @runner.execution&.id }
+  end
+
+  api!
+  def reload
+    process_reload
 
     json(
-      deployment_response(deploymentId: execution&.id)
+      deployment_response(deploymentId: @runner.execution&.id)
     )
   end
 
