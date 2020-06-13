@@ -69,4 +69,17 @@ class GlobalController < ApplicationController
 
     json(msg || {})
   end
+
+  PERMITTED_TYPE_LISTS = ['Website::ALERT_TYPES'].freeze
+  api :GET, 'global/type-lists/:type'
+  description 'Type lists.'
+  param :type, String, desc: "Permitted values: #{PERMITTED_TYPE_LISTS}",
+                       required: true
+  def type_lists
+    unless GlobalController::PERMITTED_TYPE_LISTS.include?(params[:type])
+      validation_error!('Invalid type')
+    end
+
+    json(eval(params[:type]))
+  end
 end

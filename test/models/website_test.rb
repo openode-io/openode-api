@@ -264,6 +264,42 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal w.offline?, true
   end
 
+  # alert validation
+  test 'alert validation with valid one' do
+    w = default_website
+    w.alerts = [Website::ALERT_STOP_LACK_CREDITS]
+    w.save!
+  end
+
+  test 'alert validation with invalid one' do
+    w = default_website
+    w.alerts = ['invalid']
+    w.save
+
+    assert_equal w.valid?, false
+  end
+
+  # alerting?
+  test 'alerting? with included one' do
+    w = default_website
+    w.alerts = [Website::ALERT_STOP_LACK_CREDITS]
+
+    assert_equal w.alerting?(Website::ALERT_STOP_LACK_CREDITS), true
+  end
+
+  test 'alerting? with missing one' do
+    w = default_website
+    w.alerts = []
+
+    assert_equal w.alerting?(Website::ALERT_STOP_LACK_CREDITS), false
+  end
+
+  # initial_alerts
+  test 'initial alerts' do
+    results = Website.initial_alerts
+    assert_equal results.length, 0
+  end
+
   # storage area validation
 
   test 'storage area validate with valid ones' do

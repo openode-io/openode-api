@@ -8,10 +8,17 @@ class GlobalControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test '/global/status/job-queues - not full' do
-    get '/global/status/job-queues', as: :json
+  test '/global/type-lists/:type valid' do
+    get '/global/type-lists/Website::ALERT_TYPES', as: :json
 
     assert_response :success
+    assert_equal response.parsed_body.length, 1
+  end
+
+  test '/global/type-lists/:type invalid' do
+    get '/global/type-lists/Website::last', as: :json
+
+    assert_response :bad_request
   end
 
   test '/global/status/job-queues - full' do

@@ -36,6 +36,7 @@ class LibTasksCreditsTest < ActiveSupport::TestCase
   test "spend - one to process, one lacks credits" do
     website = default_website
     website.status = Website::STATUS_ONLINE
+    website.alerts = [Website::ALERT_STOP_LACK_CREDITS]
     website.save!
 
     website.user.credits = 0
@@ -53,5 +54,21 @@ class LibTasksCreditsTest < ActiveSupport::TestCase
     last_event = website.events.last
     assert_equal last_event.obj["title"], "Stopping instance (lacking credits)"
     assert_equal last_event.obj["api_result"]["result"], "success"
+  end
+
+  test "spend - one to process, one lacks credits - no alert if disabled alert" do
+    website = default_website
+    website.status = Website::STATUS_ONLINE
+    website.alerts = []
+    website.save!
+
+    website.user.credits = 0
+    website.user.save!
+
+    invoke_task "credits:online_spend"
+
+    mail_sent = ActionMailer::Base.deliveries.last
+
+    assert_nil mail_sent
   end
 end

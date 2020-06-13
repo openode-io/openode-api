@@ -17,6 +17,10 @@ Rails/OutputSafety:
   Exclude:
     - 'app/mailers/newsletter_mailer.rb'
 
+Security/Eval:
+  Exclude:
+    - 'app/controllers/global_controller.rb'
+
 Rails/InverseOf:
   Enabled: false
 
