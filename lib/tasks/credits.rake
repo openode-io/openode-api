@@ -49,11 +49,12 @@ namespace :credits do
             stop_instance(website, 'Stopping instance (lacking credits)')
 
             # notify the user:
-
-            UserMailer.with(
-              user: website.user,
-              website: website
-            ).stopped_due_no_credit.deliver_now
+            if website.alerting?(Website::ALERT_STOP_LACK_CREDITS)
+              UserMailer.with(
+                user: website.user,
+                website: website
+              ).stopped_due_no_credit.deliver_now
+            end
           end
         rescue StandardError => e
           Rails.logger.error e.to_s

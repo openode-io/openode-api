@@ -916,7 +916,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
           as: :json,
           params: {
             website: {
-              crontab: new_crontab
+              crontab: new_crontab,
+              alerts: [Website::ALERT_STOP_LACK_CREDITS]
             }
           },
           headers: default_headers_auth
@@ -925,6 +926,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
     website.reload
     assert_equal website.crontab, new_crontab
+    assert_equal website.alerts, [Website::ALERT_STOP_LACK_CREDITS]
   end
 
   test 'post /instances/:instance_id/crontab' do

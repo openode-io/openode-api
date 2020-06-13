@@ -2,6 +2,7 @@ require 'uri'
 require 'rest-client'
 
 class Website < ApplicationRecord
+  serialize :alerts, JSON
   serialize :domains, JSON
   serialize :open_source, JSON
   serialize :configs, JSON
@@ -64,6 +65,14 @@ class Website < ApplicationRecord
   TYPE_DOCKER = 'docker'
   TYPE_KUBERNETES = 'kubernetes'
   TYPES = ['nodejs', TYPE_DOCKER, TYPE_KUBERNETES].freeze
+
+  ALERT_STOP_LACK_CREDITS = 'stop_lacking_credits'
+  ALERT_TYPES = [
+    {
+      id: ALERT_STOP_LACK_CREDITS,
+      default: false
+    }
+  ]
 
   DEFAULT_ACCOUNT_TYPE = 'second'
   OPEN_SOURCE_ACCOUNT_TYPE = 'open_source'
@@ -175,6 +184,7 @@ class Website < ApplicationRecord
   validate :validate_domains
   validate :validate_site_name
   validate :validate_account_type
+  validate :validate_alerts
 
   with_options if: :open_source_plan? do
     before_validation :force_open_source_status_pending_on_create, on: :create
@@ -224,6 +234,12 @@ class Website < ApplicationRecord
     account_type == OPEN_SOURCE_ACCOUNT_TYPE
   end
 
+  def self.initial_alerts
+    ALERT_TYPES
+      .select { |alert_type| alert_type[:default] }
+      .map { |alert_type| alert_type[:id] }
+  end
+
   def prepare_new_site
     return unless site_name
 
@@ -241,6 +257,7 @@ class Website < ApplicationRecord
     self.instance_type = 'server' # to deprecate
     self.open_source ||= {}
     self.domains = []
+    self.alerts = Website.initial_alerts
 
     if site_name.include?('.')
       self.domain_type = DOMAIN_TYPE_CUSTOM_DOMAIN
@@ -426,6 +443,14 @@ class Website < ApplicationRecord
 
   MAX_RAM_PLAN_WITHOUT_PAID_ORDER = 100
 
+  def validate_alerts
+    current_alerts.each do |alert|
+      unless ALERT_TYPES.map { |a| a[:id] }.include?(alert)
+        errors.add(:alerts, "Invalid alert #{alert}")
+      end
+    end
+  end
+
   def validate_account_type
     found_plan = Website.plan_of(account_type)
     return errors.add(:account_type, "Invalid plan #{account_type}") unless found_plan
@@ -533,6 +558,14 @@ class Website < ApplicationRecord
         cert_key_path: configs['SSL_CERTIFICATE_KEY_PATH']
       }
     end
+  end
+
+  def current_alerts
+    alerts || []
+  end
+
+  def alerting?(alert_type)
+    current_alerts.include?(alert_type)
   end
 
   def max_build_duration

@@ -73,6 +73,8 @@ Rails.application.routes.draw do
     get 'available-plans', to: 'global#available_plans'
     get 'available-plans-at/:type/:location_str_id', to: 'global#available_plans_at'
 
+    get 'type-lists/:type', to: 'global#type_lists'
+
     get 'settings', to: 'global#settings'
     get 'stats', to: 'global#stats'
   end
