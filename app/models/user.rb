@@ -129,6 +129,10 @@ class User < ApplicationRecord
     [1, true].include?(is_admin) ? 'admin' : 'regular'
   end
 
+  def admin?
+    type == 'admin'
+  end
+
   def active_websites?
     websites.any?(&:active?)
   end
@@ -188,6 +192,9 @@ class User < ApplicationRecord
 
   def can?(action, website)
     assert Website::PERMISSIONS.include?(action)
+
+    # admin can do everything
+    return true if admin?
 
     # website owner can do everything
     return true if self == website.user

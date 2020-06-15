@@ -286,6 +286,15 @@ class UserTest < ActiveSupport::TestCase
     assert_equal user.can?(Website::PERMISSION_PLAN, website), true
   end
 
+  test 'can? anything if super admin' do
+    website = default_website
+    user = User.where.not(id: website.user.id).first
+    user.is_admin = true
+    user.save!
+
+    assert_equal user.can?(Website::PERMISSION_PLAN, website), true
+  end
+
   test 'can? throw forbidden if not owner and not collaborator' do
     Collaborator.all.destroy_all
     website = default_website
