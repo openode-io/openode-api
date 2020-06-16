@@ -203,4 +203,16 @@ class InstanceImageManagerTest < ActiveSupport::TestCase
       assert_includes e.to_s, "exit code = 3"
     end
   end
+
+  test 'tag_parts - happy path' do
+    parts = DeploymentMethod::Util::InstanceImageManager.tag_parts("asdf--12--1985")
+
+    assert_equal parts, { site_name: "asdf", website_id: "12", execution_id: "1985" }
+  end
+
+  test 'tag_parts - with invalid tag' do
+    parts = DeploymentMethod::Util::InstanceImageManager.tag_parts("asdf121985")
+
+    assert_equal parts, {}
+  end
 end

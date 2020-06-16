@@ -382,6 +382,36 @@ class ActiveSupport::TestCase
       content_type: 'application/json',
       response_status: 200,
       response_path: 'test/fixtures/http/do/empty.txt'
+    },
+    {
+      url: 'https://api.digitalocean.com/v2/registry/openode_prod/repositories?page=1&per_page=20',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/do/get_registry_repos.json'
+    },
+    {
+      url: 'https://api.digitalocean.com/v2/registry/openode_prod/repositories/repo-1/tags?page=1&per_page=20',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/do/get_repo_tags.json'
+    },
+    {
+      url: 'https://api.digitalocean.com/v2/registry/openode_prod/repositories/repo-1/tags/sitename--111--123456',
+      method: :delete,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/do/empty.txt'
     }
   ]
 

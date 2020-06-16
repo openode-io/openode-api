@@ -9,6 +9,7 @@ module DeploymentMethod
       LIMIT_REPOSITORY_BYTES = 1024 * 1024 * 1024 # MB * KB * B -> 1 GB
       MAX_BUILD_TIMEOUT = 360
       TIMEOUT_EXIT_CODE = 124
+      TAG_NAME_SEPARATOR = '--'
 
       def initialize(args)
         assert args[:runner]
@@ -28,7 +29,21 @@ module DeploymentMethod
       end
 
       def self.tag_name(options = {})
-        "#{options[:website].site_name}--#{options[:website].id}--#{options[:execution_id]}"
+        "#{options[:website].site_name}#{TAG_NAME_SEPARATOR}#{options[:website].id}" \
+        "#{TAG_NAME_SEPARATOR}#{options[:execution_id]}"
+      end
+
+      # given a tag name, retrieve the parts
+      def self.tag_parts(tag_name)
+        tag_parts = tag_name.split(TAG_NAME_SEPARATOR)
+
+        return {} if tag_parts.length != 3
+
+        {
+          site_name: tag_parts.first,
+          website_id: tag_parts[1],
+          execution_id: tag_parts.last
+        }
       end
 
       def image_name_tag
