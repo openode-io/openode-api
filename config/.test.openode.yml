@@ -13,6 +13,7 @@ application:
           -----END RSA PRIVATE KEY-----
         root_files_path: /home/
     images_location:
+      registry_impl_type: digital_ocean
       docker_server: docker.io
       docker_username: test
       repository_name: openode_prod
