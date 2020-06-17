@@ -35,7 +35,12 @@ namespace :registry do
 
           img_registry.destroy_tag(repository.name, tag.tag)
         end
+      rescue StandardError => e
+        Ex::Logger.error(e, 'Issue removing tag')
       end
+
+    rescue StandardError => e
+      Ex::Logger.error(e, 'Issue with repository')
     end
   end
 end
