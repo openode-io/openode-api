@@ -17,12 +17,12 @@ namespace :registry do
     )
 
     img_registry.repositories.each do |repository|
+      sleep 1 unless Rails.env.test?
       tags = img_registry.tags(repository.name)
 
       tags.each do |tag|
         tag_parts = DeploymentMethod::Util::InstanceImageManager.tag_parts(tag.tag)
 
-        puts "tag_ #{tag_parts.inspect}"
         next unless tag_parts[:execution_id]
 
         execution = Execution.find_by id: tag_parts[:execution_id]
