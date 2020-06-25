@@ -118,4 +118,35 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert_equal snapshot.status, Snapshot::STATUS_FAILED
     end
   end
+
+  test 'GET /instances/:instance_id/snapshots - happy path' do
+    website = default_website
+
+    assert_equal website.snapshots.count, 1
+
+    get "/instances/#{website.site_name}/snapshots",
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body.length, 1
+    assert_equal response.parsed_body.first['status'], 'pending'
+    assert_equal response.parsed_body.first['path'], '/what/'
+  end
+
+  test 'GET /instances/:instance_id/snapshots/:id - happy path' do
+    website = default_website
+
+    snapshot = website.snapshots.first
+
+    get "/instances/#{website.site_name}/snapshots/#{snapshot.id}",
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body['status'], 'pending'
+    assert_equal response.parsed_body['path'], '/what/'
+  end
 end

@@ -158,6 +158,8 @@ Rails.application.routes.draw do
 
     # Snapshots
     post '/:site_name/snapshots/', to: 'snapshots#create_snapshot'
+    get '/:site_name/snapshots/', to: 'snapshots#index'
+    get '/:site_name/snapshots/:id', to: 'snapshots#retrieve'
 
     # executions
     get '/:site_name/executions/list/:type', to: 'executions#index'
