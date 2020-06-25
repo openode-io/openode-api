@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  website: one
+  status: pending
+  expire_at: 2020-06-18 14:19:49
+  size_mb: 1.5
+  path: /what/
+  url: MyString
+
+two:
+  website: two
+  status: pending
+  expire_at: 2020-06-18 14:19:49
+  size_mb: 1.5
+  path: /what/
+  url: MyString

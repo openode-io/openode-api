@@ -157,6 +157,44 @@ module DeploymentMethod
                          skip_notify_errors: options[:skip_notify_errors])
     end
 
+    def make_archive(options = {})
+      require_fields([:archive_path], options)
+      require_fields([:folder_path], options)
+
+      "cd #{options[:folder_path]} && " \
+      "zip -r #{options[:archive_path]} . ; " \
+      "rm -rf #{options[:folder_path]}"
+    end
+
+    def make_snapshot(options = {})
+      require_fields([:snapshot], options)
+      website, website_location = get_website_fields(options)
+      snapshot = options[:snapshot]
+
+      # copy instance files
+      result = ex('kubectl_on_latest_pod',
+                  website: website,
+                  website_location: website_location,
+                  s_arguments: "cp POD_NAME:#{snapshot.path} #{snapshot.get_destination_folder}",
+                  pod_name_delimiter: "POD_NAME")
+      snapshot.steps << { name: 'copy instance files', result: result }
+
+      # make an archive
+      result_archive = ex('make_archive',
+                          archive_path: snapshot.get_destination_path(".zip"),
+                          folder_path: snapshot.get_destination_folder)
+      snapshot.steps << { name: 'make archive', result: result_archive }
+
+      snapshot.status = Snapshot::STATUS_SUCCEED
+    rescue StandardError => e
+      Ex::Logger.info(e, 'issue to make the snapshot')
+
+      snapshot.steps << { name: 'fail to complete snapshot', result: e }
+      snapshot.status = Snapshot::STATUS_FAILED
+    ensure
+      snapshot.save
+    end
+
     def reload(options = {})
       website = options[:website]
 

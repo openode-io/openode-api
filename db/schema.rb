@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_06_13_020519) do
+ActiveRecord::Schema.define(version: 2020_06_18_181949) do
 
   create_table "collaborators", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "website_id"
@@ -146,16 +146,17 @@ ActiveRecord::Schema.define(version: 2020_06_13_020519) do
   end
 
   create_table "snapshots", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
-    t.bigint "user_id", null: false
     t.bigint "website_id", null: false
-    t.string "name"
     t.string "status", default: "pending"
-    t.float "tx_time_in_sec"
-    t.float "size_in_mb"
-    t.text "details"
+    t.datetime "expire_at"
+    t.float "size_mb"
+    t.string "uid"
+    t.string "path"
+    t.string "destination_path"
+    t.string "url"
+    t.text "steps", size: :medium
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["user_id"], name: "index_snapshots_on_user_id"
     t.index ["website_id"], name: "index_snapshots_on_website_id"
   end
 
