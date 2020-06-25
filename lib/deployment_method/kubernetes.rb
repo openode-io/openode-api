@@ -433,15 +433,16 @@ module DeploymentMethod
     def generate_deployment_probes_yml(website)
       return '' if website.skip_port_check?
 
+      # livenessProbe:
+      #    httpGet:
+      #      path: #{website.status_probe_path}
+      #      port: 80
+      #    initialDelaySeconds: 120
+      #    periodSeconds: 600
+      #    timeoutSeconds: 3
+      #    failureThreshold: 1
+
       "
-        livenessProbe:
-          httpGet:
-            path: #{website.status_probe_path}
-            port: 80
-          initialDelaySeconds: 120
-          periodSeconds: 600
-          timeoutSeconds: 3
-          failureThreshold: 1
         readinessProbe:
           httpGet:
             path: #{website.status_probe_path}

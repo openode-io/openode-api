@@ -496,7 +496,7 @@ VAR2=5678
     assert_includes yml, "  name: www-deployment"
     assert_includes yml, "  namespace: #{kubernetes_method.namespace_of(website)}"
     assert_includes yml, "  replicas: 1"
-    assert_includes yml, "  livenessProbe:" if opts[:with_probes]
+    # assert_includes yml, "  livenessProbe:" if opts[:with_probes]
     assert_includes yml, "  readinessProbe:" if opts[:with_probes]
     assert_includes yml, "  resources:"
     assert_includes yml, "deploymentId: \"#{kubernetes_method.deployment_id}\""
@@ -510,7 +510,7 @@ VAR2=5678
     assert_includes yml, "memory: #{opts[:limited_memory]}Mi" if opts[:limited_memory]
 
     # Deployment strategy
-    assert_includes yml, "type: RollingUpdate" if website.memory <= 1000
+    assert_includes yml, "type: Recreate" if website.memory <= 1000
     assert_includes yml, "type: Recreate" if website.memory > 1000
 
     # dotenv
@@ -537,11 +537,11 @@ VAR2=5678
   end
 
   # deployment strategy
-  test 'deployment_strategy - with rolling update' do
+  test 'deployment_strategy - with Recreate and small instance' do
     assert @website.memory <= 1000
     strategy = kubernetes_method.deployment_strategy(@website.memory)
 
-    assert_equal strategy, "RollingUpdate"
+    assert_equal strategy, "Recreate"
   end
 
   test 'deployment_strategy - with Recreate' do
@@ -607,7 +607,7 @@ VAR2=5678
   test 'generate_deployment_probes_yml - with probes' do
     yml = kubernetes_method.generate_deployment_probes_yml(@website)
 
-    assert_includes yml, "livenessProbe:"
+    # assert_includes yml, "livenessProbe:"
     assert_includes yml, "path: /"
     assert_includes yml, "readinessProbe:"
     assert_includes yml, "periodSeconds: 20"
@@ -618,7 +618,7 @@ VAR2=5678
     @website.configs['STATUS_PROBE_PATH'] = '/status'
     yml = kubernetes_method.generate_deployment_probes_yml(@website)
 
-    assert_includes yml, "livenessProbe:"
+    # assert_includes yml, "livenessProbe:"
     assert_includes yml, "path: /status"
     assert_includes yml, "readinessProbe:"
     assert_includes yml, "periodSeconds: 20"
@@ -641,7 +641,7 @@ VAR2=5678
 
     yml = kubernetes_method.generate_deployment_probes_yml(@website)
 
-    assert_not_includes yml, "livenessProbe:"
+    # assert_not_includes yml, "livenessProbe:"
     assert_not_includes yml, "readinessProbe:"
   end
 
