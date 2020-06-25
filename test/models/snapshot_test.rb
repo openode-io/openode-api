@@ -15,6 +15,17 @@ class SnapshotTest < ActiveSupport::TestCase
     assert s.steps, []
   end
 
+  test "snapshot invalid with empty path" do
+    w = default_website
+    w.snapshots.delete_all
+
+    exception = assert_raises StandardError do
+      Snapshot.create!(website: w, path: ' ')
+    end
+
+    assert_includes exception.inspect.to_s, "Path ensure to have a valid path"
+  end
+
   test "creation fail if too recently snapshoted" do
     w = default_website
 
