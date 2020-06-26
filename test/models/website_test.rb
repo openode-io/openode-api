@@ -959,6 +959,30 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.site_name, 'helloworld'
   end
 
+  test 'create - extract custom domain from http url' do
+    user = default_user
+    user.websites.destroy_all
+    website = Website.create!(
+      site_name: 'http://www.helloWorld.com/path',
+      user_id: user.id
+    )
+
+    assert_equal website.valid?, true
+    assert_equal website.site_name, "www.helloworld.com"
+  end
+
+  test 'create - extract custom domain from https url' do
+    user = default_user
+    user.websites.destroy_all
+    website = Website.create!(
+      site_name: 'https://www.helloWorld.com/path',
+      user_id: user.id
+    )
+
+    assert_equal website.valid?, true
+    assert_equal website.site_name, "www.helloworld.com"
+  end
+
   test 'create - subdomain where cannot create website' do
     user = default_user
     user.orders.destroy_all

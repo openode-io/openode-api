@@ -241,6 +241,16 @@ class Website < ApplicationRecord
       .map { |alert_type| alert_type[:id] }
   end
 
+  def self.strip_non_host_site_name_parts(site_name)
+    if !site_name.starts_with?('http://') && !site_name.starts_with?('https://')
+      return site_name
+    end
+
+    uri = URI(site_name)
+
+    uri.host
+  end
+
   def prepare_new_site
     return unless site_name
 
@@ -251,7 +261,7 @@ class Website < ApplicationRecord
     self.status ||= DEFAULT_STATUS
     change_status(status)
 
-    self.site_name = site_name.downcase
+    self.site_name = Website.strip_non_host_site_name_parts(site_name.downcase)
     self.domain_type = DOMAIN_TYPE_SUBDOMAIN
     self.type = TYPE_KUBERNETES
     self.redir_http_to_https = false
