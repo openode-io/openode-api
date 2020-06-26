@@ -30,7 +30,7 @@ class ApplicationController < ActionController::API
 
     model
       .search_for(search_for, attributes)
-      .paginate(page: params[:page] || 1, per_page: 99)
+      .paginate(page: params[:page] || 1, per_page: 100)
       .order(opts[:order] || "id DESC")
   end
 end
