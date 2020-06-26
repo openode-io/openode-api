@@ -1,7 +1,7 @@
 class DnsController < InstancesController
   before_action :ensure_location
 
-  before_action only: %i[settings] do
+  before_action only: %i[add_alias del_alias settings] do
     requires_custom_domain
   end
 

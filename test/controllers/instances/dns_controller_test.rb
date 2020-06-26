@@ -27,6 +27,19 @@ class DnsControllerTest < ActionDispatch::IntegrationTest
     assert_equal w.events[0].obj['title'], 'Add domain alias'
   end
 
+  test '/instances/:instance_id/add-alias with subdomain should fail' do
+    w = default_website
+
+    post "/instances/#{w.id}/add-alias",
+         as: :json,
+         params: { hostname: 'www3.www.what.is' },
+         headers: default_headers_auth
+
+    assert_response :bad_request
+
+    assert_includes response.parsed_body.to_s, "requires a custom domain"
+  end
+
   test '/instances/:instance_id/add-alias with custom domain - forbidden' do
     w, = prepare_forbidden_test(Website::PERMISSION_PLAN)
 
@@ -59,6 +72,19 @@ class DnsControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal w.events.length, 1
     assert_equal w.events[0].obj['title'], 'Delete domain alias'
+  end
+
+  test '/instances/:instance_id/del-alias with subdomain should fail' do
+    w = default_website
+
+    post "/instances/#{w.id}/del-alias",
+         as: :json,
+         params: { hostname: 'www3.www.what.is' },
+         headers: default_headers_auth
+
+    assert_response :bad_request
+
+    assert_includes response.parsed_body.to_s, "requires a custom domain"
   end
 
   test '/instances/:instance_id/del-alias with custom domain - forbidden' do
