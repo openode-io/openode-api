@@ -111,7 +111,7 @@ Lint/SuppressedException:
     - 'test/**/*.rb'
 
 Metrics/MethodLength:
-  Max: 30
+  Max: 40
   Exclude:
     - 'test/**/*.rb'
     - 'lib/deployment_method/runner.rb' # to refactor
