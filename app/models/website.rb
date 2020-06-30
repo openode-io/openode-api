@@ -525,8 +525,9 @@ class Website < ApplicationRecord
     end
 
     # then url must contain www.openode.io
-    unless Website.contains_open_source_backlink(open_source['repository_url'],
-                                                 "www.openode.io")
+    if !open_source_activated &&
+       !Website.contains_open_source_backlink(open_source['repository_url'],
+                                              "www.openode.io")
       errors.add(:open_source, "missing thanks link www.openode.io")
     end
 

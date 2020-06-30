@@ -1214,6 +1214,25 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal w.valid?, false
   end
 
+  test "able to save if already approved, w/ invalid due to missing back link" do
+    w = default_website
+    w.open_source_activated = true
+    w.save(validate: false)
+
+    w.open_source = {
+      'status' => Website::OPEN_SOURCE_STATUS_APPROVED,
+      'title' => 'helloworld',
+      'description' => " asdf " * 200,
+      'repository_url' => "http://github.com/openode-io/openode-bad"
+    }
+
+    w.account_type = Website::OPEN_SOURCE_ACCOUNT_TYPE
+
+    w.save
+
+    assert_equal w.valid?, true
+  end
+
   test "not notify open source requested if changing to non open source" do
     w = default_website
 
