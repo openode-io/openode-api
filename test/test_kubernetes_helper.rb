@@ -100,10 +100,10 @@ class ActiveSupport::TestCase
   end
 
   def prepare_kubernetes_custom_cmd(kubernetes_method,
-                              cmd,
-                              expected_result,
-                              expected_exit_code,
-                              opts = {})
+                                    cmd,
+                                    expected_result,
+                                    expected_exit_code,
+                                    opts = {})
     # exec www-deployment-5889df69dc-xg9xl -- netstat -tl
     cmd = kubernetes_method.kubectl(
       website_location: opts[:website_location],

@@ -1050,12 +1050,12 @@ VAR2=5678
       "tcp        0      0 127.0.0.1:3000          0.0.0.0:*               LISTEN"
 
     prepare_kubernetes_custom_cmd(kubernetes_method,
-                            "netstat -tl",
-                            netstat_result,
-                            0,
-                            website: @website,
-                            website_location: @website_location,
-                            pod_name: "www-deployment-5889df69dc-xg9xl")
+                                  "netstat -tl",
+                                  netstat_result,
+                                  0,
+                                  website: @website,
+                                  website_location: @website_location,
+                                  pod_name: "www-deployment-5889df69dc-xg9xl")
 
     prepare_kubernetes_logs(kubernetes_method, "hello logs", 0,
                             website: @website,
