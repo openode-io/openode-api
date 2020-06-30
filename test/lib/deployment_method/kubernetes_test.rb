@@ -1044,6 +1044,19 @@ VAR2=5678
     get_pods_json_content = IO.read('test/fixtures/kubernetes/1_pod_alive.json')
     prepare_get_pods_json(kubernetes_method, @website, @website_location, get_pods_json_content,
                           0)
+
+    netstat_result = "Active Internet connections (only servers)\n"\
+      "Proto Recv-Q Send-Q Local Address           Foreign Address         State       \n"\
+      "tcp        0      0 127.0.0.1:3000          0.0.0.0:*               LISTEN"
+
+    prepare_kubernetes_custom_cmd(kubernetes_method,
+                                  "netstat -tl",
+                                  netstat_result,
+                                  0,
+                                  website: @website,
+                                  website_location: @website_location,
+                                  pod_name: "www-deployment-5889df69dc-xg9xl")
+
     prepare_kubernetes_logs(kubernetes_method, "hello logs", 0,
                             website: @website,
                             website_location: @website_location,
@@ -1062,6 +1075,9 @@ VAR2=5678
         website: @website,
         website_location: @website_location
       )
+
+      first_event = kubernetes_method.runner.execution.events.first
+      assert_includes first_event.dig('update'), "IMPORTANT: HTTP port (80) NOT listening"
     end
   end
 

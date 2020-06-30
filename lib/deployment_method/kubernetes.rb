@@ -907,11 +907,17 @@ module DeploymentMethod
 
         analyze_final_pods_state(pods)
 
-        latest_pod_name = get_latest_pod_name_in(pods)
+        unless website.online?
+          analyze_deployment_failure(
+            website: website,
+            website_location: website_location,
+            pods: pods
+          )
+        end
 
         ex_stdout('logs', website: website,
                           website_location: website_location,
-                          pod_name: latest_pod_name,
+                          pod_name: get_latest_pod_name_in(pods),
                           nb_lines: 1_000)
       rescue StandardError => e
         Ex::Logger.info(e, 'Unable to retrieve the logs')
@@ -931,6 +937,25 @@ module DeploymentMethod
 
       notify('info', "\n\n*** Final Deployment state: #{runner&.execution&.status&.upcase} ***\n")
     end
+
+    def store_services(options = {})
+      wl = options.dig(:website_location)
+
+      args = {
+        website_location: wl,
+        with_namespace: true,
+        s_arguments: "get services -o json"
+      }
+
+      services = JSON.parse(ex_stdout("kubectl", args))
+      wl.obj ||= {}
+      wl.obj['services'] = services
+      wl.save
+    end
+
+    ### Finalization analysis
+
+    # POD analysis
 
     def analyse_pod_status_for_lack_memory(name, status)
       reason = status.dig('lastState', 'terminated', 'reason')&.downcase
@@ -955,20 +980,53 @@ module DeploymentMethod
       Ex::Logger.error(e, 'Issue analysing the pods state')
     end
 
-    def store_services(options = {})
-      wl = options.dig(:website_location)
+    # PORT analysis
+    def analyze_netstat_tcp_ports(opts = {})
+      lastest_pod_name = get_latest_pod_name_in(opts[:pods])
+      result = ex('custom_cmd',
+                  website: opts[:website],
+                  website_location: opts[:website_location],
+                  cmd: "netstat -tl",
+                  pod_name: lastest_pod_name)
 
-      args = {
-        website_location: wl,
-        with_namespace: true,
-        s_arguments: "get services -o json"
-      }
+      netstats = Io::Netstat.parse(result.dig(:stdout))
 
-      services = JSON.parse(ex_stdout("kubectl", args))
-      wl.obj ||= {}
-      wl.obj['services'] = services
-      wl.save
+      # check the port
+      port_available = netstats.any? do |netstat|
+        Io::Netstat.addr_port_available?(netstat[:local_addr], %w[80 http HTTP]) &&
+          netstat[:state] == 'listen'
+      end
+
+      unless port_available
+        notify('error', "IMPORTANT: HTTP port (80) NOT listening. " \
+                        "Currently listening ports: #{Io::Netstat.local_addr_ports(netstats)}")
+      end
+
+      # check hostname
+      hostname_all = netstats.any? do |netstat|
+        Io::Netstat.addr_port_available?(netstat[:local_addr], %w[80 http HTTP]) &&
+          Io::Netstat.addr_host_to_all?(netstat[:local_addr])
+      end
+
+      if port_available && !hostname_all
+        notify('error', "IMPORTANT: The proper port is listening, BUT not to all hosts" \
+                        " (more likely only listening to localhost for example)")
+      end
+
+      if !port_available || !hostname_all
+        notify('debug', "Netstat: #{netstats.inspect}")
+      end
+    rescue StandardError => e
+      Ex::Logger.error(e, 'Issue analysing the port-host listening')
     end
+
+    def analyze_deployment_failure(opts = {})
+      require_fields([:website, :website_location, :pods], opts)
+
+      analyze_netstat_tcp_ports(opts)
+    end
+
+    ### End Finalization analysis
 
     # the following hooks are notification procs.
 
