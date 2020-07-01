@@ -832,7 +832,7 @@ class Website < ApplicationRecord
   end
 
   # credits related task updates and calculations
-  def spend_online_hourly_credits!
+  def spend_online_hourly_credits!(hourly_ratio = 1.0)
     current_plan = plan
 
     return unless current_plan
@@ -840,11 +840,41 @@ class Website < ApplicationRecord
     spendings = [
       {
         action_type: CreditAction::TYPE_CONSUME_PLAN,
-        credits_cost: Website.cost_price_to_credits(current_plan[:cost_per_hour])
+        credits_cost:
+          Website.cost_price_to_credits(current_plan[:cost_per_hour]) * hourly_ratio
       }
     ]
 
     spend_hourly_credits!(spendings)
+  end
+
+  # minutes ratio of the current hour.
+  # if it's now 12:30 (to_time), and from time is 12:00 the ratio is 0.5
+  def self.last_time_elapsed_hour_ratio(from_time, to_time)
+    [((to_time - from_time) / (60.60 * 60.0)), 1].min
+  end
+
+  def spending_partial_hourly_ratio
+    # take max time betwee last deployment and current time
+    from_time = [deployments.completed.last&.created_at, Time.zone.now.beginning_of_hour]
+                .select(&:present?)
+                .max
+
+    to_time = Time.zone.now
+
+    # min 0, max 1
+    [
+      [Website.last_time_elapsed_hour_ratio(from_time, to_time), 0].max,
+      1
+    ].min
+  end
+
+  def spend_partial_last_hour_credits
+    hourly_ratio = spending_partial_hourly_ratio
+
+    spend_online_hourly_credits!(hourly_ratio)
+  rescue StandardError => e
+    logger.info("Issue spend_partial_last_hour_credits #{e.inspect}")
   end
 
   def spend_persistence_hourly_credits!

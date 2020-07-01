@@ -808,6 +808,26 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
   end
 
+  test 'spend hourly credits - partial hour' do
+    website = default_website
+    website.credit_actions.destroy_all
+    wl = default_website_location
+    wl.nb_cpus = 1
+    wl.extra_storage = 0
+    wl.save!
+
+    website.spend_online_hourly_credits!(0.5)
+
+    plan = website.plan
+
+    assert_equal website.credit_actions.reload.length, 1
+    ca = website.credit_actions.first
+
+    assert_equal(ca.credits_spent.to_f.round(4),
+                 (plan[:cost_per_hour] * 100.0 * 0.5).to_f.round(4))
+    assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
+  end
+
   test 'spend hourly credits - skip if open source' do
     website = default_website
     website.credit_actions.destroy_all
@@ -841,9 +861,135 @@ class WebsiteTest < ActiveSupport::TestCase
 
     website.spend_online_hourly_credits!
     website.reload
-    puts "website.credit_actions #{website.credit_actions.inspect}"
 
     assert_equal website.credit_actions.length, 1
+  end
+
+  test 'partial spend hourly credits - half hour, no deployment' do
+    website = default_website
+    website.credit_actions.destroy_all
+    website.deployments.destroy_all
+    wl = default_website_location
+    wl.nb_cpus = 1
+    wl.extra_storage = 0
+    wl.save!
+
+    current_time = Time.zone.now
+    travel_to current_time.beginning_of_hour + 30.minutes
+    expected_ratio = 0.49504950495049505
+
+    website.spend_partial_last_hour_credits
+
+    plan = website.plan
+
+    ca = website.credit_actions.reload.first
+
+    assert_equal(ca.credits_spent.to_f.round(4),
+                 (plan[:cost_per_hour] * 100.0 * expected_ratio).to_f.round(4))
+    assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
+  end
+
+  test 'partial spend hourly credits - 45 minutes, with deployment' do
+    website = default_website
+    website.credit_actions.destroy_all
+
+    wl = default_website_location
+    wl.nb_cpus = 1
+    wl.extra_storage = 0
+    wl.save!
+
+    current_time = Time.zone.now
+    travel_to current_time.beginning_of_hour + 30.minutes
+
+    # set deployment to 15 minutes
+    deployment = website.deployments.last
+    deployment.created_at = current_time.beginning_of_hour + 15.minutes
+    deployment.save!
+
+    expected_ratio = 0.24752475247524752
+
+    website.spend_partial_last_hour_credits
+
+    plan = website.plan
+
+    ca = website.credit_actions.reload.first
+
+    assert_equal(ca.credits_spent.to_f.round(4),
+                 (plan[:cost_per_hour] * 100.0 * expected_ratio).to_f.round(4))
+    assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
+  end
+
+  test 'partial spend hourly credits - with deployment' do
+    website = default_website
+    website.credit_actions.destroy_all
+
+    wl = default_website_location
+    wl.nb_cpus = 1
+    wl.extra_storage = 0
+    wl.save!
+
+    current_time = Time.zone.now
+    travel_to current_time.beginning_of_hour + 30.minutes
+
+    # set deployment to 15 minutes
+    deployment = website.deployments.last
+    deployment.created_at = current_time.beginning_of_hour + 15.minutes
+    deployment.save!
+
+    expected_ratio = 0.24752475247524752
+
+    website.spend_partial_last_hour_credits
+
+    plan = website.plan
+
+    ca = website.credit_actions.reload.first
+
+    assert_equal(ca.credits_spent.to_f.round(4),
+                 (plan[:cost_per_hour] * 100.0 * expected_ratio).to_f.round(4))
+    assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
+  end
+
+  test 'spending_partial_hourly_ratio - with deployment' do
+    website = default_website
+    website.credit_actions.destroy_all
+
+    wl = default_website_location
+    wl.nb_cpus = 1
+    wl.extra_storage = 0
+    wl.save!
+
+    current_time = Time.zone.now
+    travel_to current_time.beginning_of_hour + 30.minutes
+
+    # set deployment to 15 minutes
+    deployment = website.deployments.last
+    deployment.created_at = current_time.beginning_of_hour + 15.minutes
+    deployment.save!
+
+    expected_ratio = 0.24752475247524752
+
+    assert_in_delta website.spending_partial_hourly_ratio, expected_ratio, 0.001
+  end
+
+  test 'spending_partial_hourly_ratio - with deployment too old' do
+    website = default_website
+    website.credit_actions.destroy_all
+
+    wl = default_website_location
+    wl.nb_cpus = 1
+    wl.extra_storage = 0
+    wl.save!
+
+    current_time = Time.zone.now
+    travel_to current_time.beginning_of_hour + 30.minutes
+
+    deployment = website.deployments.last
+    deployment.created_at = current_time.beginning_of_hour - 15.minutes
+    deployment.save!
+
+    expected_ratio = 0.495
+
+    assert_in_delta website.spending_partial_hourly_ratio, expected_ratio, 0.001
   end
 
   test 'spend hourly credits - with persistent services' do
@@ -884,6 +1030,20 @@ class WebsiteTest < ActiveSupport::TestCase
 
     assert_equal c.credits_spent, cost
     assert_equal website.user.credits, orig_credits - cost
+  end
+
+  test 'last_time_elapsed_hour_ratio - 5 minutes' do
+    t = Time.zone.now.beginning_of_hour + 5.minutes
+    ratio = Website.last_time_elapsed_hour_ratio(t.beginning_of_hour, t)
+
+    assert_in_delta ratio, 0.083, 0.001
+  end
+
+  test 'last_time_elapsed_hour_ratio - few seconds' do
+    t = Time.zone.now.beginning_of_hour + 5.seconds
+    ratio = Website.last_time_elapsed_hour_ratio(t.beginning_of_hour, t)
+
+    assert_in_delta ratio, 0.0013, 0.0001
   end
 
   # plan

@@ -25,6 +25,10 @@ class Execution < ApplicationRecord
     where(status: STATUS_RUNNING)
   }
 
+  scope :completed, lambda {
+    where.not(status: STATUS_RUNNING)
+  }
+
   scope :success, lambda {
     where(status: STATUS_SUCCESS)
   }

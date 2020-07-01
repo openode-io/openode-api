@@ -208,6 +208,10 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     prepare_action_yml(@kubernetes_method, @website_location, "apply.yml",
                        "delete -f apply.yml", 'success')
 
+    current_time = Time.zone.now
+    travel_to current_time.beginning_of_hour + 30.minutes
+    @website.deployments.destroy_all
+
     assert_scripted do
       begin_ssh
       post "/instances/#{@website.site_name}/stop?location_str_id=canada",
@@ -224,6 +228,12 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
       assert_equal @website.status, Website::STATUS_OFFLINE
       assert_equal @website.executions.last.type, 'Task'
+
+      last_credit_action = @website.credit_actions.reload.last
+      expected_ratio = 0.4950
+
+      assert_in_delta @website.plan[:cost_per_hour] * 100.0 * expected_ratio,
+                      last_credit_action.credits_spent, 0.0001
     end
   end
 

@@ -170,6 +170,7 @@ module DeploymentMethod
       runner.cloud_provider.stop(options)
 
       website.change_status!(Website::STATUS_OFFLINE, skip_validations: true)
+      website.spend_partial_last_hour_credits
     end
 
     def instance_up_cmd(_options = {})
