@@ -1020,9 +1020,29 @@ module DeploymentMethod
       Ex::Logger.error(e, 'Issue analysing the port-host listening')
     end
 
+    # will notifies kube events of all types in the namespace
+    def analyze_final_events(opts = {})
+      kubectl_args = {
+        website_location: opts[:website_location],
+        with_namespace: true,
+        s_arguments: "get events -o json"
+      }
+      result = JSON.parse(ex("kubectl", kubectl_args).dig(:stdout))
+
+      result.dig('items').each do |event|
+        entity = event.dig('involvedObject', 'kind')
+        reason = event.dig('reason')
+        message = event.dig('message')
+        notify("debug", "Event - entity: #{entity}, reason: #{reason}, message: #{message}")
+      end
+    rescue StandardError => e
+      Ex::Logger.error(e, 'Issue analysing final events')
+    end
+
     def analyze_deployment_failure(opts = {})
       require_fields([:website, :website_location, :pods], opts)
 
+      analyze_final_events(opts)
       analyze_netstat_tcp_ports(opts)
     end
 

@@ -1,0 +1,40 @@
+{ "items": [
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2020-07-01T02:10:40Z",
+            "involvedObject": {
+                "apiVersion": "extensions/v1beta1",
+                "kind": "Ingress",
+                "name": "main-ingress",
+                "namespace": "instance-19217",
+                "resourceVersion": "7511860",
+                "uid": "78c5b51e-dbc5-430f-8bed-68b578f022da"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2020-07-01T02:10:40Z",
+            "message": "Configuration for instance-19217/main-ingress was added or updated",
+            "metadata": {
+                "creationTimestamp": "2020-07-01T02:10:40Z",
+                "name": "main-ingress.161d7ef6700b1e69",
+                "namespace": "instance-19217",
+                "resourceVersion": "7511869",
+                "selfLink": "/api/v1/namespaces/instance-19217/events/main-ingress.161d7ef6700b1e69",
+                "uid": "8e76ff94-0d32-4bf2-ba38-bcc022e27cce"
+            },
+            "reason": "AddedOrUpdated",
+            "reportingComponent": "",
+            "reportingInstance": "",
+            "source": {
+                "component": "nginx-ingress-controller"
+            },
+            "type": "Normal"
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": "",
+        "selfLink": ""
+    }
+}

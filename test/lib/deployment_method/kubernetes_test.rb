@@ -1045,6 +1045,17 @@ VAR2=5678
     prepare_get_pods_json(kubernetes_method, @website, @website_location, get_pods_json_content,
                           0)
 
+    cmd = kubernetes_method.kubectl(
+      website_location: @website_location,
+      with_namespace: true,
+      s_arguments: "get events -o json"
+    )
+
+    file_events =
+      "test/fixtures/kubernetes/get_events.json"
+    expected_result = IO.read(file_events)
+    prepare_ssh_session(cmd, expected_result, 0)
+
     netstat_result = "Active Internet connections (only servers)\n"\
       "Proto Recv-Q Send-Q Local Address           Foreign Address         State       \n"\
       "tcp        0      0 127.0.0.1:3000          0.0.0.0:*               LISTEN"
@@ -1076,8 +1087,12 @@ VAR2=5678
         website_location: @website_location
       )
 
-      first_event = kubernetes_method.runner.execution.events.first
-      assert_includes first_event.dig('update'), "IMPORTANT: HTTP port (80) NOT listening"
+      event = kubernetes_method.runner.execution.events.first
+      expected_event = "entity: Ingress, reason: AddedOrUpdated, message: Configuration for"
+      assert_includes event.dig('update'), expected_event
+
+      port_event = kubernetes_method.runner.execution.events[1]
+      assert_includes port_event.dig('update'), "IMPORTANT: HTTP port (80) NOT listening"
     end
   end
 
