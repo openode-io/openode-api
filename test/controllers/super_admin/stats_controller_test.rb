@@ -44,9 +44,10 @@ class SuperAdmin::StatsControllerTest < ActionDispatch::IntegrationTest
 
   test "generic_daily_stats - with deployments" do
     Deployment.destroy_all
-    dep = Deployment.create!(status: 'success', website: default_website)
+    Deployment.create!(status: 'success', website: default_website)
 
-    get "/super_admin/stats/generic_daily_stats?attrib_to_sum=1&entity=Deployment&entity_method=type_dep",
+    get "/super_admin/stats/generic_daily_stats?attrib_to_sum=1&entity=" \
+        "Deployment&entity_method=type_dep",
         as: :json,
         headers: super_admin_headers_auth
 
