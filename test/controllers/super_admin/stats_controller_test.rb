@@ -41,4 +41,20 @@ class SuperAdmin::StatsControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body[1]['date'], (Time.zone.now - 1.day).strftime("%Y-%m-%d")
     assert_equal response.parsed_body[1]['value'], 10.5
   end
+
+  test "generic_daily_stats - with deployments" do
+    Deployment.destroy_all
+    Deployment.create!(status: 'success', website: default_website)
+
+    get "/super_admin/stats/generic_daily_stats?attrib_to_sum=1&entity=" \
+        "Deployment&entity_method=type_dep",
+        as: :json,
+        headers: super_admin_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body.length, 1
+    assert_equal response.parsed_body.first['date'], DateTime.now.to_date.to_s
+    assert_equal response.parsed_body.first['value'], 1
+  end
 end

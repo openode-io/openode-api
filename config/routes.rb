@@ -25,6 +25,7 @@ Rails.application.routes.draw do
     post 'newsletters/:id/send', to: 'newsletters#deliver'
 
     get 'stats/spendings', to: 'stats#spendings'
+    get 'stats/generic_daily_stats', to: 'stats#generic_daily_stats'
     get 'stats/nb_online', to: 'stats#nb_online'
   end
 
