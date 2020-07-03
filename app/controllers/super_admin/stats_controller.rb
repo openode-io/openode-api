@@ -1,13 +1,23 @@
 class SuperAdmin::StatsController < SuperAdmin::SuperAdminController
+  include Stats
+
   def spendings
-    nb_days = (params['nb_days'] || 30).to_i
+    params['attrib_to_sum'] = 'credits_spent'
+    params['entity'] = 'CreditAction'
 
-    hash_entries = CreditAction
-                   .where('created_at > ?', nb_days.days.ago)
-                   .group("DATE(created_at)")
-                   .sum(:credits_spent)
+    generic_daily_stats
+  end
 
-    json(hash_entries.map { |k, v| { date: k, value: v } }.sort_by { |e| e[:date] })
+  def generic_daily_stats
+    entity_method = params['entity_method']
+
+    entity = params['entity'].constantize
+
+    if entity_method.present?
+      entity = entity.send(entity_method)
+    end
+
+    json(prepare_daily_stats(entity, params))
   end
 
   def nb_online
