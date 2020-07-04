@@ -231,6 +231,44 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal w.status, Website::STATUS_ONLINE
   end
 
+  # recent_out_of_memory_detected?
+  test 'recent_out_of_memory_detected - with oom' do
+    w = default_website
+
+    WebsiteStatus.log(
+      w,
+      containerStatuses: [
+        {
+          reason: 'OOMKilled'
+        }
+      ]
+    )
+    
+    assert_equal w.recent_out_of_memory_detected?, true
+  end
+
+  test 'recent_out_of_memory_detected - no oom' do
+    w = default_website
+
+    WebsiteStatus.log(
+      w,
+      containerStatuses: [
+        {
+          reason: 'OOM-=Killed'
+        }
+      ]
+    )
+    
+    assert_equal w.recent_out_of_memory_detected?, false
+  end
+
+  test 'recent_out_of_memory_detected - no status' do
+    w = default_website
+    w.statuses.destroy_all
+    
+    assert_equal w.recent_out_of_memory_detected?, false
+  end
+
   # online? offline?
   test 'online? - if online' do
     w = default_website
