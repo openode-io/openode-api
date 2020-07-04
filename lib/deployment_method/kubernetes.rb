@@ -410,7 +410,7 @@ module DeploymentMethod
           namespace: #{namespace_of(website_location.website)}
         spec:
           accessModes:
-            - ReadWriteMany
+            - ReadWriteOnce
           resources:
             requests:
               storage: #{website_location.extra_storage}Gi
@@ -510,7 +510,7 @@ module DeploymentMethod
           selector:
             matchLabels:
               app: www
-          replicas: 2
+          replicas: #{website_location.replicas}
           strategy:
             type: #{deployment_strategy(website.memory)}
           template:

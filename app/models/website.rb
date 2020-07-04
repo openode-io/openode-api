@@ -128,6 +128,12 @@ class Website < ApplicationRecord
       default: true
     },
     {
+      variable: 'REPLICAS',
+      description: 'Number of replicas of the given instance.',
+      type: 'website_location',
+      default: 1
+    },
+    {
       variable: 'TYPE',
       description: 'Deployment method (internal)',
       type: 'website',
@@ -368,6 +374,18 @@ class Website < ApplicationRecord
   def config_website_must_comply(config, value)
     # is setting an attribute in website object
     self[config[:variable].downcase] = value
+  end
+
+  def config_website_location_must_comply(config, value)
+    # is setting an attribute in first website_location object
+    wl = website_locations.first
+
+    unless wl
+      errors.add(:configs, "No website location available to set #{config[:variable]}")
+    end
+
+    wl[config[:variable].downcase] = value
+    wl.save!
   end
 
   def config_site_name_must_comply(_config, value)

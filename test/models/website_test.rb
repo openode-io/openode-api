@@ -712,6 +712,22 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.latest_reference_website_image_tag_address, img_name_tag
   end
 
+  test 'set config REPLICAS - happy path' do
+    referencing_to_website = Website.last
+
+    website = default_website
+    website.configs ||= {}
+    website.configs['REPLICAS'] = 2
+    website.save
+
+    wl = website.website_locations.first
+    wl.reload
+
+    assert_equal website.valid?, true
+
+    assert_equal wl.replicas, 2
+  end
+
   test 'status_probe_path default' do
     website = default_website
     website.save!
