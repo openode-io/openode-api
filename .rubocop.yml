@@ -30,6 +30,9 @@ Rails/HasManyOrHasOneDependent:
 Rails/SkipsModelValidations:
   Enabled: false
 
+Style/CommentAnnotation:
+  Enabled: false
+
 Style/FormatString:
   Enabled: false
 
