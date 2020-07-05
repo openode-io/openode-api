@@ -66,6 +66,7 @@ class InstancesController < ApplicationController
     w_obj["last_deployment_id"] = w.deployments.last&.id
     w_obj["ip"] = w.first_ip
     w_obj["active"] = w.active?
+    w_obj["out_of_memory_detected"] = w.recent_out_of_memory_detected?
 
     extra_storage = w.website_locations&.first&.extra_storage || 0
 

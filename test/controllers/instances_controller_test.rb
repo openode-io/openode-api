@@ -157,6 +157,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal site_to_check['persistence']['storage_areas'], ['/opt/app/data/']
     assert_nil site_to_check['env']
     assert_nil site_to_check['events']
+    assert_equal site_to_check['out_of_memory_detected'], false
 
     assert site_to_check['last_deployment']
   end

@@ -721,6 +721,10 @@ class Website < ApplicationRecord
     self.status = new_status
   end
 
+  def recent_out_of_memory_detected?
+    statuses.last&.simplified_container_statuses.to_s.downcase.include?('oomkilled')
+  end
+
   def init_change_plan_to_open_source
     self.open_source['status'] = OPEN_SOURCE_STATUS_PENDING
 
