@@ -69,6 +69,10 @@ def get_random_node_pool(client, cluster_id)
   client.kubernetes_clusters.node_pools(id: cluster_id).sample
 end
 
+def instance_ns?(_namesppace)
+  namespace.starts_with?('instance-')
+end
+
 namespace :kube_maintenance do
   desc ''
   task scale_clusters: :environment do
@@ -160,6 +164,78 @@ namespace :kube_maintenance do
         Rails.logger.error "[#{name}] skipping in items loop, #{e}"
       end
 
+    ensure
+      cluster_runner.execution_method&.destroy_execution
+    end
+  end
+
+  # TODO: add tests
+  desc ''
+  task verify_states_main_pvc: :environment do
+    name = "Task kube_maintenance__verify_states_main_pvc"
+    Rails.logger.info "[#{name}] begin"
+
+    kube_clusters_runners.each do |cluster_runner|
+      location = cluster_runner.execution_method.location
+      Rails.logger.info "[#{name}] Current location #{location.str_id}"
+
+      # PVC check
+      result = JSON.parse(cluster_runner.execution_method.ex_stdout(
+                            "raw_kubectl",
+                            s_arguments: "get pvc --all-namespaces -o json"
+                          ))
+
+      result.dig('items').each do |pvc|
+        ns = pvc.dig('metadata', 'namespace')
+
+        next unless instance_ns?(ns)
+
+        website_id = ns.split('-').last
+
+        Rails.logger.info "[#{name}] checking website id #{website_id}"
+
+        website = Website.find_by id: website_id
+
+        # check unnessary PVC
+        if !website || !website.extra_storage?
+          Rails.logger.info "[#{name}] should remove PVC in ns #{ns}"
+        end
+      end
+    ensure
+      cluster_runner.execution_method&.destroy_execution
+    end
+  end
+
+  desc ''
+  task verify_states_deployments: :environment do
+    name = "Task kube_maintenance__verify_states_deployments"
+    Rails.logger.info "[#{name}] begin"
+
+    kube_clusters_runners.each do |cluster_runner|
+      location = cluster_runner.execution_method.location
+      Rails.logger.info "[#{name}] Current location #{location.str_id}"
+
+      result = JSON.parse(cluster_runner.execution_method.ex_stdout(
+                            "raw_kubectl",
+                            s_arguments: "get deployments --all-namespaces -o json"
+                          ))
+
+      result.dig('items').each do |pvc|
+        ns = pvc.dig('metadata', 'namespace')
+
+        next unless instance_ns?(ns)
+
+        website_id = ns.split('-').last
+
+        Rails.logger.info "[#{name}] checking website id #{website_id}"
+
+        website = Website.find_by id: website_id
+
+        # check unnessary PVC
+        if !website || !website.online?
+          Rails.logger.info "[#{name}] should remove deployment in ns #{ns}"
+        end
+      end
     ensure
       cluster_runner.execution_method&.destroy_execution
     end
