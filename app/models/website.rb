@@ -722,7 +722,7 @@ class Website < ApplicationRecord
   end
 
   def recent_out_of_memory_detected?
-    "#{statuses.last&.simplified_container_statuses}".downcase.include?('oomkilled')
+    statuses.last&.simplified_container_statuses.to_s.downcase.include?('oomkilled')
   end
 
   def init_change_plan_to_open_source

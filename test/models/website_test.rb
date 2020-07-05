@@ -243,7 +243,7 @@ class WebsiteTest < ActiveSupport::TestCase
         }
       ]
     )
-    
+
     assert_equal w.recent_out_of_memory_detected?, true
   end
 
@@ -258,14 +258,14 @@ class WebsiteTest < ActiveSupport::TestCase
         }
       ]
     )
-    
+
     assert_equal w.recent_out_of_memory_detected?, false
   end
 
   test 'recent_out_of_memory_detected - no status' do
     w = default_website
     w.statuses.destroy_all
-    
+
     assert_equal w.recent_out_of_memory_detected?, false
   end
 
