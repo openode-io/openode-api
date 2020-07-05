@@ -206,6 +206,7 @@ namespace :kube_maintenance do
     end
   end
 
+  # TODO add tests
   desc ''
   task verify_states_deployments: :environment do
     name = "Task kube_maintenance__verify_states_deployments"
