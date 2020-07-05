@@ -69,8 +69,8 @@ def get_random_node_pool(client, cluster_id)
   client.kubernetes_clusters.node_pools(id: cluster_id).sample
 end
 
-def instance_ns?(_namesppace)
-  namespace.starts_with?('instance-')
+def instance_ns?(current_namespace)
+  current_namespace.starts_with?('instance-')
 end
 
 namespace :kube_maintenance do
