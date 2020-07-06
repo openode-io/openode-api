@@ -2,6 +2,7 @@
 require 'droplet_kit'
 
 MIN_REQUIRED_MEMORY = 2000
+MAX_PODS_PER_NODE = 110
 
 def first_build_server_configs(build_server)
   {
@@ -54,6 +55,16 @@ def retrieve_allocated_mb(cluster_runner, node_name)
   requested_mem
 end
 
+def retrieve_nb_pods_in_node(cluster_runner, node_name)
+  get_pods_result = JSON.parse(cluster_runner.execution_method.ex_stdout(
+    "raw_kubectl",
+    s_arguments: "get pods --all-namespaces -o wide --field-selector " \
+                  "spec.nodeName=#{node_name} -o json"
+  ))
+
+  get_pods_result&.dig('items')&.count || 0
+end
+
 # digital ocean
 def do_client
   DropletKit::Client.new(access_token: ENV['DO_ACCESS_TOKEN'])
@@ -99,11 +110,18 @@ namespace :kube_maintenance do
         {
           name: node_name,
           allocatable_memory_mb: allocatable_memory_mb,
-          requested_memory_mb: retrieve_allocated_mb(cluster_runner, node_name)
+          requested_memory_mb: retrieve_allocated_mb(cluster_runner, node_name),
+          nb_pods: retrieve_nb_pods_in_node(cluster_runner, node_name)
         }
       end
 
       node_with_max_available = nodes_infos.max_by do |n|
+        if n[:nb_pods] >= MAX_PODS_PER_NODE
+          # hard set of requested_memory_mb to max alloc to force having no memory
+          n[:orig_requested_memory_mb] = n[:requested_memory_mb]
+          n[:requested_memory_mb] = n[:allocatable_memory_mb]
+        end
+
         n[:allocatable_memory_mb] - n[:requested_memory_mb]
       end
 
@@ -128,9 +146,12 @@ namespace :kube_maintenance do
 
         node_pool = get_random_node_pool(digi_client, cluster.id)
         node_pool.count += 1
-        digi_client.kubernetes_clusters.update_node_pool(node_pool,
-                                                         id: cluster.id,
-                                                         pool_id: node_pool.id)
+        #digi_client.kubernetes_clusters.update_node_pool(node_pool,
+        #                                                 id: cluster.id,
+        #                                                 pool_id: node_pool.id)
+        History.create(obj: {
+          "title": "increasing cluster #{cluster.id} nb nodes to #{node_pool.count}"
+        })
       end
     end
   end

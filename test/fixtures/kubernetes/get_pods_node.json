@@ -1,0 +1,15 @@
+{
+    "apiVersion": "v1",
+    "items": [{
+        "test": "test"
+    },{
+        "test": "test"
+    },{
+        "test": "test"
+    }],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": "",
+        "selfLink": ""
+    }
+}
