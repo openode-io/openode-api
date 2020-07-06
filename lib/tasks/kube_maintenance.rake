@@ -57,10 +57,11 @@ end
 
 def retrieve_nb_pods_in_node(cluster_runner, node_name)
   get_pods_result = JSON.parse(cluster_runner.execution_method.ex_stdout(
-    "raw_kubectl",
-    s_arguments: "get pods --all-namespaces -o wide --field-selector " \
-                  "spec.nodeName=#{node_name} -o json"
-  ))
+                                 "raw_kubectl",
+                                 s_arguments: "get pods --all-namespaces " \
+                                              "-o wide --field-selector " \
+                                              "spec.nodeName=#{node_name} -o json"
+                               ))
 
   get_pods_result&.dig('items')&.count || 0
 end
@@ -146,12 +147,12 @@ namespace :kube_maintenance do
 
         node_pool = get_random_node_pool(digi_client, cluster.id)
         node_pool.count += 1
-        #digi_client.kubernetes_clusters.update_node_pool(node_pool,
+        # digi_client.kubernetes_clusters.update_node_pool(node_pool,
         #                                                 id: cluster.id,
         #                                                 pool_id: node_pool.id)
         History.create(obj: {
-          "title": "increasing cluster #{cluster.id} nb nodes to #{node_pool.count}"
-        })
+                         "title": "increasing cluster #{cluster.id} nb nodes to #{node_pool.count}"
+                       })
       end
     end
   end

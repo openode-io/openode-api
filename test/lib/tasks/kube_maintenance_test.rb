@@ -12,7 +12,6 @@ class LibKubeMaintenanceTest < ActiveSupport::TestCase
                     'production-canada2.yml kubectl describe node pool-jetf8t6fc-38akt'
     prepare_ssh_session(cmd_desc_node, IO.read('test/fixtures/kubernetes/desc_node.txt'))
 
-
     cmd_get_pods = 'KUBECONFIG=/var/www/openode-api/config/kubernetes/' \
                     'production-canada2.yml kubectl get pods --all-namespaces -o wide ' \
                     '--field-selector spec.nodeName=pool-jetf8t6fc-38akt -o json'
@@ -50,7 +49,6 @@ class LibKubeMaintenanceTest < ActiveSupport::TestCase
                     'production-canada2.yml kubectl describe node pool-jetf8t6fc-38akt'
     prepare_ssh_session(cmd_desc_node, IO.read('test/fixtures/kubernetes/desc_node.txt'))
 
-
     cmd_get_pods = 'KUBECONFIG=/var/www/openode-api/config/kubernetes/' \
                     'production-canada2.yml kubectl get pods --all-namespaces -o wide ' \
                     '--field-selector spec.nodeName=pool-jetf8t6fc-38akt -o json'
@@ -67,7 +65,8 @@ class LibKubeMaintenanceTest < ActiveSupport::TestCase
     cmd_get_pods = 'KUBECONFIG=/var/www/openode-api/config/kubernetes/' \
                     'production-usa.yml kubectl get pods --all-namespaces -o wide ' \
                     '--field-selector spec.nodeName=pool-jetf8t6fc-38akt -o json'
-    prepare_ssh_session(cmd_get_pods, IO.read('test/fixtures/kubernetes/get_pods_node_with_max_pods.json'))
+    prepare_ssh_session(cmd_get_pods, IO.read('test/fixtures/kubernetes/' \
+                                              'get_pods_node_with_max_pods.json'))
 
     assert_scripted do
       begin_ssh
