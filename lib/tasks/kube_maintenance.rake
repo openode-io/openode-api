@@ -147,9 +147,9 @@ namespace :kube_maintenance do
 
         node_pool = get_random_node_pool(digi_client, cluster.id)
         node_pool.count += 1
-        # digi_client.kubernetes_clusters.update_node_pool(node_pool,
-        #                                                 id: cluster.id,
-        #                                                 pool_id: node_pool.id)
+        digi_client.kubernetes_clusters.update_node_pool(node_pool,
+                                                         id: cluster.id,
+                                                         pool_id: node_pool.id)
         History.create(obj: {
                          "title": "increasing cluster #{cluster.id} nb nodes to #{node_pool.count}"
                        })
