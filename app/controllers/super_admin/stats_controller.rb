@@ -21,14 +21,20 @@ class SuperAdmin::StatsController < SuperAdmin::SuperAdminController
   end
 
   def nb_online
+    params['variable_name'] = 'nb_online'
+    system_stats
+  end
+
+  def system_stats
     nb_days = (params['nb_days'] || 30).to_i
+    variable_name = params['variable_name']
 
     stats = SystemStat
             .where('created_at > ?', nb_days.days.ago)
 
     json(
       stats
-      .map { |s| { date: s.created_at.to_date, value: s.obj.dig('nb_online') } }
+      .map { |s| { date: s.created_at.to_date, value: s.obj.dig(variable_name) } }
       .sort_by do |e|
         e[:created_at]
       end

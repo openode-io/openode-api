@@ -16,6 +16,10 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/ with header token' do
+    u = User.find_by token: '1234s56789'
+    u.updated_at = Time.zone.now - 2.hours
+    u.save!
+
     w = Website.find_by site_name: 'testsite'
     w.domains = []
     w.save
@@ -28,6 +32,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal w_found['site_name'], 'testsite'
     assert_equal w_found['status'], 'online'
     assert_equal w_found['domains'], []
+
+    assert Time.zone.now - u.reload.updated_at < 10
   end
 
   test '/instances/ with null token should fail' do

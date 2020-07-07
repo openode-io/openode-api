@@ -150,11 +150,10 @@ Metrics/PerceivedComplexity:
     - 'db/migrate/*.rb'
 
 Metrics/CyclomaticComplexity:
-  Max: 15
+  Max: 20
   Exclude:
     - 'lib/io/dir.rb' # to refactor
     - 'lib/deployment_method/runner.rb' # to refactor
-    - 'lib/deployment_method/base.rb'
     - 'db/migrate/*.rb'
 
 Naming/MethodParameterName:
