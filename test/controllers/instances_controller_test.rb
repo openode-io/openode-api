@@ -154,7 +154,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal site_to_check['hostname'], 'testsite.openode.io'
     assert_equal site_to_check['ip'], '127.0.0.1'
     assert_equal site_to_check['location']['full_name'], 'Montreal (Canada)'
-    assert_equal site_to_check['price'], '0.80'
+    assert_equal site_to_check['price'], '1.00'
     assert_equal site_to_check['plan_name'], '100 MB'
     assert_equal site_to_check['nb_collaborators'], website.collaborators.count
     assert_equal site_to_check['last_deployment_id'], website.deployments.last.id
@@ -234,7 +234,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal site_to_check['site_name'], 'testsite'
     assert_equal site_to_check['ip'], '127.0.0.1'
     assert_equal site_to_check['location']['full_name'], 'Montreal (Canada)'
-    assert_equal site_to_check['price'], '0.80'
+    assert_equal site_to_check['price'], '1.00'
     assert_equal site_to_check['plan_name'], '100 MB'
     assert_equal site_to_check['nb_collaborators'], website.collaborators.count
     assert_equal site_to_check['last_deployment_id'], website.deployments.last.id

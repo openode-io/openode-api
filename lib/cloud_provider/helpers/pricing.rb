@@ -1,25 +1,22 @@
 module CloudProvider
   module Helpers
     module Pricing
-      COST_EXTRA_STORAGE_GB_PER_MONTH = 0.13
+      COST_EXTRA_STORAGE_GB_PER_MONTH = 0.15
       COST_EXTRA_STORAGE_GB_PER_HOUR = COST_EXTRA_STORAGE_GB_PER_MONTH / (24 * 31)
       COST_EXTRA_BANDWIDTH_PER_GB = 0.015
       COST_EXTRA_CPU = 5.00
       COST_EXTRA_CPU_PER_HOUR = COST_EXTRA_CPU / (24 * 31)
 
       def calc_cost_per_month(ram)
-        amount_ram_server = 2000
-        cost_server = 5.16 # in $
+        pricing_params = CloudProvider::Manager.instance.application.dig('pricing')
 
-        nb_possible_instances = amount_ram_server.to_f / ram
-        base_cost = cost_server / nb_possible_instances
+        server_cost = pricing_params.dig('typical_server_cost').to_f
+        allocatable_ram = pricing_params.dig('typical_allocatable_ram').to_f
+        price_multiplier = pricing_params.dig('price_multiplier').to_f
 
-        charge = base_cost * 1.50
-        price = charge * 2.6
+        price_per_mb = server_cost / allocatable_ram
 
-        degressive_saving = 2.0 * ram * 0.001
-
-        price - degressive_saving
+        price_per_mb * price_multiplier * ram
       end
 
       def credits_per_month(ram)

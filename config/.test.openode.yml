@@ -1,6 +1,10 @@
 application:
   base_hostname: openode.io
   hostname_private_cloud: openode.dev
+  pricing:
+    typical_server_cost: 80
+    typical_allocatable_ram: 9600
+    price_multiplier: 1.2
   docker:
     build_servers:
       - ip: 127.0.0.1
