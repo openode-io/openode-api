@@ -54,6 +54,8 @@ class SuperAdmin::NewslettersControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
+    invoke_all_jobs
+
     custom_newsletter.reload
 
     assert_equal response.parsed_body, {}
