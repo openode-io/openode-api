@@ -100,8 +100,6 @@ class DeploymentTest < ActiveSupport::TestCase
     )
 
     dep.reload
-
-    puts "dep #{dep.parent_execution.inspect}"
   end
 
   test 'Create fails with invalid status' do
@@ -190,5 +188,29 @@ class DeploymentTest < ActiveSupport::TestCase
   test 'total_nb - with archived' do
     GlobalStat.increase!("nb_archived_deployments", 1)
     assert_equal Deployment.total_nb, 5
+  end
+
+  test 'image_execution_id - happy path' do
+    d = Deployment.create!(
+      website: default_website,
+      status: 'running',
+      obj: {
+        image_name_tag: "r/production/newnewnewtest345:newnewnewtest345--167--3121"
+      }
+    )
+
+    assert_equal d.image_execution_id, 3121
+  end
+
+  test 'image_execution_id - no fail exec id' do
+    d = Deployment.create!(
+      website: default_website,
+      status: 'running',
+      obj: {
+        image_name_tag: "r/production/newnewnewtest345:newnewnewtest345-167-3121"
+      }
+    )
+
+    assert d.image_execution_id, 0
   end
 end

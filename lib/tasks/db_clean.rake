@@ -31,7 +31,8 @@ namespace :db_clean do
       if deployment.website
         last_successful_deployment = deployment.website.deployments.success.last
 
-        if last_successful_deployment == deployment
+        if last_successful_deployment == deployment ||
+           deployment.id == last_successful_deployment.image_execution_id
           Rails.logger.info "[#{name}] keeping latest #{deployment.id}"
 
           next
