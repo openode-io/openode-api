@@ -4,8 +4,8 @@ PATH=PATH=/bin:/usr/bin:/home/ubuntu/.rvm/rubies/ruby-2.7.1/bin/
 
 1 * * * * cd $PATH_REPO && rails db_stats:log_system_stat >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 3 * * * * cd $PATH_REPO && rails mailgun:check_failed_events >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
-# 0 */5 * * * cd $PATH_REPO && rails db_clean:old_deployments >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
-# 15 */2 * * * cd $PATH_REPO && rails db_clean:old_task_executions >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+0 */5 * * * cd $PATH_REPO && rails db_clean:old_deployments >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+15 */2 * * * cd $PATH_REPO && rails db_clean:old_task_executions >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 2 */5 * * * cd $PATH_REPO && rails db_clean:old_histories >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 4 */5 * * * cd $PATH_REPO && rails db_clean:old_credit_actions >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 0 */6 * * * cd $PATH_REPO && rails background_notification:after_one_day_registration >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
@@ -19,7 +19,7 @@ PATH=PATH=/bin:/usr/bin:/home/ubuntu/.rvm/rubies/ruby-2.7.1/bin/
 */3 * * * * cd $PATH_REPO && rails update:uptime_robot >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 10 22 * * * cd $PATH_REPO && rails verify_website_environment:open_source_activated >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 5 * * * * cd $PATH_REPO && rails kube_maintenance:scale_clusters >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
-# 10 10 * * * cd $PATH_REPO && rails registry:clean >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+10 10 * * * cd $PATH_REPO && rails registry:clean >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 10 */6 * * * cd $PATH_REPO && /bin/bash scripts/backup-kubes.sh >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 5 */3 * * * /usr/sbin/logrotate -s ~/logrotate.status /var/www/openode-api/scripts/logrotate.d/openode_api
 15 */3 * * * /usr/sbin/logrotate -s ~/openode-www-logrotate.status /var/www/openode-www/scripts/logrotate.d/openode_www

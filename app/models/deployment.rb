@@ -24,6 +24,13 @@ class Deployment < Execution
       Deployment.nb_archived_deployments # + archived
   end
 
+  def image_execution_id
+    tag_separator = DeploymentMethod::Util::InstanceImageManager::TAG_NAME_SEPARATOR
+    last_part = obj&.dig('image_name_tag')&.split(tag_separator)&.last
+
+    last_part&.to_i
+  end
+
   def humanize_events
     return "" unless events
 
