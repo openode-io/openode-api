@@ -218,8 +218,17 @@ namespace :kube_maintenance do
 
         website = Website.find_by id: website_id
 
+        different_location = website&.first_location != location
+
+        if different_location
+          Rails.logger.info "[#{name}] reason: " \
+                            "location should be " \
+                            "#{website&.first_location&.str_id} " \
+                            "but is #{location.str_id}"
+        end
+
         # check unnessary PVC
-        if !website || !website.extra_storage?
+        if !website || !website.extra_storage? || different_location
           Rails.logger.info "[#{name}] should remove PVC in ns #{ns}"
         end
       end
@@ -243,8 +252,8 @@ namespace :kube_maintenance do
                             s_arguments: "get deployments --all-namespaces -o json"
                           ))
 
-      result.dig('items').each do |pvc|
-        ns = pvc.dig('metadata', 'namespace')
+      result.dig('items').each do |deployment|
+        ns = deployment.dig('metadata', 'namespace')
 
         next unless instance_ns?(ns)
 
@@ -254,8 +263,25 @@ namespace :kube_maintenance do
 
         website = Website.find_by id: website_id
 
-        # check unnessary PVC
-        if !website || !website.online?
+        # check unnessary deployment
+        if !website
+          Rails.logger.info "[#{name}] reason: website removed"
+        end
+
+        if website&.offline?
+          Rails.logger.info "[#{name}] reason: website offline"
+        end
+
+        different_location = website&.first_location != location
+
+        if different_location
+          Rails.logger.info "[#{name}] reason: " \
+                            "location should be " \
+                            "#{website&.first_location&.str_id} " \
+                            "but is #{location.str_id}"
+        end
+
+        if !website || website.offline? || different_location
           Rails.logger.info "[#{name}] should remove deployment in ns #{ns}"
         end
       end

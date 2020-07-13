@@ -1573,4 +1573,17 @@ class WebsiteTest < ActiveSupport::TestCase
 
     assert_equal w.secret[:test], 1234
   end
+
+  test "first location - happy path" do
+    w = default_website
+
+    assert_equal w.first_location.str_id, "canada"
+  end
+
+  test "first location - no website location" do
+    w = default_website
+    w.website_locations.destroy_all
+
+    assert_nil w.first_location
+  end
 end

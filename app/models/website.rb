@@ -768,6 +768,10 @@ class Website < ApplicationRecord
     status == STATUS_OFFLINE
   end
 
+  def first_location
+    website_locations.first&.location
+  end
+
   def add_storage_area(storage_area)
     self.storage_areas ||= []
     self.storage_areas << storage_area
