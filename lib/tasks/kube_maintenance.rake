@@ -264,7 +264,7 @@ namespace :kube_maintenance do
         website = Website.find_by id: website_id
 
         # check unnessary deployment
-        if !website
+        unless website
           Rails.logger.info "[#{name}] reason: website removed"
         end
 
