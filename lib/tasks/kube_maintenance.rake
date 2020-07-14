@@ -187,7 +187,7 @@ namespace :kube_maintenance do
         # states analysis
 
         # TODO add tests
-        
+
         # contains OOMKilled with significant restart count
         statuses_killed = website_status.statuses_containing_terminated_reason('oomkilled')
                                         .select do |st|
