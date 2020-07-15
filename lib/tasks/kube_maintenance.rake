@@ -186,8 +186,6 @@ namespace :kube_maintenance do
         ###
         # states analysis
 
-        # TODO add tests
-
         # contains OOMKilled with significant restart count
         statuses_killed = website_status.statuses_containing_terminated_reason('oomkilled')
                                         .select do |st|
@@ -197,9 +195,17 @@ namespace :kube_maintenance do
         if statuses_killed.any?
           Rails.logger.info "[#{name}] should kill deployment of " \
                             "#{website.site_name} - #{statuses_killed.inspect}"
+
+          wl = website.website_locations.first
+          wl.notify_force_stop('Out of memory detected')
+
+          cluster_runner.execution_method.do_stop(
+            website: website,
+            website_location: wl
+          )
         end
 
-      rescue e
+      rescue StandardError => e
         Rails.logger.error "[#{name}] skipping in items loop, #{e}"
       end
 

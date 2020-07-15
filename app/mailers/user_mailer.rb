@@ -45,6 +45,15 @@ class UserMailer < ApplicationMailer
     mail(to: mail_to, subject: "#{@website.site_name}@opeNode stopped")
   end
 
+  def stopped_due_reason
+    @user = params[:user]
+    @website = params[:website]
+    @reason = params[:reason]
+    mail_to = @user.email
+
+    mail(to: mail_to, subject: "#{@website.site_name}@opeNode stopped")
+  end
+
   def response_open_source_request
     @user = params[:user]
     @website = params[:website]

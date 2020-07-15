@@ -5,7 +5,6 @@
             "apiVersion": "v1",
             "kind": "Pod",
             "metadata": {
-                "creationTimestamp": "2020-06-16T10:03:54Z",
                 "generateName": "www-deployment-5cd97f5b48-",
                 "labels": {
                     "app": "www",
@@ -13,7 +12,7 @@
                     "pod-template-hash": "5cd97f5b48"
                 },
                 "name": "www-deployment-5cd97f5b48-zskm7",
-                "namespace": "instance-16563",
+                "namespace": "instance-152",
                 "ownerReferences": [
                     {
                         "apiVersion": "apps/v1",
@@ -25,111 +24,8 @@
                     }
                 ],
                 "resourceVersion": "13955187",
-                "selfLink": "/api/v1/namespaces/instance-16563/pods/www-deployment-5cd97f5b48-zskm7",
+                "selfLink": "/api/v1/namespaces/instance-152/pods/www-deployment-5cd97f5b48-zskm7",
                 "uid": "651356e8-9c03-4b4e-9ab9-406503318632"
-            },
-            "spec": {
-                "containers": [
-                    {
-                        "envFrom": [
-                            {
-                                "configMapRef": {
-                                    "name": "dotenv"
-                                }
-                            }
-                        ],
-                        "image": "registry.digitalocean.com/production-openode/xxx:xxx--16563--372795",
-                        "imagePullPolicy": "Always",
-                        "livenessProbe": {
-                            "failureThreshold": 1,
-                            "httpGet": {
-                                "path": "/",
-                                "port": 80,
-                                "scheme": "HTTP"
-                            },
-                            "initialDelaySeconds": 120,
-                            "periodSeconds": 600,
-                            "successThreshold": 1,
-                            "timeoutSeconds": 3
-                        },
-                        "name": "www",
-                        "ports": [
-                            {
-                                "containerPort": 80,
-                                "protocol": "TCP"
-                            }
-                        ],
-                        "readinessProbe": {
-                            "failureThreshold": 3,
-                            "httpGet": {
-                                "path": "/",
-                                "port": 80,
-                                "scheme": "HTTP"
-                            },
-                            "initialDelaySeconds": 10,
-                            "periodSeconds": 20,
-                            "successThreshold": 1,
-                            "timeoutSeconds": 1
-                        },
-                        "resources": {
-                            "limits": {
-                                "ephemeral-storage": "100Mi",
-                                "memory": "50Mi"
-                            },
-                            "requests": {
-                                "ephemeral-storage": "100Mi",
-                                "memory": "50Mi"
-                            }
-                        },
-                        "terminationMessagePath": "/dev/termination-log",
-                        "terminationMessagePolicy": "File",
-                        "volumeMounts": [
-                            {
-                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
-                                "name": "default-token-wgbk8",
-                                "readOnly": true
-                            }
-                        ]
-                    }
-                ],
-                "dnsPolicy": "ClusterFirst",
-                "enableServiceLinks": true,
-                "imagePullSecrets": [
-                    {
-                        "name": "regcred"
-                    }
-                ],
-                "nodeName": "pool-large-1-3cuu4",
-                "priority": 0,
-                "restartPolicy": "Always",
-                "schedulerName": "default-scheduler",
-                "securityContext": {},
-                "serviceAccount": "default",
-                "serviceAccountName": "default",
-                "terminationGracePeriodSeconds": 30,
-                "tolerations": [
-                    {
-                        "effect": "NoExecute",
-                        "key": "node.kubernetes.io/not-ready",
-                        "operator": "Exists",
-                        "tolerationSeconds": 300
-                    },
-                    {
-                        "effect": "NoExecute",
-                        "key": "node.kubernetes.io/unreachable",
-                        "operator": "Exists",
-                        "tolerationSeconds": 300
-                    }
-                ],
-                "volumes": [
-                    {
-                        "name": "default-token-wgbk8",
-                        "secret": {
-                            "defaultMode": 420,
-                            "secretName": "default-token-wgbk8"
-                        }
-                    }
-                ]
             },
             "status": {
                 "conditions": [
