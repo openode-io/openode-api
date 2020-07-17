@@ -16,6 +16,11 @@ class Website < ApplicationRecord
   has_many :website_locations, dependent: :destroy
   has_many :snapshots, dependent: :destroy
   has_many :events, foreign_key: :ref_id, class_name: :WebsiteEvent, dependent: :destroy
+  has_many :stop_events,
+           foreign_key: :ref_id,
+           class_name: :StopWebsiteEvent,
+           dependent: :destroy
+  has_many :notifications, class_name: :WebsiteNotification, dependent: :destroy
   has_many :executions
   has_many :credit_actions
   has_many :website_bandwidth_daily_stats, foreign_key: :ref_id,
@@ -739,6 +744,10 @@ class Website < ApplicationRecord
     self.status = new_status
   end
 
+  def recent_out_of_memory_detected?
+    statuses.last&.simplified_container_statuses.to_s.downcase.include?('oomkilled')
+  end
+
   def init_change_plan_to_open_source
     self.open_source['status'] = OPEN_SOURCE_STATUS_PENDING
 
@@ -780,6 +789,10 @@ class Website < ApplicationRecord
 
   def offline?
     status == STATUS_OFFLINE
+  end
+
+  def first_location
+    website_locations.first&.location
   end
 
   def add_storage_area(storage_area)

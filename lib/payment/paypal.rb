@@ -21,7 +21,8 @@ module Payment
 
       {
         'content' => cleaned_obj,
-        'amount' => cleaned_obj['mc_gross'].to_f,
+        'amount' =>
+          (cleaned_obj['mc_gross'].to_f - (cleaned_obj['tax']&.to_f || 0)).round(2),
         'user_id' => cleaned_obj['custom'].to_i,
         'payment_status' => cleaned_obj['payment_status']
       }

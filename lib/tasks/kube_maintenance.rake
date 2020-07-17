@@ -2,6 +2,7 @@
 require 'droplet_kit'
 
 MIN_REQUIRED_MEMORY = 2000
+MAX_PODS_PER_NODE = 110
 
 def first_build_server_configs(build_server)
   {
@@ -54,6 +55,17 @@ def retrieve_allocated_mb(cluster_runner, node_name)
   requested_mem
 end
 
+def retrieve_nb_pods_in_node(cluster_runner, node_name)
+  get_pods_result = JSON.parse(cluster_runner.execution_method.ex_stdout(
+                                 "raw_kubectl",
+                                 s_arguments: "get pods --all-namespaces " \
+                                              "-o wide --field-selector " \
+                                              "spec.nodeName=#{node_name} -o json"
+                               ))
+
+  get_pods_result&.dig('items')&.count || 0
+end
+
 # digital ocean
 def do_client
   DropletKit::Client.new(access_token: ENV['DO_ACCESS_TOKEN'])
@@ -67,6 +79,10 @@ end
 
 def get_random_node_pool(client, cluster_id)
   client.kubernetes_clusters.node_pools(id: cluster_id).sample
+end
+
+def instance_ns?(current_namespace)
+  current_namespace.starts_with?('instance-')
 end
 
 namespace :kube_maintenance do
@@ -95,11 +111,18 @@ namespace :kube_maintenance do
         {
           name: node_name,
           allocatable_memory_mb: allocatable_memory_mb,
-          requested_memory_mb: retrieve_allocated_mb(cluster_runner, node_name)
+          requested_memory_mb: retrieve_allocated_mb(cluster_runner, node_name),
+          nb_pods: retrieve_nb_pods_in_node(cluster_runner, node_name)
         }
       end
 
       node_with_max_available = nodes_infos.max_by do |n|
+        if n[:nb_pods] >= MAX_PODS_PER_NODE
+          # hard set of requested_memory_mb to max alloc to force having no memory
+          n[:orig_requested_memory_mb] = n[:requested_memory_mb]
+          n[:requested_memory_mb] = n[:allocatable_memory_mb]
+        end
+
         n[:allocatable_memory_mb] - n[:requested_memory_mb]
       end
 
@@ -127,6 +150,9 @@ namespace :kube_maintenance do
         digi_client.kubernetes_clusters.update_node_pool(node_pool,
                                                          id: cluster.id,
                                                          pool_id: node_pool.id)
+        History.create(obj: {
+                         "title": "increasing cluster #{cluster.id} nb nodes to #{node_pool.count}"
+                       })
       end
     end
   end
@@ -154,12 +180,134 @@ namespace :kube_maintenance do
         website = cluster_runner.execution_method.website_from_namespace(ns)
         next unless website&.present?
 
-        Rails.logger.info "[#{name} logging status for #{website.site_name}]"
-        WebsiteStatus.log(website, status)
-      rescue e
+        Rails.logger.info "[#{name}] logging status for #{website.site_name}"
+        website_status = WebsiteStatus.log(website, status)
+
+        ###
+        # states analysis
+
+        # contains OOMKilled with significant restart count
+        statuses_killed = website_status.statuses_containing_terminated_reason('oomkilled')
+                                        .select do |st|
+          st['restartCount'] && st['restartCount'] >= 2
+        end
+
+        if statuses_killed.any?
+          Rails.logger.info "[#{name}] should kill deployment of " \
+                            "#{website.site_name} - #{statuses_killed.inspect}"
+
+          wl = website.website_locations.first
+          wl.notify_force_stop('Out of memory detected')
+
+          cluster_runner.execution_method.do_stop(
+            website: website,
+            website_location: wl
+          )
+        end
+
+      rescue StandardError => e
         Rails.logger.error "[#{name}] skipping in items loop, #{e}"
       end
 
+    ensure
+      cluster_runner.execution_method&.destroy_execution
+    end
+  end
+
+  # TODO: add tests
+  desc ''
+  task verify_states_main_pvc: :environment do
+    name = "Task kube_maintenance__verify_states_main_pvc"
+    Rails.logger.info "[#{name}] begin"
+
+    kube_clusters_runners.each do |cluster_runner|
+      location = cluster_runner.execution_method.location
+      Rails.logger.info "[#{name}] Current location #{location.str_id}"
+
+      # PVC check
+      result = JSON.parse(cluster_runner.execution_method.ex_stdout(
+                            "raw_kubectl",
+                            s_arguments: "get pvc --all-namespaces -o json"
+                          ))
+
+      result.dig('items').each do |pvc|
+        ns = pvc.dig('metadata', 'namespace')
+
+        next unless instance_ns?(ns)
+
+        website_id = ns.split('-').last
+
+        Rails.logger.info "[#{name}] checking website id #{website_id}"
+
+        website = Website.find_by id: website_id
+
+        different_location = website&.first_location != location
+
+        if different_location
+          Rails.logger.info "[#{name}] reason: " \
+                            "location should be " \
+                            "#{website&.first_location&.str_id} " \
+                            "but is #{location.str_id}"
+        end
+
+        # check unnessary PVC
+        if !website || !website.extra_storage? || different_location
+          Rails.logger.info "[#{name}] should remove PVC in ns #{ns}"
+        end
+      end
+    ensure
+      cluster_runner.execution_method&.destroy_execution
+    end
+  end
+
+  # TODO add tests
+  desc ''
+  task verify_states_deployments: :environment do
+    name = "Task kube_maintenance__verify_states_deployments"
+    Rails.logger.info "[#{name}] begin"
+
+    kube_clusters_runners.each do |cluster_runner|
+      location = cluster_runner.execution_method.location
+      Rails.logger.info "[#{name}] Current location #{location.str_id}"
+
+      result = JSON.parse(cluster_runner.execution_method.ex_stdout(
+                            "raw_kubectl",
+                            s_arguments: "get deployments --all-namespaces -o json"
+                          ))
+
+      result.dig('items').each do |deployment|
+        ns = deployment.dig('metadata', 'namespace')
+
+        next unless instance_ns?(ns)
+
+        website_id = ns.split('-').last
+
+        Rails.logger.info "[#{name}] checking website id #{website_id}"
+
+        website = Website.find_by id: website_id
+
+        # check unnessary deployment
+        unless website
+          Rails.logger.info "[#{name}] reason: website removed"
+        end
+
+        if website&.offline?
+          Rails.logger.info "[#{name}] reason: website offline"
+        end
+
+        different_location = website&.first_location != location
+
+        if different_location
+          Rails.logger.info "[#{name}] reason: " \
+                            "location should be " \
+                            "#{website&.first_location&.str_id} " \
+                            "but is #{location.str_id}"
+        end
+
+        if !website || website.offline? || different_location
+          Rails.logger.info "[#{name}] should remove deployment in ns #{ns}"
+        end
+      end
     ensure
       cluster_runner.execution_method&.destroy_execution
     end

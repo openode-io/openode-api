@@ -258,5 +258,38 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert_equal wl.extra_storage, before_extra_storage
   end
 
-  # TODO: other tests
+  # notify_force_stop
+  test 'notify_force_stop - happy path' do
+    website = default_website
+    website.notifications.destroy_all
+    wl = website.website_locations.first
+
+    reason = 'Out of memory detected'
+    wl.notify_force_stop(reason)
+
+    assert_equal wl.website.stop_events.length, 1
+    assert_equal wl.website.stop_events.last.obj.dig('reason'), reason
+
+    assert_equal wl.website.notifications.reload.last.content, reason
+    assert_equal wl.website.notifications.last.level, 'critical'
+
+    mail_sent = ActionMailer::Base.deliveries.first
+    assert_includes mail_sent.subject, 'stopped'
+    assert_includes mail_sent.subject, website.site_name
+    assert_includes mail_sent.body.raw_source, reason
+  end
+
+  test 'notify_force_stop - already notified recently' do
+    website = default_website
+    website.notifications.destroy_all
+    wl = website.website_locations.first
+
+    StopWebsiteEvent.create(website: website, obj: { reason: 'no!' })
+
+    reason = 'Out of memory detected'
+    wl.notify_force_stop(reason)
+
+    assert_equal wl.website.stop_events.length, 1
+    assert_equal wl.website.stop_events.last.obj.dig('reason'), 'no!'
+  end
 end

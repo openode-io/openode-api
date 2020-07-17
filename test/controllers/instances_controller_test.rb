@@ -16,6 +16,10 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/ with header token' do
+    u = User.find_by token: '1234s56789'
+    u.updated_at = Time.zone.now - 2.hours
+    u.save!
+
     w = Website.find_by site_name: 'testsite'
     w.domains = []
     w.save
@@ -28,6 +32,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal w_found['site_name'], 'testsite'
     assert_equal w_found['status'], 'online'
     assert_equal w_found['domains'], []
+
+    assert Time.zone.now - u.reload.updated_at < 10
   end
 
   test '/instances/ with null token should fail' do
@@ -148,7 +154,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal site_to_check['hostname'], 'testsite.openode.io'
     assert_equal site_to_check['ip'], '127.0.0.1'
     assert_equal site_to_check['location']['full_name'], 'Montreal (Canada)'
-    assert_equal site_to_check['price'], '0.80'
+    assert_equal site_to_check['price'], '1.00'
     assert_equal site_to_check['plan_name'], '100 MB'
     assert_equal site_to_check['nb_collaborators'], website.collaborators.count
     assert_equal site_to_check['last_deployment_id'], website.deployments.last.id
@@ -157,6 +163,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal site_to_check['persistence']['storage_areas'], ['/opt/app/data/']
     assert_nil site_to_check['env']
     assert_nil site_to_check['events']
+    assert_equal site_to_check['out_of_memory_detected'], false
 
     assert site_to_check['last_deployment']
   end
@@ -227,7 +234,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal site_to_check['site_name'], 'testsite'
     assert_equal site_to_check['ip'], '127.0.0.1'
     assert_equal site_to_check['location']['full_name'], 'Montreal (Canada)'
-    assert_equal site_to_check['price'], '0.80'
+    assert_equal site_to_check['price'], '1.00'
     assert_equal site_to_check['plan_name'], '100 MB'
     assert_equal site_to_check['nb_collaborators'], website.collaborators.count
     assert_equal site_to_check['last_deployment_id'], website.deployments.last.id

@@ -1,0 +1,100 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "generateName": "www-deployment-5cd97f5b48-",
+                "labels": {
+                    "app": "www",
+                    "deploymentId": "372795",
+                    "pod-template-hash": "5cd97f5b48"
+                },
+                "name": "www-deployment-5cd97f5b48-zskm7",
+                "namespace": "instance-152",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "apps/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "ReplicaSet",
+                        "name": "www-deployment-5cd97f5b48",
+                        "uid": "4a91e34f-e725-43c3-b37d-88b034eb2a7e"
+                    }
+                ],
+                "resourceVersion": "13955187",
+                "selfLink": "/api/v1/namespaces/instance-152/pods/www-deployment-5cd97f5b48-zskm7",
+                "uid": "651356e8-9c03-4b4e-9ab9-406503318632"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2020-06-16T10:03:54Z",
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2020-07-13T14:01:28Z",
+                        "status": "True",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2020-07-13T14:01:28Z",
+                        "status": "True",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2020-06-16T10:03:54Z",
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "containerID": "docker://acb49c1b0b3adba8e146b75cca02ede13ae5f84e08b62a4fb6fa7700127f9a8a",
+                        "image": "registry.digitalocean.com/production-openode/xxx:xxx--16563--372795",
+                        "imageID": "docker-pullable://registry.digitalocean.com/production-openode/xxx@sha256:0906f3567eb512f86617300c0d0372a1e9c11e469c4e1b5df9f18ba4f23b667e",
+                        "lastState": {
+                            "terminated": {
+                                "containerID": "docker://4a474a495eeb82a9a4257003553ea8eb92cd26730ba6368fcd68553a1605e43a",
+                                "exitCode": 0,
+                                "finishedAt": "2020-07-13T14:00:57Z",
+                                "reason": "OOMKilled",
+                                "startedAt": "2020-07-12T22:43:45Z"
+                            }
+                        },
+                        "name": "www",
+                        "ready": true,
+                        "restartCount": 39,
+                        "started": true,
+                        "state": {
+                            "running": {
+                                "startedAt": "2020-07-13T14:00:59Z"
+                            }
+                        }
+                    }
+                ],
+                "hostIP": "10.136.156.23",
+                "phase": "Running",
+                "podIP": "10.244.0.62",
+                "podIPs": [
+                    {
+                        "ip": "10.244.0.62"
+                    }
+                ],
+                "qosClass": "Burstable",
+                "startTime": "2020-06-16T10:03:54Z"
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": "",
+        "selfLink": ""
+    }
+}

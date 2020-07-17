@@ -17,6 +17,18 @@ class PaypalTest < ActiveSupport::TestCase
     assert_equal result['payment_status'], 'Completed'
   end
 
+  test 'valid input with tax' do
+    paypal_fixture_test_path = 'test/fixtures/http/payment/paypal/paypal_with_tax.json'
+    content = JSON.parse(File.read(Rails.root.join(paypal_fixture_test_path)))
+
+    result = Payment::Paypal.parse(content)
+
+    assert_not_nil result['content']
+    assert_equal result['amount'], 1.85
+    assert_equal result['user_id'], 10_000
+    assert_equal result['payment_status'], 'Completed'
+  end
+
   test 'is completed?' do
     paypal_fixture_test_path = 'test/fixtures/http/payment/paypal/paypal.json'
     content = JSON.parse(File.read(Rails.root.join(paypal_fixture_test_path)))

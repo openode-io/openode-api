@@ -19,7 +19,7 @@ class WebsiteStatus < History
 
   def simplified_container_statuses
     statuses = obj&.dig('containerStatuses')
-    return {} unless statuses
+    return [] unless statuses
 
     statuses.each do |s|
       s.delete("containerID")
@@ -28,5 +28,12 @@ class WebsiteStatus < History
     end
 
     statuses
+  end
+
+  def statuses_containing_terminated_reason(reason)
+    simplified_container_statuses
+      .select do |status|
+        status.dig('lastState', 'terminated', 'reason').to_s.downcase == reason.downcase
+      end
   end
 end

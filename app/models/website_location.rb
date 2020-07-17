@@ -98,6 +98,27 @@ class WebsiteLocation < ApplicationRecord
     manager.available_plans_of_type_at(website.cloud_type, location.str_id)
   end
 
+  def notify_force_stop(reason)
+    last_stop_event = website.stop_events.last
+
+    unless last_stop_event
+      StopWebsiteEvent.create(website: website, obj: { reason: reason })
+      website.create_event(title: reason)
+
+      WebsiteNotification.create(
+        website: website,
+        level: WebsiteNotification::LEVEL_CRITICAL,
+        content: reason
+      )
+
+      UserMailer.with(
+        user: website.user,
+        website: website,
+        reason: reason
+      ).stopped_due_reason.deliver_now
+    end
+  end
+
   # main domain used internally
   def main_domain
     send "domain_#{website.domain_type}"

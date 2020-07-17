@@ -22,6 +22,9 @@ class ApplicationController < ActionController::API
 
     @user = User.find_by!(token: token)
 
+    # update user updated_at to know which user is active
+    @user.touch if (Time.zone.now - @user.updated_at) / (60 * 60) >= 1
+
     rate_limit(@user, response: response)
   end
 

@@ -27,6 +27,9 @@ Rails.application.routes.draw do
     get 'stats/spendings', to: 'stats#spendings'
     get 'stats/generic_daily_stats', to: 'stats#generic_daily_stats'
     get 'stats/nb_online', to: 'stats#nb_online'
+    get 'stats/system', to: 'stats#system_stats'
+
+    get 'generic/:entity', to: 'super_admin#generic_index'
   end
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html

@@ -39,7 +39,7 @@ class Order < ApplicationRecord
     # extra copy for admin purpose
     OrderMailer.with(
       order: self,
-      comment: '',
+      comment: content&.dig('comment') || content&.dig(:comment),
       email_to: ENV['DEFAULT_EMAIL']
     ).confirmation.deliver_now
   end

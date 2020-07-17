@@ -11,9 +11,9 @@ class Execution < ApplicationRecord
   belongs_to :website, optional: true
   belongs_to :website_location, optional: true
 
-  belongs_to :parent_execution, foreign_key: :parent_execution_id,
-                                class_name: :Execution,
-                                optional: true
+  belongs_to :parent_execution,
+             class_name: :Execution,
+             optional: true
 
   before_create :initialize_status
 
