@@ -751,8 +751,6 @@ class WebsiteTest < ActiveSupport::TestCase
   end
 
   test 'set config REPLICAS - happy path' do
-    referencing_to_website = Website.last
-
     website = default_website
     website.configs ||= {}
     website.configs['REPLICAS'] = 2
