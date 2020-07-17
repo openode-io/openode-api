@@ -30,6 +30,8 @@ class Website < ApplicationRecord
                       class_name: :WebsiteStatus,
                       dependent: :destroy
 
+  LIMIT_RAM_BLUE_GREEN_DEPLOYMENT = 2000
+
   # collaborators data plus user information
   def pretty_collaborators_h
     collaborators
@@ -157,6 +159,14 @@ class Website < ApplicationRecord
       min: 10,
       max: 60,
       default: 20
+    },
+    {
+      variable: 'BLUE_GREEN_DEPLOYMENT',
+      description: 'Avoid downtime while deploying, ' \
+                    'temporarily keeps the old instance running while the new one is preparing.',
+      type: 'blue_green_deployment',
+      enum: [true, false, 'true', 'false', ''],
+      default: false
     },
     {
       variable: 'SKIP_PORT_CHECK',
@@ -349,10 +359,21 @@ class Website < ApplicationRecord
         end
       end
 
+      if %w[blue_green_deployment boolean].include?(config[:type])
+        self.configs[var_name] = [true, 'true'].include?(value)
+      end
+
       if value.present? && config[:type].present?
         # call method based on type type, see below
-        send("config_#{config[:type]}_must_comply", config, value)
+        send("config_#{config[:type]}_must_comply", config, self.configs[var_name])
       end
+    end
+  end
+
+  def config_blue_green_deployment_must_comply(_config, value)
+    if value && plan[:ram] >= LIMIT_RAM_BLUE_GREEN_DEPLOYMENT
+      errors.add(:configs, "Maximum RAM with blue green deployment is " \
+                            "#{LIMIT_RAM_BLUE_GREEN_DEPLOYMENT} MB")
     end
   end
 
@@ -600,6 +621,10 @@ class Website < ApplicationRecord
 
   def dotenv_filepath
     get_config("DOTENV_FILEPATH")
+  end
+
+  def blue_green_deployment?
+    get_config("BLUE_GREEN_DEPLOYMENT")
   end
 
   def reference_website_image
@@ -857,6 +882,18 @@ class Website < ApplicationRecord
           Website.cost_price_to_credits(current_plan[:cost_per_hour]) * hourly_ratio
       }
     ]
+
+    if blue_green_deployment?
+      pricing_params = CloudProvider::Manager.instance.application.dig('pricing')
+      cost_ratio = pricing_params.dig('blue_green_ratio_plan_cost').to_f
+
+      spendings << {
+        action_type: CreditAction::TYPE_CONSUME_BLUE_GREEN,
+        credits_cost:
+          Website.cost_price_to_credits(current_plan[:cost_per_hour]) *
+          cost_ratio * hourly_ratio
+      }
+    end
 
     spend_hourly_credits!(spendings)
   end
