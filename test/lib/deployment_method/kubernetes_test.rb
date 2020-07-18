@@ -539,16 +539,26 @@ VAR2=5678
   # deployment strategy
   test 'deployment_strategy - with Recreate and small instance' do
     assert @website.memory <= 1000
-    strategy = kubernetes_method.deployment_strategy(@website.memory)
+    strategy = kubernetes_method.deployment_strategy(@website, @website.memory)
 
     assert_equal strategy, "Recreate"
+  end
+
+  test 'deployment_strategy - with blue green deployment' do
+    @website.configs ||= {}
+    @website.configs['BLUE_GREEN_DEPLOYMENT'] = true
+    @website.save!
+
+    strategy = kubernetes_method.deployment_strategy(@website, @website.memory)
+
+    assert_equal strategy, "RollingUpdate"
   end
 
   test 'deployment_strategy - with Recreate' do
     @website.account_type = "sixth"
     @website.save!
     assert @website.memory > 1000
-    strategy = kubernetes_method.deployment_strategy(@website.memory)
+    strategy = kubernetes_method.deployment_strategy(@website, @website.memory)
 
     assert_equal strategy, "Recreate"
   end
