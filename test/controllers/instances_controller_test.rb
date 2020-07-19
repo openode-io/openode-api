@@ -149,6 +149,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
+    assert_equal response.parsed_body.length, 3
+
     site_to_check = response.parsed_body.find { |w| w['site_name'] == website.site_name }
     assert_equal site_to_check['site_name'], 'testsite'
     assert_equal site_to_check['hostname'], 'testsite.openode.io'
@@ -166,6 +168,20 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal site_to_check['out_of_memory_detected'], false
 
     assert site_to_check['last_deployment']
+  end
+
+  test '/instances/summary using search' do
+    website = Website.find_by site_name: 'testsite'
+    website.storage_areas = ['/opt/app/data/']
+    website.save!
+    get '/instances/summary?with=last_deployment&search=stsit',
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body.length, 1
+    assert_equal response.parsed_body.first['site_name'], 'testsite'
   end
 
   test '/instances/summary happy path - with env' do

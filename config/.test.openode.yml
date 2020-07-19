@@ -5,6 +5,7 @@ application:
     typical_server_cost: 80
     typical_allocatable_ram: 9600
     price_multiplier: 1.2
+    blue_green_ratio_plan_cost: 0.2
   docker:
     build_servers:
       - ip: 127.0.0.1
