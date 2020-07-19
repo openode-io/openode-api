@@ -94,10 +94,12 @@ class InstancesController < ApplicationController
   description 'List instances summary.'
   param :with, String, desc: INSTANCE_SUMMARY_WITH_DESC,
                        required: false
+  param :search, String, desc: "Filter based on the site_name.", required: false
   def summary
     extras = extra_fields_summary(params[:with])
 
     json(@user.websites_with_access
+      .select { |w| params[:search] ? w.site_name.include?(params[:search]) : true }
       .map do |w|
         summarize_website(w, extras)
       end
