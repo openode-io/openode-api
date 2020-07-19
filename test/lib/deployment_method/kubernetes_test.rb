@@ -495,7 +495,7 @@ VAR2=5678
     assert_includes yml, "kind: Deployment"
     assert_includes yml, "  name: www-deployment"
     assert_includes yml, "  namespace: #{kubernetes_method.namespace_of(website)}"
-    assert_includes yml, "  replicas: 1"
+    assert_includes yml, "  replicas: #{opts[:replicas] || 1}"
     # assert_includes yml, "  livenessProbe:" if opts[:with_probes]
     assert_includes yml, "  readinessProbe:" if opts[:with_probes]
     assert_includes yml, "  resources:"
@@ -570,6 +570,22 @@ VAR2=5678
                                    requested_memory: @website.memory,
                                    limited_memory: @website.memory,
                                    with_probes: true)
+  end
+
+  test 'generate_deployment_yml - with replicas 2' do
+    @website.configs ||= {}
+    @website.configs['REPLICAS'] = 2
+    @website.save!
+
+    @website_location.reload
+
+    yml = kubernetes_method.generate_deployment_yml(@website, @website_location, {})
+
+    assert_contains_deployment_yml(yml, @website, @website_location,
+                                   requested_memory: @website.memory,
+                                   limited_memory: @website.memory,
+                                   with_probes: true,
+                                   replicas: 2)
   end
 
   test 'generate_deployment_yml - with persisted storage' do

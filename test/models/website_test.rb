@@ -791,6 +791,11 @@ class WebsiteTest < ActiveSupport::TestCase
 
   test 'set config REPLICAS - happy path' do
     website = default_website
+    wl = website.website_locations.first
+    wl.extra_storage = 0
+    wl.save!
+    
+    website.website_locations.reload
     website.configs ||= {}
     website.configs['REPLICAS'] = 2
     website.save

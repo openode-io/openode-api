@@ -4,6 +4,7 @@ class WebsiteLocation < ApplicationRecord
   serialize :obj, JSON
 
   MAIN_SERVICE_NAME = 'main-service'
+  MAX_REPLICAS = 5
 
   belongs_to :website
   belongs_to :location
@@ -15,11 +16,18 @@ class WebsiteLocation < ApplicationRecord
 
   validate :validate_nb_cpus
   validate :unique_location_per_website
+  validate :replicas_limitation_with_extra_storage
 
   validates :extra_storage, numericality: {
     only_integer: true,
     greater_than_or_equal_to: 0,
     less_than_or_equal_to: 10
+  }
+
+  validates :replicas, numericality: {
+    only_integer: true,
+    greater_than_or_equal_to: 1,
+    less_than_or_equal_to: MAX_REPLICAS
   }
 
   def main_service
@@ -40,6 +48,12 @@ class WebsiteLocation < ApplicationRecord
 
     if nb_cpus <= 0 || nb_cpus > max_cpus
       errors.add(:nb_cpus, "Invalid value, valid ones: [1..#{max_cpus}]")
+    end
+  end
+
+  def replicas_limitation_with_extra_storage
+    if replicas > 1 && extra_storage.positive?
+      errors.add(:replicas, 'permanent storage cannot be used with replicas > 1')
     end
   end
 
