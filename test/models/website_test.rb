@@ -794,7 +794,7 @@ class WebsiteTest < ActiveSupport::TestCase
     wl = website.website_locations.first
     wl.extra_storage = 0
     wl.save!
-    
+
     website.website_locations.reload
     website.configs ||= {}
     website.configs['REPLICAS'] = 2

@@ -59,6 +59,19 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert_equal wl.valid?, false
   end
 
+  test 'extra storage - largest plan cannot be used with replicas > 1' do
+    website = default_website
+    website.account_type = 'sixth'
+    website.save!
+
+    wl = website.website_locations.first
+    wl.extra_storage = 0
+    wl.replicas = 2
+    wl.save
+
+    assert_equal wl.valid?, false
+  end
+
   test 'extra storage - replicas too low' do
     website = default_website
     wl = website.website_locations.first

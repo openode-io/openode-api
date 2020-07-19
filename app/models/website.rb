@@ -30,7 +30,7 @@ class Website < ApplicationRecord
                       class_name: :WebsiteStatus,
                       dependent: :destroy
 
-  LIMIT_RAM_BLUE_GREEN_DEPLOYMENT = 2000
+  LIMIT_RAM_BLUE_GREEN_DEPLOYMENT = 1000
 
   # collaborators data plus user information
   def pretty_collaborators_h
@@ -377,7 +377,7 @@ class Website < ApplicationRecord
   end
 
   def config_blue_green_deployment_must_comply(_config, value)
-    if value && plan[:ram] >= LIMIT_RAM_BLUE_GREEN_DEPLOYMENT
+    if value && plan[:ram] > LIMIT_RAM_BLUE_GREEN_DEPLOYMENT
       errors.add(:configs, "Maximum RAM with blue green deployment is " \
                             "#{LIMIT_RAM_BLUE_GREEN_DEPLOYMENT} MB")
     end

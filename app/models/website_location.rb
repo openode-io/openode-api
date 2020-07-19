@@ -5,6 +5,7 @@ class WebsiteLocation < ApplicationRecord
 
   MAIN_SERVICE_NAME = 'main-service'
   MAX_REPLICAS = 5
+  LIMIT_RAM_WITH_REPLICAS = 1000
 
   belongs_to :website
   belongs_to :location
@@ -17,6 +18,7 @@ class WebsiteLocation < ApplicationRecord
   validate :validate_nb_cpus
   validate :unique_location_per_website
   validate :replicas_limitation_with_extra_storage
+  validate :replicas_limitation_based_on_the_plan
 
   validates :extra_storage, numericality: {
     only_integer: true,
@@ -54,6 +56,13 @@ class WebsiteLocation < ApplicationRecord
   def replicas_limitation_with_extra_storage
     if replicas > 1 && extra_storage.positive?
       errors.add(:replicas, 'permanent storage cannot be used with replicas > 1')
+    end
+  end
+
+  def replicas_limitation_based_on_the_plan
+    if replicas > 1 && website.reload.plan[:ram] > LIMIT_RAM_WITH_REPLICAS
+      errors.add(:replicas, "maximum plan is #{LIMIT_RAM_WITH_REPLICAS} MB " \
+                            "with replicas > 1")
     end
   end
 
