@@ -1705,4 +1705,36 @@ class WebsiteTest < ActiveSupport::TestCase
 
     assert_nil w.first_location
   end
+
+  test "plan price - replicas = 1" do
+    w = default_website
+
+    assert_in_delta w.plan_cost, 0.1344, 0.00001
+  end
+
+  test "plan price - replicas = 2" do
+    w = default_website
+    wl = w.website_locations.first
+    wl.extra_storage = 0
+    wl.replicas = 2
+    wl.save!
+
+    assert_in_delta w.plan_cost, 0.1344 * 2, 0.00005
+  end
+
+  test "blue_green_deployment_option_cost - replicas = 1" do
+    w = default_website
+
+    assert_in_delta w.blue_green_deployment_option_cost, 0.1344 * 0.20, 0.00001
+  end
+
+  test "blue_green_deployment_option_cost - replicas = 2" do
+    w = default_website
+    wl = w.website_locations.first
+    wl.extra_storage = 0
+    wl.replicas = 2
+    wl.save!
+
+    assert_in_delta w.blue_green_deployment_option_cost, 0.1344 * 0.20 * 2, 0.00001
+  end
 end

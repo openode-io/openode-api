@@ -887,29 +887,35 @@ class Website < ApplicationRecord
     price * 100.0
   end
 
+  def plan_cost
+    Website.cost_price_to_credits(plan[:cost_per_hour]) *
+      (website_locations.first&.replicas || 1)
+  end
+
+  def blue_green_deployment_option_cost
+    pricing_params = CloudProvider::Manager.instance.application.dig('pricing')
+    cost_ratio = pricing_params.dig('blue_green_ratio_plan_cost').to_f
+
+    Website.cost_price_to_credits(plan[:cost_per_hour]) * cost_ratio *
+      (website_locations.first&.replicas || 1)
+  end
+
   # credits related task updates and calculations
   def spend_online_hourly_credits!(hourly_ratio = 1.0)
-    current_plan = plan
-
-    return unless current_plan
+    return unless plan
 
     spendings = [
       {
         action_type: CreditAction::TYPE_CONSUME_PLAN,
-        credits_cost:
-          Website.cost_price_to_credits(current_plan[:cost_per_hour]) * hourly_ratio
+        credits_cost: plan_cost * hourly_ratio
       }
     ]
 
     if blue_green_deployment?
-      pricing_params = CloudProvider::Manager.instance.application.dig('pricing')
-      cost_ratio = pricing_params.dig('blue_green_ratio_plan_cost').to_f
 
       spendings << {
         action_type: CreditAction::TYPE_CONSUME_BLUE_GREEN,
-        credits_cost:
-          Website.cost_price_to_credits(current_plan[:cost_per_hour]) *
-          cost_ratio * hourly_ratio
+        credits_cost: blue_green_deployment_option_cost * hourly_ratio
       }
     end
 
