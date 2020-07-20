@@ -60,7 +60,7 @@ class WebsiteLocation < ApplicationRecord
   end
 
   def replicas_limitation_based_on_the_plan
-    if replicas > 1 && website.reload.plan[:ram] > LIMIT_RAM_WITH_REPLICAS
+    if replicas > 1 && website.plan[:ram] > LIMIT_RAM_WITH_REPLICAS
       errors.add(:replicas, "maximum plan is #{LIMIT_RAM_WITH_REPLICAS} MB " \
                             "with replicas > 1")
     end

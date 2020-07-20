@@ -12,7 +12,7 @@ class Website < ApplicationRecord
   self.inheritance_column = :_type
 
   belongs_to :user
-  has_many :collaborators
+  has_many :collaborators, dependent: :destroy
   has_many :website_locations, dependent: :destroy
   has_many :snapshots, dependent: :destroy
   has_many :events, foreign_key: :ref_id, class_name: :WebsiteEvent, dependent: :destroy
@@ -21,7 +21,7 @@ class Website < ApplicationRecord
            class_name: :StopWebsiteEvent,
            dependent: :destroy
   has_many :notifications, class_name: :WebsiteNotification, dependent: :destroy
-  has_many :executions
+  has_many :executions, dependent: :destroy
   has_many :credit_actions
   has_many :website_bandwidth_daily_stats, foreign_key: :ref_id,
                                            class_name: :WebsiteBandwidthDailyStat,
