@@ -326,7 +326,7 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert_equal wl.website.notifications.reload.last.content, reason
     assert_equal wl.website.notifications.last.level, 'critical'
 
-    mail_sent = ActionMailer::Base.deliveries.first
+    mail_sent = ActionMailer::Base.deliveries.last
     assert_includes mail_sent.subject, 'stopped'
     assert_includes mail_sent.subject, website.site_name
     assert_includes mail_sent.body.raw_source, reason
