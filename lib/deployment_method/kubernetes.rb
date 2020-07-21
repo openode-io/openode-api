@@ -829,13 +829,14 @@ module DeploymentMethod
       website, website_location = get_website_fields(options)
       options[:nb_lines] ||= 100
 
-      kubectl_on_latest_pod(
+      args = {
         website: website,
         website_location: website_location,
-        pod_name: options[:pod_name],
-        s_arguments: "logs POD_NAME --tail=#{options[:nb_lines]}",
-        pod_name_delimiter: "POD_NAME"
-      )
+        with_namespace: true,
+        s_arguments: "logs -l app=www --tail=#{options[:nb_lines]}"
+      }
+
+      kubectl(args)
     end
 
     def custom_cmd(options = {})

@@ -381,19 +381,12 @@ VAR2=5678
   end
 
   test 'logs - happy path' do
-    prepare_get_pods_happy(@website_location)
+    result = kubernetes_method.logs(
+      website: @website,
+      website_location: @website_location
+    )
 
-    assert_scripted do
-      begin_ssh
-
-      result = kubernetes_method.logs(
-        website: @website,
-        website_location: @website_location
-      )
-
-      pod_name = "www-deployment-5889df69dc-xg9xl"
-      assert_includes result, "kubectl -n instance-#{@website.id} logs #{pod_name} --tail=100"
-    end
+    assert_includes result, "kubectl -n instance-#{@website.id} logs -l app=www --tail=100"
   end
 
   test 'exec - happy path' do

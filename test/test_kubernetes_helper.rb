@@ -92,7 +92,7 @@ class ActiveSupport::TestCase
                               opts = {})
     cmd = kubernetes_method.kubectl(
       website_location: opts[:website_location],
-      s_arguments: "-n instance-#{opts[:website].id} logs #{opts[:pod_name]}" \
+      s_arguments: "-n instance-#{opts[:website].id} logs -l app=www" \
                     " --tail=#{opts[:nb_lines]}"
     )
 
