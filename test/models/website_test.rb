@@ -237,9 +237,16 @@ class WebsiteTest < ActiveSupport::TestCase
 
     WebsiteStatus.log(
       w,
-      containerStatuses: [
+      [
         {
-          reason: 'OOMKilled'
+          label_app: 'www',
+          status: {
+            containerStatuses: [
+              {
+                reason: 'OOMKilled'
+              }
+            ]
+          }
         }
       ]
     )
@@ -252,9 +259,16 @@ class WebsiteTest < ActiveSupport::TestCase
 
     WebsiteStatus.log(
       w,
-      containerStatuses: [
+      [
         {
-          reason: 'OOM-=Killed'
+          label_app: 'www',
+          status: {
+            containerStatuses: [
+              {
+                reason: 'OOM-=Killed'
+              }
+            ]
+          }
         }
       ]
     )

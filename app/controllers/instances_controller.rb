@@ -119,7 +119,7 @@ class InstancesController < ApplicationController
 
   api!
   def status
-    json(@website.statuses.last&.simplified_container_statuses || [])
+    json(@website.statuses.last&.obj || [])
   end
 
   api :GET, 'instances/:id/routes'

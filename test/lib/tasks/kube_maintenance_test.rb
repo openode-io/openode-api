@@ -152,6 +152,10 @@ class LibKubeMaintenanceTest < ActiveSupport::TestCase
       assert_equal statuses.length, 1
       assert_equal statuses.first['name'], "www"
 
+      assert_equal status.obj.length, 1
+      assert_equal status.obj.first.dig('label_app'), "www"
+      assert_equal status.obj.first.dig('status', 'containerStatuses').length, 1
+
       assert_equal Execution.count, 0
     end
   end

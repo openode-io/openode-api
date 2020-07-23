@@ -81,7 +81,6 @@ class WebsiteStatusTest < ActiveSupport::TestCase
           }
         }
       ]
-          
     )
 
     statuses = web_status.statuses_containing_terminated_reason('oomkilled')

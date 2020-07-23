@@ -763,6 +763,23 @@ module DeploymentMethod
       JSON.parse(ex("kubectl", args)[:stdout])
     end
 
+    def ex_on_all_pods_stdout(_cmd, options = {})
+      pods_result = get_pods_json(options)
+
+      pods_result.dig('items').map do |pod|
+        pod_name = pod.dig('metadata', 'name')
+
+        {
+          name: pod_name,
+          result: ex_stdout('custom_cmd',
+                            options.merge(
+                              cmd: "cat /proc/net/dev",
+                              pod_name: pod_name
+                            ))
+        }
+      end
+    end
+
     def find_first_load_balancer(object)
       load_balancer = nil
 

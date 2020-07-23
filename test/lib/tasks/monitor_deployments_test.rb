@@ -28,13 +28,15 @@ class LibMonitorDeploymentsTest < ActiveSupport::TestCase
     WebsiteBandwidthDailyStat.create(
       website: w,
       obj: {
-        "previous_network_metrics" => [
-          {
-            "interface" => "eth0",
-            "rcv_bytes" => 84_363_193.0 - 1000,
-            "tx_bytes" => 9_758_564.0 - 100
-          }
-        ],
+        "previous_network_metrics" => {
+          'www-deployment-5889df69dc-xg9xl': [
+            {
+              "interface" => "eth0",
+              "rcv_bytes" => 84_363_193.0 - 1000,
+              "tx_bytes" => 9_758_564.0 - 100
+            }
+          ]
+        },
         "rcv_bytes" => 100.0,
         "tx_bytes" => 10.0
       },
@@ -71,10 +73,15 @@ class LibMonitorDeploymentsTest < ActiveSupport::TestCase
       stat = WebsiteBandwidthDailyStat.last
 
       assert_equal stat.ref_id, w.id
-      assert_equal stat.obj['previous_network_metrics'].length, 1
-      assert_equal stat.obj['previous_network_metrics'].first['interface'], 'eth0'
-      assert_equal stat.obj['previous_network_metrics'].first['rcv_bytes'], 84_363_193.0
-      assert_equal stat.obj['previous_network_metrics'].first['tx_bytes'], 9_758_564
+
+      expected_pod_name = 'www-deployment-5889df69dc-xg9xl'
+
+      assert_equal stat.obj['previous_network_metrics'][expected_pod_name].length, 1
+
+      pod_result = stat.obj['previous_network_metrics'][expected_pod_name]
+      assert_equal pod_result.first['interface'], 'eth0'
+      assert_equal pod_result.first['rcv_bytes'], 84_363_193.0
+      assert_equal pod_result.first['tx_bytes'], 9_758_564
       assert_equal stat.obj['rcv_bytes'], 1000
       assert_equal stat.obj['tx_bytes'], 100
 
@@ -98,13 +105,15 @@ class LibMonitorDeploymentsTest < ActiveSupport::TestCase
     today_stat = WebsiteBandwidthDailyStat.create(
       website: w,
       obj: {
-        "previous_network_metrics" => [
-          {
-            "interface" => "eth0",
-            "rcv_bytes" => 84_363_193.0 - 1000,
-            "tx_bytes" => 9_758_564.0 - 100
-          }
-        ],
+        "previous_network_metrics" => {
+          'www-deployment-5889df69dc-xg9xl': [
+            {
+              "interface" => "eth0",
+              "rcv_bytes" => 84_363_193.0 - 1000,
+              "tx_bytes" => 9_758_564.0 - 100
+            }
+          ]
+        },
         "rcv_bytes" => 100.0,
         "tx_bytes" => 10.0
       }
@@ -138,10 +147,14 @@ class LibMonitorDeploymentsTest < ActiveSupport::TestCase
       assert_equal today_stat.id, stat.id
 
       assert_equal stat.ref_id, w.id
-      assert_equal stat.obj['previous_network_metrics'].length, 1
-      assert_equal stat.obj['previous_network_metrics'].first['interface'], 'eth0'
-      assert_equal stat.obj['previous_network_metrics'].first['rcv_bytes'], 84_363_193.0
-      assert_equal stat.obj['previous_network_metrics'].first['tx_bytes'], 9_758_564
+
+      expected_pod_name = 'www-deployment-5889df69dc-xg9xl'
+      pod_result = stat.obj['previous_network_metrics'][expected_pod_name]
+
+      assert_equal pod_result.length, 1
+      assert_equal pod_result.first['interface'], 'eth0'
+      assert_equal pod_result.first['rcv_bytes'], 84_363_193.0
+      assert_equal pod_result.first['tx_bytes'], 9_758_564
       assert_equal stat.obj['rcv_bytes'], 1000 + 100
       assert_equal stat.obj['tx_bytes'], 100 + 10
     end
@@ -164,13 +177,15 @@ class LibMonitorDeploymentsTest < ActiveSupport::TestCase
     WebsiteBandwidthDailyStat.create(
       website: w,
       obj: {
-        "previous_network_metrics" => [
-          {
-            "interface" => "eth0",
-            "rcv_bytes" => 84_363_193.0 - 1000,
-            "tx_bytes" => 9_758_564.0 - 100
-          }
-        ],
+        "previous_network_metrics" => {
+          'www-deployment-5889df69dc-xg9xl': [
+            {
+              "interface" => "eth0",
+              "rcv_bytes" => 84_363_193.0 - 1000,
+              "tx_bytes" => 9_758_564.0 - 100
+            }
+          ]
+        },
         "rcv_bytes" => 200_000_000_000.0,
         "tx_bytes" => 1_000_000_000.0
       }
