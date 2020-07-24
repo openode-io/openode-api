@@ -2,6 +2,16 @@
 module DeploymentMethod
   module Util
     module OutputDiagnostic
+      def self.replace_matches(matches, str)
+        result = str.clone
+
+        (1..matches.length - 1).each do |index|
+          result = result.gsub("[[#{index}]]", matches[index])
+        end
+
+        result
+      end
+
       def self.analyze(name_entity, log)
         return "" unless log
 
@@ -12,12 +22,15 @@ module DeploymentMethod
         result = ""
 
         rules.each do |rule|
-          next unless log.to_s.include?(rule['input'])
+          matches = Regexp.new(rule['input']).match(log)
+          next unless matches
 
           result << "\n\n-------\n"
           result << "Detected: #{rule['input']}\n"
-          result << "Explanation: #{rule['explanation']}\n"
-          result << "*To fix*: #{rule['action_to_take']}\n"
+          result << "Explanation: " \
+                    "#{OutputDiagnostic.replace_matches(matches, rule['explanation'])}\n"
+          result << "*To fix*: " \
+                    "#{OutputDiagnostic.replace_matches(matches, rule['action_to_take'])}\n"
           result << "-------\n\n"
         end
 
