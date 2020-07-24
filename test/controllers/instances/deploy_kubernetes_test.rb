@@ -41,7 +41,6 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     prepare_kubernetes_logs(kubernetes_method, "hello logs", 0,
                             website: website,
                             website_location: website_location,
-                            pod_name: "www-deployment-5889df69dc-xg9xl",
                             nb_lines: 1_000)
 
     prepare_get_services_json(kubernetes_method, website, website_location,

@@ -514,7 +514,7 @@ module DeploymentMethod
           selector:
             matchLabels:
               app: www
-          replicas: 1
+          replicas: #{website_location.replicas}
           strategy:
             type: #{deployment_strategy(website, website.memory)}
           template:
@@ -763,6 +763,23 @@ module DeploymentMethod
       JSON.parse(ex("kubectl", args)[:stdout])
     end
 
+    def ex_on_all_pods_stdout(_cmd, options = {})
+      pods_result = get_pods_json(options)
+
+      pods_result.dig('items').map do |pod|
+        pod_name = pod.dig('metadata', 'name')
+
+        {
+          name: pod_name,
+          result: ex_stdout('custom_cmd',
+                            options.merge(
+                              cmd: "cat /proc/net/dev",
+                              pod_name: pod_name
+                            ))
+        }
+      end
+    end
+
     def find_first_load_balancer(object)
       load_balancer = nil
 
@@ -829,13 +846,14 @@ module DeploymentMethod
       website, website_location = get_website_fields(options)
       options[:nb_lines] ||= 100
 
-      kubectl_on_latest_pod(
+      args = {
         website: website,
         website_location: website_location,
-        pod_name: options[:pod_name],
-        s_arguments: "logs POD_NAME --tail=#{options[:nb_lines]}",
-        pod_name_delimiter: "POD_NAME"
-      )
+        with_namespace: true,
+        s_arguments: "logs -l app=www --tail=#{options[:nb_lines]}"
+      }
+
+      kubectl(args)
     end
 
     def custom_cmd(options = {})

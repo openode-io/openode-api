@@ -171,22 +171,37 @@ namespace :kube_maintenance do
                             s_arguments: "get pods --all-namespaces -o json"
                           ))
 
+      statuses_by_website = {}
+
       (result&.dig('items') || []).each do |pod|
         ns = pod.dig('metadata', 'namespace')
         status = pod.dig('status')
+        label_app = pod.dig('metadata', 'labels', 'app')
 
         next unless ns.to_s.start_with?(cluster_runner.execution_method.namespace_of)
 
         website = cluster_runner.execution_method.website_from_namespace(ns)
         next unless website&.present?
 
+        statuses_by_website[website] ||= []
+
+        statuses_by_website[website] << {
+          label_app: label_app,
+          status: status
+        }
+      rescue StandardError => e
+        Rails.logger.error "[#{name}] skipping in items loop, #{e}"
+      end
+
+      statuses_by_website.each do |website, statuses|
         Rails.logger.info "[#{name}] logging status for #{website.site_name}"
-        website_status = WebsiteStatus.log(website, status)
+        website_status = WebsiteStatus.log(website, statuses)
 
         ###
         # states analysis
 
         # contains OOMKilled with significant restart count
+
         statuses_killed = website_status.statuses_containing_terminated_reason('oomkilled')
                                         .select do |st|
           st['restartCount'] && st['restartCount'] >= 2
@@ -204,9 +219,8 @@ namespace :kube_maintenance do
             website_location: wl
           )
         end
-
       rescue StandardError => e
-        Rails.logger.error "[#{name}] skipping in items loop, #{e}"
+        Rails.logger.error "[#{name}] skipping statuses_by_website, #{e}"
       end
 
     ensure

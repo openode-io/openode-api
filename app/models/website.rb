@@ -12,7 +12,7 @@ class Website < ApplicationRecord
   self.inheritance_column = :_type
 
   belongs_to :user
-  has_many :collaborators
+  has_many :collaborators, dependent: :destroy
   has_many :website_locations, dependent: :destroy
   has_many :snapshots, dependent: :destroy
   has_many :events, foreign_key: :ref_id, class_name: :WebsiteEvent, dependent: :destroy
@@ -21,7 +21,7 @@ class Website < ApplicationRecord
            class_name: :StopWebsiteEvent,
            dependent: :destroy
   has_many :notifications, class_name: :WebsiteNotification, dependent: :destroy
-  has_many :executions
+  has_many :executions, dependent: :destroy
   has_many :credit_actions
   has_many :website_bandwidth_daily_stats, foreign_key: :ref_id,
                                            class_name: :WebsiteBandwidthDailyStat,
@@ -30,7 +30,7 @@ class Website < ApplicationRecord
                       class_name: :WebsiteStatus,
                       dependent: :destroy
 
-  LIMIT_RAM_BLUE_GREEN_DEPLOYMENT = 2000
+  LIMIT_RAM_BLUE_GREEN_DEPLOYMENT = 1000
 
   # collaborators data plus user information
   def pretty_collaborators_h
@@ -133,6 +133,12 @@ class Website < ApplicationRecord
       type: 'website',
       enum: [true, false, 'true', 'false', ''],
       default: true
+    },
+    {
+      variable: 'REPLICAS',
+      description: 'Number of replicas of the given instance.',
+      type: 'website_location',
+      default: 1
     },
     {
       variable: 'TYPE',
@@ -371,7 +377,7 @@ class Website < ApplicationRecord
   end
 
   def config_blue_green_deployment_must_comply(_config, value)
-    if value && plan[:ram] >= LIMIT_RAM_BLUE_GREEN_DEPLOYMENT
+    if value && plan[:ram] > LIMIT_RAM_BLUE_GREEN_DEPLOYMENT
       errors.add(:configs, "Maximum RAM with blue green deployment is " \
                             "#{LIMIT_RAM_BLUE_GREEN_DEPLOYMENT} MB")
     end
@@ -394,6 +400,18 @@ class Website < ApplicationRecord
   def config_website_must_comply(config, value)
     # is setting an attribute in website object
     self[config[:variable].downcase] = value
+  end
+
+  def config_website_location_must_comply(config, value)
+    # is setting an attribute in first website_location object
+    wl = website_locations.first
+
+    unless wl
+      errors.add(:configs, "No website location available to set #{config[:variable]}")
+    end
+
+    wl[config[:variable].downcase] = value
+    wl.save!
   end
 
   def config_site_name_must_comply(_config, value)
@@ -869,29 +887,35 @@ class Website < ApplicationRecord
     price * 100.0
   end
 
+  def plan_cost
+    Website.cost_price_to_credits(plan[:cost_per_hour]) *
+      (website_locations.first&.replicas || 1)
+  end
+
+  def blue_green_deployment_option_cost
+    pricing_params = CloudProvider::Manager.instance.application.dig('pricing')
+    cost_ratio = pricing_params.dig('blue_green_ratio_plan_cost').to_f
+
+    Website.cost_price_to_credits(plan[:cost_per_hour]) * cost_ratio *
+      (website_locations.first&.replicas || 1)
+  end
+
   # credits related task updates and calculations
   def spend_online_hourly_credits!(hourly_ratio = 1.0)
-    current_plan = plan
-
-    return unless current_plan
+    return unless plan
 
     spendings = [
       {
         action_type: CreditAction::TYPE_CONSUME_PLAN,
-        credits_cost:
-          Website.cost_price_to_credits(current_plan[:cost_per_hour]) * hourly_ratio
+        credits_cost: plan_cost * hourly_ratio
       }
     ]
 
     if blue_green_deployment?
-      pricing_params = CloudProvider::Manager.instance.application.dig('pricing')
-      cost_ratio = pricing_params.dig('blue_green_ratio_plan_cost').to_f
 
       spendings << {
         action_type: CreditAction::TYPE_CONSUME_BLUE_GREEN,
-        credits_cost:
-          Website.cost_price_to_credits(current_plan[:cost_per_hour]) *
-          cost_ratio * hourly_ratio
+        credits_cost: blue_green_deployment_option_cost * hourly_ratio
       }
     end
 

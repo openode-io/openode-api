@@ -49,6 +49,24 @@ class ConfigsControllerTest < ActionDispatch::IntegrationTest
     assert_equal w.type, 'kubernetes'
   end
 
+  test '/instances/:instance_id/set-config with REPLICAS' do
+    w = Website.find_by site_name: 'testsite'
+    wl = w.website_locations.first
+    wl.extra_storage = 0
+    wl.save!
+
+    post '/instances/testsite/set-config',
+         as: :json,
+         params: { variable: 'REPLICAS', value: 3 },
+         headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal w.website_locations.first.reload.replicas, 3
+
+    assert_equal w.reload.configs['REPLICAS'], 3
+  end
+
   test '/instances/:instance_id/set-config with valid variable, enum' do
     post '/instances/testsite/set-config',
          as: :json,

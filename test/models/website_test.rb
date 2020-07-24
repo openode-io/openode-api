@@ -237,9 +237,16 @@ class WebsiteTest < ActiveSupport::TestCase
 
     WebsiteStatus.log(
       w,
-      containerStatuses: [
+      [
         {
-          reason: 'OOMKilled'
+          label_app: 'www',
+          status: {
+            containerStatuses: [
+              {
+                reason: 'OOMKilled'
+              }
+            ]
+          }
         }
       ]
     )
@@ -252,9 +259,16 @@ class WebsiteTest < ActiveSupport::TestCase
 
     WebsiteStatus.log(
       w,
-      containerStatuses: [
+      [
         {
-          reason: 'OOM-=Killed'
+          label_app: 'www',
+          status: {
+            containerStatuses: [
+              {
+                reason: 'OOM-=Killed'
+              }
+            ]
+          }
         }
       ]
     )
@@ -787,6 +801,25 @@ class WebsiteTest < ActiveSupport::TestCase
     website.reload
 
     assert_equal website.latest_reference_website_image_tag_address, img_name_tag
+  end
+
+  test 'set config REPLICAS - happy path' do
+    website = default_website
+    wl = website.website_locations.first
+    wl.extra_storage = 0
+    wl.save!
+
+    website.website_locations.reload
+    website.configs ||= {}
+    website.configs['REPLICAS'] = 2
+    website.save
+
+    wl = website.website_locations.first
+    wl.reload
+
+    assert_equal website.valid?, true
+
+    assert_equal wl.replicas, 2
   end
 
   test 'status_probe_path default' do
@@ -1685,5 +1718,41 @@ class WebsiteTest < ActiveSupport::TestCase
     w.website_locations.destroy_all
 
     assert_nil w.first_location
+  end
+
+  test "plan price - replicas = 1" do
+    w = default_website
+
+    assert_in_delta w.plan_cost, 0.1344, 0.00001
+  end
+
+  test "plan price - replicas = 2" do
+    w = default_website
+    wl = w.website_locations.first
+    wl.extra_storage = 0
+    wl.replicas = 2
+    wl.save!
+
+    w.website_locations.reload
+
+    assert_in_delta w.plan_cost, 0.1344 * 2, 0.00005
+  end
+
+  test "blue_green_deployment_option_cost - replicas = 1" do
+    w = default_website
+
+    assert_in_delta w.blue_green_deployment_option_cost, 0.1344 * 0.20, 0.00001
+  end
+
+  test "blue_green_deployment_option_cost - replicas = 2" do
+    w = default_website
+    wl = w.website_locations.first
+    wl.extra_storage = 0
+    wl.replicas = 2
+    wl.save!
+
+    w.website_locations.reload
+
+    assert_in_delta w.blue_green_deployment_option_cost, 0.1344 * 0.20 * 2, 0.00001
   end
 end

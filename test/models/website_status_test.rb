@@ -21,19 +21,63 @@ class WebsiteStatusTest < ActiveSupport::TestCase
     assert_equal statuses.first.obj['status']['what'], 0
   end
 
+  test 'simplified_container_statuses - multi pods' do
+    w = default_website
+
+    st = WebsiteStatus.log(
+      w,
+      [
+        {
+          label_app: 'www',
+          status: {
+            containerStatuses: [
+              {
+                what: 0,
+                is: 1
+              }
+            ]
+          }
+        },
+        {
+          label_app: 'www',
+          status: {
+            containerStatuses: [
+              {
+                what: 2,
+                is: 1
+              }
+            ]
+          }
+        }
+      ]
+    )
+
+    statuses = st.simplified_container_statuses
+
+    assert_equal statuses.length, 2
+    assert_equal statuses.first['what'], 0
+    assert_equal statuses.last['what'], 2
+  end
+
   test 'statuses_containing_terminated_reason - with oom' do
     w = default_website
 
     web_status = WebsiteStatus.log(
       w,
-      containerStatuses: [
+      [
         {
-          what: 0,
-          is: 1,
-          lastState: {
-            terminated: {
-              reason: 'oomkilled'
-            }
+          status: {
+            containerStatuses: [
+              {
+                what: 0,
+                is: 1,
+                lastState: {
+                  terminated: {
+                    reason: 'oomkilled'
+                  }
+                }
+              }
+            ]
           }
         }
       ]
@@ -50,14 +94,20 @@ class WebsiteStatusTest < ActiveSupport::TestCase
 
     web_status = WebsiteStatus.log(
       w,
-      containerStatuses: [
+      [
         {
-          what: 0,
-          is: 1,
-          lastState: {
-            nonterminated: {
-              dummy: '123456'
-            }
+          status: {
+            containerStatuses: [
+              {
+                what: 0,
+                is: 1,
+                lastState: {
+                  nonterminated: {
+                    dummy: '123456'
+                  }
+                }
+              }
+            ]
           }
         }
       ]
