@@ -18,7 +18,11 @@ class WebsiteStatus < History
   end
 
   def simplified_container_statuses
-    statuses = (obj || []).map { |o| o.dig('status', 'containerStatuses') }.flatten
+    statuses = (obj || [])
+               .map { |o| o&.dig('status', 'containerStatuses') }
+               .select { |element| element }
+               .flatten
+
     return [] unless statuses
 
     statuses.each do |s|
