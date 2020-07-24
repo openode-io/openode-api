@@ -1,7 +1,12 @@
 [
 	{
-		"input": "You need to install the latest version of Python",
-		"explanation": "Python package is missing",
-		"action_to_take": "*** Missing python, add the following instruction in your Dockerfile 'RUN apk --update add make python gcc g++', see an example at https://github.com/openode-io/build-templates/blob/4480c96281ef40ce0a10ed9894da11a13871db9d/v1/templates/node-extras/Dockerfile#L8."
-	}
+    "input": "You need to install the latest version of Python",
+    "explanation": "Python package is missing",
+    "action_to_take": "*** Missing python, add the following instruction in your Dockerfile 'RUN apk --update add make python gcc g++', see an example at https://github.com/openode-io/build-templates/blob/4480c96281ef40ce0a10ed9894da11a13871db9d/v1/templates/node-extras/Dockerfile#L8."
+  },
+  {
+    "input": "^.*spawn (.*) ENOENT.*$",
+    "explanation": "Package [[1]] is missing",
+    "action_to_take": "*** A package ([[1]]) seems to be missing and should be added using the Dockerfile."
+  }
 ]

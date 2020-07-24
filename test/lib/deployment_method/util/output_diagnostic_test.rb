@@ -26,4 +26,25 @@ class OutputDiagnosticTest < ActiveSupport::TestCase
 
     assert_equal result, ""
   end
+
+  test 'happy path - detected missing git' do
+    log = "hello world \n" \
+          " spawn git ENOENT---\n" \
+          "asdf"
+
+    result = DeploymentMethod::Util::OutputDiagnostic.analyze("build_image", log)
+
+    assert_includes result, "Package git is missing"
+    assert_includes result, "A package (git) seems"
+  end
+
+  test 'happy path - regex should not be multiline' do
+    log = "hello spawn world \n" \
+          "  git ---\n" \
+          "as ENOENT df"
+
+    result = DeploymentMethod::Util::OutputDiagnostic.analyze("build_image", log)
+
+    assert_equal result, ""
+  end
 end
