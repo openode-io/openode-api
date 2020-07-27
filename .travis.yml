@@ -5,6 +5,9 @@ language: ruby
 
 before_script:
 - sudo apt-get install -qq sshpass
+- nvm install 10
+- nvm alias default 10
+- node -v
 - npm i -g openode
 
 script:
