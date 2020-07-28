@@ -26,6 +26,10 @@ class InstancesController < ApplicationController
     requires_status_in [Website::STATUS_ONLINE, Website::STATUS_OFFLINE]
   end
 
+  before_action only: [:restart, :reload] do
+    clear_website_states
+  end
+
   before_action only: [:set_plan] do
     requires_access_to(Website::PERMISSION_PLAN)
   end
@@ -495,6 +499,10 @@ class InstancesController < ApplicationController
     unless statuses.include?(@website.status)
       validation_error!("The instance must be in status #{statuses}.")
     end
+  end
+
+  def clear_website_states
+    @website.statuses.destroy_all
   end
 
   def requires_website_inactive!

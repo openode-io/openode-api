@@ -51,12 +51,22 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     @website.crontab = ''
     @website.save!
 
+    website2 = Website.where.not(id: @website.id).first
+
+    assert_not_equal website2.id, @website.id
+
+    ws1 = WebsiteStatus.log(@website, test: 234)
+    ws2 = WebsiteStatus.log(website2, test: 234)
+
     post "/instances/#{@website.site_name}/restart",
          as: :json,
          params: base_params,
          headers: default_headers_auth
 
     prepare_launch_happy_path(@kubernetes_method, @website, @website_location)
+
+    assert_nil WebsiteStatus.find_by(id: ws1.id)
+    assert WebsiteStatus.find_by(id: ws2.id)
 
     assert_scripted do
       begin_ssh
