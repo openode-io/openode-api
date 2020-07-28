@@ -81,6 +81,14 @@ def get_random_node_pool(client, cluster_id)
   client.kubernetes_clusters.node_pools(id: cluster_id).sample
 end
 
+def get_node_pool_size_mb(node_pool)
+  # size looks like: s-6vcpu-16gb
+
+  size_parts = node_pool.size.split("-")
+
+  size_parts.last&.include?("gb") ? size_parts.last.to_i * 1000 : nil
+end
+
 def instance_ns?(current_namespace)
   current_namespace.starts_with?('instance-')
 end
@@ -93,7 +101,14 @@ namespace :kube_maintenance do
 
     kube_clusters_runners.each do |cluster_runner|
       location = cluster_runner.execution_method.location
-      Rails.logger.info "[#{name}] Current location #{location.str_id}"
+      digi_client = do_client
+      cluster_name = "k8s-#{location.str_id}"
+      cluster = get_cluster(digi_client, cluster_name)
+
+      next unless cluster
+
+      Rails.logger.info "[#{name}] Current location #{location.str_id} - " \
+                        "cluster #{cluster_name}"
 
       result = JSON.parse(cluster_runner.execution_method.ex_stdout(
                             "raw_kubectl",
@@ -115,6 +130,8 @@ namespace :kube_maintenance do
           nb_pods: retrieve_nb_pods_in_node(cluster_runner, node_name)
         }
       end
+
+      puts "nodes_infos -> #{nodes_infos.inspect}"
 
       node_with_max_available = nodes_infos.max_by do |n|
         if n[:nb_pods] >= MAX_PODS_PER_NODE
@@ -138,12 +155,7 @@ namespace :kube_maintenance do
 
       if available_memory < MIN_REQUIRED_MEMORY
         Rails.logger.info "[#{name}] requires scale up!"
-
-        digi_client = do_client
-        looking_for_cluster = "k8s-#{location.str_id}"
-        cluster = get_cluster(digi_client, looking_for_cluster)
-
-        next unless cluster
+        next # TODO
 
         node_pool = get_random_node_pool(digi_client, cluster.id)
         node_pool.count += 1
@@ -153,7 +165,46 @@ namespace :kube_maintenance do
         History.create(obj: {
                          "title": "increasing cluster #{cluster.id} nb nodes to #{node_pool.count}"
                        })
+      else
+        total_available_ram_mb = nodes_infos
+                                 .map { |n| n[:allocatable_memory_mb] - n[:requested_memory_mb] }
+                                 .sum
+
+        node_pools = digi_client.kubernetes_clusters.node_pools(id: cluster.id)
+
+        # 1- DECREASE - case one node pool nb nodes can just be reduced (TODO)
+
+        # 2- MOVE - case two, we can reduce a big node pool, and add 1 to a
+        # small node pool
+        max_node_pool = node_pools.max_by do |node_pool|
+          get_node_pool_size_mb(node_pool) || 0
+        end
+
+        if max_node_pool
+          smaller_node_pool = node_pools.find do |node_pool|
+            get_node_pool_size_mb(node_pool) && get_node_pool_size_mb(max_node_pool) &&
+              get_node_pool_size_mb(node_pool) < get_node_pool_size_mb(max_node_pool)
+          end
+
+          if smaller_node_pool
+            diff_max_pool_vs_small = get_node_pool_size_mb(max_node_pool) -
+                                     get_node_pool_size_mb(smaller_node_pool)
+            if (total_available_ram_mb -
+              (diff_max_pool_vs_small.to_f * 0.75)) > MIN_REQUIRED_MEMORY
+              Rails.logger.info "[#{name}] can scale down using MOVE strategy!"
+              History.create(obj: {
+                         "title": "can scale down - move cluster #{cluster.id} node pools.",
+                         "max_node_pool": max_node_pool.name,
+                         "smaller_node_pool": smaller_node_pool.name,
+                         "total_available_ram_mb": total_available_ram_mb,
+                         "diff_max_pool_vs_small": diff_max_pool_vs_small
+                       })
+            end
+          end
+        end
       end
+
+      next # TODO REMOVE!!
     end
   end
 
