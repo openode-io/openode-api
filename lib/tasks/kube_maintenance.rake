@@ -81,8 +81,83 @@ def get_random_node_pool(client, cluster_id)
   client.kubernetes_clusters.node_pools(id: cluster_id).sample
 end
 
+def get_node_pool_size_mb(node_pool)
+  # size looks like: s-6vcpu-16gb
+
+  size_parts = node_pool.size.split("-")
+
+  size_parts.last&.include?("gb") ? size_parts.last.to_i * 1000 : nil
+end
+
+def should_scale_down_cluster?(total_available_ram_mb, diff_change_mb)
+  (total_available_ram_mb - (diff_change_mb.to_f * 0.75)) > MIN_REQUIRED_MEMORY * 2.0
+end
+
 def instance_ns?(current_namespace)
   current_namespace.starts_with?('instance-')
+end
+
+def scale_down_move_strategy(name, total_available_ram_mb, _digi_client, cluster, node_pools)
+  max_node_pool = node_pools.max_by do |node_pool|
+    node_pool.count <= 0 ? 0 : (get_node_pool_size_mb(node_pool) || 0)
+  end
+
+  unless max_node_pool
+    Rails.logger.info "[#{name}] no max node pool for MOVE strategy"
+  end
+
+  if max_node_pool
+    smaller_node_pool = node_pools.find do |node_pool|
+      get_node_pool_size_mb(node_pool) && get_node_pool_size_mb(max_node_pool) &&
+        get_node_pool_size_mb(node_pool) < get_node_pool_size_mb(max_node_pool)
+    end
+
+    if smaller_node_pool
+      Rails.logger.info "[#{name}] found smaller node pool for MOVE " \
+                        "#{smaller_node_pool.name}"
+
+      diff_max_pool_vs_small = get_node_pool_size_mb(max_node_pool) -
+                               get_node_pool_size_mb(smaller_node_pool)
+
+      Rails.logger.info "[#{name}] for MOVE " \
+                        "diff_max_pool_vs_small = #{diff_max_pool_vs_small}"
+
+      if should_scale_down_cluster?(total_available_ram_mb, diff_max_pool_vs_small)
+        Rails.logger.info "[#{name}] ACTION_TAKEN should scale down using MOVE strategy!"
+        History.create(obj: {
+                         "title": "can scale down - move cluster #{cluster.id} node pools.",
+                         "max_node_pool_to_reduce": max_node_pool.name,
+                         "smaller_node_pool_to_increase": smaller_node_pool.name,
+                         "total_available_ram_mb": total_available_ram_mb,
+                         "diff_max_pool_vs_small": diff_max_pool_vs_small
+                       })
+
+        true
+      else
+        Rails.logger.info "[#{name}] for MOVE should not scale down"
+      end
+    end
+  end
+end
+
+def scale_down_decrease_strategy(name, total_available_ram_mb, _digi_client,
+                                 cluster, node_pools)
+  node_pool_to_decrease = node_pools.find do |node_pool|
+    diff_remove_node_mb = get_node_pool_size_mb(node_pool)
+    should_scale_down_cluster?(total_available_ram_mb, diff_remove_node_mb) &&
+      node_pool.count.positive?
+  end
+
+  if node_pool_to_decrease
+    Rails.logger.info "[#{name}] ACTION_TAKEN can scale down using DECREASE strategy!"
+    History.create(obj: {
+                     "title": "can scale down - decrease cluster #{cluster.id} node pools.",
+                     "node_pool_to_decrease": node_pool_to_decrease.name,
+                     "total_available_ram_mb": total_available_ram_mb
+                   })
+  else
+    Rails.logger.info "[#{name}] no node pool found for DECREASE strategy!"
+  end
 end
 
 namespace :kube_maintenance do
@@ -93,7 +168,14 @@ namespace :kube_maintenance do
 
     kube_clusters_runners.each do |cluster_runner|
       location = cluster_runner.execution_method.location
-      Rails.logger.info "[#{name}] Current location #{location.str_id}"
+      digi_client = do_client
+      cluster_name = "k8s-#{location.str_id}"
+      cluster = get_cluster(digi_client, cluster_name)
+
+      next unless cluster
+
+      Rails.logger.info "[#{name}] Current location #{location.str_id} - " \
+                        "cluster #{cluster_name}"
 
       result = JSON.parse(cluster_runner.execution_method.ex_stdout(
                             "raw_kubectl",
@@ -137,22 +219,31 @@ namespace :kube_maintenance do
                         "= #{available_memory}"
 
       if available_memory < MIN_REQUIRED_MEMORY
-        Rails.logger.info "[#{name}] requires scale up!"
+        Rails.logger.info "[#{name}] ACTION_TAKEN requires scale up!"
 
-        digi_client = do_client
-        looking_for_cluster = "k8s-#{location.str_id}"
-        cluster = get_cluster(digi_client, looking_for_cluster)
-
-        next unless cluster
-
-        node_pool = get_random_node_pool(digi_client, cluster.id)
-        node_pool.count += 1
-        digi_client.kubernetes_clusters.update_node_pool(node_pool,
+        pool = get_random_node_pool(digi_client, cluster.id)
+        pool.count += 1
+        digi_client.kubernetes_clusters.update_node_pool(pool,
                                                          id: cluster.id,
-                                                         pool_id: node_pool.id)
+                                                         pool_id: pool.id)
         History.create(obj: {
-                         "title": "increasing cluster #{cluster.id} nb nodes to #{node_pool.count}"
+                         "title": "increasing cluster #{cluster.id} nb nodes to #{pool.count}"
                        })
+      else
+        total_available_ram_mb = nodes_infos
+                                 .map { |n| n[:allocatable_memory_mb] - n[:requested_memory_mb] }
+                                 .sum
+
+        node_pools = digi_client.kubernetes_clusters.node_pools(id: cluster.id)
+
+        # 1- DECREASE - case one node pool nb nodes can just be reduced
+        scale_down_decrease_strategy(name, total_available_ram_mb, digi_client,
+                                     cluster, node_pools)
+
+        # 2- MOVE - case two, we can reduce a big node pool, and add 1 to a
+        # small node pool
+        scale_down_move_strategy(name, total_available_ram_mb, digi_client,
+                                 cluster, node_pools)
       end
     end
   end

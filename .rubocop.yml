@@ -99,6 +99,7 @@ Metrics/BlockLength:
     - 'db/schema.rb'
     - 'db/migrate/*.rb'
     - 'config/routes.rb'
+    - 'lib/tasks/kube_maintenance.rake'
 
 Metrics/ParameterLists:
   Exclude:
