@@ -295,7 +295,7 @@ namespace :kube_maintenance do
 
         statuses_killed = website_status.statuses_containing_terminated_reason('oomkilled')
                                         .select do |st|
-          st['restartCount'] && st['restartCount'] >= 2
+          st['restartCount'] && st['restartCount'] >= 1
         end
 
         if statuses_killed.any?
