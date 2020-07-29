@@ -60,7 +60,7 @@ class LibKubeMaintenanceTest < ActiveSupport::TestCase
 
   test "scale clusters - with scaling due to lack of memory" do
     History.destroy_all
-    
+
     cmd_nodes = 'KUBECONFIG=/var/www/openode-api/config/kubernetes/' \
                 'production-usa.yml kubectl get nodes -o json'
     prepare_ssh_session(cmd_nodes, IO.read('test/fixtures/kubernetes/get_nodes.json'))
