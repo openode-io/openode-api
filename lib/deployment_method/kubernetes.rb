@@ -503,6 +503,13 @@ module DeploymentMethod
       end
     end
 
+    def tabulate(str, nb_tabs = 0)
+      str.lines.map do |line|
+        "  " * nb_tabs + line.sub("\n", "")
+      end
+      .join("\n")
+    end
+
     def generate_deployment_yml(website, website_location, opts)
       <<~END_YML
         apiVersion: apps/v1

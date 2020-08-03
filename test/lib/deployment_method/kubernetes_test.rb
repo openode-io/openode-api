@@ -223,9 +223,8 @@ VAR2=5678
     assert_scripted do
       begin_ssh
 
-      kubernetes_method.runner.init_execution!('Deployment', {
-                                                 'parent_execution_id' => parent_execution.id
-                                               })
+      kubernetes_method.runner.init_execution!('Deployment',
+                                               'parent_execution_id' => parent_execution.id)
 
       execution = kubernetes_method.runner.execution
 
@@ -554,6 +553,25 @@ VAR2=5678
     strategy = kubernetes_method.deployment_strategy(@website, @website.memory)
 
     assert_equal strategy, "Recreate"
+  end
+
+  test 'tabulate - 0 tabs' do
+    str = "asdf\n" \
+          "\n" \
+          "  - what"
+
+    assert_equal kubernetes_method.tabulate(str), str
+  end
+
+  test 'tabulate - 2 tabs' do
+    str = "asdf\n" \
+          "\n" \
+          "  - what"
+    expected_str = "asdf\n" \
+                   "\n" \
+                   "  - what"
+
+    assert_equal kubernetes_method.tabulate(str), expected_str
   end
 
   test 'generate_deployment_yml - basic' do
