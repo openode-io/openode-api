@@ -560,18 +560,18 @@ VAR2=5678
           "\n" \
           "  - what"
 
-    assert_equal kubernetes_method.tabulate(str), str
+    assert_equal kubernetes_method.tabulate(0, str), str
   end
 
   test 'tabulate - 2 tabs' do
     str = "asdf\n" \
           "\n" \
           "  - what"
-    expected_str = "asdf\n" \
-                   "\n" \
-                   "  - what"
+    expected_str = "    asdf\n" \
+                   "    \n" \
+                   "      - what"
 
-    assert_equal kubernetes_method.tabulate(str), expected_str
+    assert_equal kubernetes_method.tabulate(2, str), expected_str
   end
 
   test 'generate_deployment_yml - basic' do
@@ -642,7 +642,11 @@ VAR2=5678
   end
 
   test 'generate_deployment_probes_yml - with probes' do
-    yml = kubernetes_method.generate_deployment_probes_yml(@website)
+    yml = kubernetes_method.generate_deployment_probes_yml(
+      with_readiness_probe: true,
+      status_probe_path: @website.status_probe_path,
+      status_probe_period: @website.status_probe_period
+    )
 
     # assert_includes yml, "livenessProbe:"
     assert_includes yml, "path: /"
@@ -653,9 +657,12 @@ VAR2=5678
   test 'generate_deployment_probes_yml - with probes, custom path' do
     @website.configs ||= {}
     @website.configs['STATUS_PROBE_PATH'] = '/status'
-    yml = kubernetes_method.generate_deployment_probes_yml(@website)
+    yml = kubernetes_method.generate_deployment_probes_yml(
+      with_readiness_probe: !@website.skip_port_check?,
+      status_probe_path: @website.status_probe_path,
+      status_probe_period: @website.status_probe_period
+    )
 
-    # assert_includes yml, "livenessProbe:"
     assert_includes yml, "path: /status"
     assert_includes yml, "readinessProbe:"
     assert_includes yml, "periodSeconds: 20"
@@ -665,7 +672,11 @@ VAR2=5678
     @website.configs ||= {}
     @website.configs['STATUS_PROBE_PERIOD'] = 55
     @website.save!
-    yml = kubernetes_method.generate_deployment_probes_yml(@website)
+    yml = kubernetes_method.generate_deployment_probes_yml(
+      with_readiness_probe: true,
+      status_probe_path: @website.status_probe_path,
+      status_probe_period: @website.status_probe_period
+    )
 
     assert_includes yml, "periodSeconds: 55"
   end
@@ -676,9 +687,12 @@ VAR2=5678
     }
     @website.save!
 
-    yml = kubernetes_method.generate_deployment_probes_yml(@website)
+    yml = kubernetes_method.generate_deployment_probes_yml(
+      with_readiness_probe: !@website.skip_port_check?,
+      status_probe_path: @website.status_probe_path,
+      status_probe_period: @website.status_probe_period
+    )
 
-    # assert_not_includes yml, "livenessProbe:"
     assert_not_includes yml, "readinessProbe:"
   end
 

@@ -430,8 +430,8 @@ module DeploymentMethod
       kubectl(args)
     end
 
-    def generate_deployment_probes_yml(website)
-      return '' if website.skip_port_check?
+    def generate_deployment_probes_yml(opts = {})
+      return '' unless opts[:with_readiness_probe]
 
       # livenessProbe:
       #    httpGet:
@@ -442,14 +442,14 @@ module DeploymentMethod
       #    timeoutSeconds: 3
       #    failureThreshold: 1
 
-      "
+      <<~END_YML
         readinessProbe:
           httpGet:
-            path: #{website.status_probe_path}
+            path: #{opts[:status_probe_path]}
             port: 80
-          periodSeconds: #{website.status_probe_period}
+          periodSeconds: #{opts[:status_probe_period]}
           initialDelaySeconds: 10
-      "
+      END_YML
     end
 
     def storage_volumes?(website, website_location)
@@ -503,7 +503,7 @@ module DeploymentMethod
       end
     end
 
-    def tabulate(str, nb_tabs = 0)
+    def tabulate(nb_tabs, str)
       str.lines.map do |line|
         "  " * nb_tabs + line.sub("\n", "")
       end
@@ -511,6 +511,12 @@ module DeploymentMethod
     end
 
     def generate_deployment_yml(website, website_location, opts)
+      deployment_probes = generate_deployment_probes_yml(
+        with_readiness_probe: !website.skip_port_check?,
+        status_probe_path: website.status_probe_path,
+        status_probe_period: website.status_probe_period
+      )
+
       <<~END_YML
         apiVersion: apps/v1
         kind: Deployment
@@ -542,7 +548,7 @@ module DeploymentMethod
                     name: dotenv
                 ports:
                 - containerPort: 80
-        #{generate_deployment_probes_yml(website)}
+        #{tabulate 4, deployment_probes}
                 resources:
                   limits: # more resources if available in the cluster
                     ephemeral-storage: 100Mi
@@ -556,6 +562,8 @@ module DeploymentMethod
         #{generate_deployment_mount_paths_yml(website, website_location)}
       END_YML
     end
+
+    # def generate_deployment_addons_yml()
 
     def generate_service_yml(website)
       <<~END_YML
