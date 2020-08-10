@@ -370,6 +370,8 @@ module DeploymentMethod
         ---
         #{generate_deployment_yml(website, website_location, opts)}
         ---
+        #{generate_deployment_addons_yml([0])}
+        ---
         #{generate_service_yml(website)}
         ---
         #{generate_ingress_yml(website, website_location)}
@@ -563,7 +565,63 @@ module DeploymentMethod
       END_YML
     end
 
-    # def generate_deployment_addons_yml()
+    def generate_deployment_addons_yml(addons)
+      addons
+        .map { |addon| generate_deployment_addon_yml(addon) }
+        .join("\n---")
+    end
+
+    def generate_deployment_addons_yml(addon)
+      <<~END_YML
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: redis
+          namespace: instance-167
+        spec:
+          type: NodePort
+          ports:
+          - port: 6379
+            targetPort: 6379
+            protocol: TCP
+          selector:
+            app: redis
+        ---
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: redis-deployment
+          namespace: instance-167
+        spec:
+          selector:
+            matchLabels:
+              app: redis
+          replicas: 1
+          strategy:
+            type: "Recreate"
+          template:
+            metadata:
+              labels:
+                app: redis
+            spec:
+              containers:
+              - image: redis
+                imagePullPolicy: Always
+                name: redis
+                envFrom:
+                - configMapRef:
+                    name: dotenv
+                ports:
+                - containerPort: 6379
+                resources:
+                  limits: # more resources if available in the cluster
+                    ephemeral-storage: 100Mi
+                    memory: 100Mi
+                  requests:
+                    ephemeral-storage: 100Mi
+                    memory: 100Mi
+      END_YML
+    end
 
     def generate_service_yml(website)
       <<~END_YML
