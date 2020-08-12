@@ -406,12 +406,11 @@ class Website < ApplicationRecord
     # is setting an attribute in first website_location object
     wl = website_locations.first
 
-    unless wl
-      errors.add(:configs, "No website location available to set #{config[:variable]}")
+    if wl
+      # set the field only if it exists
+      wl[config[:variable].downcase] = value
+      wl.save!
     end
-
-    wl[config[:variable].downcase] = value
-    wl.save!
   end
 
   def config_site_name_must_comply(_config, value)
