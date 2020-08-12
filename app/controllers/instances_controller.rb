@@ -205,7 +205,7 @@ class InstancesController < ApplicationController
 
   api!
   def update
-    @website.update(website_params)
+    @website.update!(website_params)
 
     @website_event_obj = {
       title: 'update-website',

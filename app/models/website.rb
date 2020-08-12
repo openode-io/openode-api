@@ -545,6 +545,8 @@ class Website < ApplicationRecord
 
   def validate_open_source
     # status
+    open_source['status'] ||= OPEN_SOURCE_STATUS_PENDING
+
     unless OPEN_SOURCE_STATUSES.include?(open_source['status'])
       errors.add(:open_source, "invalid open source status (#{open_source['status']})")
     end
