@@ -883,6 +883,13 @@ VAR2=5678
     end
   end
 
+  test 'generate_rules_ingress_yml - happy path' do
+    yml =
+      kubernetes_method.generate_rules_ingress_yml(@website, nil, [{ hostname: 'myurl.com' }])
+
+    assert_equal yml.scan(/myurl.com/).count, 1
+  end
+
   test 'generate_instance_yml - basic' do
     cmd_get_dotenv = kubernetes_method.retrieve_dotenv_cmd(website: @website)
     prepare_ssh_session(cmd_get_dotenv, '')

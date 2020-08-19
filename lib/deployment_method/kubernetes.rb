@@ -670,9 +670,11 @@ module DeploymentMethod
       result = "  tls:\n" \
                "  - hosts:\n"
 
-      rules << rules[0]
+      spec_rules = rules.clone
 
-      rules.each do |rule|
+      spec_rules << spec_rules[0]
+
+      spec_rules.each do |rule|
         result += "    - #{rule[:hostname]}\n"
       end
 
