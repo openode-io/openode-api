@@ -108,12 +108,12 @@ class InstancesController < ApplicationController
     json(@user.websites_with_access
       .select { |w| params[:search] ? w.site_name.include?(params[:search]) : true }
       .sort_by { |w| w['created_at'] }
+      .reverse
       .drop(skip)
       .take([(params[:limit] ? params[:limit].to_i : nil) || 500, 500].min)
       .map do |w|
         summarize_website(w, extras)
-      end
-      .reverse)
+      end)
   end
 
   api :GET, 'instances/:id/summary'

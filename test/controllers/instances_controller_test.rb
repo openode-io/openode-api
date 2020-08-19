@@ -181,7 +181,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_equal response.parsed_body.length, 1
-    assert_equal response.parsed_body[0]['site_name'], 'testprivatecloud'
+    assert_equal response.parsed_body[0]['site_name'], 'testkubernetes-type'
   end
 
   test '/instances/summary happy path with limit 1' do
