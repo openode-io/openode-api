@@ -98,18 +98,21 @@ class InstancesController < ApplicationController
   description 'List instances summary.'
   param :with, String, desc: INSTANCE_SUMMARY_WITH_DESC,
                        required: false
+  param :skip, String, required: false, desc: "Skip N results"
   param :limit, String, required: false, desc: "Results limit. Maximum and default = 500."
   param :search, String, desc: "Filter based on the site_name.", required: false
   def summary
     extras = extra_fields_summary(params[:with])
+    skip = params[:skip].present? ? params[:skip].to_i : 0
 
     json(@user.websites_with_access
       .select { |w| params[:search] ? w.site_name.include?(params[:search]) : true }
+      .sort_by { |w| w['created_at'] }
+      .drop(skip)
       .take([(params[:limit] ? params[:limit].to_i : nil) || 500, 500].min)
       .map do |w|
         summarize_website(w, extras)
       end
-      .sort_by { |w| w['created_at'] }
       .reverse)
   end
 

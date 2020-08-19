@@ -170,6 +170,20 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert site_to_check['last_deployment']
   end
 
+  test '/instances/summary - skip 2' do
+    website = Website.find_by site_name: 'testsite'
+    website.storage_areas = ['/opt/app/data/']
+    website.save!
+    get '/instances/summary?with=last_deployment&skip=2',
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body.length, 1
+    assert_equal response.parsed_body[0]['site_name'], 'testprivatecloud'    
+  end
+
   test '/instances/summary happy path with limit 1' do
     website = Website.find_by site_name: 'testsite'
     website.storage_areas = ['/opt/app/data/']
