@@ -39,6 +39,38 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.parsed_body['error'], 'Multi location is not currently supported'
   end
 
+  test '/instances/:instance_id/remove-location then add, with website location configs' do
+    w = Website.find_by site_name: 'testsite'
+
+    w.configs ||= {}
+    w.configs['REPLICAS'] = 1
+    w.save!
+
+    w.change_status! Website::STATUS_OFFLINE
+    wl = w.website_locations.first
+    wl.extra_storage = 0
+    wl.save!
+
+    location = wl.location
+
+    post "/instances/#{w.site_name}/remove-location",
+         as: :json,
+         params: { location_str_id: location.str_id },
+         headers: default_headers_auth
+
+    assert_response :success
+
+    post "/instances/#{w.site_name}/add-location",
+         as: :json,
+         params: { location_str_id: location.str_id },
+         headers: default_headers_auth
+
+    assert_response :success
+
+    w.website_locations.reload
+    assert_equal w.website_locations.first.location.str_id, location.str_id
+  end
+
   test '/instances/:instance_id/add-location forbidden' do
     w, = prepare_forbidden_test(Website::PERMISSION_PLAN)
 

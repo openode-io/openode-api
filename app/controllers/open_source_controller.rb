@@ -24,6 +24,7 @@ class OpenSourceController < ApplicationController
       id: website.id,
       status: website.status,
       site_name: website.site_name,
+      hostname: website.website_locations&.first&.main_domain,
       open_source: website.open_source,
       created_at: website.created_at,
       updated_at: website.updated_at
