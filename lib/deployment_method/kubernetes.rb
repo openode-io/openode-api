@@ -509,7 +509,7 @@ module DeploymentMethod
       str.lines.map do |line|
         "  " * nb_tabs + line.sub("\n", "")
       end
-      .join("\n")
+         .join("\n")
     end
 
     def generate_deployment_yml(website, website_location, opts)
@@ -571,7 +571,7 @@ module DeploymentMethod
         .join("\n---")
     end
 
-    def generate_deployment_addons_yml(addon)
+    def generate_deployment_addon_yml(_addon)
       <<~END_YML
         apiVersion: v1
         kind: Service
