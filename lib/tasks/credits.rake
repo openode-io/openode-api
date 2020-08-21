@@ -31,11 +31,12 @@ namespace :credits do
     name = "Task credits__online__spend"
     Rails.logger.info "[#{name}] begin"
 
-    websites = Website.in_statuses([Website::STATUS_ONLINE])
+    websites = Website.select(:id).in_statuses([Website::STATUS_ONLINE]).pluck(:id)
 
     Rails.logger.info "[#{name}] #{websites.count} to process"
 
-    websites.each do |website|
+    websites.each do |website_id|
+      website = Website.find(website_id)
       Rails.logger.info "[#{name}] processing #{website.site_name}"
 
       begin
@@ -68,6 +69,8 @@ namespace :credits do
         msg = "[#{name}] issue updating credits check at of #{website.site_name}: #{e}"
         Rails.logger.error msg
       end
+
+      sleep 0.005 unless Rails.env.test?
     end
   end
 
