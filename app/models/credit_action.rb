@@ -5,11 +5,13 @@ class CreditAction < ApplicationRecord
   validate :verify_enough_credits
 
   TYPE_CONSUME_PLAN = 'consume-plan'
+  TYPE_CONSUME_ADDON_PLAN = 'consume-addon-plan'
   TYPE_CONSUME_BLUE_GREEN = 'consume-blue-green'
   TYPE_CONSUME_STORAGE = 'consume-storage'
   TYPE_CONSUME_BANDWIDTH = 'consume-bandwidth'
   ACTION_TYPES = [
     TYPE_CONSUME_PLAN,
+    TYPE_CONSUME_ADDON_PLAN,
     TYPE_CONSUME_STORAGE,
     TYPE_CONSUME_BANDWIDTH,
     TYPE_CONSUME_BLUE_GREEN

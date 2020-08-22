@@ -7,8 +7,8 @@ namespace :update do
     Rails.logger.info "[#{task_name}] begin"
 
     manager = CloudProvider::Manager.instance
-    addons_repository_url = manager.application.dig(
-      'addons', 'repository_url'
+    addons_repository_fileroot_url = manager.application.dig(
+      'addons', 'repository_fileroot_url'
     )
     addons_repository_tree_url = manager.application.dig(
       'addons', 'repository_tree_url'
@@ -19,12 +19,27 @@ namespace :update do
     ).dig('tree')
 
     repo_tree.each do |tree_item|
-      next if tree_item['type'] != 'tree' || tree_item['path'].scan(/\//).count != 1
+      next if tree_item['type'] != 'tree' || tree_item['path'].scan(%r{/}).count != 1
 
-      puts "itree item #{tree_item}"
       dir_addon = tree_item['path']
 
-      puts "dir addon #{dir_addon}"
+      config_url = "#{addons_repository_fileroot_url}#{dir_addon}/config.json"
+      config_content = JSON.parse(
+        RestClient::Request.execute(method: :get, url: config_url)
+      )
+
+      addon = if Addon.exists?(name: config_content['name'])
+                Addon.find_by(name: config_content['name'])
+              else
+                Addon.create!(name: config_content['name'], category: config_content['category'])
+      end
+
+      addon.name = config_content['name']
+      addon.category = config_content['category']
+      addon.obj = config_content
+      addon.save!
+    rescue StandardError => e
+      Rails.logger.error("Issue update addon... #{e}")
     end
   end
 end

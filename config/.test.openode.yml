@@ -2,7 +2,8 @@ application:
   base_hostname: openode.io
   hostname_private_cloud: openode.dev
   addons:
-    repository_url: https://github.com/openode-io/addons
+    repository_url: https://github.com/openode-io/addons/
+    repository_fileroot_url: https://raw.githubusercontent.com/openode-io/addons/master/
     repository_tree_url: https://api.github.com/repos/openode-io/addons/git/trees/master?recursive=true
   pricing:
     typical_server_cost: 80

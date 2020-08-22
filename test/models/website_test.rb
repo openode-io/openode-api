@@ -918,6 +918,53 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
   end
 
+  test 'spend hourly credits - plan + 2 addons' do
+    website = default_website
+    website.credit_actions.destroy_all
+
+    WebsiteAddon.create!(
+      name: 'addon1',
+      website: website,
+      addon: Addon.last,
+      obj: {},
+      account_type: 'second'
+    )
+
+    WebsiteAddon.create!(
+      name: 'addon2',
+      website: website,
+      addon: Addon.last,
+      obj: {},
+      account_type: 'third'
+    )
+
+    wl = default_website_location
+    wl.nb_cpus = 1
+    wl.extra_storage = 0
+    wl.save!
+
+    website.spend_online_hourly_credits!
+
+    plan = website.plan
+
+    assert_equal website.credit_actions.reload.length, 3
+    ca = website.credit_actions.first
+
+    assert_equal(ca.credits_spent.to_f.round(4),
+                 (plan[:cost_per_hour] * 100.0).to_f.round(4))
+    assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
+
+    ca_addon1 = website.credit_actions[1]
+    assert_equal ca_addon1.action_type, CreditAction::TYPE_CONSUME_ADDON_PLAN
+    assert_equal(ca_addon1.credits_spent.to_f.round(4),
+                 (plan[:cost_per_hour] * 100.0).to_f.round(4))
+
+    ca_addon2 = website.credit_actions[2]
+    assert_equal ca_addon2.action_type, CreditAction::TYPE_CONSUME_ADDON_PLAN
+    assert_equal(ca_addon2.credits_spent.to_f.round(4),
+                 (plan[:cost_per_hour] * 200.0).to_f.round(4))
+  end
+
   test 'spend hourly credits - plan with blue green deployment' do
     website = default_website
     website.credit_actions.destroy_all

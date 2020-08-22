@@ -412,6 +412,26 @@ class ActiveSupport::TestCase
       content_type: 'application/json',
       response_status: 200,
       response_path: 'test/fixtures/http/do/empty.txt'
+    },
+    {
+      url: 'https://api.github.com/repos/openode-io/addons/git/trees/master?recursive=true',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/addons/repo_tree.json'
+    },
+    {
+      url: 'https://raw.githubusercontent.com/openode-io/addons/master/caching/redis-caching/config.json',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/addons/config.json'
     }
   ]
 

@@ -641,6 +641,56 @@ VAR2=5678
                                    with_probes: false)
   end
 
+  # generate_deployment_addons_yml
+  test 'generate_deployment_addons_yml - with no addon' do
+    yml = kubernetes_method.generate_deployment_addons_yml([])
+
+    assert_equal yml, ""
+  end
+
+  test 'generate_deployment_addons_yml - with single addon' do
+    w = default_website
+
+    Addon.destroy_all
+    addon = Addon.create!(
+      name: 'hello-redis',
+      category: 'caching',
+      obj: {
+        name: "redis-caching",
+        category: "caching",
+        minimum_memory_mb: 50,
+        protocol: "TCP",
+        logo_filename: "logo.svg",
+        documentation_filename: "README.md",
+        image: "redis:alpine",
+        target_port: 6379,
+        required_fields: ["exposed_port"],
+        env_variables: {},
+        required_env_variables: []
+      }
+    )
+
+    WebsiteAddon.create!(
+      website: w,
+      addon: addon,
+      name: addon.name,
+      account_type: 'second',
+      obj: {
+
+      }
+    )
+
+    yml = kubernetes_method.generate_deployment_addons_yml(w.website_addons.reload)
+
+    assert_includes yml, "namespace: instance-#{w.id}"
+    assert_includes yml, "app: hello-redis"
+    assert_includes yml, "port: 6379"
+    assert_includes yml, "targetPort: 6379"
+    assert_includes yml, "containerPort: 6379"
+    assert_includes yml, "image: redis:alpine"
+    assert_includes yml, "memory: 100"
+  end
+
   test 'generate_deployment_probes_yml - with probes' do
     yml = kubernetes_method.generate_deployment_probes_yml(
       with_readiness_probe: true,

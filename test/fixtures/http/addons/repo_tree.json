@@ -1,0 +1,53 @@
+{
+  "sha": "11609c4fb7f1e648b6083fa589f84946dba84dbc",
+  "url": "https://api.github.com/repos/openode-io/addons/git/trees/11609c4fb7f1e648b6083fa589f84946dba84dbc",
+  "tree": [
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b03e539e987804a733f20583c6b8bc5aeab70370",
+      "size": 333,
+      "url": "https://api.github.com/repos/openode-io/addons/git/blobs/b03e539e987804a733f20583c6b8bc5aeab70370"
+    },
+    {
+      "path": "caching",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "817192dcd778b8671707f98599e53e1442f54f40",
+      "url": "https://api.github.com/repos/openode-io/addons/git/trees/817192dcd778b8671707f98599e53e1442f54f40"
+    },
+    {
+      "path": "caching/redis-caching",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "62498fd63913a681b844716dffcd36c3b1db41c6",
+      "url": "https://api.github.com/repos/openode-io/addons/git/trees/62498fd63913a681b844716dffcd36c3b1db41c6"
+    },
+    {
+      "path": "caching/redis-caching/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4dd2f311a3262eddfe6287c58d056df60a72526c",
+      "size": 17,
+      "url": "https://api.github.com/repos/openode-io/addons/git/blobs/4dd2f311a3262eddfe6287c58d056df60a72526c"
+    },
+    {
+      "path": "caching/redis-caching/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e444ba8d6d38c137bad26518a4d73d1b2f3d174a",
+      "size": 279,
+      "url": "https://api.github.com/repos/openode-io/addons/git/blobs/e444ba8d6d38c137bad26518a4d73d1b2f3d174a"
+    },
+    {
+      "path": "caching/redis-caching/logo.svg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "32723a3f47d9892181ccaa003eae7ef57b6a5c7b",
+      "size": 6151,
+      "url": "https://api.github.com/repos/openode-io/addons/git/blobs/32723a3f47d9892181ccaa003eae7ef57b6a5c7b"
+    }
+  ],
+  "truncated": false
+}

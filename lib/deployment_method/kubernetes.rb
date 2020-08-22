@@ -370,7 +370,7 @@ module DeploymentMethod
         ---
         #{generate_deployment_yml(website, website_location, opts)}
         ---
-        #{generate_deployment_addons_yml([0])}
+        #{generate_deployment_addons_yml(website.website_addons)}
         ---
         #{generate_service_yml(website)}
         ---
@@ -565,61 +565,67 @@ module DeploymentMethod
       END_YML
     end
 
-    def generate_deployment_addons_yml(addons)
-      addons
+    def generate_deployment_addons_yml(website_addons)
+      website_addons
         .map { |addon| generate_deployment_addon_yml(addon) }
         .join("\n---")
     end
 
-    def generate_deployment_addon_yml(_addon)
+    def generate_deployment_addon_yml(website_addon)
       <<~END_YML
         apiVersion: v1
         kind: Service
         metadata:
-          name: redis
-          namespace: instance-167
+          name: #{website_addon.name}
+          namespace: #{namespace_of(website_addon.website)}
         spec:
           type: NodePort
           ports:
-          - port: 6379
-            targetPort: 6379
-            protocol: TCP
+          - port: #{website_addon.obj.dig('exposed_port')}
+            targetPort: #{website_addon.addon.obj.dig('target_port') || 80}
+            protocol: #{website_addon.addon.obj.dig('protocol')}
           selector:
-            app: redis
+            app: #{website_addon.name}
+        ---
+        #{generate_config_map_yml(
+          name: "dotenv-#{website_addon.name}",
+          namespace: namespace_of(website_addon.website),
+          variables: website_addon.obj&.dig('env') || {}
+        )}
         ---
         apiVersion: apps/v1
         kind: Deployment
         metadata:
-          name: redis-deployment
-          namespace: instance-167
+          name: #{website_addon.name}-deployment
+          namespace: #{namespace_of(website_addon.website)}
         spec:
           selector:
             matchLabels:
-              app: redis
+              app: #{website_addon.name}
           replicas: 1
           strategy:
             type: "Recreate"
           template:
             metadata:
               labels:
-                app: redis
+                app: #{website_addon.name}
             spec:
               containers:
-              - image: redis
+              - image: #{website_addon.addon.obj.dig('image')}
                 imagePullPolicy: Always
-                name: redis
+                name: #{website_addon.name}
                 envFrom:
                 - configMapRef:
-                    name: dotenv
+                    name: dotenv-#{website_addon.name}
                 ports:
-                - containerPort: 6379
+                - containerPort: #{website_addon.addon.obj.dig('target_port') || 80}
                 resources:
-                  limits: # more resources if available in the cluster
+                  limits:
                     ephemeral-storage: 100Mi
-                    memory: 100Mi
+                    memory: #{website_addon.website.memory}Mi
                   requests:
                     ephemeral-storage: 100Mi
-                    memory: 100Mi
+                    memory: #{website_addon.website.memory}Mi
       END_YML
     end
 
