@@ -535,7 +535,11 @@ class InstancesController < ApplicationController
   def populate_website
     if params['site_name']
       pid = params['site_name']
-      @website = Website.where(site_name: pid).or(Website.where(id: pid)).first!
+
+      @website = Website
+                 .where(site_name: pid)
+                 .or(Website.where(id: (Str::Parse.integer?(pid) ? pid : nil)))
+                 .first!
 
       unless @website.accessible_by?(@user)
         authorization_error!('Not authorized to access website')

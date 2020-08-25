@@ -113,6 +113,21 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body['status'], 'online'
   end
 
+  test '/instances/:instance_id with site name starting with existing website id (diff)' do
+    w = default_website
+    w2 = Website.all.find { |ww| ww.id != w.id && ww.user_id != w.user_id }
+
+    w.site_name = "#{w2.id}#{w.site_name}"
+    w.save!
+
+    get "/instances/#{w.site_name}",
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :success
+    assert_equal response.parsed_body['id'], w.id
+  end
+
   test '/instances/:instance_id with id instead of site name' do
     w = default_website
 
