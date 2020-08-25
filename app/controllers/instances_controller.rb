@@ -411,7 +411,8 @@ class InstancesController < ApplicationController
                  options: {
                    website: @website,
                    website_location: @website_location || @website.website_locations.first,
-                   nb_lines: nb_lines
+                   nb_lines: nb_lines,
+                   app: params['app']
                  }
                }]
                logs = @runner.execute(cmds)

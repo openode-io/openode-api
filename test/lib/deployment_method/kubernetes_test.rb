@@ -388,6 +388,34 @@ VAR2=5678
     assert_includes result, "kubectl -n instance-#{@website.id} logs -l app=www --tail=100"
   end
 
+  test 'logs - fail with invalid app name' do
+    assert_raise ApplicationRecord::ValidationError do
+      kubernetes_method.logs(
+        website: @website,
+        website_location: @website_location,
+        app: 'invalid'
+      )
+    end
+  end
+
+  test 'logs - with addon application' do
+    website_addon = WebsiteAddon.create!(
+      website: @website,
+      addon: Addon.last,
+      name: 'hello-redis',
+      account_type: 'second'
+    )
+
+    result = kubernetes_method.logs(
+      website: @website,
+      website_location: @website_location,
+      app: website_addon.name
+    )
+
+    assert_includes result, "kubectl -n instance-#{@website.id} " \
+      "logs -l app=#{website_addon.name} --tail=100"
+  end
+
   test 'exec - happy path' do
     prepare_get_pods_happy(@website_location)
 

@@ -34,6 +34,13 @@ class Website < ApplicationRecord
                       dependent: :destroy
 
   LIMIT_RAM_BLUE_GREEN_DEPLOYMENT = 1000
+  DEFAULT_APPLICATION_NAME = 'www'
+
+  def application_name_valid?(app_name)
+    valid_names = website_addons.map(&:name) + [DEFAULT_APPLICATION_NAME]
+
+    valid_names.include?(app_name)
+  end
 
   # collaborators data plus user information
   def pretty_collaborators_h

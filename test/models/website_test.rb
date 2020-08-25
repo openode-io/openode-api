@@ -918,6 +918,31 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
   end
 
+  test 'application_name_valid? - with default' do
+    w = default_website
+
+    assert_equal w.application_name_valid?('www'), true
+  end
+
+  test 'application_name_valid? - with invalid' do
+    w = default_website
+
+    assert_equal w.application_name_valid?('www2'), false
+  end
+
+  test 'application_name_valid? - with addon name' do
+    w = default_website
+
+    WebsiteAddon.create!(
+      website: w,
+      addon: Addon.last,
+      name: 'asdf',
+      account_type: 'second'
+    )
+
+    assert_equal w.application_name_valid?('asdf'), true
+  end
+
   test 'spend hourly credits - plan + 2 addons' do
     website = default_website
     website.credit_actions.destroy_all

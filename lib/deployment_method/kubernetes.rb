@@ -923,15 +923,24 @@ module DeploymentMethod
       kubectl(args)
     end
 
+    def verify_application_name(website, name)
+      unless website.application_name_valid?(name)
+        raise raise ApplicationRecord::ValidationError, "Invalid application name"
+      end
+    end
+
     def logs(options = {})
       website, website_location = get_website_fields(options)
       options[:nb_lines] ||= 100
+      options[:app] ||= Website::DEFAULT_APPLICATION_NAME
+
+      verify_application_name(website, options[:app])
 
       args = {
         website: website,
         website_location: website_location,
         with_namespace: true,
-        s_arguments: "logs -l app=www --tail=#{options[:nb_lines]}"
+        s_arguments: "logs -l app=#{options[:app]} --tail=#{options[:nb_lines]}"
       }
 
       kubectl(args)
