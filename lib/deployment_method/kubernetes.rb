@@ -558,7 +558,7 @@ module DeploymentMethod
           name: main-service
           namespace: #{namespace_of(website)}
         spec:
-          type: NodePort
+          type: ClusterIP
           ports:
           - port: 80
             targetPort: 80

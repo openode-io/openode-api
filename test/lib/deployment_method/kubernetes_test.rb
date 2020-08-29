@@ -678,7 +678,7 @@ VAR2=5678
   test 'generate_service_yml - basic' do
     yml = kubernetes_method.generate_service_yml(@website)
 
-    assert_contains_service_yml(yml, @website, with_type: "NodePort")
+    assert_contains_service_yml(yml, @website, with_type: "ClusterIP")
   end
 
   test 'generate_service_yml - with custom domain' do
@@ -686,7 +686,7 @@ VAR2=5678
 
     yml = kubernetes_method.generate_service_yml(w)
 
-    assert_contains_service_yml(yml, w, with_type: "NodePort")
+    assert_contains_service_yml(yml, w, with_type: "ClusterIP")
   end
 
   test 'certificate? - if certificate provided' do
