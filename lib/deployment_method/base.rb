@@ -340,8 +340,11 @@ module DeploymentMethod
       result
     end
 
-    def ex_stdout(cmd, options = {})
-      runner.execute([{ cmd_name: cmd, options: options }]).first[:result][:stdout]
+    def ex_stdout(cmd, options_cmd = {}, global_options = {})
+      runner.execute(
+        [{ cmd_name: cmd, options: options_cmd }],
+        global_options
+      ).first[:result][:stdout]
     end
 
     private

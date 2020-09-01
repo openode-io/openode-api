@@ -64,5 +64,30 @@ class RunnerTest < ActiveSupport::TestCase
     assert_equal Remote::Sftp.get_test_uploaded_files[0][:content], website.crontab
     assert_equal(Remote::Sftp.get_test_uploaded_files[0][:remote_file_path],
                  "#{website.repo_dir}.openode.cron")
+
+    assert_equal runner.execution.result['steps'].first['cmd_name'], 'send_crontab'
+  end
+
+  test 'send crontab with crontab provided - skip_result_storage' do
+    set_dummy_secrets_to(LocationServer.all)
+    website = default_website
+    website.crontab = '* * * * * ls -la'
+    website.save!
+    runner = DeploymentMethod::Runner.new('docker', 'cloud', default_runner_configs)
+
+    begin_sftp
+    runner.execute([
+                     {
+                       cmd_name: 'send_crontab', options: {
+                         is_complex: true,
+                         website: website
+                       }
+                     }
+                   ],
+                   skip_result_storage: true)
+
+    assert_equal runner.execution.result['steps'], []
+
+    puts "runner exec #{runner.execution.result.inspect}"
   end
 end

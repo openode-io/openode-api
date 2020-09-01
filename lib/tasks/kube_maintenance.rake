@@ -176,7 +176,8 @@ namespace :kube_maintenance do
 
       result = JSON.parse(cluster_runner.execution_method.ex_stdout(
                             "raw_kubectl",
-                            s_arguments: "get deployments --all-namespaces -o json"
+                            { s_arguments: "get deployments --all-namespaces -o json" },
+                            skip_result_storage: true
                           ))
 
       result.dig('items').each do |deployment|
