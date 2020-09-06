@@ -950,6 +950,9 @@ module DeploymentMethod
       website, website_location = get_website_fields(options)
       cmd = options[:cmd]
 
+      # TODO
+      # get pod -l app=hello-redis -o json
+
       kubectl_on_latest_pod(
         website: website,
         website_location: website_location,
