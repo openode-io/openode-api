@@ -1578,6 +1578,25 @@ class WebsiteTest < ActiveSupport::TestCase
     end
   end
 
+  test "open source - invalid url still work if status rejected" do
+    w = default_website
+    w.open_source = sample_open_source_attributes(Website::OPEN_SOURCE_STATUS_PENDING)
+    w.save!
+
+    w.open_source_activated = false
+    w.account_type = Website::OPEN_SOURCE_ACCOUNT_TYPE
+    w.open_source = {
+      'title' => 'helloworld',
+      'status' => Website::OPEN_SOURCE_STATUS_REJECTED,
+      'description' => " asdf " * 200,
+      'repository_url' => "ftp://github.com/openode-io/openode-cli"
+    }
+    w.save!
+
+    w.reload
+    assert w.valid?
+  end
+
   test "notify open source requested" do
     w = default_website
 

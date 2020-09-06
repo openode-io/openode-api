@@ -109,7 +109,7 @@ module DeploymentMethod
       Rails.logger.info("Execute cmds=#{cmds.to_yaml}, result=#{results.to_yaml}, " \
         "duration=#{Time.zone.now - time_begin}")
 
-      record_execution_steps(results)
+      record_execution_steps(results) unless options[:skip_result_storage]
 
       results
     end

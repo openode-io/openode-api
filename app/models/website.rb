@@ -540,6 +540,8 @@ class Website < ApplicationRecord
   end
 
   def validate_open_source
+    return if open_source['status'] == OPEN_SOURCE_STATUS_REJECTED
+
     # status
     open_source['status'] ||= OPEN_SOURCE_STATUS_PENDING
 
