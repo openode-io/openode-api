@@ -37,6 +37,7 @@ do
 
       KUBECONFIG=$kube_config_file kubectl -n $namespace get $resource -o yaml >> $ns_main_yml_file
       echo "---" >> $ns_main_yml_file
+      sleep 0.5
     done
   done
 done
