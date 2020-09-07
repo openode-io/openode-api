@@ -347,7 +347,7 @@ class InstancesController < ApplicationController
                                    website: @website.clone,
                                    website_location: @website_location,
                                    cmd: Io::Cmd.sanitize_input_cmd(params['cmd']),
-                                   service: Io::Cmd.sanitize_input_cmd(params['service'])
+                                   app: Io::Cmd.sanitize_input_cmd(params['app'])
                                  }
                                }
                              ]).first[:result]

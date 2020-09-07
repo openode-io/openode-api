@@ -417,7 +417,11 @@ VAR2=5678
   end
 
   test 'exec - happy path' do
-    prepare_get_pods_happy(@website_location)
+    # prepare_get_pods_happy(@website_location)
+
+    get_pods_json_content = IO.read('test/fixtures/kubernetes/1_pod_alive.json')
+    prepare_get_pods_json(kubernetes_method, @website, @website_location, get_pods_json_content,
+                          0, "get pod -l app=www")
 
     assert_scripted do
       begin_ssh
@@ -1191,6 +1195,10 @@ VAR2=5678
       "test/fixtures/kubernetes/get_events.json"
     expected_result = IO.read(file_events)
     prepare_ssh_session(cmd, expected_result, 0)
+
+    get_pods_json_content = IO.read('test/fixtures/kubernetes/1_pod_alive.json')
+    prepare_get_pods_json(kubernetes_method, @website, @website_location, get_pods_json_content,
+                          0, "get pod -l app=www")
 
     netstat_result = "Active Internet connections (only servers)\n"\
       "Proto Recv-Q Send-Q Local Address           Foreign Address         State       \n"\

@@ -12,12 +12,12 @@ class WebsiteAddon < ApplicationRecord
 
   validate :validate_account_type
   validate :validate_disallow_open_source
-  validate :validate_addon_obj_fields
+  validate :validate_addon_obj_fields, on: :update
 
   validates_format_of :name, with: /[a-z]+-?([a-z0-9])+/i
 
-  before_validation :downcase_name
   before_validation :init_default_values
+  before_validation :downcase_name
 
   def downcase_name
     self.name = name.downcase
@@ -31,6 +31,13 @@ class WebsiteAddon < ApplicationRecord
     end
 
     self.obj['env'] ||= {}
+
+    self.name ||= addon.name
+
+    unless account_type
+      min_plan = WithPlan.find_min_plan(addon.obj['minimum_memory_mb'])
+      self.account_type = min_plan&.dig(:internal_id)
+    end
   end
 
   def as_json(options = {})

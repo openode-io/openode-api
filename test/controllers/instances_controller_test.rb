@@ -701,7 +701,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
       begin_ssh
       post '/instances/testsite/cmd?location_str_id=canada',
            as: :json,
-           params: { service: 'www', cmd: 'ls -la' },
+           params: { app: 'www', cmd: 'ls -la' },
            headers: default_headers_auth
 
       assert_response :success

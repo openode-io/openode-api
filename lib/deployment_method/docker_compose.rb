@@ -321,10 +321,10 @@ module DeploymentMethod
     end
 
     def custom_cmd(options = {})
-      require_fields(%i[website service cmd], options)
-      website, service, cmd = options.values_at(:website, :service, :cmd)
+      require_fields(%i[website app cmd], options)
+      website, app, cmd = options.values_at(:website, :app, :cmd)
 
-      "#{exec_begin(website.container_id)} #{service} #{cmd}"
+      "#{exec_begin(website.container_id)} #{app} #{cmd}"
     end
 
     def self.default_docker_compose_file(opts = {})

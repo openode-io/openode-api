@@ -1,7 +1,7 @@
 require 'test_helper'
 
 class MyAddonsControllerTest < ActionDispatch::IntegrationTest
-  test '/instances/:instance_id/addons - happy path' do
+  test 'GET /instances/:instance_id/addons - happy path' do
     w = default_website
 
     addon = Addon.last
@@ -34,7 +34,7 @@ class MyAddonsControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body[1].dig('addon', 'id'), addon.id
   end
 
-  test '/instances/:instance_id/addons/:id - happy path' do
+  test 'GET /instances/:instance_id/addons/:id - happy path' do
     w = default_website
 
     addon = Addon.last
@@ -84,6 +84,36 @@ class MyAddonsControllerTest < ActionDispatch::IntegrationTest
     website_addon = WebsiteAddon.find(response.parsed_body['id'])
 
     assert_equal website_addon.obj.dig('env', 'TEST'), 'asdf'
+  end
+
+  test 'POST /instances/:instance_id/addons - with minimal information' do
+    w = default_website
+
+    addon = Addon.last
+    addon.obj = {
+      minimum_memory_mb: 100
+    }
+    addon.save!
+
+    puts "addon #{addon.inspect}"
+
+    post "/instances/#{w.site_name}/addons",
+         as: :json,
+         params: {
+           addon: {
+             addon_id: addon.id
+           }
+         },
+         headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body['website_id'], w.id
+    assert_equal response.parsed_body['addon_id'], addon.id
+
+    website_addon = WebsiteAddon.find(response.parsed_body['id'])
+    assert_equal website_addon.name, addon.name
+    assert_equal website_addon.account_type, "second"
   end
 
   test 'PATCH /instances/:instance_id/addons - happy path' do
@@ -139,6 +169,7 @@ class MyAddonsControllerTest < ActionDispatch::IntegrationTest
 
   test 'DELETE /instances/:instance_id/addons/:id - happy path' do
     w = default_website
+    w.change_status!(Website::STATUS_OFFLINE)
 
     addon = Addon.last
 
@@ -169,5 +200,38 @@ class MyAddonsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_nil WebsiteAddon.find_by(id: website_addon.id)
+  end
+
+  test 'DELETE /instances/:instance_id/addons/:id - fail if online' do
+    w = default_website
+    w.change_status!(Website::STATUS_ONLINE)
+
+    addon = Addon.last
+
+    post "/instances/#{w.site_name}/addons",
+         as: :json,
+         params: {
+           addon: {
+             name: 'hello-world',
+             account_type: 'second',
+             addon_id: addon.id,
+             obj: {
+               env: {
+                 TEST: 'asdf'
+               }
+             }
+           }
+         },
+         headers: default_headers_auth
+
+    assert_response :success
+
+    website_addon = WebsiteAddon.find(response.parsed_body['id'])
+
+    delete "/instances/#{w.site_name}/addons/#{website_addon.id}",
+           as: :json,
+           headers: default_headers_auth
+
+    assert_response :bad_request
   end
 end

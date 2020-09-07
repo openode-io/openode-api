@@ -568,7 +568,7 @@ module DeploymentMethod
     def generate_deployment_addons_yml(website_addons)
       website_addons
         .map { |addon| generate_deployment_addon_yml(addon) }
-        .join("\n---")
+        .join("\n---\n")
     end
 
     def generate_deployment_addon_yml(website_addon)
@@ -579,7 +579,7 @@ module DeploymentMethod
           name: #{website_addon.name}
           namespace: #{namespace_of(website_addon.website)}
         spec:
-          type: NodePort
+          type: ClusterIP
           ports:
           - port: #{website_addon.obj.dig('exposed_port')}
             targetPort: #{website_addon.addon.obj.dig('target_port') || 80}
@@ -844,7 +844,7 @@ module DeploymentMethod
       JSON.parse(ex("kubectl", args)[:stdout])
     end
 
-    def ex_on_all_pods_stdout(_cmd, options = {})
+    def ex_on_all_pods_stdout(cmd, options = {})
       pods_result = get_pods_json(options)
 
       pods_result.dig('items').map do |pod|
@@ -854,7 +854,7 @@ module DeploymentMethod
           name: pod_name,
           result: ex_stdout('custom_cmd',
                             options.merge(
-                              cmd: "cat /proc/net/dev",
+                              cmd: cmd,
                               pod_name: pod_name
                             ))
         }
@@ -946,20 +946,44 @@ module DeploymentMethod
       kubectl(args)
     end
 
+    def get_pod_by_app_name(website, website_location, app_name)
+      args_get_app_pod = {
+        website: website,
+        website_location: website_location,
+        with_namespace: true,
+        s_arguments: "get pod -l app=#{app_name} -o json"
+      }
+
+      result = JSON.parse(ex("kubectl", args_get_app_pod)[:stdout])
+
+      result&.dig('items')&.first
+    end
+
+    def get_pod_name_by_app_name(website, website_location, app_name)
+      result = get_pod_by_app_name(website, website_location, app_name)
+
+      result&.dig('metadata', 'name')
+    end
+
     def custom_cmd(options = {})
       website, website_location = get_website_fields(options)
       cmd = options[:cmd]
+      options[:app] ||= Website::DEFAULT_APPLICATION_NAME
 
-      # TODO
-      # get pod -l app=hello-redis -o json
+      verify_application_name(website, options[:app])
 
-      kubectl_on_latest_pod(
+      pod_name = get_pod_name_by_app_name(website, website_location, options[:app])
+
+      raise "Unable to find the application #{options[:app]}" unless pod_name
+
+      args = {
         website: website,
         website_location: website_location,
-        pod_name: options[:pod_name],
-        s_arguments: "exec POD_NAME -- #{cmd}",
-        pod_name_delimiter: "POD_NAME"
-      )
+        with_namespace: true,
+        s_arguments: "exec #{pod_name} -- #{cmd}"
+      }
+
+      kubectl(args)
     end
 
     def wait_for_service_load_balancer(website, website_location)

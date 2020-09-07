@@ -16,4 +16,18 @@ class Addon < ApplicationRecord
   def obj_field?(field_name)
     obj&.dig(field_name)&.present?
   end
+
+  def as_json(options = {})
+    options[:methods] = [:repository_root_file_url]
+    super
+  end
+
+  def repository_root_file_url
+    manager = CloudProvider::Manager.instance
+    addons_repository_fileroot_url = manager.application.dig(
+      'addons', 'repository_fileroot_url'
+    )
+
+    "#{addons_repository_fileroot_url}#{category}/#{name}"
+  end
 end

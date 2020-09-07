@@ -10,6 +10,10 @@ class MyAddonsController < InstancesController
     end
   end
 
+  before_action only: %i[delete_addon update_addon] do
+    requires_status_in [Website::STATUS_OFFLINE]
+  end
+
   api :GET, 'instances/:sitename/addons'
   description 'Returns the website addons'
   def index

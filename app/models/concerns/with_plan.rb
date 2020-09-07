@@ -8,6 +8,15 @@ module WithPlan
     plans.find { |p| [p[:id], p[:internal_id]].include?(acc_type) }
   end
 
+  def self.find_min_plan(minimum_memory)
+    plans = CloudProvider::Manager.instance.available_plans
+
+    plans.find do |p|
+      p[:ram] >= minimum_memory &&
+        p[:internal_id] != Website::OPEN_SOURCE_ACCOUNT_TYPE
+    end
+  end
+
   def plan
     WithPlan.plan_of(account_type)
   end
