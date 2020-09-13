@@ -10,7 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_04_003816) do
+ActiveRecord::Schema.define(version: 2020_08_24_201636) do
+
+  create_table "addons", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.string "name"
+    t.string "category"
+    t.text "obj"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["name"], name: "index_addons_on_name", unique: true
+  end
 
   create_table "collaborators", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.integer "website_id"
@@ -219,6 +228,18 @@ ActiveRecord::Schema.define(version: 2020_07_04_003816) do
     t.index ["notification_id"], name: "index_viewed_notifications_on_notification_id"
     t.index ["user_id", "notification_id"], name: "index_viewed_notifications_on_user_id_and_notification_id"
     t.index ["user_id"], name: "index_viewed_notifications_on_user_id"
+  end
+
+  create_table "website_addons", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.bigint "website_id"
+    t.bigint "addon_id"
+    t.string "name"
+    t.text "obj", size: :medium
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "account_type"
+    t.index ["website_id", "name"], name: "index_website_addons_on_website_id_and_name", unique: true
+    t.index ["website_id"], name: "index_website_addons_on_website_id"
   end
 
   create_table "website_locations", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|

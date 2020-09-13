@@ -223,9 +223,8 @@ VAR2=5678
     assert_scripted do
       begin_ssh
 
-      kubernetes_method.runner.init_execution!('Deployment', {
-                                                 'parent_execution_id' => parent_execution.id
-                                               })
+      kubernetes_method.runner.init_execution!('Deployment',
+                                               'parent_execution_id' => parent_execution.id)
 
       execution = kubernetes_method.runner.execution
 
@@ -389,8 +388,40 @@ VAR2=5678
     assert_includes result, "kubectl -n instance-#{@website.id} logs -l app=www --tail=100"
   end
 
+  test 'logs - fail with invalid app name' do
+    assert_raise ApplicationRecord::ValidationError do
+      kubernetes_method.logs(
+        website: @website,
+        website_location: @website_location,
+        app: 'invalid'
+      )
+    end
+  end
+
+  test 'logs - with addon application' do
+    website_addon = WebsiteAddon.create!(
+      website: @website,
+      addon: Addon.last,
+      name: 'hello-redis',
+      account_type: 'second'
+    )
+
+    result = kubernetes_method.logs(
+      website: @website,
+      website_location: @website_location,
+      app: website_addon.name
+    )
+
+    assert_includes result, "kubectl -n instance-#{@website.id} " \
+      "logs -l app=#{website_addon.name} --tail=100"
+  end
+
   test 'exec - happy path' do
-    prepare_get_pods_happy(@website_location)
+    # prepare_get_pods_happy(@website_location)
+
+    get_pods_json_content = IO.read('test/fixtures/kubernetes/1_pod_alive.json')
+    prepare_get_pods_json(kubernetes_method, @website, @website_location, get_pods_json_content,
+                          0, "get pod -l app=www")
 
     assert_scripted do
       begin_ssh
@@ -556,6 +587,25 @@ VAR2=5678
     assert_equal strategy, "Recreate"
   end
 
+  test 'tabulate - 0 tabs' do
+    str = "asdf\n" \
+          "\n" \
+          "  - what"
+
+    assert_equal kubernetes_method.tabulate(0, str), str
+  end
+
+  test 'tabulate - 2 tabs' do
+    str = "asdf\n" \
+          "\n" \
+          "  - what"
+    expected_str = "    asdf\n" \
+                   "    \n" \
+                   "      - what"
+
+    assert_equal kubernetes_method.tabulate(2, str), expected_str
+  end
+
   test 'generate_deployment_yml - basic' do
     yml = kubernetes_method.generate_deployment_yml(@website, @website_location, {})
 
@@ -623,8 +673,62 @@ VAR2=5678
                                    with_probes: false)
   end
 
+  # generate_deployment_addons_yml
+  test 'generate_deployment_addons_yml - with no addon' do
+    yml = kubernetes_method.generate_deployment_addons_yml([])
+
+    assert_equal yml, ""
+  end
+
+  test 'generate_deployment_addons_yml - with single addon' do
+    w = default_website
+
+    Addon.destroy_all
+    addon = Addon.create!(
+      name: 'hello-redis',
+      category: 'caching',
+      obj: {
+        name: "redis-caching",
+        category: "caching",
+        minimum_memory_mb: 50,
+        protocol: "TCP",
+        logo_filename: "logo.svg",
+        documentation_filename: "README.md",
+        image: "redis:alpine",
+        target_port: 6379,
+        required_fields: ["exposed_port"],
+        env_variables: {},
+        required_env_variables: []
+      }
+    )
+
+    WebsiteAddon.create!(
+      website: w,
+      addon: addon,
+      name: addon.name,
+      account_type: 'second',
+      obj: {
+
+      }
+    )
+
+    yml = kubernetes_method.generate_deployment_addons_yml(w.website_addons.reload)
+
+    assert_includes yml, "namespace: instance-#{w.id}"
+    assert_includes yml, "app: hello-redis"
+    assert_includes yml, "port: 6379"
+    assert_includes yml, "targetPort: 6379"
+    assert_includes yml, "containerPort: 6379"
+    assert_includes yml, "image: redis:alpine"
+    assert_includes yml, "memory: 100"
+  end
+
   test 'generate_deployment_probes_yml - with probes' do
-    yml = kubernetes_method.generate_deployment_probes_yml(@website)
+    yml = kubernetes_method.generate_deployment_probes_yml(
+      with_readiness_probe: true,
+      status_probe_path: @website.status_probe_path,
+      status_probe_period: @website.status_probe_period
+    )
 
     # assert_includes yml, "livenessProbe:"
     assert_includes yml, "path: /"
@@ -635,9 +739,12 @@ VAR2=5678
   test 'generate_deployment_probes_yml - with probes, custom path' do
     @website.configs ||= {}
     @website.configs['STATUS_PROBE_PATH'] = '/status'
-    yml = kubernetes_method.generate_deployment_probes_yml(@website)
+    yml = kubernetes_method.generate_deployment_probes_yml(
+      with_readiness_probe: !@website.skip_port_check?,
+      status_probe_path: @website.status_probe_path,
+      status_probe_period: @website.status_probe_period
+    )
 
-    # assert_includes yml, "livenessProbe:"
     assert_includes yml, "path: /status"
     assert_includes yml, "readinessProbe:"
     assert_includes yml, "periodSeconds: 20"
@@ -647,7 +754,11 @@ VAR2=5678
     @website.configs ||= {}
     @website.configs['STATUS_PROBE_PERIOD'] = 55
     @website.save!
-    yml = kubernetes_method.generate_deployment_probes_yml(@website)
+    yml = kubernetes_method.generate_deployment_probes_yml(
+      with_readiness_probe: true,
+      status_probe_path: @website.status_probe_path,
+      status_probe_period: @website.status_probe_period
+    )
 
     assert_includes yml, "periodSeconds: 55"
   end
@@ -658,9 +769,12 @@ VAR2=5678
     }
     @website.save!
 
-    yml = kubernetes_method.generate_deployment_probes_yml(@website)
+    yml = kubernetes_method.generate_deployment_probes_yml(
+      with_readiness_probe: !@website.skip_port_check?,
+      status_probe_path: @website.status_probe_path,
+      status_probe_period: @website.status_probe_period
+    )
 
-    # assert_not_includes yml, "livenessProbe:"
     assert_not_includes yml, "readinessProbe:"
   end
 
@@ -1081,6 +1195,10 @@ VAR2=5678
       "test/fixtures/kubernetes/get_events.json"
     expected_result = IO.read(file_events)
     prepare_ssh_session(cmd, expected_result, 0)
+
+    get_pods_json_content = IO.read('test/fixtures/kubernetes/1_pod_alive.json')
+    prepare_get_pods_json(kubernetes_method, @website, @website_location, get_pods_json_content,
+                          0, "get pod -l app=www")
 
     netstat_result = "Active Internet connections (only servers)\n"\
       "Proto Recv-Q Send-Q Local Address           Foreign Address         State       \n"\

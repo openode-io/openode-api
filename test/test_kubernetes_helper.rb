@@ -67,10 +67,10 @@ class ActiveSupport::TestCase
   end
 
   def prepare_get_pods_json(kubernetes_method, website, website_location, expected_result,
-                            expected_exit_code)
+                            expected_exit_code, get_pod_part = "get pods")
     cmd = kubernetes_method.kubectl(
       website_location: website_location,
-      s_arguments: "-n instance-#{website.id} get pods -o json"
+      s_arguments: "-n instance-#{website.id} #{get_pod_part} -o json"
     )
 
     prepare_ssh_session(cmd, expected_result, expected_exit_code)

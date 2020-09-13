@@ -2,6 +2,8 @@ require 'uri'
 require 'rest-client'
 
 class Website < ApplicationRecord
+  include WithPlan
+
   serialize :alerts, JSON
   serialize :domains, JSON
   serialize :open_source, JSON
@@ -15,6 +17,7 @@ class Website < ApplicationRecord
   has_many :collaborators, dependent: :destroy
   has_many :website_locations, dependent: :destroy
   has_many :snapshots, dependent: :destroy
+  has_many :website_addons, dependent: :destroy
   has_many :events, foreign_key: :ref_id, class_name: :WebsiteEvent, dependent: :destroy
   has_many :stop_events,
            foreign_key: :ref_id,
@@ -31,6 +34,13 @@ class Website < ApplicationRecord
                       dependent: :destroy
 
   LIMIT_RAM_BLUE_GREEN_DEPLOYMENT = 1000
+  DEFAULT_APPLICATION_NAME = 'www'
+
+  def application_name_valid?(app_name)
+    valid_names = website_addons.map(&:name) + [DEFAULT_APPLICATION_NAME]
+
+    valid_names.include?(app_name)
+  end
 
   # collaborators data plus user information
   def pretty_collaborators_h
@@ -315,6 +325,7 @@ class Website < ApplicationRecord
   def create_event(obj)
     stripped_obj = Str::Encode.strip_invalid_chars(obj, encoding: 'ASCII')
 
+    Rails.logger.info("Creating website event, id #{id}")
     website_event = WebsiteEvent.create(ref_id: id, obj: stripped_obj)
 
     WebsiteEventsChannel.broadcast_to(
@@ -495,25 +506,11 @@ class Website < ApplicationRecord
     end
   end
 
-  MAX_RAM_PLAN_WITHOUT_PAID_ORDER = 100
-
   def validate_alerts
     current_alerts.each do |alert|
       unless ALERT_TYPES.map { |a| a[:id] }.include?(alert)
         errors.add(:alerts, "Invalid alert #{alert}")
       end
-    end
-  end
-
-  def validate_account_type
-    found_plan = Website.plan_of(account_type)
-    return errors.add(:account_type, "Invalid plan #{account_type}") unless found_plan
-
-    if found_plan.dig(:ram) &&
-       found_plan[:ram] > MAX_RAM_PLAN_WITHOUT_PAID_ORDER && !user.orders?
-      errors.add(:account_type,
-                 "Maximum available plan without a paid order is " \
-                 "#{MAX_RAM_PLAN_WITHOUT_PAID_ORDER} MB RAM.")
     end
   end
 
@@ -711,13 +708,7 @@ class Website < ApplicationRecord
   end
 
   def self.plan_of(acc_type)
-    plans = CloudProvider::Manager.instance.available_plans
-
-    plans.find { |p| [p[:id], p[:internal_id]].include?(acc_type) }
-  end
-
-  def plan
-    Website.plan_of(account_type)
+    WithPlan.plan_of(acc_type)
   end
 
   def memory
@@ -895,6 +886,10 @@ class Website < ApplicationRecord
       (website_locations.first&.replicas || 1)
   end
 
+  def addon_plan_cost(website_addon)
+    Website.cost_price_to_credits(website_addon.plan[:cost_per_hour])
+  end
+
   def blue_green_deployment_option_cost
     pricing_params = CloudProvider::Manager.instance.application.dig('pricing')
     cost_ratio = pricing_params.dig('blue_green_ratio_plan_cost').to_f
@@ -915,10 +910,16 @@ class Website < ApplicationRecord
     ]
 
     if blue_green_deployment?
-
       spendings << {
         action_type: CreditAction::TYPE_CONSUME_BLUE_GREEN,
         credits_cost: blue_green_deployment_option_cost * hourly_ratio
+      }
+    end
+
+    spendings += website_addons.map do |website_addon|
+      {
+        action_type: CreditAction::TYPE_CONSUME_ADDON_PLAN,
+        credits_cost: addon_plan_cost(website_addon) * hourly_ratio
       }
     end
 

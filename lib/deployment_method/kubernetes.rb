@@ -370,6 +370,8 @@ module DeploymentMethod
         ---
         #{generate_deployment_yml(website, website_location, opts)}
         ---
+        #{generate_deployment_addons_yml(website.website_addons)}
+        ---
         #{generate_service_yml(website)}
         ---
         #{generate_ingress_yml(website, website_location)}
@@ -430,8 +432,8 @@ module DeploymentMethod
       kubectl(args)
     end
 
-    def generate_deployment_probes_yml(website)
-      return '' if website.skip_port_check?
+    def generate_deployment_probes_yml(opts = {})
+      return '' unless opts[:with_readiness_probe]
 
       # livenessProbe:
       #    httpGet:
@@ -442,14 +444,14 @@ module DeploymentMethod
       #    timeoutSeconds: 3
       #    failureThreshold: 1
 
-      "
+      <<~END_YML
         readinessProbe:
           httpGet:
-            path: #{website.status_probe_path}
+            path: #{opts[:status_probe_path]}
             port: 80
-          periodSeconds: #{website.status_probe_period}
+          periodSeconds: #{opts[:status_probe_period]}
           initialDelaySeconds: 10
-      "
+      END_YML
     end
 
     def storage_volumes?(website, website_location)
@@ -503,7 +505,20 @@ module DeploymentMethod
       end
     end
 
+    def tabulate(nb_tabs, str)
+      str.lines.map do |line|
+        "  " * nb_tabs + line.sub("\n", "")
+      end
+         .join("\n")
+    end
+
     def generate_deployment_yml(website, website_location, opts)
+      deployment_probes = generate_deployment_probes_yml(
+        with_readiness_probe: !website.skip_port_check?,
+        status_probe_path: website.status_probe_path,
+        status_probe_period: website.status_probe_period
+      )
+
       <<~END_YML
         apiVersion: apps/v1
         kind: Deployment
@@ -535,7 +550,7 @@ module DeploymentMethod
                     name: dotenv
                 ports:
                 - containerPort: 80
-        #{generate_deployment_probes_yml(website)}
+        #{tabulate 4, deployment_probes}
                 resources:
                   limits: # more resources if available in the cluster
                     ephemeral-storage: 100Mi
@@ -547,6 +562,70 @@ module DeploymentMethod
                     # cpu: #{website.cpus}
                 #{'volumeMounts:  ' if storage_volumes?(website, website_location)}
         #{generate_deployment_mount_paths_yml(website, website_location)}
+      END_YML
+    end
+
+    def generate_deployment_addons_yml(website_addons)
+      website_addons
+        .map { |addon| generate_deployment_addon_yml(addon) }
+        .join("\n---\n")
+    end
+
+    def generate_deployment_addon_yml(website_addon)
+      <<~END_YML
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: #{website_addon.name}
+          namespace: #{namespace_of(website_addon.website)}
+        spec:
+          type: ClusterIP
+          ports:
+          - port: #{website_addon.obj.dig('exposed_port')}
+            targetPort: #{website_addon.addon.obj.dig('target_port') || 80}
+            protocol: #{website_addon.addon.obj.dig('protocol')}
+          selector:
+            app: #{website_addon.name}
+        ---
+        #{generate_config_map_yml(
+          name: "dotenv-#{website_addon.name}",
+          namespace: namespace_of(website_addon.website),
+          variables: website_addon.obj&.dig('env') || {}
+        )}
+        ---
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: #{website_addon.name}-deployment
+          namespace: #{namespace_of(website_addon.website)}
+        spec:
+          selector:
+            matchLabels:
+              app: #{website_addon.name}
+          replicas: 1
+          strategy:
+            type: "Recreate"
+          template:
+            metadata:
+              labels:
+                app: #{website_addon.name}
+            spec:
+              containers:
+              - image: #{website_addon.addon.obj.dig('image')}
+                imagePullPolicy: Always
+                name: #{website_addon.name}
+                envFrom:
+                - configMapRef:
+                    name: dotenv-#{website_addon.name}
+                ports:
+                - containerPort: #{website_addon.addon.obj.dig('target_port') || 80}
+                resources:
+                  limits:
+                    ephemeral-storage: 100Mi
+                    memory: #{website_addon.website.memory}Mi
+                  requests:
+                    ephemeral-storage: 100Mi
+                    memory: #{website_addon.website.memory}Mi
       END_YML
     end
 
@@ -765,7 +844,7 @@ module DeploymentMethod
       JSON.parse(ex("kubectl", args)[:stdout])
     end
 
-    def ex_on_all_pods_stdout(_cmd, options = {})
+    def ex_on_all_pods_stdout(cmd, options = {})
       pods_result = get_pods_json(options)
 
       pods_result.dig('items').map do |pod|
@@ -775,7 +854,7 @@ module DeploymentMethod
           name: pod_name,
           result: ex_stdout('custom_cmd',
                             options.merge(
-                              cmd: "cat /proc/net/dev",
+                              cmd: cmd,
                               pod_name: pod_name
                             ))
         }
@@ -844,31 +923,67 @@ module DeploymentMethod
       kubectl(args)
     end
 
+    def verify_application_name(website, name)
+      unless website.application_name_valid?(name)
+        raise raise ApplicationRecord::ValidationError, "Invalid application name"
+      end
+    end
+
     def logs(options = {})
       website, website_location = get_website_fields(options)
       options[:nb_lines] ||= 100
+      options[:app] ||= Website::DEFAULT_APPLICATION_NAME
+
+      verify_application_name(website, options[:app])
 
       args = {
         website: website,
         website_location: website_location,
         with_namespace: true,
-        s_arguments: "logs -l app=www --tail=#{options[:nb_lines]}"
+        s_arguments: "logs -l app=#{options[:app]} --tail=#{options[:nb_lines]}"
       }
 
       kubectl(args)
     end
 
+    def get_pod_by_app_name(website, website_location, app_name)
+      args_get_app_pod = {
+        website: website,
+        website_location: website_location,
+        with_namespace: true,
+        s_arguments: "get pod -l app=#{app_name} -o json"
+      }
+
+      result = JSON.parse(ex("kubectl", args_get_app_pod)[:stdout])
+
+      result&.dig('items')&.first
+    end
+
+    def get_pod_name_by_app_name(website, website_location, app_name)
+      result = get_pod_by_app_name(website, website_location, app_name)
+
+      result&.dig('metadata', 'name')
+    end
+
     def custom_cmd(options = {})
       website, website_location = get_website_fields(options)
       cmd = options[:cmd]
+      options[:app] ||= Website::DEFAULT_APPLICATION_NAME
 
-      kubectl_on_latest_pod(
+      verify_application_name(website, options[:app])
+
+      pod_name = get_pod_name_by_app_name(website, website_location, options[:app])
+
+      raise "Unable to find the application #{options[:app]}" unless pod_name
+
+      args = {
         website: website,
         website_location: website_location,
-        pod_name: options[:pod_name],
-        s_arguments: "exec POD_NAME -- #{cmd}",
-        pod_name_delimiter: "POD_NAME"
-      )
+        with_namespace: true,
+        s_arguments: "exec #{pod_name} -- #{cmd}"
+      }
+
+      kubectl(args)
     end
 
     def wait_for_service_load_balancer(website, website_location)

@@ -1,0 +1,12 @@
+{
+  "name": "redis-caching",
+  "category": "caching",
+  "minimum_memory_mb": 50,
+  "protocol": "TCP",
+  "logo_filename": "logo.svg",
+  "documentation_filename": "README.md",
+  "image": "redis:alpine",
+  "target_port": 6379,
+  "env_variables": [],
+  "required_env_variables": []
+}

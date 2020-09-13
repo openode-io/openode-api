@@ -81,6 +81,8 @@ Rails.application.routes.draw do
 
     get 'settings', to: 'global#settings'
     get 'stats', to: 'global#stats'
+
+    get 'addons', to: 'addons#index'
   end
 
   scope :open_source_projects do
@@ -164,6 +166,13 @@ Rails.application.routes.draw do
     post '/:site_name/snapshots/', to: 'snapshots#create_snapshot'
     get '/:site_name/snapshots/', to: 'snapshots#index'
     get '/:site_name/snapshots/:id', to: 'snapshots#retrieve'
+
+    # Addons
+    get '/:site_name/addons/', to: 'my_addons#index'
+    get '/:site_name/addons/:id', to: 'my_addons#retrieve'
+    post '/:site_name/addons/', to: 'my_addons#create_addon'
+    patch '/:site_name/addons/:id', to: 'my_addons#update_addon'
+    delete '/:site_name/addons/:id', to: 'my_addons#delete_addon'
 
     # executions
     get '/:site_name/executions/list/:type', to: 'executions#index'
