@@ -118,6 +118,7 @@ class MyAddonsControllerTest < ActionDispatch::IntegrationTest
 
   test 'PATCH /instances/:instance_id/addons - happy path' do
     w = default_website
+    w.change_status!(Website::STATUS_OFFLINE)
 
     addon = Addon.last
 
