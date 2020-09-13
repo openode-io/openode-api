@@ -55,7 +55,7 @@ class MyAddonsControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body.dig('name'), wa.name
   end
 
-  test 'POST /instances/:instance_id/addons - happy path' do
+  test 'POST /instances/:instance_id/addons - with new line' do
     w = default_website
 
     addon = Addon.last
@@ -64,7 +64,7 @@ class MyAddonsControllerTest < ActionDispatch::IntegrationTest
          as: :json,
          params: {
            addon: {
-             name: 'hello-world',
+             name: 'hello-world\n',
              account_type: 'second',
              addon_id: addon.id,
              obj: {
@@ -83,7 +83,7 @@ class MyAddonsControllerTest < ActionDispatch::IntegrationTest
 
     website_addon = WebsiteAddon.find(response.parsed_body['id'])
 
-    assert_equal website_addon.obj.dig('env', 'TEST'), 'asdf'
+    assert_equal website_addon.name, 'hello-world\\n'
   end
 
   test 'POST /instances/:instance_id/addons - with minimal information' do
