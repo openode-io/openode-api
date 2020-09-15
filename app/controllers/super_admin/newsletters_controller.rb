@@ -17,7 +17,7 @@ class SuperAdmin::NewslettersController < SuperAdmin::SuperAdminController
   end
 
   def deliver
-    @newsletter.delay.deliver!
+    @newsletter.deliver!
 
     json({})
   end

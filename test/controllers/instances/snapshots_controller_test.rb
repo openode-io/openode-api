@@ -9,6 +9,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     @website_location = @website.website_locations.first
 
     prepare_kubernetes_method(@website, @website_location)
+    clear_all_queued_jobs
   end
 
   def prepare_kubernetes_method(website, website_location)
@@ -71,7 +72,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     assert_scripted do
       begin_ssh
 
-      Delayed::Job.last.invoke_job
+      invoke_all_jobs
 
       snapshot.reload
 
@@ -111,7 +112,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     assert_scripted do
       begin_ssh
 
-      Delayed::Job.last.invoke_job
+      invoke_all_jobs
 
       snapshot.reload
 

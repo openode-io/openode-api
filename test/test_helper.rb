@@ -6,6 +6,9 @@ require 'net/ssh/test'
 require 'net/sftp'
 require 'webmock/minitest'
 
+require 'sidekiq/testing'
+Sidekiq::Testing.fake!
+
 require 'simplecov'
 SimpleCov.start
 
@@ -699,14 +702,12 @@ class ActiveSupport::TestCase
     Rake::Task[task_name].execute
   end
 
-  def run_deployer_job
-    job = Delayed::Job.where('handler LIKE ?', '%DeploymentMethod::Deployer%').last
-
-    job.invoke_job
+  def invoke_all_jobs
+    Sidekiq::Worker.drain_all
   end
 
-  def invoke_all_jobs
-    Delayed::Job.all.each(&:invoke_job)
+  def clear_all_queued_jobs
+    Sidekiq::Worker.clear_all
   end
 
   def reset_emails

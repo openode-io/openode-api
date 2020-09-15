@@ -3,6 +3,10 @@
 require 'test_helper'
 
 class InstancesControllerDeployDockerTest < ActionDispatch::IntegrationTest
+  setup do
+    clear_all_queued_jobs
+  end
+
   test '/instances/:instance_id/restart should not allow when no credit' do
     dep_method = prepare_default_execution_method
 
@@ -25,7 +29,7 @@ class InstancesControllerDeployDockerTest < ActionDispatch::IntegrationTest
 
     assert_scripted do
       begin_ssh
-      run_deployer_job
+      invoke_all_jobs
 
       deployment = website.deployments.last
       website.reload
@@ -60,7 +64,7 @@ class InstancesControllerDeployDockerTest < ActionDispatch::IntegrationTest
 
     assert_scripted do
       begin_ssh
-      run_deployer_job
+      invoke_all_jobs
 
       deployment = website.deployments.last
       website.reload
@@ -93,7 +97,7 @@ class InstancesControllerDeployDockerTest < ActionDispatch::IntegrationTest
 
     assert_scripted do
       begin_ssh
-      run_deployer_job
+      invoke_all_jobs
 
       deployment = website.deployments.last
       website.reload
@@ -142,7 +146,7 @@ class InstancesControllerDeployDockerTest < ActionDispatch::IntegrationTest
 
     assert_scripted do
       begin_ssh
-      run_deployer_job
+      invoke_all_jobs
 
       deployment = website.deployments.last
       website.reload
@@ -224,7 +228,7 @@ class InstancesControllerDeployDockerTest < ActionDispatch::IntegrationTest
 
     assert_scripted do
       begin_ssh
-      run_deployer_job
+      invoke_all_jobs
 
       deployment = website.deployments.last
       website.reload
@@ -276,7 +280,7 @@ class InstancesControllerDeployDockerTest < ActionDispatch::IntegrationTest
     assert_scripted do
       begin_ssh
 
-      run_deployer_job
+      invoke_all_jobs
 
       deployment = website.deployments.last
       website.reload
@@ -324,7 +328,7 @@ class InstancesControllerDeployDockerTest < ActionDispatch::IntegrationTest
     assert_scripted do
       begin_ssh
 
-      run_deployer_job
+      invoke_all_jobs
 
       deployment = website.deployments.last
       website.reload

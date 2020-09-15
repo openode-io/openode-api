@@ -123,6 +123,7 @@ Metrics/MethodLength:
     - 'lib/cloud_provider/internal.rb'
     - 'lib/cloud_provider/kubernetes.rb'
     - 'db/migrate/*.rb'
+    - 'app/workers/deploy_worker.rb'
 
 Style/ClassVars:
   Enabled: false

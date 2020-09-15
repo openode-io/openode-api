@@ -46,8 +46,6 @@ module OpenodeApi
 
     config.secret_key_base = ENV['SECRET_KEY_BASE']
 
-    config.active_job.queue_adapter = :delayed_job
-
     config.description = "asdf"
   end
 end

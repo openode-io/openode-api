@@ -34,10 +34,7 @@ class SnapshotsController < InstancesController
     path = params[:path]
     snapshot = Snapshot.create!(website: @website, path: path)
 
-    @runner&.delay&.execute([{
-                              cmd_name: 'make_snapshot',
-                              options: { is_complex: true, snapshot: snapshot }
-                            }])
+    SnapshotWorker.perform_async(@website_location.id, snapshot.id)
 
     result = {
       url: snapshot.url,

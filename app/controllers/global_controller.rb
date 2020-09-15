@@ -1,4 +1,5 @@
 require 'vultr'
+require 'sidekiq/api'
 
 class GlobalController < ApplicationController
   api!
@@ -15,7 +16,10 @@ class GlobalController < ApplicationController
 
   api!
   def status_job_queues
-    is_too_full = Delayed::Job.count > Deployment::NB_JOB_QUEUES + 5
+    nb_jobs = DeployWorker.jobs.size + InstanceReloadWorker.jobs.size +
+              InstanceStopWorker.jobs.size
+
+    is_too_full = nb_jobs > Deployment::MAX_CONCURRENCY + 5
 
     json({}, is_too_full ? :internal_server_error : :ok)
   end

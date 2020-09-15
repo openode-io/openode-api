@@ -728,6 +728,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   # stop with docker compose internal
   test '/instances/:instance_id/stop with internal' do
+    clear_all_queued_jobs
     dep_method = prepare_default_execution_method
     set_dummy_secrets_to(LocationServer.all)
     prepare_default_ports
@@ -751,7 +752,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
       assert_response :success
       assert_equal response.parsed_body['result'], 'success'
 
-      Delayed::Job.first.invoke_job
+      invoke_all_jobs
 
       assert_equal website.executions.reload.last.type, 'Task'
     end
@@ -783,6 +784,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   # reload
   test '/instances/:instance_id/reload with internal' do
+    clear_all_queued_jobs
     dep_method = prepare_default_execution_method
     set_dummy_secrets_to(LocationServer.all)
     prepare_default_ports
@@ -801,14 +803,16 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
            params: {},
            headers: default_headers_auth
 
-      Delayed::Job.first.invoke_job
+      invoke_all_jobs
 
       assert_response :success
       assert_equal response.parsed_body['result'], 'success'
       assert_equal response.parsed_body.dig('website', 'id'), website.id
       assert_equal response.parsed_body.dig('website', 'site_name'), website.site_name
       assert response.parsed_body.dig('deploymentId')
-      assert_equal Deployment.last.status, Deployment::STATUS_RUNNING
+
+      deployment = Deployment.find(response.parsed_body.dig('deploymentId'))
+      assert_equal deployment.status, Deployment::STATUS_RUNNING
     end
   end
 
