@@ -1,5 +1,4 @@
 require 'vultr'
-require 'sidekiq/api'
 
 class GlobalController < ApplicationController
   api!
@@ -16,8 +15,7 @@ class GlobalController < ApplicationController
 
   api!
   def status_job_queues
-    nb_jobs = DeployWorker.jobs.size + InstanceReloadWorker.jobs.size +
-              InstanceStopWorker.jobs.size
+    nb_jobs = System::Global.queues_len
 
     is_too_full = nb_jobs > Deployment::MAX_CONCURRENCY + 5
 

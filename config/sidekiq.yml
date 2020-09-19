@@ -1,13 +1,13 @@
 ---
 :max_retries: 1
 :retry: 1
-:concurrency: <%= Deployment::MAX_CONCURRENCY %>
+:concurrency: 20
 test:
   :concurrency: 1
 development:
   :concurrency: 5
 production:
-  :concurrency: <%= Deployment::MAX_CONCURRENCY %>
+  :concurrency: 20
 :queues:
   - critical
   - default
