@@ -21,11 +21,11 @@ class GlobalControllerTest < ActionDispatch::IntegrationTest
     assert_response :bad_request
   end
 
-  test '/global/status/job-queues - full' do
-    get '/global/status/job-queues', as: :json
+  # test '/global/status/job-queues - full' do
+  #   get '/global/status/job-queues', as: :json
 
-    assert_response :success
-  end
+  #   assert_response :success
+  # end
 
   test '/documentation' do
     get '/documentation'
