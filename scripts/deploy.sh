@@ -13,7 +13,7 @@ ssh -i id_rsa_tmp -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST  \
   RAILS_ENV=$RAILS_ENV ./bin/rails db:migrate && \
   RAILS_ENV=$RAILS_ENV bash scripts/soft_reload.sh && \
   pm2 list && \
-  ps aux | grep delayed_job"
+  ps aux | grep sidekiq"
 
 ssh -i id_rsa_tmp -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST \
   "cd $PROJECT_PATH && cat scripts/crontab.txt | crontab -"

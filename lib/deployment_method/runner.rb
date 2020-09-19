@@ -30,6 +30,8 @@ module DeploymentMethod
 
       execution.status = Execution::STATUS_SUCCESS
       execution.save
+
+      execution
     end
 
     def get_execution_method

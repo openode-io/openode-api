@@ -1,0 +1,14 @@
+---
+:max_retries: 1
+:retry: 1
+:concurrency: 20
+test:
+  :concurrency: 1
+development:
+  :concurrency: 5
+production:
+  :concurrency: 20
+:queues:
+  - critical
+  - default
+  - low

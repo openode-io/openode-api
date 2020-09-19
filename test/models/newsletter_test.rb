@@ -57,6 +57,7 @@ class NewsletterTest < ActiveSupport::TestCase
   end
 
   test "deliver newsletter - custom" do
+    clear_all_queued_jobs
     emails_to_send = @custom_newsletter.emails_to_send
     emails_sent = @custom_newsletter.deliver!
 

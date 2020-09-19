@@ -33,9 +33,8 @@ class Newsletter < ApplicationRecord
 
     emails_to_send.each do |email|
       Rails.logger.info("Newsletter #{title} - enqueing mail #{email}")
-      NewsletterMailer.with(newsletter: self, mail_to: email).trigger.deliver_later
-      emails_sent << email
-      save
+
+      NewsletterEmailWorker.perform_async(id, email)
 
       emails_to_deliver << email
     end

@@ -8,6 +8,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     @website_location = @website.website_locations.first
 
     prepare_kubernetes_method(@website, @website_location)
+    clear_all_queued_jobs
   end
 
   def prepare_kubernetes_method(website, website_location)
@@ -70,7 +71,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
     assert_scripted do
       begin_ssh
-      run_deployer_job
+      invoke_all_jobs
 
       deployment = @website.deployments.last
       @website.reload
@@ -154,7 +155,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
     assert_scripted do
       begin_ssh
-      run_deployer_job
+      invoke_all_jobs
 
       deployment = @website.deployments.last
       @website.reload
@@ -197,7 +198,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
     assert_scripted do
       begin_ssh
-      run_deployer_job
+      invoke_all_jobs
 
       deployment = @website.deployments.last
       @website.reload
@@ -231,7 +232,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert_response :success
       assert_equal response.parsed_body['result'], 'success'
 
-      Delayed::Job.first.invoke_job
+      invoke_all_jobs
 
       @website.reload
 
@@ -263,7 +264,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert_response :success
       assert_equal response.parsed_body['result'], 'success'
 
-      Delayed::Job.first.invoke_job
+      invoke_all_jobs
 
       @website.reload
 
@@ -296,7 +297,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert_response :success
       assert_equal response.parsed_body['result'], 'success'
 
-      Delayed::Job.first.invoke_job
+      invoke_all_jobs
 
       @website.reload
 
@@ -328,7 +329,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert_equal response.parsed_body['deploymentId'], deployment.id
       assert_equal response.parsed_body.dig('website', 'site_name'), default_kube_website.site_name
 
-      Delayed::Job.first.invoke_job
+      invoke_all_jobs
 
       deployment.reload
 
@@ -354,7 +355,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert_equal response.parsed_body['result'], 'success'
       assert_equal response.parsed_body['deploymentId'], deployment.id
 
-      Delayed::Job.first.invoke_job
+      invoke_all_jobs
 
       deployment.reload
 

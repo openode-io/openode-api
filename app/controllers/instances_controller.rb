@@ -357,7 +357,7 @@ class InstancesController < ApplicationController
 
   api!
   def stop
-    @runner&.delay&.execute([{ cmd_name: 'stop', options: { is_complex: true } }])
+    InstanceStopWorker.perform_async(@website_location.id)
 
     @website_event_obj = { title: 'instance-stop' }
 
@@ -448,16 +448,19 @@ class InstancesController < ApplicationController
   param :parent_execution_id, String, desc: 'Rollback to parent_execution_id', required: false
   def restart
     # run in background:
-    @runner.init_execution!('Deployment', params)
-    DeploymentMethod::Deployer.delay.run(@website_location, @runner)
+
+    exec_params = params.permit(params.keys).to_h
+    execution = DeployWorker.prepare_execution(@runner, 'Deployment', exec_params)
+
+    DeployWorker.perform_async(@website_location.id, execution.id)
 
     @website_event_obj = {
       title: 'instance-restart',
-      deployment_id: @runner.execution.id
+      deployment_id: execution.id
     }
 
     json(
-      deployment_response(deploymentId: @runner.execution.id)
+      deployment_response(deploymentId: execution.id)
     )
   rescue StandardError => e
     Ex::Logger.error(e, 'Issue starting deploying')
@@ -479,7 +482,7 @@ class InstancesController < ApplicationController
     execution.status = Execution::STATUS_RUNNING
     execution.save
 
-    @runner.delay.execute([{ cmd_name: 'reload', options: { is_complex: true } }])
+    InstanceReloadWorker.perform_async(@website_location.id, execution.id)
 
     @website_event_obj = { title: 'instance-reload', deployment_id: @runner.execution&.id }
   end
