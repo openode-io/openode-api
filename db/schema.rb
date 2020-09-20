@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_24_201636) do
+ActiveRecord::Schema.define(version: 2020_09_20_164750) do
 
   create_table "addons", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "name"
@@ -50,21 +50,6 @@ ActiveRecord::Schema.define(version: 2020_08_24_201636) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["user_id"], name: "index_credit_actions_on_user_id"
     t.index ["website_id"], name: "index_credit_actions_on_website_id"
-  end
-
-  create_table "delayed_jobs", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
-    t.integer "priority", default: 0, null: false
-    t.integer "attempts", default: 0, null: false
-    t.text "handler", null: false
-    t.text "last_error"
-    t.datetime "run_at"
-    t.datetime "locked_at"
-    t.datetime "failed_at"
-    t.string "locked_by"
-    t.string "queue"
-    t.datetime "created_at", precision: 6
-    t.datetime "updated_at", precision: 6
-    t.index ["priority", "run_at"], name: "delayed_jobs_priority"
   end
 
   create_table "executions", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
