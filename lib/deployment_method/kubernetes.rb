@@ -1092,6 +1092,27 @@ module DeploymentMethod
       wl.save
     end
 
+    def pods_contain_status_message?(pods, msg)
+      pods&.dig('items')&.any? do |item|
+        item&.dig('status', 'conditions')&.any? do |cond|
+          cond&.dig('message')&.downcase&.include?(msg)
+        end
+      end
+    end
+
+    def on_max_build_duration(options = {})
+      website, website_location = get_website_fields(options)
+
+      pods = get_pods_json(
+        website: website,
+        website_location: website_location
+      )
+
+      return 60 * 5 if pods_contain_status_message?(pods, "insufficient memory")
+
+      0
+    end
+
     ### Finalization analysis
 
     # POD analysis
