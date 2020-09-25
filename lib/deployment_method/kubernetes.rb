@@ -775,7 +775,7 @@ module DeploymentMethod
           annotations:
             kubernetes.io/ingress.class: "nginx"
             nginx.org/websocket-services: "main-service"
-            nginx.org/client-max-body-size: "100m"
+            nginx.ingress.kubernetes.io/proxy-body-size: "100m"
             nginx.ingress.kubernetes.io/ssl-redirect: "#{website.get_config('REDIR_HTTP_TO_HTTPS')}"
             # cert-manager.io/cluster-issuer: "letsencrypt-prod"
         spec:
