@@ -7,6 +7,7 @@ module DeploymentMethod
 
     REMOTE_PATH_API_LIB = '/root/openode-www/api/lib'
     DEFAULT_CRONTAB_FILENAME = '.openode.cron'
+    MAX_DEPLOYMENT_DURATION = 10 * 60
 
     def deployment_id
       (runner&.execution&.id || 'not_available').to_s
@@ -198,9 +199,14 @@ module DeploymentMethod
       end
     end
 
+    def on_max_build_duration(_options = {})
+      raise "should implement on max build duration, ret new seconds to wait"
+    end
+
     def verify_instance_up(options = {})
       website, = get_website_fields(options)
       is_up = false
+      sleep_check_duration = 7
 
       begin
         t_started = Time.zone.now
@@ -214,7 +220,19 @@ module DeploymentMethod
           break if is_up
           break if ENV['RAILS_ENV'] == 'test'
 
-          sleep 7
+          sleep sleep_check_duration
+
+          if Time.zone.now - t_started >= max_build_duration
+            new_seconds_to_wait = on_max_build_duration(options)
+
+            break if new_seconds_to_wait + max_build_duration > MAX_DEPLOYMENT_DURATION
+            break if new_seconds_to_wait.zero?
+
+            max_build_duration += new_seconds_to_wait
+            msg_extra_waiting = "waiting extra #{new_seconds_to_wait} seconds... " \
+                                "cluster resizing"
+            notify("warn", msg_extra_waiting)
+          end
         end
 
         error!("Max build duration reached (#{max_build_duration})") unless is_up

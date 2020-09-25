@@ -1297,4 +1297,27 @@ VAR2=5678
     # storage_volumes
     assert_equal kubernetes_method.storage_volumes?(w, wl), false
   end
+
+  test 'pods_contain_status_message? - happy path' do
+    file_services =
+      "test/fixtures/kubernetes/get_pods_not_enough_memory.json"
+    pods = JSON.parse(IO.read(file_services))
+
+    result = kubernetes_method.pods_contain_status_message?(pods, "insufficient memory")
+    assert result
+  end
+
+  test 'pods_contain_status_message? - does not contain' do
+    file_services =
+      "test/fixtures/kubernetes/1_pod_alive.json"
+    pods = JSON.parse(IO.read(file_services))
+
+    result = kubernetes_method.pods_contain_status_message?(pods, "insufficient memory")
+    assert_not result
+  end
+
+  test 'pods_contain_status_message? - no items' do
+    result = kubernetes_method.pods_contain_status_message?({}, "insufficient memory")
+    assert_not result
+  end
 end

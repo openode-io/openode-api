@@ -775,7 +775,7 @@ module DeploymentMethod
           annotations:
             kubernetes.io/ingress.class: "nginx"
             nginx.org/websocket-services: "main-service"
-            nginx.org/client-max-body-size: "100m"
+            nginx.ingress.kubernetes.io/proxy-body-size: "100m"
             nginx.ingress.kubernetes.io/ssl-redirect: "#{website.get_config('REDIR_HTTP_TO_HTTPS')}"
             # cert-manager.io/cluster-issuer: "letsencrypt-prod"
         spec:
@@ -1090,6 +1090,27 @@ module DeploymentMethod
       wl.obj ||= {}
       wl.obj['services'] = services
       wl.save
+    end
+
+    def pods_contain_status_message?(pods, msg)
+      pods&.dig('items')&.any? do |item|
+        item&.dig('status', 'conditions')&.any? do |cond|
+          cond&.dig('message')&.downcase&.include?(msg)
+        end
+      end
+    end
+
+    def on_max_build_duration(options = {})
+      website, website_location = get_website_fields(options)
+
+      pods = get_pods_json(
+        website: website,
+        website_location: website_location
+      )
+
+      return 60 * 5 if pods_contain_status_message?(pods, "insufficient memory")
+
+      0
     end
 
     ### Finalization analysis
