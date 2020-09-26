@@ -25,6 +25,14 @@ def destroy_persistence_instance(website, title)
   post_instance(website, path_api, title)
 end
 
+def destroy_addon_persistence(website)
+  website.website_addons.select(&:online?).select(&:persistence?).each do |w_addon|
+    path_api = "/instances/#{website.site_name}/addons/#{w_addon.id}/offline"
+
+    post_instance(website, path_api, "deactivating addon persitence - lack of credit")
+  end
+end
+
 namespace :credits do
   desc ''
   task online_spend: :environment do
@@ -79,7 +87,7 @@ namespace :credits do
     name = "Task credits__persistence_spend"
     Rails.logger.info "[#{name}] begin"
 
-    websites = Website.having_extra_storage
+    websites = (Website.having_extra_storage + Website.having_addon_with_persistence).uniq
 
     Rails.logger.info "[#{name}] #{websites.count} to process"
 
@@ -95,6 +103,7 @@ namespace :credits do
           if e.message.to_s.include?("No credits remaining")
             # destroy the persistence:
             destroy_persistence_instance(website, 'Destroying persistence (lacking credits)')
+            destroy_addon_persistence(website)
 
             # notify the user:
 

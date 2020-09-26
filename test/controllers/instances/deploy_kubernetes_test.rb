@@ -248,6 +248,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/stop - if kube stop fail, should put back to online' do
+    puts "web #{@website.website_addons.inspect}"
     prepare_make_secret(@kubernetes_method, @website, @website_location, "result")
     prepare_get_dotenv(@kubernetes_method, @website, "VAR1=12")
 

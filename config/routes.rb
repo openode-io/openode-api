@@ -172,6 +172,7 @@ Rails.application.routes.draw do
     get '/:site_name/addons/:id', to: 'my_addons#retrieve'
     post '/:site_name/addons/', to: 'my_addons#create_addon'
     patch '/:site_name/addons/:id', to: 'my_addons#update_addon'
+    post '/:site_name/addons/:id/offline', to: 'my_addons#set_addon_offline'
     delete '/:site_name/addons/:id', to: 'my_addons#delete_addon'
 
     # executions

@@ -135,7 +135,7 @@ module DeploymentMethod
     end
 
     def should_remove_namespace?(website)
-      !website.extra_storage?
+      !website.extra_storage? && !website.addon_with_storage?
     end
 
     # stop
@@ -370,7 +370,7 @@ module DeploymentMethod
         ---
         #{generate_deployment_yml(website, website_location, opts)}
         ---
-        #{generate_deployment_addons_yml(website.website_addons)}
+        #{generate_deployment_addons_yml(website.website_addons, opts)}
         ---
         #{generate_service_yml(website)}
         ---
@@ -398,9 +398,7 @@ module DeploymentMethod
       END_YML
     end
 
-    def generate_persistence_volume_claim_yml(website_location)
-      return '' unless website_location.extra_storage?
-
+    def generate_generic_persistence_volume_claim_yml(website_location, name, storage_gb)
       kube_cloud = Kubernetes.kube_configs
       storage_class_name = kube_cloud['storage_class_name']
 
@@ -408,25 +406,50 @@ module DeploymentMethod
         apiVersion: v1
         kind: PersistentVolumeClaim
         metadata:
-          name: main-pvc
+          name: #{name}
           namespace: #{namespace_of(website_location.website)}
         spec:
           accessModes:
             - ReadWriteOnce
           resources:
             requests:
-              storage: #{website_location.extra_storage}Gi
+              storage: #{storage_gb}Gi
           storageClassName: #{storage_class_name}
       END_YML
     end
 
+    def generate_persistence_addon_volume_claim_yml(website_addon)
+      wl = website_addon.website.website_locations.first
+
+      generate_generic_persistence_volume_claim_yml(
+        wl,
+        addon_pvc_name(website_addon),
+        website_addon.storage_gb
+      )
+    end
+
+    def generate_persistence_volume_claim_yml(website_location)
+      return '' unless website_location.extra_storage?
+
+      generate_generic_persistence_volume_claim_yml(
+        website_location,
+        "main-pvc",
+        website_location.extra_storage
+      )
+    end
+
     def destroy_storage_cmd(options = {})
       _, website_location = get_website_fields(options)
+      pvc_name = "main-pvc"
+
+      if options[:website_addon]
+        pvc_name = addon_pvc_name(options[:website_addon])
+      end
 
       args = {
         website_location: website_location,
         with_namespace: true,
-        s_arguments: "delete pvc main-pvc"
+        s_arguments: "delete pvc #{pvc_name}"
       }
 
       kubectl(args)
@@ -458,18 +481,28 @@ module DeploymentMethod
       website_location.extra_storage? && website.storage_areas && !website.storage_areas.empty?
     end
 
-    def generate_deployment_mount_paths_yml(website, website_location)
-      return "" unless storage_volumes?(website, website_location)
-
+    def generic_deployment_mount_paths_yml(paths)
       yml = ""
 
-      website.storage_areas.each do |storage_path|
+      paths.each do |storage_path|
         yml += "" \
 "        - mountPath: \"#{storage_path}\"\n"\
 "          name: main-volume\n"
       end
 
       yml
+    end
+
+    def generate_deployment_addon_mount_paths_yml(website_addon)
+      return "" unless website_addon.persistence?
+
+      generic_deployment_mount_paths_yml([website_addon.obj['persistent_path']])
+    end
+
+    def generate_deployment_mount_paths_yml(website, website_location)
+      return "" unless storage_volumes?(website, website_location)
+
+      generic_deployment_mount_paths_yml(website.storage_areas)
     end
 
     def generate_deployment_volumes_yml(website, website_location)
@@ -489,6 +522,32 @@ module DeploymentMethod
 "        volumeMounts:\n"
 
       yml + generate_deployment_mount_paths_yml(website, website_location)
+    end
+
+    def addon_pvc_name(website_addon)
+      "website-addon-#{website_addon.id}-pvc"
+    end
+
+    def generate_deployment_addon_volumes_yml(website_addon)
+      return "" unless website_addon.persistence?
+
+      persistent_path = website_addon.obj['persistent_path']
+      chmod_cmds = "chmod 777 \"#{persistent_path}\""
+
+      yml = "" \
+"      volumes:\n" \
+"      - name: main-volume\n" \
+"        persistentVolumeClaim:\n" \
+"          claimName: #{addon_pvc_name(website_addon)}\n" \
+"      initContainers:\n" \
+"      - name: init-volume\n" \
+"        image: busybox\n" \
+"        command: ['sh', '-c', '#{chmod_cmds}']\n" \
+"        volumeMounts:\n" \
+"        - mountPath: \"#{persistent_path}\"\n"\
+"          name: main-volume\n"
+
+      yml
     end
 
     def deployment_strategy(website, memory)
@@ -565,14 +624,17 @@ module DeploymentMethod
       END_YML
     end
 
-    def generate_deployment_addons_yml(website_addons)
+    def generate_deployment_addons_yml(website_addons, opts = {})
       website_addons
-        .map { |addon| generate_deployment_addon_yml(addon) }
+        .map { |addon| generate_deployment_addon_yml(addon, opts) }
         .join("\n---\n")
     end
 
-    def generate_deployment_addon_yml(website_addon)
+    def generate_deployment_addon_yml(website_addon, opts = {})
       <<~END_YML
+        ---
+        #{generate_persistence_addon_volume_claim_yml(website_addon) if opts[:with_pvc_object]}
+        ---
         apiVersion: v1
         kind: Service
         metadata:
@@ -610,6 +672,7 @@ module DeploymentMethod
               labels:
                 app: #{website_addon.name}
             spec:
+        #{generate_deployment_addon_volumes_yml(website_addon)}
               containers:
               - image: #{website_addon.addon.obj.dig('image')}
                 imagePullPolicy: Always
@@ -626,6 +689,8 @@ module DeploymentMethod
                   requests:
                     ephemeral-storage: 100Mi
                     memory: #{website_addon.website.memory}Mi
+                #{'volumeMounts:  ' if website_addon.persistence?}
+        #{generate_deployment_addon_mount_paths_yml(website_addon)}
       END_YML
     end
 

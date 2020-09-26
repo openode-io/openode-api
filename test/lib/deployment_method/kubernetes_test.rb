@@ -660,6 +660,34 @@ VAR2=5678
     assert_includes yml, "storageClassName: do-block-storage"
   end
 
+  test 'generate_persistence_addon_volume_claim_yml' do
+    addon = Addon.first
+    addon.obj ||= {}
+    addon.obj['minimum_memory_mb'] = 100
+    addon.obj['requires_persistence'] = true
+    addon.obj['persistent_path'] = "/var/www"
+    addon.obj['required_fields'] = ['persistent_path']
+    addon.save!
+
+    wa = WebsiteAddon.create(
+      name: 'hi-world',
+      account_type: 'second',
+      website: @website,
+      addon: addon,
+      obj: {
+        attrib: 'val1'
+      },
+      storage_gb: 4
+    )
+
+    yml = kubernetes_method.generate_persistence_addon_volume_claim_yml(wa)
+
+    assert_includes yml, "name: website-addon-#{wa.id}-pvc"
+    assert_includes yml, "kind: PersistentVolumeClaim"
+    assert_includes yml, "storage: 4Gi"
+    assert_includes yml, "storageClassName: do-block-storage"
+  end
+
   test 'generate_deployment_yml - with skip port check' do
     @website.configs = {
       "SKIP_PORT_CHECK": "true"
@@ -721,6 +749,208 @@ VAR2=5678
     assert_includes yml, "containerPort: 6379"
     assert_includes yml, "image: redis:alpine"
     assert_includes yml, "memory: 100"
+  end
+
+  test 'generate_deployment_addon_yml - with persistence' do
+    w = default_website
+
+    Addon.destroy_all
+    addon = Addon.create!(
+      name: 'hello-redis',
+      category: 'caching',
+      obj: {
+        name: "redis-caching",
+        category: "caching",
+        minimum_memory_mb: 50,
+        protocol: "TCP",
+        logo_filename: "logo.svg",
+        documentation_filename: "README.md",
+        image: "redis:alpine",
+        target_port: 6379,
+        requires_persistence: true,
+        persistent_path: "/var/www",
+        required_fields: %w[exposed_port persistent_path],
+        env_variables: {},
+        required_env_variables: []
+      }
+    )
+
+    WebsiteAddon.create!(
+      website: w,
+      addon: addon,
+      name: addon.name,
+      account_type: 'second',
+      obj: {
+        persistent_path: "/var/www"
+      },
+      storage_gb: 1
+    )
+
+    yml = kubernetes_method.generate_deployment_addons_yml(
+      w.website_addons.reload,
+      with_pvc_object: true
+    )
+
+    assert_includes yml, "kind: PersistentVolumeClaim"
+    assert_includes yml, "storage: 1Gi"
+  end
+
+  test 'generate_deployment_addon_volumes_yml - without persistence' do
+    w = default_website
+
+    Addon.destroy_all
+    addon = Addon.create!(
+      name: 'hello-redis',
+      category: 'caching',
+      obj: {
+        name: "redis-caching",
+        category: "caching",
+        minimum_memory_mb: 50,
+        protocol: "TCP",
+        logo_filename: "logo.svg",
+        documentation_filename: "README.md",
+        image: "redis:alpine",
+        target_port: 6379,
+        requires_persistence: false,
+        required_fields: ["exposed_port"],
+        env_variables: {},
+        required_env_variables: []
+      }
+    )
+
+    wa = WebsiteAddon.create!(
+      website: w,
+      addon: addon,
+      name: addon.name,
+      account_type: 'second',
+      obj: {
+        persistent_path: "/var/www"
+      }
+    )
+
+    yml = kubernetes_method.generate_deployment_addon_volumes_yml(wa)
+
+    assert yml == ""
+  end
+
+  test 'generate_deployment_addon_volumes_yml - with persistence' do
+    w = default_website
+
+    Addon.destroy_all
+    addon = Addon.create!(
+      name: 'hello-redis',
+      category: 'caching',
+      obj: {
+        name: "redis-caching",
+        category: "caching",
+        minimum_memory_mb: 50,
+        protocol: "TCP",
+        logo_filename: "logo.svg",
+        documentation_filename: "README.md",
+        image: "redis:alpine",
+        target_port: 6379,
+        requires_persistence: true,
+        persistent_path: "/var/www2",
+        required_fields: %w[exposed_port persistent_path],
+        env_variables: {},
+        required_env_variables: []
+      }
+    )
+
+    wa = WebsiteAddon.create!(
+      website: w,
+      addon: addon,
+      name: addon.name,
+      account_type: 'second',
+      obj: {
+        persistent_path: "/var/www2"
+      },
+      storage_gb: 2
+    )
+
+    yml = kubernetes_method.generate_deployment_addon_volumes_yml(wa)
+
+    assert_includes yml, "claimName: website-addon-#{wa.id}-pvc"
+    assert_includes yml, "'chmod 777 \"/var/www2\""
+    assert_includes yml, "mountPath: \"/var/www2\""
+  end
+
+  test 'generate_deployment_addon_mount_paths_yml - with persistence' do
+    w = default_website
+
+    Addon.destroy_all
+    addon = Addon.create!(
+      name: 'hello-redis',
+      category: 'caching',
+      obj: {
+        name: "redis-caching",
+        category: "caching",
+        minimum_memory_mb: 50,
+        protocol: "TCP",
+        logo_filename: "logo.svg",
+        documentation_filename: "README.md",
+        image: "redis:alpine",
+        target_port: 6379,
+        requires_persistence: true,
+        persistent_path: "/var/www2",
+        required_fields: %w[exposed_port persistent_path],
+        env_variables: {},
+        required_env_variables: []
+      }
+    )
+
+    wa = WebsiteAddon.create!(
+      website: w,
+      addon: addon,
+      name: addon.name,
+      account_type: 'second',
+      obj: {
+        persistent_path: "/var/www2"
+      },
+      storage_gb: 2
+    )
+
+    yml = kubernetes_method.generate_deployment_addon_mount_paths_yml(wa)
+
+    assert_includes yml, "mountPath: \"/var/www2\""
+  end
+
+  test 'generate_deployment_addon_mount_paths_yml - without persistence' do
+    w = default_website
+
+    Addon.destroy_all
+    addon = Addon.create!(
+      name: 'hello-redis',
+      category: 'caching',
+      obj: {
+        name: "redis-caching",
+        category: "caching",
+        minimum_memory_mb: 50,
+        protocol: "TCP",
+        logo_filename: "logo.svg",
+        documentation_filename: "README.md",
+        image: "redis:alpine",
+        target_port: 6379,
+        required_fields: %w[exposed_port],
+        env_variables: {},
+        required_env_variables: []
+      }
+    )
+
+    wa = WebsiteAddon.create!(
+      website: w,
+      addon: addon,
+      name: addon.name,
+      account_type: 'second',
+      obj: {
+        persistent_path: "/var/www2"
+      },
+      storage_gb: 2
+    )
+
+    yml = kubernetes_method.generate_deployment_addon_mount_paths_yml(wa)
+
+    assert yml == ""
   end
 
   test 'generate_deployment_probes_yml - with probes' do

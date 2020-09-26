@@ -51,6 +51,8 @@ class MyAddonsController < InstancesController
   api :DELETE, 'instances/:sitename/addons/:id'
   description 'Delete a website addon.'
   def delete_addon
+    deactivate_addon_storage(@website_addon)
+
     @website_addon.destroy!
 
     @website_event_obj = { title: 'delete-addon', name: @website_addon.name }
@@ -58,11 +60,33 @@ class MyAddonsController < InstancesController
     json({})
   end
 
+  api :POST, 'instances/:sitename/addons/:id/offline'
+  description 'Deactivate a website addon.'
+  def set_addon_offline
+    deactivate_addon_storage(@website_addon)
+
+    @website_event_obj = { title: 'set-addon-offline', name: @website_addon.name }
+
+    json({})
+  end
+
+  def deactivate_addon_storage(website_addon)
+    website_addon.status = WebsiteAddon::STATUS_OFFLINE
+    website_addon.save(validate: false)
+
+    @runner.execute([
+                      {
+                        cmd_name: 'destroy_storage_cmd',
+                        options: { website_addon: website_addon }
+                      }
+                    ])
+  end
+
   def permitted_params
     params.require(:addon).permit(:addon_id, :account_type, :name, obj: {})
   end
 
   def permitted_update_params
-    params.require(:addon).permit(:account_type, :name, obj: {})
+    params.require(:addon).permit(:account_type, :name, :storage_gb, obj: {})
   end
 end

@@ -6,6 +6,11 @@ class WebsiteAddon < ApplicationRecord
   belongs_to :website
   belongs_to :addon
 
+  delegate :user, to: :website
+
+  before_validation :init_default_values
+  before_validation :downcase_name
+
   validates :name, presence: true
   validates :website, presence: true
   validates :addon, presence: true
@@ -13,11 +18,14 @@ class WebsiteAddon < ApplicationRecord
   validate :validate_account_type
   validate :validate_disallow_open_source
   validate :validate_addon_obj_fields, on: :update
+  validate :validate_storage_gb, on: :update
 
   validates_format_of :name, with: /[a-z]+-?([a-z0-9])+/i
+  STATUS_ONLINE = "online"
+  STATUS_OFFLINE = "offline"
+  STATUSES = [STATUS_ONLINE, STATUS_OFFLINE, ""]
 
-  before_validation :init_default_values
-  before_validation :downcase_name
+  validates :status, inclusion: { in: STATUSES }
 
   def downcase_name
     self.name = name.downcase
@@ -28,15 +36,34 @@ class WebsiteAddon < ApplicationRecord
 
     if addon&.obj
       self.obj['exposed_port'] ||= addon.obj['target_port']
+      self.obj['persistent_path'] ||= addon.obj['persistent_path']
     end
 
     self.obj['env'] ||= {}
 
     self.name ||= addon.name
+    self.storage_gb ||= 1
 
     unless account_type
       min_plan = WithPlan.find_min_plan(addon.obj['minimum_memory_mb'])
       self.account_type = min_plan&.dig(:internal_id)
+    end
+
+    default_env_variables
+  end
+
+  def persistence?
+    addon&.requires_persistence?
+  end
+
+  def online?
+    status == STATUS_ONLINE
+  end
+
+  def default_env_variables
+    (addon.obj&.dig("required_env_variables") || []).each do |required_env_variable|
+      self.obj['env'][required_env_variable] ||=
+        addon.obj.dig('env_variables', required_env_variable)
     end
   end
 
@@ -44,8 +71,6 @@ class WebsiteAddon < ApplicationRecord
     options[:methods] = [:addon]
     super
   end
-
-  delegate :user, to: :website
 
   def validate_disallow_open_source
     if account_type == Website::OPEN_SOURCE_ACCOUNT_TYPE ||
@@ -63,6 +88,14 @@ class WebsiteAddon < ApplicationRecord
       if addon.obj_field?(field_name)
         send("validate_#{field_name}", field_name, addon.obj&.dig(field_name))
       end
+    end
+  end
+
+  def validate_storage_gb
+    return unless persistence?
+
+    unless storage_gb.positive? && storage_gb <= 10
+      errors.add(:storage_gb, "should be between 1 and 10")
     end
   end
 

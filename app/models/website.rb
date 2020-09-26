@@ -61,6 +61,11 @@ class Website < ApplicationRecord
   scope :having_extra_storage, lambda {
     joins(:website_locations).where('website_locations.extra_storage > 0')
   }
+  scope :having_addon_with_persistence, lambda {
+    joins(:website_addons)
+      .where("website_addons.storage_gb > 0 " \
+      "AND website_addons.status = '#{WebsiteAddon::STATUS_ONLINE}'")
+  }
 
   scope :in_statuses, lambda { |statuses|
     where(status: statuses)
@@ -747,6 +752,13 @@ class Website < ApplicationRecord
   end
 
   def change_status!(new_status, args = {})
+    if new_status == STATUS_ONLINE
+      website_addons.each do |addon|
+        addon.status = WebsiteAddon::STATUS_ONLINE
+        addon.save(validate: false)
+      end
+    end
+
     change_status(new_status)
 
     if args[:skip_validations]
@@ -863,14 +875,18 @@ class Website < ApplicationRecord
     total_extra_storage.positive?
   end
 
-  def extra_storage_credits_cost_per_hour
+  def addon_with_storage?
+    website_addons.any?(&:persistence?)
+  end
+
+  def extra_storage_credits_cost_per_hour(storage_amount)
     Website.cost_price_to_credits(
-      total_extra_storage * CloudProvider::Kubernetes::COST_EXTRA_STORAGE_GB_PER_HOUR
+      storage_amount * CloudProvider::Kubernetes::COST_EXTRA_STORAGE_GB_PER_HOUR
     )
   end
 
   def active?
-    extra_storage? || online?
+    extra_storage? || online? || addon_with_storage?
   end
 
   def total_extra_cpus
@@ -959,9 +975,19 @@ class Website < ApplicationRecord
     spendings = [
       {
         action_type: CreditAction::TYPE_CONSUME_STORAGE,
-        credits_cost: extra_storage_credits_cost_per_hour
+        credits_cost: extra_storage_credits_cost_per_hour(total_extra_storage)
       }
     ]
+
+    spendings += website_addons
+                 .select(&:persistence?)
+                 .select(&:online?)
+                 .map do |website_addon|
+      {
+        action_type: CreditAction::TYPE_CONSUME_ADDON_STORAGE,
+        credits_cost: extra_storage_credits_cost_per_hour(website_addon.storage_gb)
+      }
+    end
 
     spend_hourly_credits!(spendings)
   end

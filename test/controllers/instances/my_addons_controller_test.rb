@@ -170,6 +170,11 @@ class MyAddonsControllerTest < ActionDispatch::IntegrationTest
 
   test 'DELETE /instances/:instance_id/addons/:id - happy path' do
     w = default_website
+    w.type = Website::TYPE_KUBERNETES
+    w.status = Website::STATUS_OFFLINE
+    w.save!
+    wl = w.website_locations.first
+
     w.change_status!(Website::STATUS_OFFLINE)
 
     addon = Addon.last
@@ -194,13 +199,89 @@ class MyAddonsControllerTest < ActionDispatch::IntegrationTest
 
     website_addon = WebsiteAddon.find(response.parsed_body['id'])
 
-    delete "/instances/#{w.site_name}/addons/#{website_addon.id}",
-           as: :json,
-           headers: default_headers_auth
+    runner = prepare_kubernetes_runner(w, wl)
+
+    kubernetes_method = runner.get_execution_method
+
+    cmd = kubernetes_method.kubectl(
+      website_location: wl,
+      with_namespace: true,
+      s_arguments: "delete pvc website-addon-#{website_addon.id}-pvc"
+    )
+
+    prepare_ssh_session(cmd, "deleted.")
+
+    assert_scripted do
+      begin_ssh
+      delete "/instances/#{w.site_name}/addons/#{website_addon.id}",
+             as: :json,
+             headers: default_headers_auth
+
+      assert_response :success
+
+      assert_nil WebsiteAddon.find_by(id: website_addon.id)
+    end
+  end
+
+  test 'POST /instances/:instance_id/addons/:id/offline - happy path' do
+    w = default_website
+    w.type = Website::TYPE_KUBERNETES
+    w.status = Website::STATUS_OFFLINE
+    w.save!
+    wl = w.website_locations.first
+
+    w.change_status!(Website::STATUS_OFFLINE)
+
+    addon = Addon.last
+
+    post "/instances/#{w.site_name}/addons",
+         as: :json,
+         params: {
+           addon: {
+             name: 'hello-world',
+             account_type: 'second',
+             addon_id: addon.id,
+             obj: {
+               env: {
+                 TEST: 'asdf'
+               }
+             }
+           }
+         },
+         headers: default_headers_auth
 
     assert_response :success
 
-    assert_nil WebsiteAddon.find_by(id: website_addon.id)
+    website_addon = WebsiteAddon.find(response.parsed_body['id'])
+
+    # setting online
+    website_addon.status = WebsiteAddon::STATUS_ONLINE
+    website_addon.save!
+
+    runner = prepare_kubernetes_runner(w, wl)
+
+    kubernetes_method = runner.get_execution_method
+
+    cmd = kubernetes_method.kubectl(
+      website_location: wl,
+      with_namespace: true,
+      s_arguments: "delete pvc website-addon-#{website_addon.id}-pvc"
+    )
+
+    prepare_ssh_session(cmd, "deleted.")
+
+    assert_scripted do
+      begin_ssh
+      post "/instances/#{w.site_name}/addons/#{website_addon.id}/offline",
+           as: :json,
+           headers: default_headers_auth
+
+      assert_response :success
+
+      website_addon.reload
+
+      assert_equal website_addon.status, WebsiteAddon::STATUS_OFFLINE
+    end
   end
 
   test 'DELETE /instances/:instance_id/addons/:id - fail if online' do

@@ -222,6 +222,26 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal w.status, Website::STATUS_OFFLINE
   end
 
+  test 'change status to online with addons' do
+    w = Website.where(site_name: 'testsite').first
+
+    addon = WebsiteAddon.create!(
+      name: 'hi-world',
+      account_type: 'second',
+      website: w,
+      addon: Addon.first,
+      obj: {
+        attrib: 'val1'
+      }
+    )
+
+    w.change_status!(Website::STATUS_ONLINE)
+    w.reload
+    assert_equal w.status, Website::STATUS_ONLINE
+
+    assert_equal addon.reload.status, WebsiteAddon::STATUS_ONLINE
+  end
+
   test 'change status with invalid status' do
     w = Website.where(site_name: 'testsite').first
     w.change_status!('what')
@@ -882,8 +902,36 @@ class WebsiteTest < ActiveSupport::TestCase
 
     assert_equal website.total_extra_storage, 2
     assert_equal website.extra_storage?, true
-    assert_equal(website.extra_storage_credits_cost_per_hour,
+    assert_equal(website.extra_storage_credits_cost_per_hour(website.total_extra_storage),
                  2 * 100 * CloudProvider::Internal::COST_EXTRA_STORAGE_GB_PER_HOUR)
+  end
+
+  test 'extra storage with addon storage' do
+    website = default_website
+    wl = default_website_location
+    wl.extra_storage = 0
+    wl.save!
+
+    addon = Addon.first
+    addon.obj ||= {}
+    addon.obj['minimum_memory_mb'] = 100
+    addon.obj['requires_persistence'] = true
+    addon.obj['persistent_path'] = "/var/www"
+    addon.obj['required_fields'] = ['persistent_path']
+    addon.save!
+
+    WebsiteAddon.create!(
+      name: 'hi-world',
+      account_type: 'second',
+      website: website,
+      addon: addon,
+      obj: {
+        attrib: 'val1'
+      },
+      storage_gb: 2
+    )
+
+    assert_equal website.addon_with_storage?, true
   end
 
   test 'extra storage without extra storage' do
@@ -894,7 +942,54 @@ class WebsiteTest < ActiveSupport::TestCase
 
     assert_equal website.total_extra_storage, 0
     assert_equal website.extra_storage?, false
-    assert_equal website.extra_storage_credits_cost_per_hour, 0
+    assert_equal website.extra_storage_credits_cost_per_hour(website.total_extra_storage), 0
+  end
+
+  test 'website addon with extra storage' do
+    w = default_website
+    wl = default_website_location
+    wl.extra_storage = 0
+    wl.save!
+
+    addon = Addon.first
+    addon.obj ||= {}
+    addon.obj['minimum_memory_mb'] = 100
+    addon.obj['requires_persistence'] = true
+    addon.obj['persistent_path'] = "/var/www"
+    addon.obj['required_fields'] = ['persistent_path']
+    addon.save!
+
+    WebsiteAddon.create!(
+      name: 'hi-world',
+      account_type: 'second',
+      website: w,
+      addon: addon,
+      obj: {
+        attrib: 'val1'
+      },
+      storage_gb: 2,
+      status: WebsiteAddon::STATUS_ONLINE
+    )
+
+    WebsiteAddon.create!(
+      name: 'hi-world2',
+      account_type: 'second',
+      website: w,
+      addon: addon,
+      obj: {
+        attrib: 'val1'
+      },
+      storage_gb: 2,
+      status: WebsiteAddon::STATUS_OFFLINE
+    )
+
+    w.credit_actions.destroy_all
+    w.spend_persistence_hourly_credits!
+
+    assert_equal w.credit_actions.reload.length, 1
+    assert_in_delta(w.credit_actions.last.credits_spent,
+                    2 * 100 * CloudProvider::Internal::COST_EXTRA_STORAGE_GB_PER_HOUR,
+                    0.000001)
   end
 
   # spend credits

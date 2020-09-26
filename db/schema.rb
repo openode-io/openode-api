@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_20_164750) do
+ActiveRecord::Schema.define(version: 2020_10_10_142245) do
 
   create_table "addons", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "name"
@@ -223,6 +223,8 @@ ActiveRecord::Schema.define(version: 2020_09_20_164750) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "account_type"
+    t.integer "storage_gb", default: 0
+    t.string "status", default: ""
     t.index ["website_id", "name"], name: "index_website_addons_on_website_id_and_name", unique: true
     t.index ["website_id"], name: "index_website_addons_on_website_id"
   end
