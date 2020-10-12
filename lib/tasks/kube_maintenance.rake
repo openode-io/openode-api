@@ -190,7 +190,7 @@ namespace :kube_maintenance do
   end
 
   def pvc_type(name)
-    name == "main_pvc" ? "www" : "addon"
+    name == "main-pvc" ? "www" : "addon"
   end
 
   def valid_pvc_addon?(website, pvc_name)
