@@ -120,7 +120,7 @@ namespace :kube_maintenance do
 
   # TODO: add tests
   desc ''
-  task verify_states_main_pvc: :environment do
+  task verify_states_pvcs: :environment do
     name = "Task kube_maintenance__verify_states_main_pvc"
     Rails.logger.info "[#{name}] begin"
 
@@ -136,6 +136,7 @@ namespace :kube_maintenance do
 
       result.dig('items').each do |pvc|
         ns = pvc.dig('metadata', 'namespace')
+        pvc_name = pvc.dig('metadata', 'name')
 
         next unless instance_ns?(ns)
 
@@ -145,23 +146,61 @@ namespace :kube_maintenance do
 
         website = Website.find_by id: website_id
 
+        reason = ""
+
+        unless website
+          reason += " - no website found "
+        end
+
         different_location = website&.first_location != location
 
-        if different_location
-          Rails.logger.info "[#{name}] reason: " \
-                            "location should be " \
+        if website && different_location
+          reason += " - location should be " \
                             "#{website&.first_location&.str_id} " \
-                            "but is #{location.str_id}"
+                            "but is #{location.str_id} "
+        end
+
+        # main-pvc check
+        if !website.extra_storage? && pvc_name == "main-pvc"
+          reason += " - main-pvc should not be present "
+        end
+
+        if website && pvc_type(pvc_name) == "addon" && !valid_pvc_addon?(website, pvc_name)
+          reason += " - addon pvc #{pvc_name} should not be present "
         end
 
         # check unnessary PVC
-        if !website || !website.extra_storage? || different_location
-          Rails.logger.info "[#{name}] should remove PVC in ns #{ns}"
+        unless reason.empty?
+          Rails.logger.info "[#{name}] should remove PVC in ns #{ns} - reason = #{reason}"
         end
       end
     ensure
       cluster_runner.execution_method&.destroy_execution
     end
+  end
+
+  def deployment_type(name)
+    name == "www-deployment" ? "www" : "addon"
+  end
+
+  def valid_deployment_addon?(website, deployment_name)
+    addon_names = website.website_addons.select(&:online?).map(&:name)
+
+    addon_names.include?(deployment_name.delete_suffix("-deployment"))
+  end
+
+  def pvc_type(name)
+    name == "main_pvc" ? "www" : "addon"
+  end
+
+  def valid_pvc_addon?(website, pvc_name)
+    # website-addon-11-pvc
+    wa_id = pvc_name.delete_prefix("website-addon-").delete_suffix("-pvc")
+    wa = WebsiteAddon.find_by id: wa_id
+
+    return false unless wa
+
+    website.website_addons.select(&:online?).include?(wa)
   end
 
   # TODO add tests
@@ -182,6 +221,7 @@ namespace :kube_maintenance do
 
       result.dig('items').each do |deployment|
         ns = deployment.dig('metadata', 'namespace')
+        deployment_name = deployment.dig('metadata', 'name')
 
         next unless instance_ns?(ns)
 
@@ -190,27 +230,36 @@ namespace :kube_maintenance do
         Rails.logger.info "[#{name}] checking website id #{website_id}"
 
         website = Website.find_by id: website_id
+        reason = ""
 
         # check unnessary deployment
         unless website
-          Rails.logger.info "[#{name}] reason: website removed"
+          reason += " - website removed "
         end
 
         if website&.offline?
-          Rails.logger.info "[#{name}] reason: website offline"
+          reason += " - website offline "
         end
+
+        # check for location
 
         different_location = website&.first_location != location
 
-        if different_location
-          Rails.logger.info "[#{name}] reason: " \
-                            "location should be " \
+        if website && different_location
+          reason += " - location should be " \
                             "#{website&.first_location&.str_id} " \
-                            "but is #{location.str_id}"
+                            "but is #{location.str_id} "
         end
 
-        if !website || website.offline? || different_location
-          Rails.logger.info "[#{name}] should remove deployment in ns #{ns}"
+        # check for addon
+
+        if website && deployment_type(deployment_name) == "addon" &&
+           !valid_deployment_addon?(website, deployment_name)
+          reason += " - addon #{deployment_name} should be removed "
+        end
+
+        unless reason.empty?
+          Rails.logger.info "[#{name}] should remove deployment in ns #{ns} - #{reason}"
         end
       end
     ensure

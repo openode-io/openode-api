@@ -2,6 +2,10 @@
 require 'test_helper'
 
 class SuperAdmin::NewslettersControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    clear_all_queued_jobs
+  end
+
   test "index with matches" do
     get '/super_admin/newsletters?search=lo newslet',
         as: :json,

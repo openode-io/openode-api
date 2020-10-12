@@ -106,7 +106,7 @@ Metrics/ParameterLists:
     - 'test/**/*.rb'
 
 Metrics/ClassLength:
-  Max: 1000
+  Max: 2000
   Exclude:
     - 'test/**/*.rb'
 

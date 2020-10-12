@@ -435,6 +435,16 @@ class ActiveSupport::TestCase
       content_type: 'application/json',
       response_status: 200,
       response_path: 'test/fixtures/http/addons/config.json'
+    },
+    {
+      url: 'https://api.openode.io/instances/testsite/addons/980191099/offline?location_str_id=canada',
+      method: :post,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/openode_api/empty.json'
     }
   ]
 
