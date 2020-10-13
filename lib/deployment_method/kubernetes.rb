@@ -172,11 +172,15 @@ module DeploymentMethod
       snapshot = options[:snapshot]
 
       # copy instance files
-      result = ex('kubectl_on_latest_pod',
+
+      pod_name = get_pod_name_by_app(options)
+
+      result = ex('kubectl',
                   website: website,
                   website_location: website_location,
-                  s_arguments: "cp POD_NAME:#{snapshot.path} #{snapshot.get_destination_folder}",
-                  pod_name_delimiter: "POD_NAME")
+                  with_namespace: true,
+                  s_arguments: "cp #{pod_name}:#{snapshot.path} #{snapshot.get_destination_folder}")
+
       snapshot.steps << { name: 'copy instance files', result: result }
 
       # make an archive
