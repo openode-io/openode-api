@@ -1030,9 +1030,8 @@ module DeploymentMethod
       result&.dig('metadata', 'name')
     end
 
-    def custom_cmd(options = {})
+    def get_pod_name_by_app(options = {})
       website, website_location = get_website_fields(options)
-      cmd = options[:cmd]
       options[:app] ||= Website::DEFAULT_APPLICATION_NAME
 
       verify_application_name(website, options[:app])
@@ -1040,6 +1039,14 @@ module DeploymentMethod
       pod_name = get_pod_name_by_app_name(website, website_location, options[:app])
 
       raise "Unable to find the application #{options[:app]}" unless pod_name
+
+      pod_name
+    end
+
+    def custom_cmd(options = {})
+      website, website_location = get_website_fields(options)
+      cmd = options[:cmd]
+      pod_name = get_pod_name_by_app(options)
 
       args = {
         website: website,
