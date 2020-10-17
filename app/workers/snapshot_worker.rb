@@ -9,7 +9,7 @@ class SnapshotWorker
     runner = website_location.prepare_runner
     runner.execute([{
                      cmd_name: 'make_snapshot',
-                     options: { is_complex: true, snapshot: snapshot }
+                     options: { is_complex: true, snapshot: snapshot, app: snapshot.app }
                    }])
 
     runner.execute([{ cmd_name: 'reload', options: { is_complex: true } }])

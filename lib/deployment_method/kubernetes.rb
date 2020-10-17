@@ -172,11 +172,15 @@ module DeploymentMethod
       snapshot = options[:snapshot]
 
       # copy instance files
-      result = ex('kubectl_on_latest_pod',
+
+      pod_name = get_pod_name_by_app(options)
+
+      result = ex('kubectl',
                   website: website,
                   website_location: website_location,
-                  s_arguments: "cp POD_NAME:#{snapshot.path} #{snapshot.get_destination_folder}",
-                  pod_name_delimiter: "POD_NAME")
+                  with_namespace: true,
+                  s_arguments: "cp #{pod_name}:#{snapshot.path} #{snapshot.get_destination_folder}")
+
       snapshot.steps << { name: 'copy instance files', result: result }
 
       # make an archive
@@ -1030,9 +1034,8 @@ module DeploymentMethod
       result&.dig('metadata', 'name')
     end
 
-    def custom_cmd(options = {})
+    def get_pod_name_by_app(options = {})
       website, website_location = get_website_fields(options)
-      cmd = options[:cmd]
       options[:app] ||= Website::DEFAULT_APPLICATION_NAME
 
       verify_application_name(website, options[:app])
@@ -1040,6 +1043,14 @@ module DeploymentMethod
       pod_name = get_pod_name_by_app_name(website, website_location, options[:app])
 
       raise "Unable to find the application #{options[:app]}" unless pod_name
+
+      pod_name
+    end
+
+    def custom_cmd(options = {})
+      website, website_location = get_website_fields(options)
+      cmd = options[:cmd]
+      pod_name = get_pod_name_by_app(options)
 
       args = {
         website: website,

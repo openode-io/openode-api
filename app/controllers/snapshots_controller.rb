@@ -30,9 +30,11 @@ class SnapshotsController < InstancesController
   api :POST, 'instances/:id/snapshots'
   description 'Make a snapshot of the files at a given path.'
   param :path, String, desc: "", required: true
+  param :app, String, desc: "", required: true
   def create_snapshot
     path = params[:path]
-    snapshot = Snapshot.create!(website: @website, path: path)
+    app = params[:app]
+    snapshot = Snapshot.create!(website: @website, path: path, app: app)
 
     SnapshotWorker.perform_async(@website_location.id, snapshot.id)
 

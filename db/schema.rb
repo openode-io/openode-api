@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_10_142245) do
+ActiveRecord::Schema.define(version: 2020_10_13_193535) do
 
   create_table "addons", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "name"
@@ -151,6 +151,7 @@ ActiveRecord::Schema.define(version: 2020_10_10_142245) do
     t.text "steps", size: :medium
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "app", default: "www"
     t.index ["website_id"], name: "index_snapshots_on_website_id"
   end
 

@@ -29,7 +29,8 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     post "/instances/#{website.site_name}/snapshots",
          as: :json,
          params: {
-           path: '/root/path/'
+           path: '/root/path/',
+           app: 'www'
          },
          headers: default_headers_auth
 
@@ -47,9 +48,10 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body.dig('details', 'id'), snapshot.id
 
     get_pods_json_content = IO.read('test/fixtures/kubernetes/1_pod_alive.json')
+
     prepare_get_pods_json(@kubernetes_method, website, website_location,
                           get_pods_json_content,
-                          0)
+                          0, "get pod -l app=www")
 
     snapshot = website.snapshots.last
 
@@ -95,7 +97,8 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     post "/instances/#{website.site_name}/snapshots",
          as: :json,
          params: {
-           path: '/root/path/'
+           path: '/root/path/',
+           app: 'www'
          },
          headers: default_headers_auth
 
@@ -105,9 +108,10 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
     snapshot = website.snapshots.last
 
+    get_pods_json_content = IO.read('test/fixtures/kubernetes/1_pod_alive.json')
     prepare_get_pods_json(@kubernetes_method, website, website_location,
-                          "",
-                          1)
+                          get_pods_json_content,
+                          0, "get pod -l app=www")
 
     assert_scripted do
       begin_ssh
