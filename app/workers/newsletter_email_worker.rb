@@ -7,6 +7,7 @@ class NewsletterEmailWorker
 
     NewsletterMailer.with(newsletter: newsletter, mail_to: email).trigger.deliver_now
 
+    newsletter.reload
     newsletter.emails_sent << email
     newsletter.save
   end
