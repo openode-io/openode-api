@@ -1,5 +1,5 @@
 class AccountController < ApplicationController
-  before_action only: [:me, :update, :regenerate_token, :spendings, :destroy] do
+  before_action only: [:me, :update, :regenerate_token, :spendings, :destroy, :friend_invites] do
     authorize
   end
 
@@ -26,6 +26,10 @@ class AccountController < ApplicationController
     result.delete('password_hash')
 
     json(result)
+  end
+
+  def friend_invites
+    json(@user.friend_invites)
   end
 
   def register

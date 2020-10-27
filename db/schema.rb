@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_13_193535) do
+ActiveRecord::Schema.define(version: 2020_10_27_000712) do
 
   create_table "addons", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "name"
@@ -66,6 +66,16 @@ ActiveRecord::Schema.define(version: 2020_10_13_193535) do
     t.index ["parent_execution_id"], name: "index_executions_on_parent_execution_id"
     t.index ["website_id"], name: "index_executions_on_website_id"
     t.index ["website_location_id"], name: "index_executions_on_website_location_id"
+  end
+
+  create_table "friend_invites", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "order_id"
+    t.string "status"
+    t.string "email"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_friend_invites_on_user_id"
   end
 
   create_table "global_storages", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|

@@ -36,6 +36,28 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
     assert_nil response.parsed_body['password_hash']
   end
 
+  test '/account/friend_invites without invite' do
+    u = User.find_by! token: '1234s56789'
+    u.friend_invites.destroy_all
+    get '/account/friend-invites', headers: default_headers_auth, as: :json
+
+    assert_response :success
+
+    assert_equal response.parsed_body, []
+  end
+
+  test '/account/friend_invites with invite' do
+    u = User.find_by! token: '1234s56789'
+    u.friend_invites.destroy_all
+    invite = FriendInvite.create!(user: u, status: FriendInvite::STATUS_PENDING)
+    get '/account/friend-invites', headers: default_headers_auth, as: :json
+
+    assert_response :success
+
+    assert_equal response.parsed_body.count, 1
+    assert_equal response.parsed_body.first["id"], invite.id
+  end
+
   test 'PATCH /account/me with valid' do
     u = User.find_by! token: '1234s56789'
     u.newsletter = 0
