@@ -1,5 +1,6 @@
 class AccountController < ApplicationController
-  before_action only: [:me, :update, :regenerate_token, :spendings, :destroy, :friend_invites] do
+  before_action only: [:me, :update, :regenerate_token,
+                       :spendings, :destroy, :friend_invites, :invite_friend] do
     authorize
   end
 
@@ -30,6 +31,13 @@ class AccountController < ApplicationController
 
   def friend_invites
     json(@user.friend_invites)
+  end
+
+  def invite_friend
+    friend_invite = FriendInvite(user: @user, status: FriendInvite::STATUS_PENDING,
+                                 email: params[:email])
+
+    json(friend_invite)
   end
 
   def register

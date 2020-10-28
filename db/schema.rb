@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_27_000712) do
+ActiveRecord::Schema.define(version: 2020_10_28_000028) do
 
   create_table "addons", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "name"
@@ -75,6 +75,7 @@ ActiveRecord::Schema.define(version: 2020_10_27_000712) do
     t.string "email"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["email"], name: "index_friend_invites_on_email", unique: true
     t.index ["user_id"], name: "index_friend_invites_on_user_id"
   end
 

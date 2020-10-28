@@ -2,10 +2,10 @@
 
 one:
   user: one
-  status: MyString
-  email: MyString
+  status: pending
+  email: email@two.com
 
 two:
   user: two
-  status: MyString
-  email: MyString
+  status: pending
+  email: email@one.com
