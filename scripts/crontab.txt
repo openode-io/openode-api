@@ -18,6 +18,7 @@ PATH=PATH=/bin:/usr/bin:/home/ubuntu/.rvm/rubies/ruby-2.7.1/bin/
 0 10 * * * cd $PATH_REPO && rails credits:verify_expired_open_source >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 */3 * * * * cd $PATH_REPO && rails update:uptime_robot >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 # 51 * * * * cd $PATH_REPO && rails update:addons >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+53 * * * * cd $PATH_REPO && rails update:friend_invites >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 10 22 * * * cd $PATH_REPO && rails verify_website_environment:open_source_activated >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 10 10 * * * cd $PATH_REPO && rails registry:clean >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 10 */22 * * * cd $PATH_REPO && /bin/bash scripts/backup-kubes.sh >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log

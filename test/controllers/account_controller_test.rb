@@ -49,13 +49,35 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
   test '/account/friend_invites with invite' do
     u = User.find_by! token: '1234s56789'
     u.friend_invites.destroy_all
-    invite = FriendInvite.create!(user: u, status: FriendInvite::STATUS_PENDING)
+    invite = FriendInvite.create!(user: u, status: FriendInvite::STATUS_PENDING, email: "test@test.com")
     get '/account/friend-invites', headers: default_headers_auth, as: :json
 
     assert_response :success
 
     assert_equal response.parsed_body.count, 1
     assert_equal response.parsed_body.first["id"], invite.id
+  end
+
+  test 'POST /account/friend_invites' do
+    FriendInvite.destroy_all
+
+    post '/account/invite-friend',
+         params: {
+           email: "test@test.com"
+         },
+         headers: default_headers_auth,
+         as: :json
+
+    assert_response :success
+
+    fi_id = response.parsed_body["id"]
+
+    assert fi_id
+
+    mail_sent = ActionMailer::Base.deliveries.last
+
+    assert_equal mail_sent.to[0], "test@test.com"
+    assert_includes mail_sent.subject, 'Invitation'
   end
 
   test 'PATCH /account/me with valid' do

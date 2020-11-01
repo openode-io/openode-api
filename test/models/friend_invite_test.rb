@@ -43,7 +43,7 @@ class FriendInviteTest < ActiveSupport::TestCase
                            order: order, email: "myemail#{i}@gmail.com")
     end
     invite = FriendInvite.create(user: user, status: FriendInvite::STATUS_PENDING,
-                                 order: order, email: "myemail#{150}@gmail.com")
+                                 order: order, email: "myemail150@gmail.com")
 
     assert_equal invite.valid?, false
   end
