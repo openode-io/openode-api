@@ -13,9 +13,9 @@ namespace :update do
       email_invite = invite.email
       user_invited = User.find_by email: email_invite
 
-      days_elapsed = (Time.now - invite.created_at) / (60 * 60 * 24)
+      days_elapsed = (Time.zone.now - invite.created_at) / (60 * 60 * 24)
 
-      if user_invited && user_invited.activated
+      if user_invited&.activated
         # change status
         invite.status = FriendInvite::STATUS_APPROVED
         invite.save
@@ -40,4 +40,3 @@ namespace :update do
     end
   end
 end
-

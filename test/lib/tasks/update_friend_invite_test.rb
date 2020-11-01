@@ -8,7 +8,8 @@ class LibTasksUpdateFriendInviteTest < ActiveSupport::TestCase
     user = User.last
     user_invited = User.where.not(id: user.id).first
 
-    invite = FriendInvite.create!(user: user, status: FriendInvite::STATUS_PENDING, email: user_invited.email)
+    invite = FriendInvite.create!(user: user, status: FriendInvite::STATUS_PENDING,
+                                  email: user_invited.email)
 
     invoke_task "update:friend_invites"
 
@@ -25,7 +26,8 @@ class LibTasksUpdateFriendInviteTest < ActiveSupport::TestCase
 
     user = User.last
 
-    invite = FriendInvite.create!(user: user, status: FriendInvite::STATUS_PENDING, email: "invalid@email.com")
+    invite = FriendInvite.create!(user: user, status: FriendInvite::STATUS_PENDING,
+                                  email: "invalid@email.com")
     invite.created_at = 10.days.ago
     invite.save
 

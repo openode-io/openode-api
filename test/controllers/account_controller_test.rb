@@ -49,7 +49,8 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
   test '/account/friend_invites with invite' do
     u = User.find_by! token: '1234s56789'
     u.friend_invites.destroy_all
-    invite = FriendInvite.create!(user: u, status: FriendInvite::STATUS_PENDING, email: "test@test.com")
+    invite = FriendInvite.create!(user: u, status: FriendInvite::STATUS_PENDING,
+                                  email: "test@test.com")
     get '/account/friend-invites', headers: default_headers_auth, as: :json
 
     assert_response :success
