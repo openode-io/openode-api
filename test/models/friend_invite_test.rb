@@ -33,6 +33,16 @@ class FriendInviteTest < ActiveSupport::TestCase
     assert_equal invite.valid?, false
   end
 
+  test "fail if itself" do
+    user = User.last
+    order = Order.last
+
+    invite = FriendInvite.create(user: user, status: FriendInvite::STATUS_PENDING,
+                                 order: order, email: user.email)
+
+    assert_equal invite.valid?, false
+  end
+
   test "fail if creating too many invites" do
     user = User.last
     order = Order.last
