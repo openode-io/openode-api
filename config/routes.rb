@@ -41,6 +41,8 @@ Rails.application.routes.draw do
     get  'me', to: 'account#me'
     patch 'me', to: 'account#update'
     delete 'me', to: 'account#destroy'
+    get  'friend-invites', to: 'account#friend_invites'
+    post 'invite-friend', to: 'account#invite_friend'
     post 'regenerate-token', to: 'account#regenerate_token'
     post 'register', to: 'account#register'
     post 'forgot-password', to: 'account#forgot_password'

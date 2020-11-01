@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  status: pending
+  email: email@two.com
+
+two:
+  user: two
+  status: pending
+  email: email@one.com

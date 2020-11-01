@@ -1,5 +1,6 @@
 class AccountController < ApplicationController
-  before_action only: [:me, :update, :regenerate_token, :spendings, :destroy] do
+  before_action only: [:me, :update, :regenerate_token,
+                       :spendings, :destroy, :friend_invites, :invite_friend] do
     authorize
   end
 
@@ -26,6 +27,18 @@ class AccountController < ApplicationController
     result.delete('password_hash')
 
     json(result)
+  end
+
+  def friend_invites
+    json(@user.friend_invites)
+  end
+
+  def invite_friend
+    friend_invite = FriendInvite.create!(user: @user, status: FriendInvite::STATUS_PENDING,
+                                         email: params[:email])
+    InviteMailer.with(user: @user, email_to: params[:email]).send_invite.deliver_now
+
+    json(friend_invite)
   end
 
   def register

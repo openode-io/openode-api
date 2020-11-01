@@ -27,6 +27,7 @@ class User < ApplicationRecord
   has_many :websites, dependent: :destroy
   has_many :orders
   has_many :viewed_notifications, dependent: :destroy
+  has_many :friend_invites, dependent: :destroy
 
   scope :lacking_credits, -> { where('credits < nb_credits_threshold_notification') }
   scope :not_notified_low_credit, -> { where(notified_low_credit: 0) }
