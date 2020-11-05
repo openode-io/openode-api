@@ -5,10 +5,11 @@ class FriendInviteTest < ActiveSupport::TestCase
     user = User.last
 
     invite = FriendInvite.create!(user: user, status: FriendInvite::STATUS_PENDING,
-                                  email: "my@email.com")
+                                  email: "My@email.com")
 
     assert_equal invite.status, FriendInvite::STATUS_PENDING
     assert_equal invite.user, user
+    assert_equal invite.email, "my@email.com"
   end
 
   test "happy path create with order" do
@@ -39,6 +40,17 @@ class FriendInviteTest < ActiveSupport::TestCase
 
     invite = FriendInvite.create(user: user, status: FriendInvite::STATUS_PENDING,
                                  order: order, email: user.email)
+
+    assert_equal invite.valid?, false
+  end
+
+  test "fail if existing user" do
+    user = User.last
+    other_user = User.where.not(id: user.id).first
+    order = Order.last
+
+    invite = FriendInvite.create(user: user, status: FriendInvite::STATUS_PENDING,
+                                 order: order, email: other_user.email)
 
     assert_equal invite.valid?, false
   end

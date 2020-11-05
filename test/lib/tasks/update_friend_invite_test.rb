@@ -9,7 +9,9 @@ class LibTasksUpdateFriendInviteTest < ActiveSupport::TestCase
     user_invited = User.where.not(id: user.id).first
 
     invite = FriendInvite.create!(user: user, status: FriendInvite::STATUS_PENDING,
-                                  email: user_invited.email)
+                                  email: "my@invalid.com")
+    invite.email = user_invited.email
+    invite.save!
 
     invoke_task "update:friend_invites"
 
