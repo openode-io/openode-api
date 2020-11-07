@@ -85,30 +85,31 @@ namespace :kube_maintenance do
 
       statuses_by_website.each do |website, statuses|
         Rails.logger.info "[#{name}] logging status for #{website.site_name}"
-        website_status = WebsiteStatus.log(website, statuses)
+        # website_status = WebsiteStatus.log(website, statuses)
+        WebsiteStatus.log(website, statuses)
 
         ###
         # states analysis
 
         # contains OOMKilled with significant restart count
 
-        statuses_killed = website_status.statuses_containing_terminated_reason('oomkilled')
-                                        .select do |st|
-          st['restartCount'] && st['restartCount'] >= 1
-        end
+        # statuses_killed = website_status.statuses_containing_terminated_reason('oomkilled')
+        #                                .select do |st|
+        #  st['restartCount'] && st['restartCount'] >= 1
+        # end
 
-        if statuses_killed.any?
-          Rails.logger.info "[#{name}] should kill deployment of " \
-                            "#{website.site_name} - #{statuses_killed.inspect}"
+        # if statuses_killed.any?
+        #  Rails.logger.info "[#{name}] should kill deployment of " \
+        #                    "#{website.site_name} - #{statuses_killed.inspect}"
 
-          wl = website.website_locations.first
-          wl.notify_force_stop('Out of memory detected')
+        #  wl = website.website_locations.first
+        #  wl.notify_force_stop('Out of memory detected')
 
-          cluster_runner.execution_method.do_stop(
-            website: website,
-            website_location: wl
-          )
-        end
+        #  cluster_runner.execution_method.do_stop(
+        #    website: website,
+        #    website_location: wl
+        #  )
+        # end
       rescue StandardError => e
         Rails.logger.error "[#{name}] skipping statuses_by_website, #{e}"
       end
