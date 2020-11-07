@@ -275,12 +275,11 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
   test '/instances/:instance_id/stop - should still stop if site is invalid' do
     @website.update_attribute('account_type', 'open_source')
-    @website.update_attribute('open_source', {
-                                'status' => 'approved',
-                                'title' => 'helloworld',
-                                'description' => 'a ' * 31,
-                                'repository_url' => 'http://github.com/invalid'
-                              })
+    @website.update_attribute('open_source',
+                              'status' => 'approved',
+                              'title' => 'helloworld',
+                              'description' => 'a ' * 31,
+                              'repository_url' => 'http://github.com/invalid')
 
     prepare_make_secret(@kubernetes_method, @website, @website_location, "result")
     prepare_get_dotenv(@kubernetes_method, @website, "VAR1=12")

@@ -7,6 +7,6 @@ class InstanceImageManagerTest < ActiveSupport::TestCase
       registry_name: "openode-test"
     )
 
-    assert_equal instance.opts, { registry_name: 'openode-test' }
+    assert_equal instance.opts, registry_name: 'openode-test'
   end
 end

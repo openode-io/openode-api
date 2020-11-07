@@ -207,7 +207,7 @@ class InstanceImageManagerTest < ActiveSupport::TestCase
   test 'tag_parts - happy path' do
     parts = DeploymentMethod::Util::InstanceImageManager.tag_parts("asdf--12--1985")
 
-    assert_equal parts, { site_name: "asdf", website_id: "12", execution_id: "1985" }
+    assert_equal parts, site_name: "asdf", website_id: "12", execution_id: "1985"
   end
 
   test 'tag_parts - with invalid tag' do

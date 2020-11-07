@@ -337,7 +337,11 @@ class InstancesController < ApplicationController
     json(result: 'success')
   end
 
-  api!
+  api :POST, 'instances/:id/cmd'
+  description 'Execute a command in the container'
+  param :cmd, String, desc: 'Command to execute', required: true
+  param :app, String, desc: 'Application name where to execute. www is the main app name.',
+                      required: true
   def cmd
     assert params['cmd'].present?
 

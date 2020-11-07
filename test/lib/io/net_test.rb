@@ -140,7 +140,7 @@ class LibIoNetTest < ActiveSupport::TestCase
     ]
 
     assert_equal Io::Net.diff(list, previous_list),
-                 { 'rcv_bytes' => 15, 'tx_bytes' => 3 }
+                 'rcv_bytes' => 15, 'tx_bytes' => 3
   end
 
   test 'diff - with no previous should use current' do
@@ -152,6 +152,6 @@ class LibIoNetTest < ActiveSupport::TestCase
     ]
 
     assert_equal Io::Net.diff(list, nil),
-                 { 'rcv_bytes' => 45, 'tx_bytes' => 5 }
+                 'rcv_bytes' => 45, 'tx_bytes' => 5
   end
 end
