@@ -15,7 +15,8 @@ namespace :update do
 
       days_elapsed = (Time.zone.now - invite.created_at) / (60 * 60 * 24)
 
-      if user_invited&.activated
+      if user_invited&.activated && !user_invited.latest_request_ip.empty? &&
+         user_invited.latest_request_ip != invite.created_by_ip
         # change status
         invite.status = FriendInvite::STATUS_APPROVED
         invite.save
@@ -37,6 +38,8 @@ namespace :update do
         Rails.logger.info "[#{task_name}] invite too old... destroying invite #{invite.id}"
         invite.destroy
       end
+    rescue StandardError => e
+      Rails.logger.error "[#{task_name}] skipping statuses_by_website, #{e}"
     end
   end
 end
