@@ -35,7 +35,8 @@ class AccountController < ApplicationController
 
   def invite_friend
     friend_invite = FriendInvite.create!(user: @user, status: FriendInvite::STATUS_PENDING,
-                                         email: params[:email])
+                                         email: params[:email],
+                                         created_by_ip: params[:created_by_ip])
     InviteMailer.with(user: @user, email_to: params[:email]).send_invite.deliver_now
 
     json(friend_invite)
