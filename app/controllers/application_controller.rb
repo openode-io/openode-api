@@ -17,13 +17,17 @@ class ApplicationController < ActionController::API
 
   def authorize
     token = request.headers['x-auth-token'] || params['token']
+    origin_request_ip = request.headers['x-origin-request-ip']
 
     authorization_error!("No token provided") unless token
 
     @user = User.find_by!(token: token)
 
     # update user updated_at to know which user is active
-    @user.touch if (Time.zone.now - @user.updated_at) / (60 * 60) >= 1
+    if (Time.zone.now - @user.updated_at) / (60 * 60) >= 1
+      @user.touch
+      @user.update_attribute('latest_request_ip', origin_request_ip)
+    end
 
     rate_limit(@user, response: response)
   end

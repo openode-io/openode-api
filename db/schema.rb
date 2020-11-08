@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_11_07_223427) do
+ActiveRecord::Schema.define(version: 2020_11_08_155232) do
 
   create_table "addons", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "name"
@@ -197,6 +197,7 @@ ActiveRecord::Schema.define(version: 2020_11_07_223427) do
     t.string "activation_hash", limit: 200
     t.integer "suspended", limit: 1, default: 0
     t.text "account"
+    t.string "latest_request_ip", default: ""
     t.index ["day_one_mail_at"], name: "users_day_one_mail_at"
     t.index ["email"], name: "users_email_unique", unique: true
     t.index ["is_admin"], name: "user_is_admin"
