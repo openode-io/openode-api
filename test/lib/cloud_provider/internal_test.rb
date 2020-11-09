@@ -5,22 +5,22 @@ class InternalTest < ActiveSupport::TestCase
   test 'calc_cost_per_month' do
     internal_provider = CloudProvider::Manager.instance.first_of_type('internal')
 
-    assert_equal internal_provider.calc_cost_per_month(50).between?(0.5, 0.5), true
-    assert_equal internal_provider.calc_cost_per_month(1024).between?(10.24, 10.24), true
-    assert_equal internal_provider.calc_cost_per_month(2048).between?(20.48, 20.48), true
+    assert_equal internal_provider.calc_cost_per_month(50).between?(0.75, 0.75), true
+    assert_equal internal_provider.calc_cost_per_month(1024).between?(15.36, 15.36), true
+    assert_equal internal_provider.calc_cost_per_month(2048).between?(30.72, 30.72), true
   end
 
   test 'calc_cost_per_hour' do
     internal_provider = CloudProvider::Manager.instance.first_of_type('internal')
 
-    assert_in_delta internal_provider.calc_cost_per_hour(50), 0.00067, 0.00001
+    assert_in_delta internal_provider.calc_cost_per_hour(50), 0.00100806, 0.00001
   end
 
   test 'calc_cost_per_minute' do
     internal_provider = CloudProvider::Manager.instance.first_of_type('internal')
 
     puts "internal_provider.calc_cost_per_minute(50) #{internal_provider.calc_cost_per_minute(50)}"
-    assert_in_delta internal_provider.calc_cost_per_minute(50), 0.0000112, 0.000001
+    assert_in_delta internal_provider.calc_cost_per_minute(50), 0.0000168, 0.000001
   end
 
   test 'plans' do

@@ -1909,7 +1909,7 @@ class WebsiteTest < ActiveSupport::TestCase
   test "plan price - replicas = 1" do
     w = default_website
 
-    assert_in_delta w.plan_cost, 0.1344, 0.00001
+    assert_in_delta w.plan_cost, 0.201612, 0.00001
   end
 
   test "plan price - replicas = 2" do
@@ -1921,13 +1921,13 @@ class WebsiteTest < ActiveSupport::TestCase
 
     w.website_locations.reload
 
-    assert_in_delta w.plan_cost, 0.1344 * 2, 0.00005
+    assert_in_delta w.plan_cost, 0.2016 * 2, 0.00005
   end
 
   test "blue_green_deployment_option_cost - replicas = 1" do
     w = default_website
 
-    assert_in_delta w.blue_green_deployment_option_cost, 0.1344 * 0.20, 0.00001
+    assert_in_delta w.blue_green_deployment_option_cost, 0.2016 * 0.20, 0.00001
   end
 
   test "blue_green_deployment_option_cost - replicas = 2" do
@@ -1939,6 +1939,6 @@ class WebsiteTest < ActiveSupport::TestCase
 
     w.website_locations.reload
 
-    assert_in_delta w.blue_green_deployment_option_cost, 0.1344 * 0.20 * 2, 0.00001
+    assert_in_delta w.blue_green_deployment_option_cost, 0.2016 * 0.20 * 2, 0.00001
   end
 end
