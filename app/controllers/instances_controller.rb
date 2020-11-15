@@ -450,6 +450,8 @@ class InstancesController < ApplicationController
   api :POST, 'instances/:id/restart'
   description 'Rebuild and spawn the instance.'
   param :parent_execution_id, String, desc: 'Rollback to parent_execution_id', required: false
+  param :repository_url, String, desc: 'Deploy with a repository url (example: git)',
+    required: false
   def restart
     # run in background:
 

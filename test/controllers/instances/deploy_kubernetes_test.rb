@@ -136,6 +136,101 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test '/instances/:instance_id/restart - happy path with repository url (public)' do
+    @website.crontab = ''
+    @website.save!
+
+    website2 = Website.where.not(id: @website.id).first
+
+    assert_not_equal website2.id, @website.id
+
+    ws1 = WebsiteStatus.log(@website, test: 234)
+    ws2 = WebsiteStatus.log(website2, test: 234)
+
+    repository_url = "git@myrepo.com/thisone"
+
+    post "/instances/#{@website.site_name}/restart",
+         as: :json,
+         params: base_params.merge(repository_url: repository_url),
+         headers: default_headers_auth
+
+    prepare_launch_happy_path(@kubernetes_method, @website, @website_location)
+
+    assert_nil WebsiteStatus.find_by(id: ws1.id)
+    assert WebsiteStatus.find_by(id: ws2.id)
+
+    assert_equal @website.secret[:repository_url], repository_url
+
+    assert_scripted do
+      begin_ssh
+      invoke_all_jobs
+
+      deployment = @website.deployments.last
+
+      assert_equal deployment.obj['with_repository_url'], repository_url
+
+      @website.reload
+
+      assert_equal @website.status, Website::STATUS_ONLINE
+      assert_equal deployment.status, Deployment::STATUS_SUCCESS
+      assert_equal deployment.result['steps'].length, 18 # global, 2 kills, finalize
+
+      assert_equal deployment.result['errors'].length, 0
+
+      # should also have a deployment with events
+      assert_equal deployment.events.length, 15
+
+      allowed_to = dep_event_exists?(deployment.events,
+                                     'running', 'allowed to dep')
+      assert_equal allowed_to, true
+
+      assert deployment.obj['image_name_tag'].present?
+      assert_includes deployment.obj['image_name_tag'],
+                      'docker.io/openode_prod/testkubernetes-type:testkubernetes-type'
+
+      # check dotenv saved
+      assert_equal deployment.secret[:dotenv], "VAR1=12"
+
+      steps_to_verify = [
+        { "status" => "running", "level" => "info", "update" => "Verifying allowed to deploy..." },
+        { "status" => "running", "level" => "info", "update" => "Preparing instance image..." },
+        { "status" => "running", "level" => "info", "update" => "new image built" },
+        { "status" => "running", "level" => "info", "update" => "Instance image ready." },
+        { "status" => "running", "level" => "info", "update" => "Pushing instance image..." },
+        { "status" => "running", "level" => "info",
+          "update" => "Instance image pushed successfully." },
+        { "status" => "running", "level" => "info",
+          "update" => "Applying instance environment..." },
+        { "status" => "running", "level" => "info", "update" => "success" },
+        { "status" => "running", "level" => "info", "update" => "Verifying instance up..." },
+        { "status" => "running", "level" => "info",
+          "update" => "...instance verification finished." },
+        { "status" => "running", "level" => "info", "update" => "Finalizing..." },
+        { "status" => "success", "level" => "info", "update" => "hello logs" },
+        { "status" => "success", "level" => "info",
+          "update" => "\n\n*** Final Deployment state: SUCCESS ***\n" },
+        { "status" => "success", "level" => "info", "update" => "...finalized." }
+      ]
+
+      puts "events #{deployment.events.inspect}"
+
+      steps_to_verify.each do |step|
+        Rails.logger.info "checking step .. #{step.inspect}"
+        verified_event = dep_event_exists?(deployment.events,
+                                           step['status'], step['update'])
+        assert_equal verified_event, true
+      end
+
+      final_details_event = @website.deployments.last.events.find do |e|
+        e['update'].andand['details'].andand['result']
+      end
+
+      assert_not_nil final_details_event
+      assert_equal(final_details_event['update']['details']['url'],
+                   "http://#{@website.site_name}.#{CloudProvider::Manager.base_hostname}/")
+    end
+  end
+
   test '/instances/:instance_id/restart - rollback' do
     @website.crontab = ''
     @website.save!
