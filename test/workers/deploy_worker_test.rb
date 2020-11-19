@@ -18,8 +18,7 @@ class DeployWorkerTest < ActiveSupport::TestCase
     repo = "git@github.com:openode-io/openode-api.git"
     params = { "repository_url" => repo }
     DeployWorker.prepare_execution(@runner, 'Deployment', params)
-    
+
     assert_equal @website.reload.secret[:repository_url], repo
   end
 end
-

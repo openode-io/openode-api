@@ -31,9 +31,6 @@ class DeployWorker
           cmd_name: 'initialization', options: { is_complex: true }
         },
         {
-          cmd_name: 'git_clone', options: { is_complex: true }
-        },
-        {
           cmd_name: 'launch', options: {
             is_complex: true,
             limit_resources: runner.cloud_provider.limit_resources?

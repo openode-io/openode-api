@@ -447,6 +447,25 @@ class InstancesController < ApplicationController
     }.merge(args)
   end
 
+  api :POST, 'instances/:id/scm-clone'
+  description 'Clone a remote repository to the build server.'
+  param :repository_url, String, desc: 'Deploy with a repository url (example: git)'
+  def scm_clone
+
+    begin
+      result = @runner.execute([
+        {
+          cmd_name: 'git_clone',
+          options: { repository_url: params[:repository_url] }
+        }
+      ])
+    rescue => e
+      validation_error!("There was an issue to git clone - #{e}")
+    end
+
+    json({"status": "success"})
+  end
+
   api :POST, 'instances/:id/restart'
   description 'Rebuild and spawn the instance.'
   param :parent_execution_id, String, desc: 'Rollback to parent_execution_id', required: false
