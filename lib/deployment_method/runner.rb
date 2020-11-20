@@ -28,6 +28,13 @@ module DeploymentMethod
         parent_execution_id: args['parent_execution_id']
       )
 
+      if args["repository_url"]
+        @website.merge_secret!(repository_url: args["repository_url"])
+      end
+
+      execution.obj ||= {}
+      execution.obj['with_repository_url'] = args["repository_url"]
+
       execution.status = Execution::STATUS_SUCCESS
       execution.save
 

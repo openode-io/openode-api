@@ -1,5 +1,8 @@
+
 module DeploymentMethod
   class Base
+    include Plugins::Git
+
     RuntimeError = Class.new(StandardError)
 
     attr_accessor :runner

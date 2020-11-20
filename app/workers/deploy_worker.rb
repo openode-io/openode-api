@@ -2,8 +2,6 @@ class DeployWorker
   include Sidekiq::Worker
   sidekiq_options queue: 'critical', retry: false
 
-  # sidekiq_options retry: 5
-
   def self.prepare_execution(runner, execution_type, execution_params)
     if execution_type
       runner.init_execution!(execution_type, execution_params)
