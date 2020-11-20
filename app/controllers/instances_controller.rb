@@ -49,6 +49,10 @@ class InstancesController < ApplicationController
     requires_access_to(Website::PERMISSION_CONFIG)
   end
 
+  before_action only: [:scm_clone, :restart] do
+    sanitize_input_cmd(params, :repository_url)
+  end
+
   api!
   def index
     json(@user.websites_with_access)
@@ -451,26 +455,25 @@ class InstancesController < ApplicationController
   description 'Clone a remote repository to the build server.'
   param :repository_url, String, desc: 'Deploy with a repository url (example: git)'
   def scm_clone
-
     begin
-      result = @runner.execute([
-        {
-          cmd_name: 'git_clone',
-          options: { repository_url: params[:repository_url] }
-        }
-      ])
-    rescue => e
+      @runner.execute([
+                        {
+                          cmd_name: 'git_clone',
+                          options: { repository_url: params[:repository_url] }
+                        }
+                      ])
+    rescue StandardError => e
       validation_error!("There was an issue to git clone - #{e}")
     end
 
-    json({"status": "success"})
+    json({ "status": "success" })
   end
 
   api :POST, 'instances/:id/restart'
   description 'Rebuild and spawn the instance.'
   param :parent_execution_id, String, desc: 'Rollback to parent_execution_id', required: false
   param :repository_url, String, desc: 'Deploy with a repository url (example: git)',
-    required: false
+                                 required: false
   def restart
     # run in background:
 

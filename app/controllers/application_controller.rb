@@ -2,6 +2,7 @@ class ApplicationController < ActionController::API
   include Response
   include ExceptionHandler
   include ApiRateLimit
+  include SanitizeRequest
 
   def validation_error!(msg)
     raise ApplicationRecord::ValidationError, msg

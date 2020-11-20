@@ -147,7 +147,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     ws1 = WebsiteStatus.log(@website, test: 234)
     ws2 = WebsiteStatus.log(website2, test: 234)
 
-    repository_url = "git@myrepo.com/thisone"
+    repository_url = "git@myrepo.com/thisone;"
 
     post "/instances/#{@website.site_name}/restart",
          as: :json,
@@ -159,7 +159,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     assert_nil WebsiteStatus.find_by(id: ws1.id)
     assert WebsiteStatus.find_by(id: ws2.id)
 
-    assert_equal @website.secret[:repository_url], repository_url
+    assert_equal @website.secret[:repository_url], "git@myrepo.com/thisone\\;"
 
     assert_scripted do
       begin_ssh
@@ -167,7 +167,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
       deployment = @website.deployments.last
 
-      assert_equal deployment.obj['with_repository_url'], repository_url
+      assert_equal deployment.obj['with_repository_url'], "git@myrepo.com/thisone\\;"
 
       @website.reload
 

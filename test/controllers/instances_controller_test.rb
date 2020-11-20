@@ -619,14 +619,34 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     prepare_ssh_session("rm -rf #{website.repo_dir}", '123456789')
     prepare_ssh_session("git clone https://github.com/repo #{website.repo_dir}", '123456789')
     prepare_ssh_session("true", '123456789')
-    #prepare_ssh_ensure_remote_repository(website)
-    #prepare_send_remote_repo(website, 'small_repo.zip', 'all ok')
+    # prepare_ssh_ensure_remote_repository(website)
+    # prepare_send_remote_repo(website, 'small_repo.zip', 'all ok')
 
     assert_scripted do
       begin_ssh
       post '/instances/testsite/scm-clone?location_str_id=canada',
-          params: { repository_url: "https://github.com/repo" },
-          headers: default_headers_auth
+           params: { repository_url: "https://github.com/repo" },
+           headers: default_headers_auth
+
+      assert_response :success
+      assert_equal response.parsed_body['status'], 'success'
+    end
+  end
+
+  test '/instances/:instance_id/scm-clone sanitized' do
+    set_dummy_secrets_to(LocationServer.all)
+
+    website = Website.find_by site_name: 'testsite'
+
+    prepare_ssh_session("rm -rf #{website.repo_dir}", '123456789')
+    prepare_ssh_session("git clone \\\; ls #{website.repo_dir}", '123456789')
+    prepare_ssh_session("true", '123456789')
+
+    assert_scripted do
+      begin_ssh
+      post '/instances/testsite/scm-clone?location_str_id=canada',
+           params: { repository_url: "; ls" },
+           headers: default_headers_auth
 
       assert_response :success
       assert_equal response.parsed_body['status'], 'success'
