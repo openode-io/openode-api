@@ -460,6 +460,9 @@ class InstancesController < ApplicationController
                         {
                           cmd_name: 'git_clone',
                           options: { repository_url: params[:repository_url] }
+                        },
+                        {
+                          cmd_name: 'openode_cli_template'
                         }
                       ])
     rescue StandardError => e

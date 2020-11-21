@@ -636,8 +636,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     prepare_ssh_session("rm -rf #{website.repo_dir}", '123456789')
     prepare_ssh_session("git clone https://github.com/repo #{website.repo_dir}", '123456789')
     prepare_ssh_session("true", '123456789')
-    # prepare_ssh_ensure_remote_repository(website)
-    # prepare_send_remote_repo(website, 'small_repo.zip', 'all ok')
+    prepare_ssh_session("cd #{website.repo_dir} ; openode template", '')
 
     assert_scripted do
       begin_ssh
@@ -658,6 +657,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     prepare_ssh_session("rm -rf #{website.repo_dir}", '123456789')
     prepare_ssh_session("git clone \\\; ls #{website.repo_dir}", '123456789')
     prepare_ssh_session("true", '123456789')
+    prepare_ssh_session("cd #{website.repo_dir} ; openode template", '')
 
     assert_scripted do
       begin_ssh

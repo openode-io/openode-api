@@ -2,6 +2,7 @@
 module DeploymentMethod
   class Base
     include Plugins::Git
+    include Plugins::OpenodeCli
 
     RuntimeError = Class.new(StandardError)
 
