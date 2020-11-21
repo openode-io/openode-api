@@ -25,8 +25,13 @@ class ApplicationController < ActionController::API
     @user = User.find_by!(token: token)
 
     # update user updated_at to know which user is active
-    if (Time.zone.now - @user.updated_at) / (60 * 60) >= 1
+    threshold_user_should_update = (Time.zone.now - @user.updated_at) / (60 * 60) >= 1
+
+    if threshold_user_should_update
       @user.touch
+    end
+
+    if threshold_user_should_update || @user.latest_request_ip.blank?
       @user.update_attribute('latest_request_ip', origin_request_ip)
     end
 

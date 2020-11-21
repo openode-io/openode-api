@@ -52,6 +52,23 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal u.latest_request_ip, "127.0.0.2"
   end
 
+  test '/instances/ passed request ip - none already set' do
+    u = User.find_by token: '1234s56789'
+    u.updated_at = Time.zone.now
+    u.latest_request_ip = ""
+    u.save!
+
+    get '/instances/', as: :json, headers: {
+      "x-auth-token": u.token,
+      "x-origin-request-ip": "127.0.0.2"
+    }
+
+    assert_response :success
+
+    assert Time.zone.now - u.reload.updated_at < 10
+    assert_equal u.latest_request_ip, "127.0.0.2"
+  end
+
   test '/instances/ with null token should fail' do
     w = Website.find_by site_name: 'testsite'
     w.domains = []
