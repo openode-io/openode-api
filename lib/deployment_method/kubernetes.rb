@@ -689,10 +689,10 @@ module DeploymentMethod
                 resources:
                   limits:
                     ephemeral-storage: 100Mi
-                    memory: #{website_addon.website.memory}Mi
+                    memory: #{website_addon.memory}Mi
                   requests:
                     ephemeral-storage: 100Mi
-                    memory: #{website_addon.website.memory}Mi
+                    memory: #{website_addon.memory}Mi
                 #{'volumeMounts:  ' if website_addon.persistence?}
         #{generate_deployment_addon_mount_paths_yml(website_addon)}
       END_YML

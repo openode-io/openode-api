@@ -21,6 +21,10 @@ module WithPlan
     WithPlan.plan_of(account_type)
   end
 
+  def memory
+    plan[:ram].to_i # must not have decimals
+  end
+
   def validate_account_type
     found_plan = Website.plan_of(account_type)
     return errors.add(:account_type, "Invalid plan #{account_type}") unless found_plan

@@ -716,10 +716,6 @@ class Website < ApplicationRecord
     WithPlan.plan_of(acc_type)
   end
 
-  def memory
-    plan[:ram].to_i # must not have decimals
-  end
-
   def cpus
     (1 + total_extra_cpus).to_i
   end
