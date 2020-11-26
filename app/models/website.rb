@@ -239,6 +239,7 @@ class Website < ApplicationRecord
   validates :cloud_type, inclusion: { in: [CLOUD_TYPE_PRIVATE_CLOUD, CLOUD_TYPE_CLOUD] }
   validates :status, inclusion: { in: STATUSES }
 
+  before_save :initialize_domains
   after_save :notify_open_source_requested
 
   def init_subdomain; end
@@ -317,6 +318,15 @@ class Website < ApplicationRecord
     end
 
     send("init_#{domain_type}")
+  end
+
+  def initialize_domains
+    self.domains ||= []
+
+    if domain_type_was != domain_type && custom_domain? &&
+       !self.domains.include?("www.#{site_name}")
+      self.domains << "www.#{site_name}"
+    end
   end
 
   def locations

@@ -1526,7 +1526,53 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.site_name, 'hello.world'
     assert_equal website.account_type, Website::DEFAULT_ACCOUNT_TYPE
     assert_equal website.domain_type, Website::DOMAIN_TYPE_CUSTOM_DOMAIN
-    assert_equal website.domains, ['hello.world']
+    assert_equal website.domains, ['hello.world', "www.hello.world"]
+  end
+
+  test 'on save populate www if different domain type' do
+    user = default_user
+    user.websites.destroy_all
+
+    website = Website.create!(
+      site_name: 'hello.World',
+      user_id: user.id
+    )
+    website.site_name = "helloworld"
+    website.domains = []
+    website.domain_type = "subdomain"
+
+    website.save
+
+    website.site_name = "hello.world"
+    website.domains = ["hello.world"]
+    website.domain_type = "custom_domain"
+    website.save
+    website.reload
+
+    assert_equal website.domains, ["hello.world", "www.hello.world"]
+  end
+
+  test 'on double save populate www if different domain type' do
+    user = default_user
+    user.websites.destroy_all
+
+    website = Website.create!(
+      site_name: 'hello.World',
+      user_id: user.id
+    )
+    website.site_name = "helloworld"
+    website.domains = []
+    website.domain_type = "subdomain"
+
+    website.save
+
+    website.site_name = "hello.world"
+    website.domains = ["hello.world", "www.hello.world"]
+    website.domain_type = "custom_domain"
+    website.save
+    website.reload
+
+    assert_equal website.domains, ["hello.world", "www.hello.world"]
   end
 
   test 'create - custom domain - not allowed if root domain used' do
