@@ -635,9 +635,11 @@ module DeploymentMethod
     end
 
     def generate_deployment_addon_yml(website_addon, opts = {})
+      include_volume_claim = opts[:with_pvc_object] && website_addon.persistence?
+
       <<~END_YML
         ---
-        #{generate_persistence_addon_volume_claim_yml(website_addon) if opts[:with_pvc_object]}
+        #{generate_persistence_addon_volume_claim_yml(website_addon) if include_volume_claim}
         ---
         apiVersion: v1
         kind: Service

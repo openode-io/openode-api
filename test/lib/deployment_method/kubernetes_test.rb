@@ -749,6 +749,7 @@ VAR2=5678
     assert_includes yml, "containerPort: 6379"
     assert_includes yml, "image: redis:alpine"
     assert_includes yml, "memory: 100"
+    assert_not_includes yml, "PersistentVolumeClaim"
   end
 
   test 'generate_deployment_addon_yml - with persistence' do
