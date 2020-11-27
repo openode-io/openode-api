@@ -166,7 +166,7 @@ class Website < ApplicationRecord
       description: 'The build duration limit in seconds.',
       min: 50,
       default: 100,
-      max: 600
+      max: 900
     },
     {
       variable: 'STATUS_PROBE_PATH',
