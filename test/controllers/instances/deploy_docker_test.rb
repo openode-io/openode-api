@@ -47,6 +47,11 @@ class InstancesControllerDeployDockerTest < ActionDispatch::IntegrationTest
 
     website = default_website
     website.user.activated = false
+
+    user = website.user
+    user.email = "myinvalidemail@gmail.com"
+    user.save!
+
     website.user.save
 
     prepare_default_ports

@@ -445,6 +445,26 @@ class ActiveSupport::TestCase
       content_type: 'application/json',
       response_status: 200,
       response_path: 'test/fixtures/http/openode_api/empty.json'
+    },
+    {
+      url: 'https://api.neverbounce.com/v4.2/single/check',
+      method: :get,
+      with: {
+        body: { "email": "myadmin@thisisit.com", "key": "secret_xxxxxx" }
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/neverbounce/valid.json'
+    },
+    {
+      url: 'https://api.neverbounce.com/v4.2/single/check',
+      method: :get,
+      with: {
+        body: { "email": "myinvalidemail@gmail.com", "key": "secret_xxxxxx" }
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/neverbounce/invalid.json'
     }
   ]
 

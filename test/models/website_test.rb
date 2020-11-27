@@ -540,8 +540,22 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal can_deploy, false
   end
 
-  test "can_deploy_to? can't if user not activated" do
+  test "can_deploy_to? can if user not activated but can verify" do
     website = Website.find_by(site_name: 'testsite')
+    website.user.activated = false
+    website.user.save!
+    website.user.reload
+
+    can_deploy, = website.can_deploy_to?(website.website_locations.first)
+
+    assert_equal can_deploy, true
+  end
+
+  test "can_deploy_to? can if user not activated can't verify" do
+    website = Website.find_by(site_name: 'testsite')
+    user = website.user
+    user.email = "myinvalidemail@gmail.com"
+    user.save!
     website.user.activated = false
     website.user.save!
     website.user.reload

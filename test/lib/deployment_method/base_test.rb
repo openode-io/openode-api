@@ -53,6 +53,11 @@ class DeploymentMethodBaseTest < ActiveSupport::TestCase
     website_location = website.website_locations.first
 
     website.user.activated = false
+
+    user = website.user
+    user.email = "myinvalidemail@gmail.com"
+    user.save!
+
     website.user.save
 
     begin

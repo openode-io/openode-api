@@ -1,0 +1,11 @@
+{
+  "status": "success",
+  "result": "valid",
+  "flags": [
+    "has_dns",
+    "has_dns_mx"
+  ],
+  "suggested_correction": "",
+  "retry_token": "",
+  "execution_time": 499
+}

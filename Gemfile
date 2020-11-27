@@ -32,6 +32,7 @@ gem 'http'
 gem 'mailgun-ruby'
 gem 'net-sftp'
 gem 'net-ssh'
+gem "neverbounce-api"
 gem 'paypal-checkout-sdk'
 gem 'public_suffix'
 gem 'rack-cors'

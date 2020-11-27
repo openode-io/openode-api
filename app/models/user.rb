@@ -1,4 +1,5 @@
 require 'bcrypt'
+require 'neverbounce'
 
 class User < ApplicationRecord
   serialize :coupons, JSON
@@ -28,6 +29,9 @@ class User < ApplicationRecord
   has_many :orders
   has_many :viewed_notifications, dependent: :destroy
   has_many :friend_invites, dependent: :destroy
+  has_many :user_email_verifications, foreign_key: :ref_id,
+                                      class_name: :UserEmailVerification,
+                                      dependent: :destroy
 
   scope :lacking_credits, -> { where('credits < nb_credits_threshold_notification') }
   scope :not_notified_low_credit, -> { where(notified_low_credit: 0) }
@@ -207,6 +211,30 @@ class User < ApplicationRecord
     end
 
     true
+  end
+
+  def verify_email!
+    return false if user_email_verifications.last
+
+    verification = UserEmailVerification.create(ref_id: id)
+    client = NeverBounce::API::Client.new(api_key: ENV["NEVER_BOUNCE_API_KEY"])
+
+    response = client.single_check(email: email)
+
+    verification.obj = response.touch
+    verification.save
+
+    is_valid = response.result == "valid"
+
+    self.activated = is_valid
+    save
+
+    is_valid
+  rescue StandardError => e
+    logger.error("invalid email!")
+    logger.error(e.inspect.to_s)
+
+    false
   end
 
   def first_unused_coupon

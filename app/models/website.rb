@@ -845,7 +845,7 @@ class Website < ApplicationRecord
 
   # true/false, msg
   def can_deploy_to?(_website_location)
-    unless user.activated?
+    if !user.activated? && !user.verify_email!
       msg = 'User account not yet activated. Please make sure to click the ' \
             'activation link in your registration email.'
       return false, "*** #{msg}"

@@ -561,4 +561,20 @@ class UserTest < ActiveSupport::TestCase
     assert_nil User.find_by(id: user.id)
     assert_nil Website.find_by(id: first_website.id)
   end
+
+  test "verify_email! - happy path" do
+    user = default_user
+    user.activated = false
+    user.save!
+
+    user.verify_email!
+
+    user.reload
+
+    assert_equal user.activated, 1
+    verification = user.user_email_verifications.last
+
+    assert verification
+    assert_equal verification.obj['result'], "valid"
+  end
 end
