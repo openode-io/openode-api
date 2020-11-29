@@ -311,7 +311,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     prepare_get_dotenv(@kubernetes_method, @website, "VAR1=12")
 
     prepare_action_yml(@kubernetes_method, @website_location, "apply.yml",
-                       "delete -f apply.yml", 'success')
+                       "delete --timeout 30s  -f apply.yml", 'success')
 
     current_time = Time.zone.now
     travel_to current_time.beginning_of_hour + 30.minutes
@@ -348,7 +348,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     prepare_get_dotenv(@kubernetes_method, @website, "VAR1=12")
 
     prepare_action_yml(@kubernetes_method, @website_location, "apply.yml",
-                       "delete -f apply.yml", 'success', 1)
+                       "delete --timeout 30s  -f apply.yml", 'success', 1)
 
     assert_scripted do
       begin_ssh
@@ -380,7 +380,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     prepare_get_dotenv(@kubernetes_method, @website, "VAR1=12")
 
     prepare_action_yml(@kubernetes_method, @website_location, "apply.yml",
-                       "delete -f apply.yml", 'success')
+                       "delete --timeout 30s  -f apply.yml", 'success')
 
     assert_scripted do
       begin_ssh

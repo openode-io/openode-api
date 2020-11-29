@@ -322,6 +322,10 @@ module DeploymentMethod
       end
     end
 
+    def make_exec_options(options, trial_i, max_trials)
+      options.clone.merge(last_trial: trial_i == max_trials)
+    end
+
     def ex(cmd, options = {})
       Rails.logger.info("Deployment Method ex #{cmd}, options=#{options.inspect}")
       result = nil
@@ -336,8 +340,9 @@ module DeploymentMethod
       max_trials = options[:retry] ? options[:retry][:nb_max_trials] : 1
 
       (1..max_trials).each do |trial_i|
-        Rails.logger.info("Execute #{cmd} trial ##{trial_i}")
-        result = runner.execute([{ cmd_name: cmd, options: options }]).first[:result]
+        Rails.logger.info("Execute #{cmd} trial ##{trial_i}/#{max_trials}")
+        options_exec = make_exec_options(options, trial_i, max_trials)
+        result = runner.execute([{ cmd_name: cmd, options: options_exec }]).first[:result]
 
         if options[:ensure_exit_code].present?
           if result && result[:exit_code] != options[:ensure_exit_code]
