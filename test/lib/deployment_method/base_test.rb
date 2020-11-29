@@ -197,4 +197,22 @@ class DeploymentMethodBaseTest < ActiveSupport::TestCase
   test 'notify_or_soft_log - without notification + exception' do
     @base_dep_method.notify_or_soft_log("hello", true)
   end
+
+  test 'make_exec_options - first trial' do
+    opts = { oo: 123 }
+    orig_opts = opts.clone
+    new_opts = @base_dep_method.make_exec_options(opts, 1, 3)
+
+    assert_equal new_opts[:last_trial], false
+    assert_equal opts, orig_opts
+  end
+
+  test 'make_exec_options - last trial' do
+    opts = { oo: 123 }
+    orig_opts = opts.clone
+    new_opts = @base_dep_method.make_exec_options(opts, 3, 3)
+
+    assert_equal new_opts[:last_trial], true
+    assert_equal opts, orig_opts
+  end
 end

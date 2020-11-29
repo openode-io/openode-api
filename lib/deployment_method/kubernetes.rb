@@ -153,6 +153,8 @@ module DeploymentMethod
                                        image_name_tag: image_manager.image_name_tag)
       # then delete the yml
       kubectl_yml_action(website_location, "delete", kube_yml,
+                         kubectl_options: " --timeout 30s ",
+                         options_on_last_retry: " --force --grace-period=0 ",
                          default_retry_scheme: true,
                          skip_notify_errors: options[:skip_notify_errors])
     end
@@ -266,9 +268,12 @@ module DeploymentMethod
       result = nil
 
       begin
+        options_last_retry = opts[:last_trial] ? opts[:options_on_last_retry] : ""
+
         result = ex('kubectl', {
           website_location: website_location,
-          s_arguments: "#{action} -f #{tmp_file_path}"
+          s_arguments: "#{action}#{opts[:kubectl_options]}#{options_last_retry} " \
+                        "-f #{tmp_file_path}"
         }.merge(opts))
       ensure
         ex("delete_files", files: [tmp_file_path])

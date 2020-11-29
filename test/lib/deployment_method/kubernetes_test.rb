@@ -1452,7 +1452,7 @@ VAR2=5678
     prepare_get_dotenv(kubernetes_method, @website, "VAR=123")
 
     prepare_action_yml(kubernetes_method, @website_location, "apply.yml",
-                       "delete -f apply.yml", 'success')
+                       "delete --timeout 30s  -f apply.yml", 'success')
 
     assert_scripted do
       begin_ssh
@@ -1468,6 +1468,45 @@ VAR2=5678
 
       port_event = kubernetes_method.runner.execution.events[1]
       assert_includes port_event.dig('update'), "IMPORTANT: HTTP port (80) NOT listening"
+    end
+  end
+
+  test 'kubectl_yml_action - with kubectl options' do
+    prepare_action_yml(kubernetes_method, @website_location, "apply.yml",
+                       "delete --timeout 30s  -f apply.yml", 'success')
+
+    assert_scripted do
+      begin_ssh
+
+      kubernetes_method.kubectl_yml_action(
+        @website_location, "delete", "", kubectl_options: " --timeout 30s "
+      )
+    end
+  end
+
+  test 'kubectl_yml_action - with options_on_last_retry and last trial' do
+    prepare_action_yml(kubernetes_method, @website_location, "apply.yml",
+                       "delete --force  -f apply.yml", 'success')
+
+    assert_scripted do
+      begin_ssh
+
+      kubernetes_method.kubectl_yml_action(
+        @website_location, "delete", "", options_on_last_retry: " --force ", last_trial: true
+      )
+    end
+  end
+
+  test 'kubectl_yml_action - with options_on_last_retry and last trial false' do
+    prepare_action_yml(kubernetes_method, @website_location, "apply.yml",
+                       "delete -f apply.yml", 'success')
+
+    assert_scripted do
+      begin_ssh
+
+      kubernetes_method.kubectl_yml_action(
+        @website_location, "delete", "", options_on_last_retry: " --force "
+      )
     end
   end
 
