@@ -58,7 +58,13 @@ module DeploymentMethod
       img_location = cloud_provider_manager.docker_images_location
 
       # ensure docker registry secret
-      make_docker_registry_secret(website, website_location, img_location)
+      begin
+        Timeout.timeout(50) do
+          make_docker_registry_secret(website, website_location, img_location)
+        end
+      rescue Timeout::Error => e
+        Ex::Logger.info(e, 'Timeout during make docker registry secret')
+      end
 
       # build the image
       cloned_runner = runner.clone
@@ -1116,12 +1122,8 @@ module DeploymentMethod
       notify('info', details: final_details)
     end
 
-    def finalize(options = {})
-      website, website_location = get_website_fields(options)
-      super(options)
-      website.reload
-
-      begin
+    def finalize_pre_stop_steps(website, website_location)
+      Timeout.timeout(50) do
         pods = get_pods_json(
           website: website,
           website_location: website_location
@@ -1141,9 +1143,19 @@ module DeploymentMethod
                           website_location: website_location,
                           pod_name: get_latest_pod_name_in(pods),
                           nb_lines: 1_000)
-      rescue StandardError => e
-        Ex::Logger.info(e, 'Unable to retrieve the logs')
       end
+    rescue Timeout::Error => e
+      Ex::Logger.info(e, 'Timeout during pre stop steps')
+    rescue StandardError => e
+      Ex::Logger.info(e, 'Unable to retrieve the logs')
+    end
+
+    def finalize(options = {})
+      website, website_location = get_website_fields(options)
+      super(options)
+      website.reload
+
+      finalize_pre_stop_steps(website, website_location)
 
       begin
         if website.online?
