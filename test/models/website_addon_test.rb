@@ -11,12 +11,16 @@ class WebsiteAddonTest < ActiveSupport::TestCase
       website: w,
       addon: addon,
       obj: {
-        attrib: 'val1'
+        attrib: 'val1',
+        tag: "1.1.1"
       }
     )
 
+    wa.reload
+
     assert wa.valid?
     assert wa.storage_gb.zero?
+    assert_equal wa.obj['tag'], "1.1.1"
   end
 
   test "create - website with two addons with the same name is invalid" do

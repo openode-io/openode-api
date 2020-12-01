@@ -10,6 +10,7 @@ class WebsiteAddon < ApplicationRecord
 
   before_validation :init_default_values
   before_validation :downcase_name
+  before_validation :enforce_image_tag
 
   validates :name, presence: true
   validates :website, presence: true
@@ -39,6 +40,8 @@ class WebsiteAddon < ApplicationRecord
       self.obj['persistent_path'] ||= addon.obj['persistent_path']
     end
 
+    self.obj['tag'] ||= "latest"
+
     self.obj['env'] ||= {}
 
     self.name ||= addon.name
@@ -50,6 +53,18 @@ class WebsiteAddon < ApplicationRecord
     end
 
     default_env_variables
+  end
+
+  def enforce_image_tag
+    self.obj["tag"] = Io::Cmd.sanitize_input_cmd(obj["tag"])
+  end
+
+  def tag
+    obj["tag"] || "latest"
+  end
+
+  def image_tag
+    "#{addon.obj.dig('image')}:#{tag}"
   end
 
   def persistence?

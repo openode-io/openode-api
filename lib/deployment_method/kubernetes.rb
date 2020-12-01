@@ -691,7 +691,7 @@ module DeploymentMethod
             spec:
         #{generate_deployment_addon_volumes_yml(website_addon)}
               containers:
-              - image: #{website_addon.addon.obj.dig('image')}
+              - image: #{website_addon.image_tag}
                 imagePullPolicy: Always
                 name: #{website_addon.name}
                 envFrom:
