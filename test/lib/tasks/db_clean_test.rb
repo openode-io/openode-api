@@ -82,6 +82,82 @@ class LibTasksDbCleanTest < ActiveSupport::TestCase
     assert_nil Deployment.find_by(id: latest_deployment.id)
   end
 
+  test "should remove too old deployment if not online" do
+    Execution.destroy_all
+
+    w = default_website
+    w.status = 'N/A'
+    w.save!
+
+    d_orig = Deployment.create!(
+      website: w,
+      status: 'success',
+      created_at: 62.days.ago
+    )
+
+    latest_deployment = Deployment.create(
+      website: w,
+      status: 'success',
+      created_at: 34.days.ago
+    )
+
+    latest_deployment.status = 'success'
+    latest_deployment.save!
+
+    invoke_task "db_clean:old_deployments"
+
+    assert Deployment.find(latest_deployment.id)
+    assert_nil Deployment.find_by(id: d_orig.id)
+  end
+
+  test "should remove if too old deployment and online" do
+    Execution.destroy_all
+
+    w = default_website
+    w.status = 'online'
+    w.save!
+
+    d_orig = Deployment.create!(
+      website: w,
+      status: 'success',
+      created_at: 64.days.ago
+    )
+
+    not_latest_deployment = Deployment.create(
+      website: w,
+      status: 'success',
+      created_at: 32.days.ago
+    )
+
+    not_latest_deployment.status = 'success'
+    not_latest_deployment.save!
+
+    invoke_task "db_clean:old_deployments"
+
+    assert Deployment.find_by(id: not_latest_deployment.id)
+    assert_nil Deployment.find_by(id: d_orig.id)
+  end
+
+  test "should not remove if too old deployment and online and only one" do
+    Execution.destroy_all
+
+    w = default_website
+    w.status = 'online'
+    w.save!
+
+    d_orig = Deployment.create!(
+      website: w,
+      status: 'success',
+      created_at: 64.days.ago
+    )
+    d_orig.status = 'success'
+    d_orig.save!
+
+    invoke_task "db_clean:old_deployments"
+
+    assert Deployment.find_by(id: d_orig.id)
+  end
+
   test "should remove old task executions" do
     Task.create!(created_at: 2.days.ago, status: 'success')
     deployment = Deployment.create!(created_at: 2.days.ago, status: 'success')

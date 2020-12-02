@@ -44,10 +44,10 @@ namespace :db_clean do
         end
       end
 
-      Rails.logger.info "[#{name}] destring deployment #{deployment.id}"
+      Rails.logger.info "[#{name}] destroying deployment #{deployment.id}"
 
-      #GlobalStat.increase!("nb_archived_deployments", 1)
-      #deployment.destroy
+      GlobalStat.increase!("nb_archived_deployments", 1)
+      deployment.destroy
     rescue => e
       Rails.logger.error "[#{name}] error = #{e}"
     end
