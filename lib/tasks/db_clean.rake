@@ -36,7 +36,7 @@ namespace :db_clean do
           deployment.website.status != Website::STATUS_ONLINE
 
         if (last_successful_deployment == deployment ||
-           deployment.id == last_successful_deployment.image_execution_id) &&
+           deployment.id == last_successful_deployment&.image_execution_id) &&
           ! is_too_old_and_not_online
           Rails.logger.info "[#{name}] keeping latest #{deployment.id}"
 
@@ -48,6 +48,8 @@ namespace :db_clean do
 
       #GlobalStat.increase!("nb_archived_deployments", 1)
       #deployment.destroy
+    rescue => e
+      Rails.logger.error "[#{name}] error = #{e}"
     end
   end
 
