@@ -32,7 +32,7 @@ namespace :db_clean do
         last_successful_deployment = deployment.website.deployments.success.last
 
         days_dep_created = (Time.now - deployment.created_at.to_time) / (60 * 60 * 24)
-        is_too_old_and_not_online = days_dep_created >= 60 &&
+        is_too_old_and_not_online = days_dep_created >= 32 &&
           deployment.website.status != Website::STATUS_ONLINE
 
         if (last_successful_deployment == deployment ||
