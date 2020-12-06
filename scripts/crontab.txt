@@ -3,7 +3,6 @@ RAILS_ENV=production
 PATH=PATH=/bin:/usr/bin:/home/ubuntu/.rvm/rubies/ruby-2.7.1/bin/
 
 1 * * * * cd $PATH_REPO && rails db_stats:log_system_stat >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
-3 * * * * cd $PATH_REPO && rails mailgun:check_failed_events >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 0 */5 * * * cd $PATH_REPO && rails db_clean:old_deployments >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 15 */2 * * * cd $PATH_REPO && rails db_clean:old_task_executions >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 2 */5 * * * cd $PATH_REPO && rails db_clean:old_histories >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
