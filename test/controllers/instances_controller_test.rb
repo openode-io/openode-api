@@ -1076,6 +1076,25 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal website.alerts, [Website::ALERT_STOP_LACK_CREDITS]
   end
 
+  test 'patch /instances/:instance_id/ change to custom domain' do
+    website = default_website
+
+    patch '/instances/testsite/',
+          as: :json,
+          params: {
+            website: {
+              site_name: "www.mydomainname.com"
+            }
+          },
+          headers: default_headers_auth
+
+    assert_response :success
+
+    website.reload
+    assert_equal website.site_name, "www.mydomainname.com"
+    assert_equal website.domain_type, "custom_domain"
+  end
+
   test 'post /instances/:instance_id/crontab' do
     website = default_website
     website.crontab = ""
