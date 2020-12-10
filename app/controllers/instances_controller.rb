@@ -632,7 +632,7 @@ class InstancesController < ApplicationController
 
   def website_params
     params.require(:website).permit(
-      :user_id, :alerts, :crontab, open_source: {}, alerts: []
+      :site_name, :user_id, :alerts, :crontab, open_source: {}, alerts: []
     )
   end
 end

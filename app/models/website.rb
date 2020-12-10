@@ -208,6 +208,7 @@ class Website < ApplicationRecord
   ].freeze
 
   before_validation :prepare_new_site, on: :create
+  before_validation :prepare_site
 
   validates :user, presence: true
   validates :site_name, presence: true
@@ -232,7 +233,7 @@ class Website < ApplicationRecord
   end
 
   validate :can_create_new_site, on: :create
-  validate :can_use_root_domain, on: :create
+  validate :can_use_root_domain
 
   validates :type, inclusion: { in: TYPES }
   validates :domain_type, inclusion: { in: DOMAIN_TYPES }
@@ -289,6 +290,13 @@ class Website < ApplicationRecord
   end
 
   def prepare_new_site
+    self.type = TYPE_KUBERNETES
+    self.redir_http_to_https = false
+    self.open_source ||= {}
+    self.instance_type = 'server' # to deprecate
+  end
+
+  def prepare_site
     return unless site_name
 
     self.account_type ||= DEFAULT_ACCOUNT_TYPE
@@ -300,12 +308,8 @@ class Website < ApplicationRecord
 
     self.site_name = Website.strip_non_host_site_name_parts(site_name.downcase)
     self.domain_type = DOMAIN_TYPE_SUBDOMAIN
-    self.type = TYPE_KUBERNETES
-    self.redir_http_to_https = false
-    self.instance_type = 'server' # to deprecate
-    self.open_source ||= {}
-    self.domains = []
-    self.alerts = Website.initial_alerts
+    self.domains ||= []
+    self.alerts ||= Website.initial_alerts
 
     if site_name.include?('.')
       self.domain_type = DOMAIN_TYPE_CUSTOM_DOMAIN
@@ -474,7 +478,8 @@ class Website < ApplicationRecord
     root_domain = WebsiteLocation.root_domain(site_name)
     root_domain_website = Website.find_by(site_name: root_domain)
 
-    if root_domain_website && root_domain_website.user_id != user_id
+    if root_domain_website && root_domain_website.id != id &&
+       root_domain_website.user_id != user_id
       errors.add(:site_name, 'Root domain already used')
     end
   end
@@ -805,7 +810,7 @@ class Website < ApplicationRecord
     logger.info("website #{site_name} changing plan to #{acc_type}")
     self.account_type = acc_type
 
-    init_change_plan_to_open_source if open_source_plan?
+    init_change_plan_to_open_source if open_source_plan? && !open_source_was
 
     self.cloud_type = 'cloud'
   end
