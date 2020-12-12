@@ -10,7 +10,7 @@ name: Deploy
 on:
   push:
     branches:
-      - new-gh
+      - master
 
 jobs:
   deploy:
@@ -19,6 +19,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2-beta
+      with:
+        node-version: '12'
 
     - name: deploy!
       run: |
@@ -31,5 +34,8 @@ jobs:
         export RAILS_ENV="${{ secrets.RAILS_ENV }}"
         export OPENODE_TOKEN="${{ secrets.OPENODE_TOKEN }}"
         export OPENODE_SITE_NAME="${{ secrets.OPENODE_SITE_NAME }}"
+
+        npm install -g openode
+
         sh scripts/deploy.sh
 
