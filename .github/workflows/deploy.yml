@@ -1,0 +1,35 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will download a prebuilt Ruby version, install dependencies and run tests with Rake
+# For more information see: https://github.com/marketplace/actions/setup-ruby-jruby-and-truffleruby
+
+name: Deploy
+
+on:
+  push:
+    branches:
+      - new-gh
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: deploy!
+      run: |
+        export SERVER_PK_KEY="${{ secrets.SERVER_PK_KEY }}"
+        export NODE_BIN_PATH="${{ secrets.NODE_BIN_PATH }}"
+        export RUBY_BIN_PATH="${{ secrets.RUBY_BIN_PATH }}"
+        export SERVER_USER="${{ secrets.SERVER_USER }}"
+        export SERVER_HOST="${{ secrets.SERVER_HOST }}"
+        export PROJECT_PATH="${{ secrets.PROJECT_PATH }}"
+        export RAILS_ENV="${{ secrets.RAILS_ENV }}"
+        export OPENODE_TOKEN="${{ secrets.OPENODE_TOKEN }}"
+        export OPENODE_SITE_NAME="${{ secrets.OPENODE_SITE_NAME }}"
+        sh scripts/deploy.sh
+
