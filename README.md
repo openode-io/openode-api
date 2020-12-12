@@ -1,8 +1,8 @@
 # openode-api
 
 
-[![Build status](https://travis-ci.org/openode-io/openode-api.svg?branch=master)](https://travis-ci.org/openode-io/openode-api)
-
+[![Tests Actions Status](https://github.com/openode-io/openode-api/workflows/Test/badge.svg)](https://github.com/openode-io/openode-api/actions)
+[![Deploy Actions Status](https://github.com/openode-io/openode-api/workflows/Deploy/badge.svg)](https://github.com/openode-io/openode-api/actions)
 
 opeNode.io is a PaaS allowing to manage clusters of container instances. opeNode API is the core piece, providing: 1) REST API to manager clusters, 2) background jobs for spawning instances, 3) web sockets to get real-time updates on clusters events. Provides an abstraction over Kubernetes.
 
