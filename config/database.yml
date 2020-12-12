@@ -21,12 +21,11 @@ development:
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
-  <<: *default
   adapter: mysql2
   database: openode_test
-  username: travis
-  password:
-  host: localhost
+  username: root
+  password: root
+  host: 127.0.0.1
 
 production:
   <<: *default

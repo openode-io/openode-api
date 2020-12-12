@@ -1,0 +1,53 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will download a prebuilt Ruby version, install dependencies and run tests with Rake
+# For more information see: https://github.com/marketplace/actions/setup-ruby-jruby-and-truffleruby
+
+name: Test
+
+on: [push]
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+    services:
+      # How to use MySQL
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+        - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+    # To automatically get bug fixes and new Ruby versions for ruby/setup-ruby,
+    # change this to (see https://github.com/ruby/setup-ruby#versioning):
+    # uses: ruby/setup-ruby@v1
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.7.1
+    - uses: actions/setup-node@v2-beta
+      with:
+        node-version: '12'
+    - name: Create mysql db
+      run: |
+        mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "CREATE DATABASE openode_test;"
+
+    - name: Install dependencies
+      run: |
+        bundle install
+
+    - name: rubocop
+      run: |
+        bundle exec rubocop
+
+    - name: test
+      run: |
+        bundle exec bin/rails test
+
