@@ -72,6 +72,21 @@ class UserTest < ActiveSupport::TestCase
     assert_equal u.type, 'admin'
   end
 
+  test 'should remove orders on destroy' do
+    o = Order.last
+    u = o.user
+
+    u.websites.each do |w|
+      w.status = "N/A"
+      w.save!
+      w.website_locations.destroy_all
+    end
+
+    u.destroy
+
+    assert_nil Order.find_by id: o.id
+  end
+
   test 'saving account' do
     attribs = {
       email: 'user10@site.com',
