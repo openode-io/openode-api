@@ -26,7 +26,7 @@ class User < ApplicationRecord
   attr_accessor   :password_confirmation
 
   has_many :websites, dependent: :destroy
-  has_many :orders
+  has_many :orders, dependent: :destroy
   has_many :viewed_notifications, dependent: :destroy
   has_many :friend_invites, dependent: :destroy
   has_many :user_email_verifications, foreign_key: :ref_id,
