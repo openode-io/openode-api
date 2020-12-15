@@ -30,6 +30,7 @@ gem 'droplet_kit'
 gem 'ed25519'
 gem 'http'
 gem 'mailgun-ruby'
+gem 'mailjet'
 gem 'net-sftp'
 gem 'net-ssh'
 gem "neverbounce-api"
