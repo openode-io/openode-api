@@ -11,6 +11,7 @@ module Api
     end
 
     def add_contact(email)
+      ::Mailjet::Contact.create(email: email) rescue nil
       ::Mailjet::Listrecipient.create(
         is_unsubscribed: "false",
         contact_alt: email,
