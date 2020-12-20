@@ -119,7 +119,6 @@ namespace :kube_maintenance do
     end
   end
 
-  # TODO: add tests
   desc ''
   task verify_states_pvcs: :environment do
     name = "Task kube_maintenance__verify_states_main_pvc"
@@ -172,7 +171,14 @@ namespace :kube_maintenance do
 
         # check unnessary PVC
         unless reason.empty?
-          Rails.logger.info "[#{name}] should remove PVC in ns #{ns} - reason = #{reason}"
+          Rails.logger.info "[#{name}] should remove PVC in ns #{ns}, " \
+                            "pvc = #{pvc_name} - reason = #{reason}"
+
+          result = cluster_runner.execution_method.ex_stdout(
+                                      "raw_kubectl",
+                                      s_arguments: " -n #{ns} delete pvc #{pvc_name} "
+                                    )
+          Rails.logger.info "[#{name}] PVC #{pvc_name} destroyed result = #{result}"
         end
       end
     ensure
