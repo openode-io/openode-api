@@ -175,9 +175,9 @@ namespace :kube_maintenance do
                             "pvc = #{pvc_name} - reason = #{reason}"
 
           result = cluster_runner.execution_method.ex_stdout(
-                                      "raw_kubectl",
-                                      s_arguments: " -n #{ns} delete pvc #{pvc_name} "
-                                    )
+            "raw_kubectl",
+            s_arguments: " -n #{ns} delete pvc #{pvc_name} "
+          )
           Rails.logger.info "[#{name}] PVC #{pvc_name} destroyed result = #{result}"
         end
       end
@@ -210,7 +210,6 @@ namespace :kube_maintenance do
     website.website_addons.select(&:online?).include?(wa)
   end
 
-  # TODO add tests
   desc ''
   task verify_states_deployments: :environment do
     name = "Task kube_maintenance__verify_states_deployments"
@@ -266,7 +265,14 @@ namespace :kube_maintenance do
         end
 
         unless reason.empty?
-          Rails.logger.info "[#{name}] should remove deployment in ns #{ns} - #{reason}"
+          Rails.logger.info "[#{name}] should remove deployment #{deployment_name} in " \
+                            "ns #{ns} - #{reason}"
+
+          result = cluster_runner.execution_method.ex_stdout(
+            "raw_kubectl",
+            s_arguments: " -n #{ns} delete deployment #{deployment_name} "
+          )
+          Rails.logger.info "[#{name}] deployment #{deployment_name} destroyed result = #{result}"
         end
       end
     ensure
