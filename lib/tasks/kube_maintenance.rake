@@ -211,6 +211,48 @@ namespace :kube_maintenance do
   end
 
   desc ''
+  task clean_ns: :environment do
+    name = "Task kube_maintenance__clean_ns"
+    Rails.logger.info "[#{name}] begin"
+
+    kube_clusters_runners.each do |cluster_runner|
+      location = cluster_runner.execution_method.location
+      Rails.logger.info "[#{name}] Current location #{location.str_id}"
+
+      result = JSON.parse(cluster_runner.execution_method.ex_stdout(
+                            "raw_kubectl",
+                            { s_arguments: "get namespaces -o json" },
+                            skip_result_storage: true
+                          ))
+
+      result.dig('items').each do |deployment|
+        ns = deployment.dig('metadata', 'name')
+
+        next unless instance_ns?(ns)
+
+        website_id = ns.split('-').last
+
+        Rails.logger.info "[#{name}] checking website id #{website_id}"
+
+        website = Website.find_by id: website_id
+        reason = ""
+
+        unless website
+          reason += " - website removed "
+        end
+
+        unless website&.active?
+          reason += " - website inactive "
+        end
+
+        unless reason.empty?
+          Rails.logger.info "[#{name}] should remove ns #{ns}, reason = #{reason}"
+        end
+      end
+    end
+  end
+
+  desc ''
   task verify_states_deployments: :environment do
     name = "Task kube_maintenance__verify_states_deployments"
     Rails.logger.info "[#{name}] begin"
