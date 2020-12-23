@@ -246,7 +246,8 @@ namespace :kube_maintenance do
         end
 
         unless reason.empty?
-          Rails.logger.info "[#{name}] should remove ns #{ns}, reason = #{reason}"
+          log_info = "location=#{location.str_id}, reason = #{reason}"
+          Rails.logger.info "[#{name}] should remove ns #{ns}, #{log_info}"
         end
       end
     end
