@@ -241,7 +241,7 @@ namespace :kube_maintenance do
           reason += " - website removed "
         end
 
-        unless website&.active?
+        if !website&.active? && website&.offline?
           reason += " - website inactive "
         end
 
