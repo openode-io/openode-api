@@ -248,6 +248,12 @@ namespace :kube_maintenance do
         unless reason.empty?
           log_info = "location=#{location.str_id}, reason = #{reason}"
           Rails.logger.info "[#{name}] should remove ns #{ns}, #{log_info}"
+
+          result = cluster_runner.execution_method.ex_stdout(
+            "raw_kubectl",
+            s_arguments: " delete namespace #{ns} "
+          )
+          Rails.logger.info "[#{name}] deleted ns #{ns}, result = #{result}"
         end
       end
     end
