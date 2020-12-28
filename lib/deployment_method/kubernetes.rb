@@ -80,6 +80,34 @@ module DeploymentMethod
       image_manager
     end
 
+    def top_cmd(options = {})
+      _, website_location = get_website_fields(options)
+
+      kubectl(
+        website_location: website_location,
+        with_namespace: true,
+        s_arguments: " top pods "
+      )
+    end
+
+    def top(stdout)
+      stdout.to_s
+            .lines
+            .drop(1)
+            .map do |line|
+        parts = line.strip.scan(/[\S]+/)
+
+        return nil unless parts.count == 3
+
+        {
+          service: parts.first,
+          cpu_raw: parts[1],
+          memory_raw: parts[2]
+        }
+      end
+            .select(&:present?)
+    end
+
     def initialize_ns(options = {})
       website, website_location = get_website_fields(options)
 
