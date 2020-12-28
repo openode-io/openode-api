@@ -1,12 +1,18 @@
 class InstanceStatController < InstancesController
   api!
   def index
-    last_bws = @website.website_bandwidth_daily_stats.where('created_at > ?', 24.hours.ago)
+    result_top_cmd = @runner.execute([
+                                       {
+                                         cmd_name: 'top_cmd', options: {
+                                           website: @website.clone,
+                                           website_location: @website_location
+                                         }
+                                       }
+                                     ]).first.dig(:result, :stdout)
 
-    json(
-      bandwidth_inbound: extract_specific_stats(last_bws, 'inbound'),
-      bandwidth_outbound: extract_specific_stats(last_bws, 'outbound')
-    )
+    result_top = @runner.execution_method.top(result_top_cmd)
+
+    json(top: result_top)
   end
 
   api!

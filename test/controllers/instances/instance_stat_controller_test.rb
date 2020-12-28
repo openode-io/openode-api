@@ -1,39 +1,53 @@
 # frozen_string_literal: true
 
 require 'test_helper'
+require 'test_kubernetes_helper'
 
 class LocationsTest < ActionDispatch::IntegrationTest
-  setup do
+  def setup
+    @website = default_kube_website
+    @website_location = @website.website_locations.first
   end
 
-  test '/instances/:instance_id/stats without stats' do
-    get '/instances/testsite/stats',
-        as: :json,
-        headers: default_headers_auth
+  def prepare_kubernetes_method(website, website_location)
+    runner = prepare_kubernetes_runner(website, website_location)
 
-    assert_response :success
-    assert_equal response.parsed_body['bandwidth_inbound'], []
-    assert_equal response.parsed_body['bandwidth_outbound'], []
+    @kubernetes_method = runner.get_execution_method
   end
 
   test '/instances/:instance_id/stats with stats' do
-    w = default_website
+    prepare_kubernetes_method(@website, @website_location)
 
-    WebsiteBandwidthDailyStat.log(w, 'inbound' => 850, 'outbound' => 100)
-    WebsiteBandwidthDailyStat.log(w, 'inbound' => 101, 'outbound' => 50)
+    cmd_top_pods = @kubernetes_method.kubectl(
+      website_location: @website_location,
+      with_namespace: true,
+      s_arguments: " top pods "
+    )
 
-    get '/instances/testsite/stats',
-        as: :json,
-        headers: default_headers_auth
+    expected = "NAME                             CPU(cores)   MEMORY(bytes)   \n" \
+                "www-deployment-9645b55d5-lkmbn   1m           31Mi"
+    prepare_ssh_session(cmd_top_pods, expected)
 
-    assert_response :success
-    assert_equal response.parsed_body['bandwidth_inbound'].length, 1
-    assert_equal response.parsed_body['bandwidth_inbound'][0]['value'], 951
-    assert_not_nil response.parsed_body['bandwidth_inbound'][0]['date']
+    assert_scripted do
+      begin_ssh
 
-    assert_equal response.parsed_body['bandwidth_outbound'].length, 1
-    assert_equal response.parsed_body['bandwidth_outbound'][0]['value'], 150
-    assert_not_nil response.parsed_body['bandwidth_outbound'][0]['date']
+      get "/instances/#{@website.id}/stats",
+          as: :json,
+          headers: default_headers_auth
+
+      assert_response :success
+      expected_response = {
+        "top" => [
+          {
+            "service" => "www-deployment-9645b55d5-lkmbn",
+            "cpu_raw" => "1m",
+            "memory_raw" => "31Mi"
+          }
+        ]
+      }
+
+      assert_equal response.parsed_body, expected_response
+    end
   end
 
   test '/instances/:instance_id/stats/spendings with stats' do
