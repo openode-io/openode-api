@@ -1,5 +1,8 @@
 class InstanceStatController < InstancesController
-  api!
+  api :GET, 'instances/:id/stats'
+  description 'Returns the instance statistics.'
+  returns code: 200,
+          desc: "Hash following this format: { top: [{ service, cpu_raw, memory_raw }]"
   def index
     result_top_cmd = @runner.execute([
                                        {
