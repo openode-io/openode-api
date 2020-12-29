@@ -856,6 +856,36 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal wl.replicas, 2
   end
 
+  test 'set config LIMIT_RPM - default' do
+    website = default_website
+
+    assert_equal website.get_config("LIMIT_RPM"), 60 * 100
+  end
+
+  test 'set config LIMIT_RPM - set too low' do
+    website = default_website
+    website.configs ||= {}
+    website.configs['LIMIT_RPM'] = 6
+    website.save
+
+    assert_equal website.valid?, false
+    website.reload
+
+    assert_equal website.get_config("LIMIT_RPM"), 60 * 100
+  end
+
+  test 'set config LIMIT_RPM - set' do
+    website = default_website
+    website.configs ||= {}
+    website.configs['LIMIT_RPM'] = 600
+    website.save
+
+    assert_equal website.valid?, true
+    website.reload
+
+    assert_equal website.get_config("LIMIT_RPM"), 600
+  end
+
   test 'status_probe_path default' do
     website = default_website
     website.save!

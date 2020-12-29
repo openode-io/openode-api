@@ -1157,6 +1157,10 @@ VAR2=5678
       assert_includes yml, "ingress.kubernetes.io/ssl-redirect: \"#{opts[:ssl_redirect]}\""
     end
 
+    if opts[:limit_rpm].present?
+      assert_includes yml, "ingress.kubernetes.io/limit-rpm: \"#{opts[:limit_rpm]}\""
+    end
+
     domains.each do |domain|
       assert_includes yml, "- host: #{domain}"
     end
@@ -1176,7 +1180,8 @@ VAR2=5678
 
       assert_contains_ingress_yml(yml, @website, @website_location,
                                   with_certificate_secret: true,
-                                  ssl_redirect: true)
+                                  ssl_redirect: true,
+                                  limit_rpm: 60 * 100)
     end
   end
 
