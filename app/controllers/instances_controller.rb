@@ -470,7 +470,7 @@ class InstancesController < ApplicationController
       validation_error!("There was an issue to git clone - #{e}")
     end
 
-    json({ "status": "success" })
+    json("status": "success")
   end
 
   api :POST, 'instances/:id/restart'

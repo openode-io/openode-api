@@ -150,6 +150,13 @@ class Website < ApplicationRecord
       default: true
     },
     {
+      variable: 'LIMIT_RPM',
+      description: 'Number of requests accepted from a given IP each minute.',
+      default: 60 * 100,
+      min: 60 * 1,
+      max: 60 * 1000
+    },
+    {
       variable: 'REPLICAS',
       description: 'Number of replicas of the given instance.',
       type: 'website_location',
