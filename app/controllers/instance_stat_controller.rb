@@ -3,7 +3,7 @@ class InstanceStatController < InstancesController
   api :GET, 'instances/:id/stats'
   description 'Returns the instance statistics.'
   returns code: 200, desc: "" do
-    property :top, Hash, :desc => "Array following this format: [{ service, cpu_raw, memory_raw }]"
+    property :top, Array, :desc => "Array following this format: [{ service, cpu_raw, memory_raw }]"
   end
   def index
     result_top_cmd = @runner.execute([
