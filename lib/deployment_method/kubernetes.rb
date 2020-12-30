@@ -6,6 +6,7 @@ module DeploymentMethod
     KUBECONFIGS_BASE_PATH = "config/kubernetes/"
     CERTS_BASE_PATH = "config/certs/"
     KUBE_TMP_PATH = "/home/tmp/"
+    WWW_DEPLOYMENT_LABEL = "www"
 
     def initialize; end
 
@@ -97,13 +98,20 @@ module DeploymentMethod
             .map do |line|
         parts = line.strip.scan(/[\S]+/)
 
-        return nil unless parts.count == 3
+        return nil unless [3, 4].include?(parts.count)
 
-        {
-          service: parts.first,
-          cpu_raw: parts[1],
-          memory_raw: parts[2]
+        service_at = parts.count == 4 ? 1 : 0
+
+        result = {
+          service: parts[service_at],
+          cpu_raw: parts[service_at + 1],
+          memory_raw: parts[service_at + 2],
+          memory: parts[service_at + 2].to_i
         }
+
+        result[:namespace] = parts[0] if parts.count == 4
+
+        result
       end
             .select(&:present?)
     end
@@ -656,11 +664,11 @@ module DeploymentMethod
                 resources:
                   limits: # more resources if available in the cluster
                     ephemeral-storage: 100Mi
-                    memory: #{website.memory}Mi
+                    memory: #{website.calc_memory}Mi
                     # cpu: #{website.cpus}
                   requests:
                     ephemeral-storage: 100Mi
-                    memory: #{website.memory}Mi
+                    memory: #{website.calc_memory}Mi
                     # cpu: #{website.cpus}
                 #{'volumeMounts:  ' if storage_volumes?(website, website_location)}
         #{generate_deployment_mount_paths_yml(website, website_location)}
@@ -896,35 +904,37 @@ module DeploymentMethod
       END_YML
     end
 
+    def prepare_instance_up(options = {})
+      get_pods_json(options).dig('items')
+    rescue StandardError => e
+      Ex::Logger.info(e, 'Issue during prepare instance up')
+      []
+    end
+
     def node_available?(options = {})
-      _, website_location = get_website_fields(options)
+      pods = options[:instance_up_preparation]
 
-      kubectl_args = {
-        website_location: website_location,
-        with_namespace: true,
-        s_arguments: "get pods " \
-          "-o=jsonpath='{.items[*].status.containerStatuses[*].state.waiting}' " \
-          "| grep \"CrashLoopBackOff\"" # There should NOT be any container in
-        # crash loop backoff state
-      }
+      pods.none? do |pod|
+        statuses = pod.dig('status', 'containerStatuses') || []
 
-      result = ex("kubectl", kubectl_args)
-
-      result[:exit_code] == 1
+        statuses.any? do |status|
+          status.dig('state', 'waiting', 'reason') == "CrashLoopBackOff"
+        end
+      end
     end
 
     def instance_up_cmd(options = {})
-      _, website_location = get_website_fields(options)
+      pods = options[:instance_up_preparation]
 
-      args = {
-        website_location: website_location,
-        with_namespace: true,
-        s_arguments: "get pods " \
-          "-o=jsonpath='{.items[*].status.containerStatuses[*].ready}' " \
-          "| grep -v false" # There should NOT be any container not ready
-      }
+      all_ready = pods.all? do |pod|
+        statuses = pod.dig('status', 'containerStatuses') || []
 
-      kubectl(args)
+        statuses.all? { |status| status.dig('ready') }
+      end
+
+      all_ready = false if pods.blank?
+
+      "echo #{all_ready} | grep true"
     end
 
     def get_pods_json(options = {})
@@ -1234,6 +1244,10 @@ module DeploymentMethod
 
       return 60 * 5 if pods_contain_status_message?(pods, "insufficient memory")
 
+      if Time.zone.now - last_auto_manage_memory_at <= 50
+        return 50
+      end
+
       0
     end
 
@@ -1416,6 +1430,136 @@ module DeploymentMethod
       assert path
 
       path
+    end
+
+    ##### AUTO memory management
+    def auto_init(website)
+      # first history contains the current account type
+      website.auto_account_types_history = [website.auto_account_type]
+      website.save
+      self.last_auto_manage_memory_at = Time.zone.now
+    end
+
+    def auto_finalize(website)
+      website.auto_account_types_history ||= []
+
+      # remove the last one
+      updated_history = website.auto_account_types_history.reverse.drop(1).reverse
+      website.auto_account_types_history = updated_history
+      website.save
+    end
+
+    def auto_manage_memory_on_oom(website, pods)
+      return unless pods_contain_oom?(pods, Website::DEFAULT_APPLICATION_NAME)
+
+      www_pod = pods.find do |p|
+        p.dig('metadata', 'labels', 'app') == Website::DEFAULT_APPLICATION_NAME
+      end
+
+      auto_manage_memory(website, www_pod)
+      self.last_auto_manage_memory_at = Time.zone.now
+    end
+
+    def auto_manage_memory(website, pod, top_result = "")
+      return unless pod
+
+      label_app = pod.dig('metadata', 'labels', 'app')
+
+      return unless label_app == WWW_DEPLOYMENT_LABEL
+
+      return unless website.account_type == Website::AUTO_ACCOUNT_TYPE
+
+      new_auto_account_type = nil
+
+      new_auto_account_type = if contains_oom?(pod)
+                                # OOM detected...
+                                auto_should_bump_plan_to(website)
+                              else
+                                auto_should_decrease_plan_to(website, top_result)
+                              end
+
+      if new_auto_account_type
+        Rails.logger.info "Will change current auto plan to #{new_auto_account_type}"
+        auto_update_deployment(website, new_auto_account_type)
+      end
+    rescue StandardError => e
+      Ex::Logger.info(e, '[Deployment Kubernetes - auto memory] issue')
+    end
+
+    def pods_contain_oom?(pods, app = nil)
+      list_pods = pods.class == Hash ? pods.dig('items') : pods
+
+      (list_pods || []).any? do |pod|
+        label_app = pod.dig('metadata', 'labels', 'app')
+
+        contains_oom?(pod) && (!app || (app && app == label_app))
+      end
+    end
+
+    def contains_oom?(pod)
+      statuses = pod.dig('status', 'containerStatuses')
+
+      statuses&.any? { |st| st&.dig('lastState', 'terminated', 'reason') == "OOMKilled" }
+    end
+
+    def auto_should_bump_plan_to(website)
+      current_plan = WithPlan.plan_of(website.auto_account_type)
+      raise "No current plan" unless current_plan
+
+      current_memory = current_plan[:ram].to_i
+
+      bumped_plan = WithPlan.find_min_plan(current_memory + 1,
+                                           website.auto_account_types_history || [])
+
+      raise "No plan available to bump" unless bumped_plan
+
+      bumped_plan[:internal_id]
+    end
+
+    def auto_should_decrease_plan_to(website, top_result)
+      looking_for_ns = namespace_of(website)
+      instances_top = top(top_result)
+
+      instance = instances_top.find { |ins| ins[:namespace] == looking_for_ns }
+
+      return nil unless instance
+
+      current_memory = instance[:memory]
+
+      return nil unless current_memory.positive?
+
+      found_plan = WithPlan.find_min_plan(
+        current_memory + 1,
+        website.auto_account_types_history || []
+      )
+
+      return nil unless found_plan
+      return nil if found_plan[:internal_id] == website.auto_account_type
+
+      found_plan[:internal_id]
+    end
+
+    def auto_update_deployment(website, new_auto_account_type)
+      website_location = website.website_locations.first
+      latest_image = website.deployments.last.obj.dig('image_name_tag')
+
+      raise "No latest image available" unless latest_image
+
+      website.auto_account_type = new_auto_account_type
+      website.auto_account_types_history ||= []
+      website.auto_account_types_history << new_auto_account_type
+      website.auto_account_types_history.uniq!
+      website.save
+
+      kube_yml = generate_deployment_yml(website, website_location, image_name_tag: latest_image)
+
+      notify("info", "Improving instance setup...")
+
+      # then apply the yml
+      result = kubectl_yml_action(website_location, "apply", kube_yml, ensure_exit_code: 0)
+      notify("info", result[:stdout])
+
+      result
     end
   end
 end

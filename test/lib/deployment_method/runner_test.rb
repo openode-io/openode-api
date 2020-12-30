@@ -87,7 +87,5 @@ class RunnerTest < ActiveSupport::TestCase
                    skip_result_storage: true)
 
     assert_equal runner.execution.result['steps'], []
-
-    puts "runner exec #{runner.execution.result.inspect}"
   end
 end

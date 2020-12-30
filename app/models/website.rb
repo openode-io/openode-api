@@ -10,6 +10,7 @@ class Website < ApplicationRecord
   serialize :configs, JSON
   serialize :storage_areas, JSON
   serialize :data, JSON
+  serialize :auto_account_types_history, JSON
 
   self.inheritance_column = :_type
 
@@ -98,6 +99,7 @@ class Website < ApplicationRecord
   ]
 
   DEFAULT_ACCOUNT_TYPE = 'second'
+  AUTO_ACCOUNT_TYPE = 'auto'
   OPEN_SOURCE_ACCOUNT_TYPE = 'open_source'
 
   CLOUD_TYPE_PRIVATE_CLOUD = 'private-cloud'

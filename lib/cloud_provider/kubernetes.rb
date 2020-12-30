@@ -125,6 +125,14 @@ module CloudProvider
           ram: 2048,
           storage: 1000,
           bandwidth: 4000
+        },
+        {
+          id: 'auto',
+          internal_id: 'auto',
+          name: 'Auto',
+          ram: 1024,
+          storage: 1000,
+          bandwidth: 2000
         }
       ]
 

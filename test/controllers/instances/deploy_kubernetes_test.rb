@@ -33,7 +33,11 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
     prepare_action_yml(kubernetes_method, website_location, "apply.yml",
                        "apply -f apply.yml", 'success')
-    prepare_node_alive(kubernetes_method, website, website_location, 'success', 1)
+
+    get_pods_json_content = IO.read('test/fixtures/kubernetes/1_pod_alive.json')
+    prepare_get_pods_json(kubernetes_method, website, website_location, get_pods_json_content,
+                          0)
+
     prepare_instance_up(kubernetes_method, website, website_location, 'success', 0)
 
     get_pods_json_content = IO.read('test/fixtures/kubernetes/1_pod_alive.json')
@@ -116,8 +120,6 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
           "update" => "\n\n*** Final Deployment state: SUCCESS ***\n" },
         { "status" => "success", "level" => "info", "update" => "...finalized." }
       ]
-
-      puts "events #{deployment.events.inspect}"
 
       steps_to_verify.each do |step|
         Rails.logger.info "checking step .. #{step.inspect}"
@@ -211,8 +213,6 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
           "update" => "\n\n*** Final Deployment state: SUCCESS ***\n" },
         { "status" => "success", "level" => "info", "update" => "...finalized." }
       ]
-
-      puts "events #{deployment.events.inspect}"
 
       steps_to_verify.each do |step|
         Rails.logger.info "checking step .. #{step.inspect}"
@@ -343,7 +343,6 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/stop - if kube stop fail, should put back to online' do
-    puts "web #{@website.website_addons.inspect}"
     prepare_make_secret(@kubernetes_method, @website, @website_location, "result")
     prepare_get_dotenv(@kubernetes_method, @website, "VAR1=12")
 

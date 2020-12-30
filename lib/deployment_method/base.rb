@@ -8,6 +8,7 @@ module DeploymentMethod
 
     attr_accessor :runner
     attr_accessor :location
+    attr_accessor :last_auto_manage_memory_at
 
     REMOTE_PATH_API_LIB = '/root/openode-www/api/lib'
     DEFAULT_CRONTAB_FILENAME = '.openode.cron'
@@ -129,6 +130,20 @@ module DeploymentMethod
 
       mark_accessed(options)
       website.change_status!(Website::STATUS_STARTING, skip_validations: true)
+
+      auto_init(website)
+    end
+
+    def auto_init(website)
+      # to redefine in child class
+    end
+
+    def auto_finalize(website)
+      # to redefine in child class
+    end
+
+    def auto_manage_memory_on_oom(website, pods)
+      # to define in child class
     end
 
     def send_crontab(options = {})
@@ -197,7 +212,11 @@ module DeploymentMethod
       else
         return false unless node_available?(options)
 
-        result_up_cmd = ex('instance_up_cmd', website_location: website_location)
+        result_up_cmd = ex('instance_up_cmd',
+                           website_location: website_location,
+                           instance_up_preparation: options[:instance_up_preparation])
+
+        auto_manage_memory_on_oom(website, options[:instance_up_preparation])
 
         result_up_cmd && (result_up_cmd[:exit_code]).zero?
       end
@@ -205,6 +224,10 @@ module DeploymentMethod
 
     def on_max_build_duration(_options = {})
       raise "should implement on max build duration, ret new seconds to wait"
+    end
+
+    def prepare_instance_up(_options = {})
+      # define in child
     end
 
     def verify_instance_up(options = {})
@@ -220,7 +243,8 @@ module DeploymentMethod
           Rails.logger.info('deployment duration ' \
             "#{Time.zone.now - t_started}/#{max_build_duration}")
 
-          is_up = instance_up?(options)
+          instance_up_preparation = prepare_instance_up(options)
+          is_up = instance_up?(options.merge(instance_up_preparation: instance_up_preparation))
           break if is_up
           break if ENV['RAILS_ENV'] == 'test'
 
@@ -234,7 +258,7 @@ module DeploymentMethod
 
             max_build_duration += new_seconds_to_wait
             msg_extra_waiting = "waiting extra #{new_seconds_to_wait} seconds... " \
-                                "cluster resizing"
+                                "improving instance setup"
             notify("warn", msg_extra_waiting)
           end
         end
@@ -284,6 +308,8 @@ module DeploymentMethod
         website.change_status!(Website::STATUS_OFFLINE, skip_validations: true)
         website_location.running_port = nil
       end
+
+      auto_finalize(website)
 
       if runner.andand.execution
         runner.execution.status = if website.online?

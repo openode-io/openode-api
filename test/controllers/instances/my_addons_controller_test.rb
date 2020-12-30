@@ -95,8 +95,6 @@ class MyAddonsControllerTest < ActionDispatch::IntegrationTest
     }
     addon.save!
 
-    puts "addon #{addon.inspect}"
-
     post "/instances/#{w.site_name}/addons",
          as: :json,
          params: {

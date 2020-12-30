@@ -61,6 +61,7 @@ class ActiveSupport::TestCase
       website_location: website_location,
       s_arguments: s_arguments
     )
+    puts "cmd == #{cmd}"
     prepare_ssh_session(cmd, expected_result, expected_exit_code)
 
     prepare_ssh_session("rm -rf \"#{filename}\" ; ", "")
@@ -114,28 +115,10 @@ class ActiveSupport::TestCase
     prepare_ssh_session(cmd, expected_result, expected_exit_code)
   end
 
-  def prepare_node_alive(kubernetes_method, website, website_location, expected_result,
-                         expected_exit_code)
-    cmd_node_alive = kubernetes_method.kubectl(
-      website_location: website_location,
-      s_arguments: "-n instance-#{website.id} get pods " \
-                    "-o=jsonpath='{.items[*].status.containerStatuses[*].state.waiting}'" \
-                    " | grep \"CrashLoopBackOff\""
-    )
-
-    prepare_ssh_session(cmd_node_alive, expected_result, expected_exit_code)
-  end
-
-  def prepare_instance_up(kubernetes_method, website, website_location, expected_result,
+  def prepare_instance_up(_kubernetes_method, _website, _website_location, expected_result,
                           expected_exit_code = 0)
-    cmd_instance_up = kubernetes_method.kubectl(
-      website_location: website_location,
-      s_arguments: "-n instance-#{website.id} get pods " \
-                    "-o=jsonpath='{.items[*].status.containerStatuses[*].ready}'" \
-                    " | grep -v false"
-    )
 
-    prepare_ssh_session(cmd_instance_up, expected_result, expected_exit_code)
+    prepare_ssh_session("echo true | grep true", expected_result, expected_exit_code)
   end
 
   def prepare_get_services_default_happy(kubernetes_method, website_location)

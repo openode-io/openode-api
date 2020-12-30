@@ -737,6 +737,15 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.valid?, false
   end
 
+  test 'account_type auto valid' do
+    website = default_website
+    website.configs ||= {}
+    website.account_type = Website::AUTO_ACCOUNT_TYPE
+    website.save
+
+    assert_equal website.valid?, true
+  end
+
   test 'set config REFERENCE_WEBSITE_IMAGE - happy path' do
     referencing_to_website = Website.last
 
@@ -2030,5 +2039,22 @@ class WebsiteTest < ActiveSupport::TestCase
     w.website_locations.reload
 
     assert_in_delta w.blue_green_deployment_option_cost, 0.2016 * 0.20 * 2, 0.00001
+  end
+
+  test "calc_memory - regular plan" do
+    w = default_website
+    w.account_type = "second"
+    w.save
+
+    assert_equal w.calc_memory, 100
+  end
+
+  test "calc_memory - auto plan" do
+    w = default_website
+    w.account_type = "auto"
+    w.auto_account_type = "third"
+    w.save
+
+    assert_equal w.calc_memory, 200
   end
 end

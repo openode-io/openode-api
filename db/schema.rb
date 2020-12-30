@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_11_08_155232) do
+ActiveRecord::Schema.define(version: 2020_12_30_210659) do
 
   create_table "addons", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "name"
@@ -291,6 +291,8 @@ ActiveRecord::Schema.define(version: 2020_11_08_155232) do
     t.text "init_script"
     t.boolean "open_source_activated", default: false
     t.text "alerts"
+    t.string "auto_account_type", default: "third"
+    t.text "auto_account_types_history"
     t.index ["cloud_type"], name: "website_cloud_type"
     t.index ["credits_check_at"], name: "credits_check_at_website_id"
     t.index ["domains"], name: "domains_websites"
