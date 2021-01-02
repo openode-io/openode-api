@@ -41,7 +41,8 @@ class LocationsTest < ActionDispatch::IntegrationTest
           {
             "service" => "www-deployment-9645b55d5-lkmbn",
             "cpu_raw" => "1m",
-            "memory_raw" => "31Mi"
+            "memory_raw" => "31Mi",
+            "memory" => 31
           }
         ]
       }

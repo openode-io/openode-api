@@ -19,7 +19,6 @@ class InternalTest < ActiveSupport::TestCase
   test 'calc_cost_per_minute' do
     internal_provider = CloudProvider::Manager.instance.first_of_type('internal')
 
-    puts "internal_provider.calc_cost_per_minute(50) #{internal_provider.calc_cost_per_minute(50)}"
     assert_in_delta internal_provider.calc_cost_per_minute(50), 0.0000168, 0.000001
   end
 

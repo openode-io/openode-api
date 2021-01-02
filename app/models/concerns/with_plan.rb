@@ -8,12 +8,13 @@ module WithPlan
     plans.find { |p| [p[:id], p[:internal_id]].include?(acc_type) }
   end
 
-  def self.find_min_plan(minimum_memory)
+  def self.find_min_plan(minimum_memory, exclude = [])
     plans = CloudProvider::Manager.instance.available_plans
 
     plans.find do |p|
       p[:ram] >= minimum_memory &&
-        p[:internal_id] != Website::OPEN_SOURCE_ACCOUNT_TYPE
+        p[:internal_id] != Website::OPEN_SOURCE_ACCOUNT_TYPE &&
+        !exclude.include?(p[:internal_id])
     end
   end
 
@@ -23,6 +24,14 @@ module WithPlan
 
   def memory
     plan[:ram].to_i # must not have decimals
+  end
+
+  def calc_memory
+    if account_type == Website::AUTO_ACCOUNT_TYPE
+      WithPlan.plan_of(auto_account_type)[:ram].to_i
+    else
+      memory
+    end
   end
 
   def validate_account_type

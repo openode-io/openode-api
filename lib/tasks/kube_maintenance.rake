@@ -328,4 +328,40 @@ namespace :kube_maintenance do
       cluster_runner.execution_method&.destroy_execution
     end
   end
+
+  desc ''
+  task auto_manage_memory: :environment do
+    name = "Task kube_maintenance__auto_manage_memory"
+    Rails.logger.info "[#{name}] begin"
+
+    kube_clusters_runners.each do |cluster_runner|
+      location = cluster_runner.execution_method.location
+      Rails.logger.info "[#{name}] Current location #{location.str_id}"
+
+      result = JSON.parse(cluster_runner.execution_method.ex_stdout(
+                            "raw_kubectl",
+                            s_arguments: "get pods --all-namespaces -o json -l app=www"
+                          ))
+      top_result = cluster_runner.execution_method.ex_stdout(
+        "raw_kubectl",
+        s_arguments: "top pods -l app=www --all-namespaces"
+      )
+
+      (result&.dig('items') || []).each do |pod|
+        ns = pod.dig('metadata', 'namespace')
+
+        next unless ns.to_s.start_with?(cluster_runner.execution_method.namespace_of)
+
+        website = cluster_runner.execution_method.website_from_namespace(ns)
+        next unless website&.present?
+
+        cluster_runner.execution_method.auto_manage_memory(website, pod, top_result)
+      rescue StandardError => e
+        Rails.logger.error "[#{name}] skipping in items loop, #{e}"
+      end
+
+    ensure
+      cluster_runner.execution_method&.destroy_execution
+    end
+  end
 end
