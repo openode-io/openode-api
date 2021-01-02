@@ -357,7 +357,6 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     site_to_check = response.parsed_body
-    puts "si #{site_to_check.inspect}"
     assert_equal site_to_check['site_name'], 'testsite'
 
     assert site_to_check['last_deployment']

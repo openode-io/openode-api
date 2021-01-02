@@ -24,7 +24,9 @@ class GlobalController < ApplicationController
 
   api!
   def available_plans
-    json(CloudProvider::Manager.instance.available_plans)
+    plans = CloudProvider::Manager.instance.available_plans
+                                  .reject { |p| p[:internal_id] == "auto" }
+    json(plans)
   end
 
   api!

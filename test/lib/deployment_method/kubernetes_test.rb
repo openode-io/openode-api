@@ -1172,6 +1172,185 @@ VAR2=5678
     end
   end
 
+  test 'node_available? - when no crash loop back' do
+    prep = [
+      {
+        "status" => {
+          "containerStatuses" => [
+            {
+              "lastState" => { "terminated" => { "reason" => "" } }
+            }
+          ]
+        }
+      }
+    ]
+
+    assert kubernetes_method.node_available?(instance_up_preparation: prep)
+  end
+
+  test 'node_available? - when crash loop back' do
+    prep = [
+      {
+        "status" => {
+          "containerStatuses" => [
+            {
+              "state" => { "waiting" => { "reason" => "CrashLoopBackOff" } }
+            }
+          ]
+        }
+      }
+    ]
+
+    assert_not kubernetes_method.node_available?(instance_up_preparation: prep)
+  end
+
+  test 'instance_up_cmd - all up' do
+    prep = [
+      {
+        "status" => {
+          "containerStatuses" => [
+            {
+              "ready" => true
+            }
+          ]
+        }
+      }
+    ]
+
+    result = kubernetes_method.instance_up_cmd(instance_up_preparation: prep)
+
+    assert_equal result, "echo true | grep true"
+  end
+
+  test 'instance_up_cmd - not ready' do
+    prep = [
+      {
+        "status" => {
+          "containerStatuses" => [
+            {
+              "ready" => false
+            }
+          ]
+        }
+      }
+    ]
+
+    result = kubernetes_method.instance_up_cmd(instance_up_preparation: prep)
+
+    assert_equal result, "echo false | grep true"
+  end
+
+  test 'instance_up_cmd - no ready attribute' do
+    prep = [
+      {
+        "status" => {
+          "containerStatuses" => [
+            {
+              "state" => {}
+            }
+          ]
+        }
+      }
+    ]
+
+    result = kubernetes_method.instance_up_cmd(instance_up_preparation: prep)
+
+    assert_equal result, "echo false | grep true"
+  end
+
+  test 'instance_up_cmd - no pod' do
+    prep = []
+
+    result = kubernetes_method.instance_up_cmd(instance_up_preparation: prep)
+
+    assert_equal result, "echo false | grep true"
+  end
+
+  test 'pods_contain_oom? - happy path without www' do
+    pod = {
+      "metadata" => {
+        "labels" => {
+          "app" => "www"
+        }
+      },
+      "status" => {
+        "containerStatuses" => [
+          {
+            "lastState" => { "terminated" => { "reason" => "OOMKilled" } }
+          }
+        ]
+      }
+    }
+
+    assert kubernetes_method.pods_contain_oom?([pod])
+  end
+
+  test 'pods_contain_oom? - happy path with www' do
+    pod = {
+      "metadata" => {
+        "labels" => {
+          "app" => "www"
+        }
+      },
+      "status" => {
+        "containerStatuses" => [
+          {
+            "lastState" => { "terminated" => { "reason" => "OOMKilled" } }
+          }
+        ]
+      }
+    }
+
+    assert kubernetes_method.pods_contain_oom?([{}, pod], "www")
+  end
+
+  test 'pods_contain_oom? - without www' do
+    pod = {
+      "metadata" => {
+        "labels" => {
+          "app" => "www"
+        }
+      },
+      "status" => {
+        "containerStatuses" => [
+          {
+            "lastState" => { "terminated" => { "reason" => "OOMKilled" } }
+          }
+        ]
+      }
+    }
+
+    assert_equal kubernetes_method.pods_contain_oom?([{}, pod], "www2"), false
+  end
+
+  test 'contains_oom? - happy path' do
+    prep = {
+      "status" => {
+        "containerStatuses" => [
+          {
+            "lastState" => { "terminated" => { "reason" => "OOMKilled" } }
+          }
+        ]
+      }
+    }
+
+    assert kubernetes_method.contains_oom?(prep)
+  end
+
+  test 'contains_oom? - no oom' do
+    prep = {
+      "status" => {
+        "containerStatuses" => [
+          {
+            "lastState" => { "terminated" => {} }
+          }
+        ]
+      }
+    }
+
+    assert_equal kubernetes_method.contains_oom?(prep), false
+  end
+
   test 'generate_ingress_yml' do
     assert_scripted do
       begin_ssh
@@ -1594,5 +1773,253 @@ VAR2=5678
   test 'pods_contain_status_message? - no items' do
     result = kubernetes_method.pods_contain_status_message?({}, "insufficient memory")
     assert_not result
+  end
+
+  test 'top - without namespace' do
+    top = "NAME                              CPU(cores)   MEMORY(bytes)   \n" \
+      "www-deployment-675ff8d89c-zbc9z   1m           37Mi"
+
+    result = kubernetes_method.top(top)
+
+    er = [
+      {
+        service: "www-deployment-675ff8d89c-zbc9z",
+        cpu_raw: "1m",
+        memory_raw: "37Mi",
+        memory: 37
+      }
+    ]
+
+    assert_equal result, er
+  end
+
+  test 'top - with namespace' do
+    top = "NAMESPACE NAME                              CPU(cores)   MEMORY(bytes)   \n" \
+      "instance-24156   www-deployment-6744df5b9-ccscb    1m           13Mi            \n" \
+      "instance-24368   www-deployment-566d6fd9c8-vz55r   1m           72Mi"
+
+    result = kubernetes_method.top(top)
+
+    expected_r1 = {
+      service: "www-deployment-6744df5b9-ccscb",
+      cpu_raw: "1m",
+      memory_raw: "13Mi",
+      memory: 13,
+      namespace: "instance-24156"
+    }
+
+    expected_r2 = {
+      service: "www-deployment-566d6fd9c8-vz55r",
+      cpu_raw: "1m",
+      memory_raw: "72Mi",
+      memory: 72,
+      namespace: "instance-24368"
+    }
+
+    assert_equal result.first, expected_r1
+    assert_equal result.last, expected_r2
+  end
+
+  test 'auto_should_bump_plan_to - should bump' do
+    w = default_website
+    w.account_type = "auto"
+    w.auto_account_type = "first"
+    w.auto_account_types_history = nil
+    w.save
+
+    result = kubernetes_method.auto_should_bump_plan_to(w)
+
+    assert_equal result, "second"
+  end
+
+  test 'auto_should_bump_plan_to - should bump, skip history' do
+    w = default_website
+    w.account_type = "auto"
+    w.auto_account_type = "first"
+    w.auto_account_types_history = %w[second third]
+    w.save
+
+    result = kubernetes_method.auto_should_bump_plan_to(w)
+
+    assert_equal result, "fourth"
+  end
+
+  test 'auto_init - happy path' do
+    w = default_website
+    w.account_type = "auto"
+    w.auto_account_type = "first"
+    w.auto_account_types_history = ["second"]
+    w.save
+
+    kubernetes_method.auto_init(w)
+
+    w.reload
+
+    assert_equal w.auto_account_type, "first"
+    assert_equal w.auto_account_types_history, ["first"]
+  end
+
+  test 'auto_finalize - happy path' do
+    w = default_website
+    w.account_type = "auto"
+    w.auto_account_type = "first"
+    w.auto_account_types_history = %w[second third]
+    w.save
+
+    kubernetes_method.auto_finalize(w)
+
+    w.reload
+
+    assert_equal w.auto_account_type, "first"
+    assert_equal w.auto_account_types_history, ["second"]
+  end
+
+  test 'auto_manage_memory - oom' do
+    w = default_website
+    w.account_type = "auto"
+    w.auto_account_type = "first"
+    w.auto_account_types_history = nil
+    w.save
+
+    pod = {
+      "metadata" => {
+        "labels" => {
+          "app" => "www"
+        }
+      },
+      "status" => {
+        "containerStatuses" => [
+          {
+            "lastState" => { "terminated" => { "reason" => "OOMKilled" } }
+          }
+        ]
+      }
+    }
+
+    w.deployments.create!(status: 'success', obj: { image_name_tag: "docker/myimage" })
+
+    prepare_action_yml(kubernetes_method, w.website_locations.first, "apply.yml",
+                       "apply -f apply.yml", 'success')
+
+    assert_scripted do
+      begin_ssh
+
+      result = kubernetes_method.auto_manage_memory(w, pod)
+
+      assert_equal result[:stdout], "success"
+
+      w.reload
+
+      assert_equal w.auto_account_type, "second"
+      assert_equal w.auto_account_types_history, ["second"]
+    end
+  end
+
+  test 'auto_manage_memory - should decrease' do
+    w = default_website
+    w.account_type = "auto"
+    w.auto_account_type = "third"
+    w.auto_account_types_history = nil
+    w.save
+
+    pod = {
+      "metadata" => {
+        "labels" => {
+          "app" => "www"
+        }
+      },
+      "status" => {
+        "containerStatuses" => [
+          {
+            "lastState" => { "terminated" => { "reason" => "" } }
+          }
+        ]
+      }
+    }
+    top = "NAMESPACE NAME                              CPU(cores)   MEMORY(bytes)   \n" \
+      "instance-24156   www-deployment-6744df5b9-ccscb    1m           13Mi            \n" \
+      "instance-#{w.id}   www-deployment-566d6fd9c8-vz55r   1m           72Mi"
+
+    w.deployments.create!(status: 'success', obj: { image_name_tag: "docker/myimage" })
+
+    prepare_action_yml(kubernetes_method, w.website_locations.first, "apply.yml",
+                       "apply -f apply.yml", 'success')
+
+    assert_scripted do
+      begin_ssh
+
+      result = kubernetes_method.auto_manage_memory(w, pod, top)
+
+      assert_equal result[:stdout], "success"
+
+      w.reload
+
+      assert_equal w.auto_account_type, "second"
+      assert_equal w.auto_account_types_history, ["second"]
+    end
+  end
+
+  test 'auto_should_decrease_plan_to - should decrease' do
+    w = default_website
+    w.account_type = "auto"
+    w.auto_account_type = "third"
+    w.auto_account_types_history = nil
+    w.save
+
+    top = "NAMESPACE NAME                              CPU(cores)   MEMORY(bytes)   \n" \
+      "instance-24156   www-deployment-6744df5b9-ccscb    1m           13Mi            \n" \
+      "instance-#{w.id}   www-deployment-566d6fd9c8-vz55r   1m           72Mi"
+
+    result = kubernetes_method.auto_should_decrease_plan_to(w, top)
+
+    assert_equal result, "second"
+  end
+
+  test 'auto_should_decrease_plan_to - top not yet available' do
+    w = default_website
+    w.account_type = "auto"
+    w.auto_account_type = "third"
+    w.auto_account_types_history = nil
+    w.save
+
+    top = "NAMESPACE NAME                              CPU(cores)   MEMORY(bytes)   \n" \
+      "instance-24156   www-deployment-6744df5b9-ccscb    1m           13Mi            \n" \
+      "instance-#{w.id}   www-deployment-566d6fd9c8-vz55r   1m           0Mi"
+
+    result = kubernetes_method.auto_should_decrease_plan_to(w, top)
+
+    assert_equal result, nil
+  end
+
+  test 'auto_should_decrease_plan_to - do nothing if the same' do
+    w = default_website
+    w.account_type = "auto"
+    w.auto_account_type = "second"
+    w.auto_account_types_history = nil
+    w.save
+
+    top = "NAMESPACE NAME                              CPU(cores)   MEMORY(bytes)   \n" \
+      "instance-24156   www-deployment-6744df5b9-ccscb    1m           13Mi            \n" \
+      "instance-#{w.id}   www-deployment-566d6fd9c8-vz55r   1m           72Mi"
+
+    result = kubernetes_method.auto_should_decrease_plan_to(w, top)
+
+    assert_equal result, nil
+  end
+
+  test 'auto_should_decrease_plan_to - avoid taking already used account type' do
+    w = default_website
+    w.account_type = "auto"
+    w.auto_account_type = "sixth"
+    w.auto_account_types_history = %w[second third sixth]
+    w.save
+
+    top = "NAMESPACE NAME                              CPU(cores)   MEMORY(bytes)   \n" \
+      "instance-24156   www-deployment-6744df5b9-ccscb    1m           13Mi            \n" \
+      "instance-#{w.id}   www-deployment-566d6fd9c8-vz55r   1m           72Mi"
+
+    result = kubernetes_method.auto_should_decrease_plan_to(w, top)
+
+    assert_equal result, "fourth"
   end
 end
