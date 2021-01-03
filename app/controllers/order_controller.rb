@@ -22,6 +22,4 @@ class OrderController < ApplicationController
     Ex::Logger.error(e)
     json(result: 'error', msg: e.to_s)
   end
-
-
 end

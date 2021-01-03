@@ -465,8 +465,30 @@ class ActiveSupport::TestCase
       content_type: 'application/json',
       response_status: 200,
       response_path: 'test/fixtures/http/neverbounce/invalid.json'
+    },
+    {
+      url: 'https://api-m.paypal.com/v1/oauth2/token',
+      method: :post,
+      with: {
+        body: { "grant_type": "client_credentials" }
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/paypal/access_token.json'
+    },
+    {
+      url: 'https://api-m.paypal.com/v1/billing/subscriptions/MY_SUB',
+      method: :get,
+      with: {
+        body: { }
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/paypal/my_sub.json'
     }
   ]
+
+  # https://api-m.paypal.com/v1/billing/subscriptions/MY_SUB
 
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   fixtures :all
