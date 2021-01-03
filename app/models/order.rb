@@ -27,10 +27,12 @@ class Order < ApplicationRecord
   end
 
   def add_user_credits
-    nb_credits = Website.cost_price_to_credits(amount)
+    unless is_subscription
+      nb_credits = Website.cost_price_to_credits(amount)
 
-    user.credits += nb_credits
-    user.save
+      user.credits += nb_credits
+      user.save
+    end
   end
 
   def send_confirmation_email

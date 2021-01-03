@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user_id: 1
+  quantity: 1
+  active: false
+  subscription_id: MyString1
+
+two:
+  user_id: 1
+  quantity: 1
+  active: false
+  subscription_id: MyString2

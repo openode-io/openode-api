@@ -38,7 +38,7 @@ module Api
         payload: payload
       )
 
-      JSON.parse(result)
+      JSON.parse(result) rescue {}
     end
   end
 end

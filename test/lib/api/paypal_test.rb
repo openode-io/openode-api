@@ -10,7 +10,7 @@ class ApiPaypalTest < ActiveSupport::TestCase
     assert_equal access_token, "myaccesstoken"
   end
 
-  test 'get billing plans - happy path' do
+  test 'get subscription - happy path' do
     paypal_api = Api::Paypal.new
 
     paypal_api.refresh_access_token

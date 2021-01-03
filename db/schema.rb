@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_12_30_210659) do
+ActiveRecord::Schema.define(version: 2021_01_05_004720) do
 
   create_table "addons", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "name"
@@ -148,6 +148,7 @@ ActiveRecord::Schema.define(version: 2020_12_30_210659) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "gateway", default: "paypal"
+    t.boolean "is_subscription", default: false
     t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
@@ -173,6 +174,17 @@ ActiveRecord::Schema.define(version: 2020_12_30_210659) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["name"], name: "index_statuses_on_name", unique: true
+  end
+
+  create_table "subscriptions", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "quantity"
+    t.boolean "active"
+    t.string "subscription_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["subscription_id"], name: "index_subscriptions_on_subscription_id", unique: true
+    t.index ["user_id"], name: "index_subscriptions_on_user_id"
   end
 
   create_table "users", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|

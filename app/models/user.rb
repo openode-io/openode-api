@@ -29,6 +29,7 @@ class User < ApplicationRecord
   has_many :orders, dependent: :destroy
   has_many :viewed_notifications, dependent: :destroy
   has_many :friend_invites, dependent: :destroy
+  has_many :subscriptions, dependent: :destroy
   has_many :user_email_verifications, foreign_key: :ref_id,
                                       class_name: :UserEmailVerification,
                                       dependent: :destroy

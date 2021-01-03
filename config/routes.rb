@@ -49,6 +49,9 @@ Rails.application.routes.draw do
     post 'verify-reset-token', to: 'account#verify_reset_token'
     get 'spendings', to: 'account#spendings'
     post 'activate/:user_id/:activation_hash', to: 'account#activate'
+
+    # subscriptions
+    post '/subscriptions/:subscription_id/cancel', to: 'subscription#cancel'
   end
 
   scope :billing do
@@ -97,6 +100,7 @@ Rails.application.routes.draw do
 
   scope :order do
     post 'paypal', to: 'order#paypal'
+    post 'paypal_subscription', to: 'order#paypal_subscription'
   end
 
   scope :instances, constraints: { site_name: %r{[^/]+} } do
