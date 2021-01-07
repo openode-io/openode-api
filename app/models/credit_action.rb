@@ -1,6 +1,8 @@
 class CreditAction < ApplicationRecord
   belongs_to :user
   belongs_to :website
+  belongs_to :credit_action_loop, optional: true
+  belongs_to :subscription, optional: true
 
   validate :verify_enough_credits
 
@@ -32,7 +34,9 @@ class CreditAction < ApplicationRecord
       user: website.user,
       website: website,
       action_type: action_type,
-      credits_spent: credits_spent
+      credits_spent: credits_spent,
+      credit_action_loop_id: opts[:credit_action_loop_id],
+      subscription_id: opts[:subscription]&.id
     )
 
     if opts[:with_user_update]

@@ -26,7 +26,7 @@ class InternalTest < ActiveSupport::TestCase
     internal_provider = CloudProvider::Manager.instance.first_of_type('internal')
 
     plans = internal_provider.plans
-    assert_equal plans.length, 7
+    assert_equal plans.length, 8
     assert_equal plans[0][:internal_id], 'open_source'
     assert_equal plans[0][:cost_per_minute], internal_provider.calc_cost_per_minute(100)
     assert_equal plans[0][:cost_per_hour], internal_provider.calc_cost_per_hour(100)
@@ -41,7 +41,7 @@ class InternalTest < ActiveSupport::TestCase
 
     plans = provider.plans_at(location.str_id)
 
-    assert_equal plans.length, 7
+    assert_equal plans.length, 8
 
     plans.each do |plan|
       assert_equal plan[:type], CloudProvider::Internal::TYPE

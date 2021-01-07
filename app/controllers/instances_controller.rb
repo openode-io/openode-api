@@ -246,7 +246,15 @@ class InstancesController < ApplicationController
 
   api!
   def plans
-    json(@website_location.available_plans)
+    list_plans = @website_location.available_plans.select do |plan|
+      if plan[:internal_id] == "auto"
+        @user.active_subscription?
+      else
+        true
+      end
+    end
+
+    json(list_plans)
   end
 
   api!

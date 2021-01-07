@@ -20,6 +20,8 @@ class LibTasksCreditsTest < ActiveSupport::TestCase
   end
 
   test "spend - one to process, happy path" do
+    CreditActionLoop.destroy_all
+
     website = default_website
     website.status = Website::STATUS_ONLINE
     website.save!
@@ -31,6 +33,12 @@ class LibTasksCreditsTest < ActiveSupport::TestCase
     assert_equal website.user.reload.credits < credits_begin, true
 
     assert_equal website.events.length, 0
+
+    credit_loop = CreditActionLoop.last
+    assert credit_loop
+    assert_equal credit_loop.type, "CreditActionLoopOnlineSpend"
+    assert_equal credit_loop.credit_actions.count, 1
+    assert_equal credit_loop.credit_actions.first.website.id, website.id
   end
 
   test "spend - one to process, one lacks credits" do

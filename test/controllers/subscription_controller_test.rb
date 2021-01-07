@@ -52,14 +52,13 @@ class SubscriptionControllerTest < ActionDispatch::IntegrationTest
     )
 
     get "/account/subscriptions/",
-         headers: default_headers_auth,
-         as: :json
+        headers: default_headers_auth,
+        as: :json
 
     assert_response :success
 
     assert_equal response.parsed_body.count, 2
     assert_equal response.parsed_body[0]['id'], subscription2.id
     assert_equal response.parsed_body[1]['id'], subscription1.id
-
   end
 end

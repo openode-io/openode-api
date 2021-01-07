@@ -17,6 +17,6 @@ class ApiPaypalTest < ActiveSupport::TestCase
 
     result = paypal_api.execute(:get, "/v1/billing/subscriptions/MY_SUB")
 
-    assert_equal result, { "attri" => "bute" }
+    assert_equal result, "attri" => "bute"
   end
 end

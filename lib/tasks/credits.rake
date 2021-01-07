@@ -37,7 +37,8 @@ namespace :credits do
   desc ''
   task online_spend: :environment do
     name = "Task credits__online__spend"
-    Rails.logger.info "[#{name}] begin"
+    credit_loop = CreditActionLoopOnlineSpend.create!
+    Rails.logger.info "[#{name}] begin, loop = #{credit_loop}"
 
     websites = Website.select(:id).in_statuses([Website::STATUS_ONLINE]).pluck(:id)
 
@@ -48,7 +49,7 @@ namespace :credits do
       Rails.logger.info "[#{name}] processing #{website.site_name}"
 
       begin
-        website.spend_online_hourly_credits!
+        website.spend_online_hourly_credits!(1.0, credit_loop)
       rescue StandardError => e
         begin
           Rails.logger.error "[#{name}] #{e.message}"
@@ -87,6 +88,7 @@ namespace :credits do
     name = "Task credits__persistence_spend"
     Rails.logger.info "[#{name}] begin"
 
+    credit_loop = CreditActionLoopPersistenceSpend.create!
     websites = (Website.having_extra_storage + Website.having_addon_with_persistence).uniq
 
     Rails.logger.info "[#{name}] #{websites.count} to process"
@@ -95,7 +97,7 @@ namespace :credits do
       Rails.logger.info "[#{name}] processing #{website.site_name}"
 
       begin
-        website.spend_persistence_hourly_credits!
+        website.spend_persistence_hourly_credits!(credit_loop)
       rescue StandardError => e
         begin
           Rails.logger.error "[#{name}] #{e.message}"

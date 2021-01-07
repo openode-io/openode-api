@@ -66,6 +66,10 @@ class User < ApplicationRecord
   before_update :mark_changing_email
   before_destroy :ensure_no_active_website, prepend: true
 
+  def active_subscription?
+    subscriptions.exists?(active: true)
+  end
+
   def password?
     password.present?
   end

@@ -95,5 +95,12 @@ namespace :db_clean do
       name: name,
       stat_name: "nb_archived_credit_actions"
     )
+
+    clean_table(
+      Model: CreditActionLoop,
+      days_retention: days_retention,
+      name: name,
+      stat_name: "nb_archived_credit_action_loops"
+    )
   end
 end

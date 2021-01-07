@@ -946,6 +946,40 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.valid?, false
   end
 
+  # subscription_spend_persistence_hourly_ratio
+  test 'subscription_spend_persistence_hourly_ratio - without extra storage' do
+    website = default_website
+    wl = default_website_location
+    wl.extra_storage = 0
+    wl.save!
+
+    assert_equal website.subscription_spend_persistence_hourly_ratio, 1.0
+  end
+
+  test 'subscription_spend_persistence_hourly_ratio - 2 extra storage and subscription' do
+    website = default_website
+    wl = default_website_location
+    wl.extra_storage = 2
+    wl.save!
+
+    subscription = Subscription.create!(user: website.user, quantity: 1, active: true)
+    SubscriptionWebsite.create!(website: website, subscription: subscription, quantity: 1)
+
+    assert_equal website.subscription_spend_persistence_hourly_ratio, 0.5
+  end
+
+  test 'subscription_spend_persistence_hourly_ratio - with 1 extra storage and subscription' do
+    website = default_website
+    wl = default_website_location
+    wl.extra_storage = 1
+    wl.save!
+
+    subscription = Subscription.create!(user: website.user, quantity: 1, active: true)
+    SubscriptionWebsite.create!(website: website, subscription: subscription, quantity: 1)
+
+    assert_equal website.subscription_spend_persistence_hourly_ratio, 0
+  end
+
   # extra storage
   test 'extra storage with extra storage' do
     website = default_website
@@ -998,6 +1032,40 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.extra_storage_credits_cost_per_hour(website.total_extra_storage), 0
   end
 
+  test 'spend_persistence_hourly_credits! - with extra storage and subscription' do
+    w = default_website
+    wl = default_website_location
+    wl.extra_storage = 2
+    wl.save!
+
+    subscription = Subscription.create!(user: w.user, quantity: 1, active: true)
+    SubscriptionWebsite.create!(website: w, subscription: subscription, quantity: 1)
+
+    w.credit_actions.destroy_all
+    w.spend_persistence_hourly_credits!
+
+    assert_equal w.credit_actions.reload.length, 1
+    assert_in_delta(w.credit_actions.last.credits_spent,
+                    1 * 100 * CloudProvider::Internal::COST_EXTRA_STORAGE_GB_PER_HOUR,
+                    0.000001)
+  end
+
+  test 'spend_persistence_hourly_credits! - with 1 extra storage and subscription' do
+    w = default_website
+    wl = default_website_location
+    wl.extra_storage = 1
+    wl.save!
+
+    subscription = Subscription.create!(user: w.user, quantity: 1, active: true)
+    SubscriptionWebsite.create!(website: w, subscription: subscription, quantity: 1)
+
+    w.credit_actions.destroy_all
+    w.spend_persistence_hourly_credits!
+
+    assert_equal w.credit_actions.reload.length, 1
+    assert_equal w.credit_actions.last.credits_spent, 0
+  end
+
   test 'website addon with extra storage' do
     w = default_website
     wl = default_website_location
@@ -1039,10 +1107,71 @@ class WebsiteTest < ActiveSupport::TestCase
     w.credit_actions.destroy_all
     w.spend_persistence_hourly_credits!
 
-    assert_equal w.credit_actions.reload.length, 1
+    assert_equal w.credit_actions.reload.length, 2
     assert_in_delta(w.credit_actions.last.credits_spent,
                     2 * 100 * CloudProvider::Internal::COST_EXTRA_STORAGE_GB_PER_HOUR,
                     0.000001)
+  end
+
+  # subscription_spend_online_hourly_ratio
+  test 'subscription_spend_online_hourly_ratio - without subscription' do
+    website = default_website
+    SubscriptionWebsite.destroy_all
+
+    assert_equal website.subscription_spend_online_hourly_ratio, 1.0
+  end
+
+  test 'subscription_spend_online_hourly_ratio - with active subscription' do
+    website = default_website
+    SubscriptionWebsite.destroy_all
+    Subscription.destroy_all
+
+    subscription = Subscription.create!(user: website.user, quantity: 1, active: true)
+    SubscriptionWebsite.create!(website: website, subscription: subscription, quantity: 1)
+
+    assert_equal website.subscription_spend_online_hourly_ratio, 0.0
+  end
+
+  test 'subscription_spend_online_hourly_ratio - with inactive subscription' do
+    website = default_website
+    SubscriptionWebsite.destroy_all
+    Subscription.destroy_all
+
+    subscription = Subscription.create!(user: website.user, quantity: 1, active: false)
+    SubscriptionWebsite.create!(website: website, subscription: subscription, quantity: 1)
+
+    assert_equal website.subscription_spend_online_hourly_ratio, 1.0
+  end
+
+  # subscription
+  test 'subscription - with active subscription' do
+    website = default_website
+    SubscriptionWebsite.destroy_all
+    Subscription.destroy_all
+
+    subscription = Subscription.create!(user: website.user, quantity: 1, active: true)
+    SubscriptionWebsite.create!(website: website, subscription: subscription, quantity: 1)
+
+    assert_equal website.subscription, subscription
+  end
+
+  test 'subscription - with inactive subscription' do
+    website = default_website
+    SubscriptionWebsite.destroy_all
+    Subscription.destroy_all
+
+    subscription = Subscription.create!(user: website.user, quantity: 1, active: false)
+    SubscriptionWebsite.create!(website: website, subscription: subscription, quantity: 1)
+
+    assert_nil website.subscription
+  end
+
+  test 'subscription - without subscription' do
+    website = default_website
+    SubscriptionWebsite.destroy_all
+    Subscription.destroy_all
+
+    assert_nil website.subscription
   end
 
   # spend credits
