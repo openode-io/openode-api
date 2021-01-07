@@ -10,6 +10,10 @@ class SubscriptionController < ApplicationController
     end
   end
 
+  def index
+    json(@user.subscriptions.order(id: :desc))
+  end
+
   def cancel
     paypal_api = Api::Paypal.new
     paypal_api.refresh_access_token

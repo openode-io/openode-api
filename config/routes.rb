@@ -51,6 +51,7 @@ Rails.application.routes.draw do
     post 'activate/:user_id/:activation_hash', to: 'account#activate'
 
     # subscriptions
+    get '/subscriptions/', to: 'subscription#index'
     post '/subscriptions/:subscription_id/cancel', to: 'subscription#cancel'
   end
 
