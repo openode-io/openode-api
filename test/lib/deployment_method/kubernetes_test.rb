@@ -1928,7 +1928,7 @@ VAR2=5678
       assert_equal w.auto_account_type, "second"
       assert_equal w.auto_account_types_history, ["second"]
 
-      assert_includes w.events.last.obj.dig('update'), "Auto Mem"
+      assert_includes w.events.last.obj.dig('title'), "Auto Mem"
     end
   end
 
@@ -1990,6 +1990,38 @@ VAR2=5678
     result = kubernetes_method.auto_should_decrease_plan_to(w, top)
 
     assert_equal result, "second"
+  end
+
+  test 'auto_should_decrease_plan_to - should not decrease if same' do
+    w = default_website
+    w.account_type = "auto"
+    w.auto_account_type = "third"
+    w.auto_account_types_history = %w[first second]
+    w.save
+
+    top = "NAMESPACE NAME                              CPU(cores)   MEMORY(bytes)   \n" \
+      "instance-24156   www-deployment-6744df5b9-ccscb    1m           13Mi            \n" \
+      "instance-#{w.id}   www-deployment-566d6fd9c8-vz55r   1m           72Mi"
+
+    result = kubernetes_method.auto_should_decrease_plan_to(w, top)
+
+    assert_nil result
+  end
+
+  test 'auto_should_decrease_plan_to - should not decrease if plan larger' do
+    w = default_website
+    w.account_type = "auto"
+    w.auto_account_type = "third"
+    w.auto_account_types_history = %w[first second third]
+    w.save
+
+    top = "NAMESPACE NAME                              CPU(cores)   MEMORY(bytes)   \n" \
+      "instance-24156   www-deployment-6744df5b9-ccscb    1m           13Mi            \n" \
+      "instance-#{w.id}   www-deployment-566d6fd9c8-vz55r   1m           72Mi"
+
+    result = kubernetes_method.auto_should_decrease_plan_to(w, top)
+
+    assert_nil result
   end
 
   test 'auto_should_decrease_plan_to - top not yet available' do
