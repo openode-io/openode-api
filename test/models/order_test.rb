@@ -24,6 +24,24 @@ class OrderTest < ActiveSupport::TestCase
     assert_equal order.gateway, 'paypal'
   end
 
+  test 'without unused coupon, is subscription' do
+    user = User.first
+    credits_before = user.credits
+
+    Order.create!(
+      user: user,
+      amount: 10.0,
+      payment_status: 'Completed',
+      gateway: 'paypal',
+      content: { 'payment_status' => 'Completed' },
+      is_subscription: true
+    )
+
+    user.reload
+
+    assert_equal user.credits, credits_before
+  end
+
   test 'without used coupon' do
     user = User.first
     coupon = Coupon.first

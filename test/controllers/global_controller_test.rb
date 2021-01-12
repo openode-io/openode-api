@@ -58,7 +58,7 @@ class GlobalControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
-    assert_equal response.parsed_body.length, 8
+    assert_equal response.parsed_body.length, 9
     dummy = response.parsed_body.find { |l| l['id'] == 'DUMMY-PLAN' }
     assert_equal dummy['id'], 'DUMMY-PLAN'
 
@@ -71,7 +71,7 @@ class GlobalControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
-    assert_equal response.parsed_body.length, 7
+    assert_equal response.parsed_body.length, 8
     assert_equal response.parsed_body[0]['id'], 'open-source'
   end
 

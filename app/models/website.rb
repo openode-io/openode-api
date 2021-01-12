@@ -15,6 +15,7 @@ class Website < ApplicationRecord
   self.inheritance_column = :_type
 
   belongs_to :user
+  has_many :subscription_websites, dependent: :destroy
   has_many :collaborators, dependent: :destroy
   has_many :website_locations, dependent: :destroy
   has_many :snapshots, dependent: :destroy
@@ -280,6 +281,10 @@ class Website < ApplicationRecord
 
   def open_source_plan?
     account_type == OPEN_SOURCE_ACCOUNT_TYPE
+  end
+
+  def auto_plan?
+    account_type == AUTO_ACCOUNT_TYPE
   end
 
   def self.initial_alerts
@@ -871,6 +876,11 @@ class Website < ApplicationRecord
       return true, ''
     end
 
+    # has subscription active?
+    if subscription_websites.reload.first.present?
+      return true, ''
+    end
+
     unless user.credits?(Website.cost_price_to_credits(plan[:cost_per_hour]))
       msg = 'No credit available. Please make sure to buy credits via the Administration ' \
             'dashboard in Billing - ' \
@@ -934,21 +944,34 @@ class Website < ApplicationRecord
       (website_locations.first&.replicas || 1)
   end
 
+  def subscription_spend_online_hourly_ratio
+    subscription_websites.reload.last&.activated? ? 0.0 : 1.0
+  end
+
+  def subscription
+    if subscription_websites.reload.last&.activated?
+      subscription_websites.last&.subscription
+    end
+  end
+
   # credits related task updates and calculations
-  def spend_online_hourly_credits!(hourly_ratio = 1.0)
+  def spend_online_hourly_credits!(hourly_ratio = 1.0, credit_action_loop = nil)
     return unless plan
 
     spendings = [
       {
         action_type: CreditAction::TYPE_CONSUME_PLAN,
-        credits_cost: plan_cost * hourly_ratio
+        credits_cost: plan_cost * hourly_ratio * subscription_spend_online_hourly_ratio,
+        subscription: subscription
       }
     ]
 
     if blue_green_deployment?
       spendings << {
         action_type: CreditAction::TYPE_CONSUME_BLUE_GREEN,
-        credits_cost: blue_green_deployment_option_cost * hourly_ratio
+        credits_cost: blue_green_deployment_option_cost * hourly_ratio *
+                      subscription_spend_online_hourly_ratio,
+        subscription: subscription
       }
     end
 
@@ -959,7 +982,7 @@ class Website < ApplicationRecord
       }
     end
 
-    spend_hourly_credits!(spendings)
+    spend_hourly_credits!(spendings, credit_action_loop)
   end
 
   # minutes ratio of the current hour.
@@ -969,7 +992,7 @@ class Website < ApplicationRecord
   end
 
   def spending_partial_hourly_ratio
-    # take max time betwee last deployment and current time
+    # take max time between last deployment and current time
     from_time = [deployments.completed.last&.created_at, Time.zone.now.beginning_of_hour]
                 .select(&:present?)
                 .max
@@ -991,11 +1014,24 @@ class Website < ApplicationRecord
     logger.info("Issue spend_partial_last_hour_credits #{e.inspect}")
   end
 
-  def spend_persistence_hourly_credits!
+  def subscription_spend_persistence_hourly_ratio
+    if total_extra_storage <= 0
+      1.0
+    else
+      qty = subscription_websites.first&.quantity || 0
+
+      # remove qty to the total extra storage
+      (total_extra_storage - qty).to_f / total_extra_storage
+    end
+  end
+
+  def spend_persistence_hourly_credits!(credit_action_loop = nil)
     spendings = [
       {
         action_type: CreditAction::TYPE_CONSUME_STORAGE,
-        credits_cost: extra_storage_credits_cost_per_hour(total_extra_storage)
+        credits_cost: extra_storage_credits_cost_per_hour(total_extra_storage) *
+          subscription_spend_persistence_hourly_ratio,
+        subscription: subscription
       }
     ]
 
@@ -1009,15 +1045,15 @@ class Website < ApplicationRecord
       }
     end
 
-    spend_hourly_credits!(spendings)
+    spend_hourly_credits!(spendings, credit_action_loop)
   end
 
-  def spend_hourly_credits!(spendings)
+  def spend_hourly_credits!(spendings, credit_action_loop)
     current_plan = plan
 
     return if !current_plan || (open_source_plan? && open_source_activated)
 
-    consume_spendings(spendings)
+    consume_spendings(spendings, credit_action_loop)
   end
 
   def spend_exceeding_traffic!(bytes)
@@ -1033,12 +1069,13 @@ class Website < ApplicationRecord
     consume_spendings(spendings)
   end
 
-  def consume_spendings(spendings)
+  def consume_spendings(spendings, credit_action_loop = nil)
     spendings.each do |spending|
-      if spending[:credits_cost] != 0
-        CreditAction.consume!(self, spending[:action_type],
-                              spending[:credits_cost], with_user_update: true)
-      end
+      CreditAction.consume!(self, spending[:action_type],
+                            spending[:credits_cost],
+                            with_user_update: true,
+                            credit_action_loop_id: credit_action_loop&.id,
+                            subscription: spending[:subscription])
     end
   end
 

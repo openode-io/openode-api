@@ -3,6 +3,7 @@ module DeploymentMethod
   class Base
     include Plugins::Git
     include Plugins::OpenodeCli
+    include Plugins::Subscription
 
     RuntimeError = Class.new(StandardError)
 
@@ -45,6 +46,7 @@ module DeploymentMethod
     def verify_can_deploy(options = {})
       website, website_location = get_website_fields(options)
 
+      subscription_init(options)
       can_deploy, msg = website.can_deploy_to?(website_location)
 
       raise ApplicationRecord::ValidationError, msg unless can_deploy
@@ -191,6 +193,8 @@ module DeploymentMethod
 
       website.change_status!(Website::STATUS_OFFLINE, skip_validations: true)
       website.spend_partial_last_hour_credits
+
+      subscription_stop(options)
     end
 
     def instance_up_cmd(_options = {})

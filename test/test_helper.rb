@@ -465,6 +465,96 @@ class ActiveSupport::TestCase
       content_type: 'application/json',
       response_status: 200,
       response_path: 'test/fixtures/http/neverbounce/invalid.json'
+    },
+    {
+      url: 'https://api-m.paypal.com/v1/oauth2/token',
+      method: :post,
+      with: {
+        body: { "grant_type": "client_credentials" }
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/paypal/access_token.json'
+    },
+    {
+      url: 'https://api-m.paypal.com/v1/billing/subscriptions/MY_SUB',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/paypal/my_sub.json'
+    },
+    {
+      url: 'https://api-m.paypal.com/v1/billing/subscriptions/I-19RUCRSR776E',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/paypal/valid.json'
+    },
+    {
+      url: 'https://ipnpb.paypal.com/cgi-bin/webscr?cmd=_notify-validate',
+      method: :post,
+      with: {
+        body: "payment_cycle=Daily&txn_type=recurring_payment_profile_cancel&last_name=Levesque&next_payment_date=N/A&residence_country=CA&initial_payment_amount=0.00&currency_code=USD&time_created=18%3A44%3A29+Jan+02%2C+2021+PST&verify_sign=Ab9GqN77tIrXe20oyfXtzTVqk4q1ADZ0S5jAQI9MLW3761RKjjSJYfdv&period_type=+Regular&payer_status=unverified&tax=0.00&payer_email=levesque.martin%40gmail.com&first_name=Martin&receiver_email=info%40openode.io&payer_id=G3A62CTSVEHRW&product_type=1&shipping=0.00&amount_per_cycle=1.00&profile_status=Cancelled&charset=windows-1252&notify_version=3.9&amount=1.00&outstanding_balance=0.00&recurring_payment_id=I-C07GLHXGP65Y&product_name=openode+test&ipn_track_id=924c4eb589c62\n\n"
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/payment/paypal/verified.txt'
+    },
+    {
+      url: 'https://api-m.paypal.com/v1/billing/subscriptions/I-C07GLHXGP65Y',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/paypal/valid.json'
+    },
+    {
+      url: 'https://ipnpb.paypal.com/cgi-bin/webscr?cmd=_notify-validate',
+      method: :post,
+      with: {
+        body: "payment_cycle=Daily&txn_type=recurring_payment_profile_cancel&last_name=Levesque&next_payment_date=N/A&residence_country=CA&initial_payment_amount=0.00&currency_code=USD&time_created=18%3A44%3A29+Jan+02%2C+2021+PST&verify_sign=Ab9GqN77tIrXe20oyfXtzTVqk4q1ADZ0S5jAQI9MLW3761RKjjSJYfdv&period_type=+Regular&payer_status=unverified&tax=0.00&payer_email=levesque.martin%40gmail.com&first_name=Martin&receiver_email=info%40openode.io&payer_id=G3A62CTSVEHRW&product_type=1&shipping=0.00&amount_per_cycle=1.00&profile_status=Cancelled&charset=windows-1252&notify_version=3.9&amount=1.00&outstanding_balance=0.00&recurring_payment_id=I-C07GLHXGP65INACTIVE&product_name=openode+test&ipn_track_id=924c4eb589c62\n"
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/payment/paypal/verified.txt'
+    },
+    {
+      url: 'https://api-m.paypal.com/v1/billing/subscriptions/I-C07GLHXGP65INACTIVE',
+      method: :get,
+      with: {
+        body: {}
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/paypal/canceled.json'
+    },
+    {
+      url: 'https://ipnpb.paypal.com/cgi-bin/webscr?cmd=_notify-validate',
+      method: :post,
+      with: {
+        body: "mc_gross=1.00&period_type=+Regular&outstanding_balance=0.00&next_payment_date=02%3A00%3A00+Jan+03%2C+2021+PST&protection_eligibility=Eligible&payment_cycle=Daily&address_status=confirmed&tax=0.00&payer_id=G3A62CTSVEHRW&address_street=6680+Baillargeon&payment_date=18%3A46%3A06+Jan+02%2C+2021+PST&payment_status=Completed&product_name=openode+test&charset=windows-1252&recurring_payment_id=I-C07GLHXGP65Y&address_zip=j4z1s8&first_name=Martin&mc_fee=0.10&address_country_code=CA&address_name=Martin+Levesque&notify_version=3.9&amount_per_cycle=1.00&payer_status=unverified&currency_code=USD&business=info%40openode.io&address_country=Canada&address_city=Brossard&verify_sign=Aml20njl9DXrAMgHcc7m0EmUUiqwAVy7q.wZJBb.nXkZ.0M.0V5lagCL&payer_email=levesque.martin%40gmail.com&initial_payment_amount=0.00&profile_status=Active&amount=1.00&txn_id=73V47872D10092911&payment_type=instant&last_name=Levesque&address_state=QC&receiver_email=info%40openode.io&payment_fee=0.10&receiver_id=FS2SL9ESDQKCG&txn_type=recurring_payment&mc_currency=USD&residence_country=CA&receipt_id=0483-1472-9192-6690&transaction_subject=openode+test&payment_gross=1.00&shipping=0.00&product_type=1&time_created=18%3A44%3A29+Jan+02%2C+2021+PST&ipn_track_id=5ba41a09b532c\n"
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/payment/paypal/verified.txt'
+    },
+    {
+      url: 'https://api-m.paypal.com/v1/billing/subscriptions/I-CCCANCELGLHXGP65Y/cancel',
+      method: :post,
+      with: {
+        body: "{\"reason\": \"N/A\"}"
+      },
+      content_type: 'application/json',
+      response_status: 200,
+      response_path: 'test/fixtures/http/paypal/empty.txt'
     }
   ]
 

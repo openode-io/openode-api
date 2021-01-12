@@ -936,6 +936,42 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body[0]['id'], 'open-source'
   end
 
+  test '/instances/:instance_id/plans kubernetes - with subscription' do
+    w = default_website
+    w.type = Website::TYPE_KUBERNETES
+    w.save!
+
+    Subscription.create!(user_id: w.user.id, quantity: 1, active: true)
+
+    get "/instances/#{w.site_name}/plans?location_str_id=canada",
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body.length, 8
+    assert_equal response.parsed_body[0]['id'], 'open-source'
+    assert(response.parsed_body.find { |p| p['internal_id'] == "auto" })
+  end
+
+  test '/instances/:instance_id/plans kubernetes - without subscription' do
+    w = default_website
+    w.type = Website::TYPE_KUBERNETES
+    w.save!
+
+    Subscription.create!(user_id: w.user.id, quantity: 1, active: false)
+
+    get "/instances/#{w.site_name}/plans?location_str_id=canada",
+        as: :json,
+        headers: default_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body.length, 7
+    assert_equal response.parsed_body[0]['id'], 'open-source'
+    assert_nil(response.parsed_body.find { |p| p['internal_id'] == "auto" })
+  end
+
   # /set-plan
   test '/instances/:instance_id/set-plan to a new one' do
     set_dummy_secrets_to(LocationServer.all)

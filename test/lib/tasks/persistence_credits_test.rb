@@ -6,6 +6,7 @@ class LibTasksCreditsTest < ActiveSupport::TestCase
   end
 
   test "spend persistence - one to process, does not lack credits" do
+    CreditActionLoop.destroy_all
     reset_all_extra_storage
 
     website = default_website
@@ -24,6 +25,12 @@ class LibTasksCreditsTest < ActiveSupport::TestCase
 
     assert_equal website.events.count, 0
     assert_in_delta website.user.reload.credits, 999.96, 0.01
+
+    credit_loop = CreditActionLoop.last
+    assert credit_loop
+    assert_equal credit_loop.type, "CreditActionLoopPersistenceSpend"
+    assert_equal credit_loop.credit_actions.count, 1
+    assert_equal credit_loop.credit_actions.first.website.id, website.id
   end
 
   test "spend persistence - one to process, lacks credits" do

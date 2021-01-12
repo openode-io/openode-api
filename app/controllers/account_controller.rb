@@ -23,6 +23,7 @@ class AccountController < ApplicationController
   def me
     result = @user.attributes
     result['type'] = @user.type
+    result['has_active_subscription'] = @user.active_subscription?
 
     result.delete('password_hash')
 

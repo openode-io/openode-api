@@ -1,0 +1,67 @@
+{
+   "id":"WH-3BH95372W3023211K-7TG75526JP330221V",
+   "event_version":"1.0",
+   "create_time":"2021-01-03T04:01:09.091Z",
+   "resource_type":"subscription",
+   "resource_version":"2.0",
+   "event_type":"BILLING.SUBSCRIPTION.ACTIVATED",
+   "summary":"Subscription activated",
+   "resource":{
+      "quantity":"1",
+      "subscriber":{
+         "name":{
+            "given_name":"first name",
+            "surname":"last name"
+         },
+         "email_address":"email.mail@gmail.com",
+         "payer_id":"G3A62CTSVEHRW",
+         "shipping_address":{
+            "address":{
+            }
+         }
+      },
+      "create_time":"2021-01-03T03:59:39Z",
+      "custom_id":"MY_CUSTOM_ID",
+      "plan_overridden":false,
+      "shipping_amount":{
+         "currency_code":"USD",
+         "value":"0.0"
+      },
+      "start_time":"2021-01-02T05:00:00Z",
+      "update_time":"2021-01-03T04:00:58Z",
+      "billing_info":{
+         "outstanding_balance":{
+            "currency_code":"USD",
+            "value":"0.0"
+         },
+         "cycle_executions":[
+            {
+               "tenure_type":"REGULAR",
+               "sequence":1,
+               "cycles_completed":0,
+               "cycles_remaining":0,
+               "current_pricing_scheme_version":1,
+               "total_cycles":0
+            }
+         ],
+         "last_payment":{
+            "amount":{
+               "currency_code":"USD",
+               "value":"1.0"
+            },
+            "time":"2021-01-03T04:00:57Z"
+         },
+         "next_billing_time":"2021-01-03T04:00:57Z",
+         "failed_payments_count":0
+      },
+      "links":[
+      ],
+      "id":"I-19RUCRSR776E",
+      "plan_id":"P-87654154ST2919815L7YS6QA",
+      "status":"ACTIVE",
+      "status_update_time":"2021-01-03T04:00:58Z"
+   },
+   "links":[
+   ]
+}
+

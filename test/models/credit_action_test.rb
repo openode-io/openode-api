@@ -41,4 +41,25 @@ class CreditActionTest < ActiveSupport::TestCase
       assert_equal website.user.credits, credits_remaining
     end
   end
+
+  test 'saves with enough credits, without user update, with subscription' do
+    website = default_website
+    credits_remaining = website.user.credits
+    subscription = Subscription.last
+
+    ca = CreditAction.consume!(
+      website,
+      CreditAction::TYPE_CONSUME_PLAN,
+      1,
+      with_user_update: false,
+      subscription: subscription
+    )
+    website.user.reload
+
+    assert_equal ca.credits_spent, 1
+    assert_equal ca.credits_remaining, credits_remaining
+    assert_equal website.user.credits, credits_remaining
+    assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
+    assert_equal ca.subscription, subscription
+  end
 end

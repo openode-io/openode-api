@@ -54,6 +54,21 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     end
   end
 
+  test 'verify_can_deploy - using subscription' do
+    dep_method = kubernetes_method
+    SubscriptionWebsite.destroy_all
+    user = @website.user
+    user.credits = 0
+    user.save!
+
+    @website.account_type = Website::AUTO_ACCOUNT_TYPE
+    @website.save!
+
+    Subscription.create!(user: user, quantity: 2, active: true)
+
+    dep_method.verify_can_deploy(website: @website, website_location: @website_location)
+  end
+
   test 'delete files generate proper command' do
     result = kubernetes_method.delete_files(files: ['/home/4/test.txt', '/home/what/isthat'])
     assert_equal result, 'rm -rf "/home/4/test.txt" ; rm -rf "/home/what/isthat" ; '
@@ -1912,6 +1927,8 @@ VAR2=5678
 
       assert_equal w.auto_account_type, "second"
       assert_equal w.auto_account_types_history, ["second"]
+
+      assert_includes w.events.last.obj.dig('update'), "Auto Mem"
     end
   end
 

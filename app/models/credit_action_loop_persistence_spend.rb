@@ -1,0 +1,3 @@
+
+class CreditActionLoopPersistenceSpend < CreditActionLoop
+end

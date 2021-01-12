@@ -1554,6 +1554,7 @@ module DeploymentMethod
       kube_yml = generate_deployment_yml(website, website_location, image_name_tag: latest_image)
 
       notify("info", "Improving instance setup...")
+      website.create_event(update: "Auto Mem optimization triggered")
 
       # then apply the yml
       result = kubectl_yml_action(website_location, "apply", kube_yml, ensure_exit_code: 0)

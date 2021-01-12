@@ -342,6 +342,53 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test '/instances/:instance_id/stop - with subscription' do
+    # with auto
+    @website.account_type = Website::AUTO_ACCOUNT_TYPE
+    @website.save!
+
+    s = Subscription.create!(active: true, user: @website.user, quantity: 2)
+    SubscriptionWebsite.create!(website: @website, subscription: s, quantity: 1)
+
+    prepare_make_secret(@kubernetes_method, @website, @website_location, "result")
+    prepare_get_dotenv(@kubernetes_method, @website, "VAR1=12")
+
+    prepare_action_yml(@kubernetes_method, @website_location, "apply.yml",
+                       "delete --timeout 30s  -f apply.yml", 'success')
+
+    current_time = Time.zone.now
+    travel_to current_time.beginning_of_hour + 30.minutes
+    @website.deployments.destroy_all
+
+    assert_scripted do
+      begin_ssh
+      post "/instances/#{@website.site_name}/stop?location_str_id=canada",
+           as: :json,
+           params: {},
+           headers: default_headers_auth
+
+      assert_response :success
+      assert_equal response.parsed_body['result'], 'success'
+
+      invoke_all_jobs
+
+      @website.reload
+
+      assert_equal @website.status, Website::STATUS_OFFLINE
+      assert_equal @website.executions.last.type, 'Task'
+
+      last_credit_action = @website.credit_actions.reload.last
+      expected_ratio = 0
+
+      assert_in_delta @website.plan[:cost_per_hour] * 100.0 * expected_ratio,
+                      last_credit_action.credits_spent, 0.0001
+
+      subscription_website = SubscriptionWebsite.find_by(website: @website)
+
+      assert_nil subscription_website
+    end
+  end
+
   test '/instances/:instance_id/stop - if kube stop fail, should put back to online' do
     prepare_make_secret(@kubernetes_method, @website, @website_location, "result")
     prepare_get_dotenv(@kubernetes_method, @website, "VAR1=12")

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_12_30_210659) do
+ActiveRecord::Schema.define(version: 2021_01_10_151209) do
 
   create_table "addons", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "name"
@@ -40,6 +40,13 @@ ActiveRecord::Schema.define(version: 2020_12_30_210659) do
     t.index ["str_id"], name: "index_coupons_on_str_id", unique: true
   end
 
+  create_table "credit_action_loops", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.string "type"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["type"], name: "index_credit_action_loops_on_type"
+  end
+
   create_table "credit_actions", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "website_id", null: false
@@ -48,6 +55,10 @@ ActiveRecord::Schema.define(version: 2020_12_30_210659) do
     t.float "credits_remaining"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.bigint "credit_action_loop_id"
+    t.bigint "subscription_id"
+    t.index ["credit_action_loop_id"], name: "index_credit_actions_on_credit_action_loop_id"
+    t.index ["subscription_id"], name: "index_credit_actions_on_subscription_id"
     t.index ["user_id"], name: "index_credit_actions_on_user_id"
     t.index ["website_id"], name: "index_credit_actions_on_website_id"
   end
@@ -148,6 +159,7 @@ ActiveRecord::Schema.define(version: 2020_12_30_210659) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "gateway", default: "paypal"
+    t.boolean "is_subscription", default: false
     t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
@@ -173,6 +185,27 @@ ActiveRecord::Schema.define(version: 2020_12_30_210659) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["name"], name: "index_statuses_on_name", unique: true
+  end
+
+  create_table "subscription_websites", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.integer "website_id"
+    t.bigint "subscription_id", null: false
+    t.integer "quantity"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["subscription_id"], name: "index_subscription_websites_on_subscription_id"
+    t.index ["website_id"], name: "index_subscription_websites_on_website_id"
+  end
+
+  create_table "subscriptions", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "quantity"
+    t.boolean "active"
+    t.string "subscription_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["subscription_id"], name: "index_subscriptions_on_subscription_id", unique: true
+    t.index ["user_id"], name: "index_subscriptions_on_user_id"
   end
 
   create_table "users", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
@@ -304,6 +337,7 @@ ActiveRecord::Schema.define(version: 2020_12_30_210659) do
   end
 
   add_foreign_key "location_servers", "locations", name: "location_servers_ibfk_1"
+  add_foreign_key "subscription_websites", "subscriptions"
   add_foreign_key "website_locations", "locations", name: "website_locations_ibfk_2"
   add_foreign_key "website_locations", "websites", name: "website_locations_ibfk_1", on_delete: :cascade
 end

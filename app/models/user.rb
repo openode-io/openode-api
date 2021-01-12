@@ -29,6 +29,7 @@ class User < ApplicationRecord
   has_many :orders, dependent: :destroy
   has_many :viewed_notifications, dependent: :destroy
   has_many :friend_invites, dependent: :destroy
+  has_many :subscriptions, dependent: :destroy
   has_many :user_email_verifications, foreign_key: :ref_id,
                                       class_name: :UserEmailVerification,
                                       dependent: :destroy
@@ -64,6 +65,10 @@ class User < ApplicationRecord
   after_update :send_registration_email_on_mail_changed
   before_update :mark_changing_email
   before_destroy :ensure_no_active_website, prepend: true
+
+  def active_subscription?
+    subscriptions.exists?(active: true)
+  end
 
   def password?
     password.present?
