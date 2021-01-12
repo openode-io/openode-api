@@ -1532,9 +1532,11 @@ module DeploymentMethod
         current_memory + 1,
         website.auto_account_types_history || []
       )
+      current_plan = WithPlan.plan_of(website.auto_account_type)
 
       return nil unless found_plan
       return nil if found_plan[:internal_id] == website.auto_account_type
+      return nil if found_plan[:ram] > current_plan[:ram]
 
       found_plan[:internal_id]
     end
@@ -1554,7 +1556,7 @@ module DeploymentMethod
       kube_yml = generate_deployment_yml(website, website_location, image_name_tag: latest_image)
 
       notify("info", "Improving instance setup...")
-      website.create_event(update: "Auto Mem optimization triggered")
+      website.create_event(title: "Auto Mem optimization triggered")
 
       # then apply the yml
       result = kubectl_yml_action(website_location, "apply", kube_yml, ensure_exit_code: 0)
