@@ -12,7 +12,8 @@ class Subscription < ApplicationRecord
     return if user.websites.count > quantity
 
     user.websites.each do |website|
-      website.change_plan!(Website::AUTO_ACCOUNT_TYPE)
+      website.account_type = Website::AUTO_ACCOUNT_TYPE
+      website.save(validate: false)
     end
   end
 
