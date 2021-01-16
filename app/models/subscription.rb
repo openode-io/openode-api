@@ -62,4 +62,22 @@ class Subscription < ApplicationRecord
   def self.stop_using_subscription(website)
     SubscriptionWebsite.where(website: website).destroy_all
   end
+
+  def cancel
+    return false unless subscription_id
+
+    latest_order = user.orders.where(
+      "content LIKE ?", "%#{subscription_id}%"
+    ).order(id: :desc).first
+
+    return false unless latest_order
+
+    self.expires_at = latest_order.created_at + 1.month
+    save
+
+    true
+  rescue StandardError => e
+    Ex::Logger.error(e, "Can't cancel the subscription #{id}")
+    false
+  end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_01_10_151209) do
+ActiveRecord::Schema.define(version: 2021_01_16_194712) do
 
   create_table "addons", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "name"
@@ -204,6 +204,7 @@ ActiveRecord::Schema.define(version: 2021_01_10_151209) do
     t.string "subscription_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.datetime "expires_at", precision: 6
     t.index ["subscription_id"], name: "index_subscriptions_on_subscription_id", unique: true
     t.index ["user_id"], name: "index_subscriptions_on_user_id"
   end

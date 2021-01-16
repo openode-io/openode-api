@@ -91,6 +91,84 @@ class SubscriptionTest < ActiveSupport::TestCase
     assert_equal website.account_type, "auto"
   end
 
+  test "cancel - happy path" do
+    SubscriptionWebsite.destroy_all
+    Subscription.destroy_all
+    website = default_website
+    website.account_type = "first"
+    website.save!
+
+    website.website_locations
+
+    website.configs ||= {}
+    website.configs["REPLICAS"] = 1
+    website.save!
+
+    user = website.user
+    order = user.orders.last
+
+    order.is_subscription = true
+    subscription_id = "I-123456FFFDDF"
+
+    order.content = "{\"recurring_payment_id\":\"#{subscription_id}\"}"
+    order.save!
+
+    Website.where.not(id: website.id).destroy_all
+
+    s = Subscription.create!(
+      user_id: user.id,
+      quantity: 1,
+      active: true,
+      subscription_id: subscription_id
+    )
+
+    result = s.cancel
+
+    s.reload
+
+    assert result
+    assert s.expires_at >= (order.created_at + 1.month - 1.minute)
+  end
+
+  test "cancel - no subscription order" do
+    SubscriptionWebsite.destroy_all
+    Subscription.destroy_all
+    website = default_website
+    website.account_type = "first"
+    website.save!
+
+    website.website_locations
+
+    website.configs ||= {}
+    website.configs["REPLICAS"] = 1
+    website.save!
+
+    user = website.user
+    order = user.orders.last
+
+    order.is_subscription = true
+    subscription_id = "I-123456FFFDDF"
+
+    order.content = "{\"hello\":\"world\"}"
+    order.save!
+
+    Website.where.not(id: website.id).destroy_all
+
+    s = Subscription.create!(
+      user_id: user.id,
+      quantity: 1,
+      active: true,
+      subscription_id: subscription_id
+    )
+
+    result = s.cancel
+
+    s.reload
+
+    assert_not result
+    assert_nil s.expires_at
+  end
+
   test "auto set account type on create - without order should work" do
     SubscriptionWebsite.destroy_all
     Subscription.destroy_all
