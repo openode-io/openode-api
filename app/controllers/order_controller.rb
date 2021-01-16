@@ -68,9 +68,14 @@ class OrderController < ApplicationController
     if params['txn_type'] == "recurring_payment_profile_cancel"
       Rails.logger.info("Subscription handle_paypal_subscription_ipn - attempting to cancel")
       return if subscription.cancel
+
       Rails.logger.info("Subscription handle_paypal_subscription_ipn - unable to cancel...")
     end
 
+    unless subscription.expires_at.nil?
+      Rails.logger.info("handle_paypal_subscription_ipn - has been canceled, skip")
+      return
+    end
 
     valid_statuses = %w[APPROVED ACTIVE]
 

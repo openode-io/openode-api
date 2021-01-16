@@ -50,7 +50,7 @@ class OrderControllerTest < ActionDispatch::IntegrationTest
     assert_not OrderController.paypal_subscription_json?('hello=world&whatis=this')
   end
 
-  test '/order/paypal_subscription - ipn active' do
+  test '/order/paypal_subscription - ipn cancel without order' do
     user = User.first
     user.subscriptions.destroy_all
 
@@ -71,6 +71,63 @@ class OrderControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal subscription.quantity, 1
     assert_equal subscription.active, true
+  end
+
+  test '/order/paypal_subscription - ipn cancel with order' do
+    subscription_id = "I-C07GLHXGP65Y"
+    user = User.first
+    puts "ooo #{user.orders.inspect}"
+    order = Order.last
+    order.user_id = user.id
+    order.content = "{ #{subscription_id} }"
+    order.save!
+
+    user.subscriptions.destroy_all
+
+    subscription = Subscription.create!(
+      subscription_id: subscription_id,
+      user_id: user.id,
+      quantity: 1,
+      active: true
+    )
+
+    payload_path = 'test/fixtures/http/paypal/ipn-cancel.txt'
+    content = File.read(Rails.root.join(payload_path))
+
+    post '/order/paypal_subscription', params: content
+
+    assert_response :success
+
+    subscription.reload
+
+    assert_equal subscription.quantity, 1
+    assert_equal subscription.active, true
+    assert subscription.expires_at >= (order.created_at + 1.month - 1.minute)
+  end
+
+  test '/order/paypal_subscription - if expires should not update' do
+    user = User.first
+    user.subscriptions.destroy_all
+
+    subscription = Subscription.create!(
+      subscription_id: "I-C07GLHXGP65Y",
+      user_id: user.id,
+      quantity: 0,
+      active: false,
+      expires_at: Time.zone.now + 1.month
+    )
+
+    payload_path = 'test/fixtures/http/paypal/ipn-cancel.txt'
+    content = File.read(Rails.root.join(payload_path))
+
+    post '/order/paypal_subscription', params: content
+
+    assert_response :success
+
+    subscription.reload
+
+    assert_equal subscription.quantity, 0
+    assert_equal subscription.active, false
   end
 
   test '/order/paypal_subscription - ipn recurring payment' do

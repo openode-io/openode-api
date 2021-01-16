@@ -64,10 +64,20 @@ class Subscription < ApplicationRecord
   end
 
   def cancel
+    return false unless subscription_id
+
     latest_order = user.orders.where(
-      "content LIKE ?", "%\"recurring_payment_id\":\"#{subscription_id}\"%"
+      "content LIKE ?", "%#{subscription_id}%"
     ).order(id: :desc).first
-    # take user orders, find the latest with recur payment id
-    # elect * from orders where content like '%"recurring_payment_id":"I-4UF2MG8F95YV"%' order by id desc limit 1;
+
+    return false unless latest_order
+
+    self.expires_at = latest_order.created_at + 1.month
+    save
+
+    true
+  rescue StandardError => e
+    Ex::Logger.error(e, "Can't cancel the subscription #{id}")
+    false
   end
 end
