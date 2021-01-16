@@ -62,4 +62,12 @@ class Subscription < ApplicationRecord
   def self.stop_using_subscription(website)
     SubscriptionWebsite.where(website: website).destroy_all
   end
+
+  def cancel
+    latest_order = user.orders.where(
+      "content LIKE ?", "%\"recurring_payment_id\":\"#{subscription_id}\"%"
+    ).order(id: :desc).first
+    # take user orders, find the latest with recur payment id
+    # elect * from orders where content like '%"recurring_payment_id":"I-4UF2MG8F95YV"%' order by id desc limit 1;
+  end
 end
