@@ -31,4 +31,31 @@ class LibTasksSubscriptionTest < ActiveSupport::TestCase
 
     assert SubscriptionWebsite.find_by(id: sw.id)
   end
+
+  test "subscription check expiration - has one expired" do
+    w = default_website
+    w.status = Website::STATUS_STARTING
+    w.save!
+
+    SubscriptionWebsite.destroy_all
+    Subscription.destroy_all
+
+    subscription1 = Subscription.create!(
+      user: w.user,
+      quantity: 1,
+      active: true,
+      expires_at: Time.zone.now + 10.days
+    )
+    subscription2 = Subscription.create!(
+      user: w.user,
+      quantity: 1,
+      active: true,
+      expires_at: Time.zone.now - 1.days
+    )
+
+    invoke_task "subscription:check_expirations"
+
+    assert_equal subscription1.reload.active, true
+    assert_equal subscription2.reload.active, false
+  end
 end
