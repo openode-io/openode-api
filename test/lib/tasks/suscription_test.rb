@@ -50,7 +50,7 @@ class LibTasksSubscriptionTest < ActiveSupport::TestCase
       user: w.user,
       quantity: 1,
       active: true,
-      expires_at: Time.zone.now - 1.days
+      expires_at: Time.zone.now - 1.day
     )
 
     invoke_task "subscription:check_expirations"
