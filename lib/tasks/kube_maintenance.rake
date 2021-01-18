@@ -378,7 +378,7 @@ namespace :kube_maintenance do
         "raw_kubectl",
         s_arguments: "top pods --all-namespaces"
       )
-      
+
       top_results = cluster_runner.execution_method.top(top_raw_result)
       websites_results = {}
 
