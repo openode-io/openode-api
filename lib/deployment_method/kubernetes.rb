@@ -105,6 +105,7 @@ module DeploymentMethod
         result = {
           service: parts[service_at],
           cpu_raw: parts[service_at + 1],
+          cpu: parts[service_at + 1].to_f / 1000.0,
           memory_raw: parts[service_at + 2],
           memory: parts[service_at + 2].to_i
         }

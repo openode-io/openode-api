@@ -21,6 +21,7 @@ class Website < ApplicationRecord
   has_many :snapshots, dependent: :destroy
   has_many :website_addons, dependent: :destroy
   has_many :events, foreign_key: :ref_id, class_name: :WebsiteEvent, dependent: :destroy
+  has_many :website_stats, foreign_key: :ref_id, class_name: :WebsiteStats, dependent: :destroy
   has_many :stop_events,
            foreign_key: :ref_id,
            class_name: :StopWebsiteEvent,

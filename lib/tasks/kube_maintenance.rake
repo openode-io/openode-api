@@ -364,4 +364,39 @@ namespace :kube_maintenance do
       cluster_runner.execution_method&.destroy_execution
     end
   end
+
+  desc ''
+  task monitor_pods_stats: :environment do
+    name = "Task kube_maintenance__monitor_pods_stats"
+    Rails.logger.info "[#{name}] begin"
+
+    kube_clusters_runners.each do |cluster_runner|
+      location = cluster_runner.execution_method.location
+      Rails.logger.info "[#{name}] Current location #{location.str_id}"
+
+      top_raw_result = cluster_runner.execution_method.ex_stdout(
+        "raw_kubectl",
+        s_arguments: "top pods --all-namespaces"
+      )
+      
+      top_results = cluster_runner.execution_method.top(top_raw_result)
+      websites_results = {}
+
+      top_results.each do |top_result|
+        website = cluster_runner.execution_method.website_from_namespace(top_result[:namespace])
+
+        next unless website&.present?
+
+        websites_results[website] ||= []
+        websites_results[website] << top_result
+      end
+
+      websites_results.each do |website, top_result|
+        WebsiteStats.create(website: website, obj: top_result)
+      end
+
+    ensure
+      cluster_runner.execution_method&.destroy_execution
+    end
+  end
 end
