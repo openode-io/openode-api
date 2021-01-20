@@ -19,6 +19,7 @@ class LibTasksSubscriptionTest < ActiveSupport::TestCase
 
   test "subscription clean - is starting should not be removed" do
     w = default_website
+    w.account_type = "auto"
     w.status = Website::STATUS_STARTING
     w.save!
 
@@ -30,6 +31,22 @@ class LibTasksSubscriptionTest < ActiveSupport::TestCase
     invoke_task "subscription:clean"
 
     assert SubscriptionWebsite.find_by(id: sw.id)
+  end
+
+  test "subscription clean - non auto plan should be removed" do
+    w = default_website
+    w.account_type = "first"
+    w.status = Website::STATUS_STARTING
+    w.save!
+
+    SubscriptionWebsite.destroy_all
+
+    subscription = Subscription.create!(user: w.user, quantity: 1, active: true)
+    sw = SubscriptionWebsite.create!(website: w, subscription: subscription, quantity: 1)
+
+    invoke_task "subscription:clean"
+
+    assert_nil SubscriptionWebsite.find_by(id: sw.id)
   end
 
   test "subscription check expiration - has one expired" do

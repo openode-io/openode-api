@@ -6,13 +6,15 @@ namespace :subscription do
     Rails.logger.info "[#{name}] begin"
 
     statuses = [Website::STATUS_ONLINE, Website::STATUS_STARTING, Website::STATUS_STARTING]
-    website_ids = Website.in_statuses(statuses).pluck(:id)
-    subscription_websites_to_del = SubscriptionWebsite.where.not(website_id: website_ids)
 
-    subscription_websites_to_del.each do |subscription_website|
-      Rails.logger.info "[#{name}] destroying #{subscription_website}"
+    SubscriptionWebsite.all.each do |subscription_website|
+      website = subscription_website.website
 
-      subscription_website.destroy
+      if !statuses.include?(website.status) || !website.auto_plan?
+        Rails.logger.info "[#{name}] destroying #{subscription_website}"
+
+        subscription_website.destroy
+      end
     end
   end
 
