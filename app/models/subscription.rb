@@ -25,6 +25,10 @@ class Subscription < ApplicationRecord
     quantity_used >= quantity
   end
 
+  def self.clean_subscriptions_usage(website)
+    website.subscription_websites.destroy_all unless website.auto_plan?
+  end
+
   def self.start_using_subscription(user, website)
     return nil unless user.subscriptions.activated.count.positive?
 
