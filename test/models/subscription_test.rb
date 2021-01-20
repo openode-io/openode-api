@@ -68,6 +68,69 @@ class SubscriptionTest < ActiveSupport::TestCase
     assert_equal result[:subscription_website].website, website
   end
 
+  test "clean_subscriptions_usage - happy path" do
+    SubscriptionWebsite.destroy_all
+    Subscription.destroy_all
+    website = default_website
+    website.account_type = "first"
+    website.save!
+
+    website.website_locations
+    user = website.user
+
+    website.configs ||= {}
+    website.configs["REPLICAS"] = 1
+    website.save!
+
+    s = Subscription.create!(user_id: user.id, quantity: 3, active: true)
+
+    website.reload
+
+    website.account_type = Website::AUTO_ACCOUNT_TYPE
+    website.save!
+
+    result = Subscription.start_using_subscription(user, website)
+
+    assert_equal result[:subscription], s
+
+    website.account_type = "first"
+    website.save!
+
+    Subscription.clean_subscriptions_usage(website)
+
+    assert website.reload.subscription_websites, []
+  end
+
+  test "clean_subscriptions_usage - no cleanup if auto" do
+    SubscriptionWebsite.destroy_all
+    Subscription.destroy_all
+    website = default_website
+    website.account_type = "first"
+    website.save!
+
+    website.website_locations
+    user = website.user
+
+    website.configs ||= {}
+    website.configs["REPLICAS"] = 1
+    website.save!
+
+    s = Subscription.create!(user_id: user.id, quantity: 3, active: true)
+
+    website.reload
+
+    website.account_type = Website::AUTO_ACCOUNT_TYPE
+    website.save!
+
+    result = Subscription.start_using_subscription(user, website)
+
+    assert_equal result[:subscription], s
+
+    Subscription.clean_subscriptions_usage(website)
+
+    assert website.reload.subscription_websites.first, result[:subscription_website]
+  end
+
   test "auto set account type on create - happy path" do
     SubscriptionWebsite.destroy_all
     Subscription.destroy_all

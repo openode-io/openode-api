@@ -1800,6 +1800,7 @@ VAR2=5678
       {
         service: "www-deployment-675ff8d89c-zbc9z",
         cpu_raw: "1m",
+        cpu: 0.001,
         memory_raw: "37Mi",
         memory: 37
       }
@@ -1818,6 +1819,7 @@ VAR2=5678
     expected_r1 = {
       service: "www-deployment-6744df5b9-ccscb",
       cpu_raw: "1m",
+      cpu: 0.001,
       memory_raw: "13Mi",
       memory: 13,
       namespace: "instance-24156"
@@ -1826,6 +1828,7 @@ VAR2=5678
     expected_r2 = {
       service: "www-deployment-566d6fd9c8-vz55r",
       cpu_raw: "1m",
+      cpu: 0.001,
       memory_raw: "72Mi",
       memory: 72,
       namespace: "instance-24368"
