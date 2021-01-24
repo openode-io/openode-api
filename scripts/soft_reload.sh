@@ -9,5 +9,5 @@ do
         sleep 5
 done
 
-pm2 reload sidekiq
-pm2 reload openode-api
+/usr/local/bin/pm2 reload sidekiq
+/usr/local/bin/pm2 reload openode-api
