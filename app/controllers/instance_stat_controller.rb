@@ -19,6 +19,15 @@ class InstanceStatController < InstancesController
     json(top: result_top)
   end
 
+  api :GET, 'instances/:id/stats/mem_cpu'
+  description 'Returns the instance statistics (CPU, memory).'
+  returns code: 200, desc: "" do
+    property :top, Array, desc: "Array following this format: [{ service, cpu, memory }]"
+  end
+  def mem_cpu
+    json(@website.website_stats.order(id: :desc))
+  end
+
   api!
   def spendings
     nb_days = (params['nb_days'] || 30).to_i

@@ -52,6 +52,22 @@ class LocationsTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test '/instances/:instance_id/stats/mem_cpu with stats' do
+    obj = [{
+      "service" => "www-deployment-57cc775fb-57plr",
+      "cpu_raw" => "1m",
+      "cpu" => 0.001,
+      "memory_raw" => "36Mi"
+    }]
+    ws = WebsiteStats.create!(ref_id: @website.id, obj: obj)
+
+    get "/instances/#{@website.id}/stats/mem_cpu",
+        as: :json,
+        headers: default_headers_auth
+
+    assert_equal response.parsed_body.first['id'], ws.id
+  end
+
   test '/instances/:instance_id/stats/spendings with stats' do
     CreditAction.all.each(&:destroy)
 
