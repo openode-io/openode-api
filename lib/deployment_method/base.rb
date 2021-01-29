@@ -267,7 +267,11 @@ module DeploymentMethod
           end
         end
 
-        error!("Max build duration reached (#{max_build_duration})") unless is_up
+        msg_max = "Max build duration reached (#{max_build_duration}). " \
+          "This parameter can be changed if needed, " \
+          "see https://www.openode.io/docs/misc/max_build_duration.md and " \
+          "https://www.openode.io/docs/misc/skip_port_verification.md"
+        error!(msg_max) unless is_up
       rescue StandardError => e
         Ex::Logger.info(e, 'Issue to verify instance up')
         is_up = false
