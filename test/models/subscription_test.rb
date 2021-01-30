@@ -136,6 +136,7 @@ class SubscriptionTest < ActiveSupport::TestCase
     Subscription.destroy_all
     website = default_website
     website.account_type = "first"
+    website.status = "N/A"
     website.save!
 
     website.website_locations
@@ -152,6 +153,34 @@ class SubscriptionTest < ActiveSupport::TestCase
     website.reload
 
     assert_equal website.account_type, "auto"
+    assert SubscriptionWebsite.count.zero?
+  end
+
+  test "auto set account type on create - start using subscription if online" do
+    SubscriptionWebsite.destroy_all
+    Subscription.destroy_all
+    website = default_website
+    website.account_type = "first"
+    website.status = "online"
+    website.save!
+
+    website.website_locations
+
+    website.configs ||= {}
+    website.configs["REPLICAS"] = 1
+    website.save!
+
+    user = website.user
+    Website.where.not(id: website.id).destroy_all
+
+    subscription = Subscription.create!(user_id: user.id, quantity: 1, active: true)
+
+    website.reload
+
+    assert_equal website.account_type, "auto"
+    assert SubscriptionWebsite.count == 1
+    assert_equal SubscriptionWebsite.last.website, website
+    assert_equal SubscriptionWebsite.last.subscription, subscription
   end
 
   test "cancel - happy path" do

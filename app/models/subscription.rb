@@ -14,6 +14,9 @@ class Subscription < ApplicationRecord
     user.websites.each do |website|
       website.account_type = Website::AUTO_ACCOUNT_TYPE
       website.save(validate: false)
+
+      # if the website is online, start the subscription usage
+      Subscription.start_using_subscription(user, website) if website.online?
     end
   end
 
