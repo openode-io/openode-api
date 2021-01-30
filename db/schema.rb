@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_01_16_194712) do
+ActiveRecord::Schema.define(version: 2021_01_30_023123) do
 
   create_table "addons", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.string "name"
@@ -96,6 +96,8 @@ ActiveRecord::Schema.define(version: 2021_01_16_194712) do
     t.text "obj"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "key", default: ""
+    t.index ["key"], name: "index_global_storages_on_key"
   end
 
   create_table "histories", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
