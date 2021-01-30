@@ -62,6 +62,7 @@ class User < ApplicationRecord
   validate :verify_passwords_match, on: :create
 
   after_create :send_registration_email
+  after_create :record_free_credit_distributed
   after_update :send_registration_email_on_mail_changed
   before_update :mark_changing_email
   before_destroy :ensure_no_active_website, prepend: true
@@ -90,6 +91,10 @@ class User < ApplicationRecord
 
   def send_registration_email
     UserMailer.with(user: self).registration.deliver_now
+  end
+
+  def record_free_credit_distributed
+    GlobalEmailRegistration.create(key: email)
   end
 
   def mark_changing_email
@@ -154,6 +159,8 @@ class User < ApplicationRecord
   end
 
   def distribute_free_credits
+    return if GlobalEmailRegistration.exists?(key: email)
+
     internal_provider = CloudProvider::Manager.instance.first_of_type('internal')
 
     plan = internal_provider.plans.find { |p| p[:id] == '100-MB' }

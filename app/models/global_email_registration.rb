@@ -1,0 +1,3 @@
+
+class GlobalEmailRegistration < GlobalStorage
+end

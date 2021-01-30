@@ -18,6 +18,26 @@ class UserTest < ActiveSupport::TestCase
     assert User.passwd_valid?(expected_encryption, 'hello')
   end
 
+  test 'distribute free credits only once' do
+    attribs = {
+      email: 'user1@site.com',
+      password: 'Hello123',
+      is_admin: false,
+      token: '1234s56789101112'
+    }
+
+    user = User.create!(attribs)
+
+    assert user.credits.positive?
+    assert GlobalEmailRegistration.last.key == "user1@site.com"
+
+    user.destroy!
+
+    user = User.create!(attribs)
+
+    assert user.credits.zero?
+  end
+
   test 'saving and reading user password' do
     attribs = {
       email: 'user1@site.com',
