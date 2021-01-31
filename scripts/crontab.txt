@@ -19,6 +19,7 @@ PATH=PATH=/bin:/usr/bin:/home/ubuntu/.rvm/rubies/ruby-2.7.1/bin/:/home/ubuntu/.n
 10 */6 * * * cd $PATH_REPO && rails kube_maintenance:verify_states_pvcs >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 45 */6 * * * cd $PATH_REPO && rails kube_maintenance:verify_states_deployments >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 50 */12 * * * cd $PATH_REPO && rails kube_maintenance:clean_ns >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+*/5 * * * * cd $PATH_REPO && rails deployment:shutdown_neverending_deployments >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 30 */12 * * * cd $PATH_REPO && /bin/bash scripts/soft_reload.sh >> scripts/pm2/soft_reload.out.log 2>> scripts/pm2/soft_reload.err.log
 35 */24 * * * cd $PATH_REPO && /usr/local/bin/pm2 reload openode-www >> scripts/pm2/reload-openode-www.out.log 2>> scripts/pm2/reload-openode-www.err.log
 */3 * * * * cd $PATH_REPO && rails update:uptime_robot >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
