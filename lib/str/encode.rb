@@ -10,11 +10,12 @@ module Str
     end
 
     def self.strip_invalid_chars(obj, opts = {})
-      if obj.class.name == 'Hash'
+      case obj.class.name
+      when 'Hash'
         obj.each do |key, value|
           obj[key] = Encode.strip_invalid_chars(value, opts)
         end
-      elsif obj.class.name == 'String'
+      when 'String'
         obj = Encode.strip_by(obj, '', opts)
       end
 

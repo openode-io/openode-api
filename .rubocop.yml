@@ -30,6 +30,15 @@ Rails/HasManyOrHasOneDependent:
 Rails/SkipsModelValidations:
   Enabled: false
 
+Style/OptionalBooleanParameter:
+  Enabled: false
+
+Style/StringConcatenation:
+  Enabled: false
+
+Lint/MissingSuper:
+  Enabled: false
+
 Style/CommentAnnotation:
   Enabled: false
 

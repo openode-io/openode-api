@@ -172,9 +172,10 @@ class WebsiteLocation < ApplicationRecord
   end
 
   def compute_domains
-    if website.domain_type == 'subdomain'
+    case website.domain_type
+    when 'subdomain'
       [main_domain]
-    elsif website.domain_type == 'custom_domain'
+    when 'custom_domain'
       website.domains
     end
   end

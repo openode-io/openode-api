@@ -305,7 +305,7 @@ module DeploymentMethod
     end
 
     def logs(options = {})
-      container_id = options[:website].andand.container_id || options[:container_id]
+      container_id = options[:website]&.container_id || options[:container_id]
 
       assert container_id
       require_fields([:nb_lines], options)
@@ -360,11 +360,11 @@ services:
     end
 
     def self.hook_cmd_is(obj, cmds_name)
-      cmds_name.include?(obj.andand[:cmd_name])
+      cmds_name.include?(obj&.dig(:cmd_name))
     end
 
     def self.hook_cmd_state_is(obj, cmd_state)
-      obj.andand[:cmd_state] == cmd_state
+      obj&.dig(:cmd_state) == cmd_state
     end
 
     def self.hook_cmd_and_state(cmds_name, cmd_state, output)

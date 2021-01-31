@@ -43,8 +43,8 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     assert_equal website.snapshots.count, 1
     assert_equal snapshot.status, Snapshot::STATUS_PENDING
 
-    assert response.parsed_body.dig('expires_in').to_f >= 59
-    assert_equal response.parsed_body.dig('url'), snapshot.url
+    assert response.parsed_body['expires_in'].to_f >= 59
+    assert_equal response.parsed_body['url'], snapshot.url
     assert_equal response.parsed_body.dig('details', 'id'), snapshot.id
 
     get_pods_json_content = IO.read('test/fixtures/kubernetes/1_pod_alive.json')
@@ -80,10 +80,10 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
       assert_equal snapshot.status, Snapshot::STATUS_SUCCEED
       assert_equal snapshot.steps.length, 2
-      assert_equal snapshot.steps.first.dig('name'), "copy instance files"
-      assert_equal snapshot.steps[1].dig('name'), "make archive"
+      assert_equal snapshot.steps.first['name'], "copy instance files"
+      assert_equal snapshot.steps[1]['name'], "make archive"
 
-      assert_equal website.events.last.obj.dig('title'), "create-snapshot"
+      assert_equal website.events.last.obj['title'], "create-snapshot"
     end
   end
 

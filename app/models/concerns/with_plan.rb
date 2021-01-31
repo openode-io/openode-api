@@ -38,7 +38,7 @@ module WithPlan
     found_plan = Website.plan_of(account_type)
     return errors.add(:account_type, "Invalid plan #{account_type}") unless found_plan
 
-    if found_plan.dig(:ram) &&
+    if found_plan[:ram] &&
        found_plan[:ram] > MAX_RAM_PLAN_WITHOUT_PAID_ORDER && !user.orders?
       errors.add(:account_type,
                  "Maximum available plan without a paid order is " \

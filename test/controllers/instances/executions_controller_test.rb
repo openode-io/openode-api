@@ -32,7 +32,7 @@ class ExecutionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body[0].keys,
                  %w[id website_id status created_at obj parent_execution_id type]
 
-    ids_response = response.parsed_body.map { |e| e.dig('id') }
+    ids_response = response.parsed_body.map { |e| e['id'] }
     assert_not_includes ids_response, failed_deployment.id
   end
 

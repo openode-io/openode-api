@@ -374,10 +374,10 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_equal response.parsed_body.count, 1
-    assert_equal response.parsed_body.first.dig('label_app'), 'www'
+    assert_equal response.parsed_body.first['label_app'], 'www'
 
     container_statuses = response.parsed_body.first.dig('status', 'containerStatuses')
-    assert_equal container_statuses.first.dig('ready'), true
+    assert_equal container_statuses.first['ready'], true
   end
 
   test '/instances/routes happy path' do
@@ -884,9 +884,9 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
       assert_equal response.parsed_body['result'], 'success'
       assert_equal response.parsed_body.dig('website', 'id'), website.id
       assert_equal response.parsed_body.dig('website', 'site_name'), website.site_name
-      assert response.parsed_body.dig('deploymentId')
+      assert response.parsed_body['deploymentId']
 
-      deployment = Deployment.find(response.parsed_body.dig('deploymentId'))
+      deployment = Deployment.find(response.parsed_body['deploymentId'])
       assert_equal deployment.status, Deployment::STATUS_RUNNING
     end
   end
@@ -1152,7 +1152,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     website.reload
 
     assert_equal website.crontab, new_crontab
-    assert_equal website.events.last.obj.dig('title'), 'update-crontab'
+    assert_equal website.events.last.obj['title'], 'update-crontab'
   end
 
   test 'DEL /instances/:instance_id/ forbidden' do

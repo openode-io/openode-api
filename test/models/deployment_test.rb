@@ -117,11 +117,11 @@ class DeploymentTest < ActiveSupport::TestCase
     }
 
     begin
-     dep.save!
-     raise 'invalid'
+      dep.save!
+      raise 'invalid'
     rescue StandardError => e
       assert_includes e.to_s, 'Validation failed'
-   end
+    end
   end
 
   test 'humanize_events with events' do

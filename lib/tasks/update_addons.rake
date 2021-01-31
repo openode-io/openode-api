@@ -16,7 +16,7 @@ namespace :update do
 
     repo_tree = JSON.parse(
       RestClient::Request.execute(method: :get, url: addons_repository_tree_url)
-    ).dig('tree')
+    )['tree']
 
     repo_tree.each do |tree_item|
       next if tree_item['type'] != 'tree' || tree_item['path'].scan(%r{/}).count != 1

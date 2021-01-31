@@ -410,16 +410,16 @@ class WebsiteTest < ActiveSupport::TestCase
   test 'create_event - happy path' do
     website = default_website
     website.create_event(test1: 1234, test2: 456)
-    assert_equal website.events.first.obj.dig('test1'), 1234
-    assert_equal website.events.first.obj.dig('test2'), 456
+    assert_equal website.events.first.obj['test1'], 1234
+    assert_equal website.events.first.obj['test2'], 456
   end
 
   test 'create_event - with special chars' do
     website = default_website
     website.create_event(test1: "what1\xD0\xBF\xD0\xB2\xD0\xBF", test2: 'what')
 
-    assert_equal website.events.first.obj.dig('test1'), 'what1'
-    assert_equal website.events.first.obj.dig('test2'), 'what'
+    assert_equal website.events.first.obj['test1'], 'what1'
+    assert_equal website.events.first.obj['test2'], 'what'
   end
 
   # add_location
@@ -2069,7 +2069,7 @@ class WebsiteTest < ActiveSupport::TestCase
     w.save_secret!(test: 1234)
     w.store_env_variable!('MY_var', 'value1')
 
-    assert_equal w.env.dig('MY_var'), 'value1'
+    assert_equal w.env['MY_var'], 'value1'
     assert_equal w.secret[:test], 1234
   end
 
@@ -2077,12 +2077,12 @@ class WebsiteTest < ActiveSupport::TestCase
     w = default_website
     w.store_env_variable!('MY_var', 'value1')
 
-    assert_equal w.env.dig('MY_var'), 'value1'
+    assert_equal w.env['MY_var'], 'value1'
 
     w.reload
     w.store_env_variable!('MY_var2', 'value2')
-    assert_equal w.env.dig('MY_var'), 'value1'
-    assert_equal w.env.dig('MY_var2'), 'value2'
+    assert_equal w.env['MY_var'], 'value1'
+    assert_equal w.env['MY_var2'], 'value2'
   end
 
   test "env - overwrite a set of variables" do
@@ -2090,8 +2090,8 @@ class WebsiteTest < ActiveSupport::TestCase
     w.save_secret!(test: 1234)
     w.overwrite_env_variables!('test1' => 1234, 'test2' => 'tt')
 
-    assert_equal w.env.dig('test1'), 1234
-    assert_equal w.env.dig('test2'), 'tt'
+    assert_equal w.env['test1'], 1234
+    assert_equal w.env['test2'], 'tt'
     assert_equal w.secret[:test], 1234
   end
 
@@ -2101,9 +2101,9 @@ class WebsiteTest < ActiveSupport::TestCase
     w.update_env_variables!('test3' => 12_343)
     w.update_env_variables!('test1' => 1234, 'test2' => 'tt')
 
-    assert_equal w.env.dig('test1'), 1234
-    assert_equal w.env.dig('test2'), 'tt'
-    assert_equal w.env.dig('test3'), 12_343
+    assert_equal w.env['test1'], 1234
+    assert_equal w.env['test2'], 'tt'
+    assert_equal w.env['test3'], 12_343
     assert_equal w.secret[:test], 1234
   end
 
@@ -2115,8 +2115,8 @@ class WebsiteTest < ActiveSupport::TestCase
 
     w.destroy_env_variable!('MY_var')
 
-    assert_nil w.env.dig('MY_var')
-    assert_equal w.env.dig('MY_var2'), 'value2'
+    assert_nil w.env['MY_var']
+    assert_equal w.env['MY_var2'], 'value2'
 
     assert_equal w.secret[:test], 1234
   end

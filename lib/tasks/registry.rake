@@ -9,11 +9,11 @@ namespace :registry do
     image_location = manager.application.dig(
       'docker', 'images_location'
     )
-    registry_type = image_location.dig('registry_impl_type')
+    registry_type = image_location['registry_impl_type']
 
     img_registry = DeploymentMethod::Util::ImageRegistry.instance(
       registry_type,
-      registry_name: image_location.dig('repository_name')
+      registry_name: image_location['repository_name']
     )
 
     img_registry.repositories.each do |repository|

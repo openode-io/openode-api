@@ -64,7 +64,7 @@ class WebsiteAddon < ApplicationRecord
   end
 
   def image_tag
-    "#{addon.obj.dig('image')}:#{tag}"
+    "#{addon.obj['image']}:#{tag}"
   end
 
   def persistence?

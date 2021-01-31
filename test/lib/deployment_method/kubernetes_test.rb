@@ -1663,10 +1663,10 @@ VAR2=5678
 
       event = kubernetes_method.runner.execution.events.first
       expected_event = "entity: Ingress, reason: AddedOrUpdated, message: Configuration for"
-      assert_includes event.dig('update'), expected_event
+      assert_includes event['update'], expected_event
 
       port_event = kubernetes_method.runner.execution.events[1]
-      assert_includes port_event.dig('update'), "IMPORTANT: HTTP port (80) NOT listening"
+      assert_includes port_event['update'], "IMPORTANT: HTTP port (80) NOT listening"
     end
   end
 
@@ -1931,7 +1931,7 @@ VAR2=5678
       assert_equal w.auto_account_type, "second"
       assert_equal w.auto_account_types_history, ["second"]
 
-      assert_includes w.events.last.obj.dig('title'), "Auto Mem"
+      assert_includes w.events.last.obj['title'], "Auto Mem"
     end
   end
 

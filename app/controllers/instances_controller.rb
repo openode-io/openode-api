@@ -271,7 +271,7 @@ class InstancesController < ApplicationController
     @website_event_obj = {
       title: 'change-plan',
       new_value: plan[:id],
-      original_value: Website.plan_of(orig_account_type).dig(:id)
+      original_value: Website.plan_of(orig_account_type)[:id]
     }
 
     process_reload_latest_deployment if @website.online?
@@ -328,7 +328,7 @@ class InstancesController < ApplicationController
     assert params['filesInfo'].present?
 
     input_files =
-      if params['filesInfo'].class.name == 'String'
+      if params['filesInfo'].instance_of?(String)
         JSON.parse(params['filesInfo'])
       else
         params['filesInfo']
@@ -559,7 +559,7 @@ class InstancesController < ApplicationController
   end
 
   def requires_location_server
-    unless @website_location.andand.location_server
+    unless @website_location&.location_server
       validation_error!('This feature requires a server already allocated.')
     end
   end
@@ -610,10 +610,9 @@ class InstancesController < ApplicationController
   end
 
   def check_minimum_cli_version
-    if params['version']
-      unless Gem::Version.new(params['version']) >= Gem::Version.new(MINIMUM_CLI_VERSION)
-        validation_error!('Deprecated CLI version, please upgrade with npm i -g openode')
-      end
+    if params['version'] &&
+       Gem::Version.new(params['version']) < Gem::Version.new(MINIMUM_CLI_VERSION)
+      validation_error!('Deprecated CLI version, please upgrade with npm i -g openode')
     end
   end
 

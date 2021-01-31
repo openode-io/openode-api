@@ -10,7 +10,7 @@ class LibTasksUpdateAddonsTest < ActiveSupport::TestCase
 
     assert_equal addon.name, 'redis-caching'
     assert_equal addon.category, 'caching'
-    assert_equal addon.obj.dig('name'), 'redis-caching'
-    assert_equal addon.obj.dig('documentation_filename'), 'README.md'
+    assert_equal addon.obj['name'], 'redis-caching'
+    assert_equal addon.obj['documentation_filename'], 'README.md'
   end
 end

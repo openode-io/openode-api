@@ -7,9 +7,7 @@ module DeploymentMethod
 
     RuntimeError = Class.new(StandardError)
 
-    attr_accessor :runner
-    attr_accessor :location
-    attr_accessor :last_auto_manage_memory_at
+    attr_accessor :runner, :location, :last_auto_manage_memory_at
 
     REMOTE_PATH_API_LIB = '/root/openode-www/api/lib'
     DEFAULT_CRONTAB_FILENAME = '.openode.cron'
@@ -319,7 +317,7 @@ module DeploymentMethod
 
       auto_finalize(website)
 
-      if runner.andand.execution
+      if runner&.execution
         runner.execution.status = if website.online?
                                     Execution::STATUS_SUCCESS
                                   else
@@ -378,11 +376,10 @@ module DeploymentMethod
         options_exec = make_exec_options(options, trial_i, max_trials)
         result = runner.execute([{ cmd_name: cmd, options: options_exec }]).first[:result]
 
-        if options[:ensure_exit_code].present?
-          if result && result[:exit_code] != options[:ensure_exit_code]
-            msg = "Failed to run #{cmd}, result=#{result.inspect}"
-            notify_or_soft_log(msg, options[:skip_notify_errors])
-          end
+        if options[:ensure_exit_code].present? &&
+           (result && result[:exit_code] != options[:ensure_exit_code])
+          msg = "Failed to run #{cmd}, result=#{result.inspect}"
+          notify_or_soft_log(msg, options[:skip_notify_errors])
         end
 
         break if result && (result[:exit_code]).zero?
