@@ -129,7 +129,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       end
 
       final_details_event = @website.deployments.last.events.find do |e|
-        e['update'].andand['details'].andand['result']
+        e.dig('update', 'details', 'result') rescue nil
       end
 
       assert_not_nil final_details_event
@@ -222,7 +222,11 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       end
 
       final_details_event = @website.deployments.last.events.find do |e|
-        e['update'].andand['details'].andand['result']
+        if e.instance_of?(String)
+          nil
+        else
+          e.dig('update', 'details', 'result') rescue nil
+        end
       end
 
       assert_not_nil final_details_event
@@ -259,8 +263,8 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert_equal deployment.status, Deployment::STATUS_SUCCESS
 
       assert_equal deployment.parent_execution.id, parent_deployment.id
-      assert_equal deployment.obj.dig('image_name_tag'),
-                   parent_deployment.obj.dig('image_name_tag')
+      assert_equal deployment.obj['image_name_tag'],
+                   parent_deployment.obj['image_name_tag']
     end
   end
 
@@ -301,7 +305,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert_equal @website.status, Website::STATUS_ONLINE
       assert_equal deployment.status, Deployment::STATUS_SUCCESS
 
-      assert_equal deployment.obj.dig('image_name_tag'), img_name_tag
+      assert_equal deployment.obj['image_name_tag'], img_name_tag
     end
   end
 
@@ -476,7 +480,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
       assert_not_equal deployment, parent_deployment
       assert_equal deployment.status, Execution::STATUS_SUCCESS
-      assert_equal deployment.obj.dig('image_name_tag'), 'mypreviousimage'
+      assert_equal deployment.obj['image_name_tag'], 'mypreviousimage'
     end
   end
 
@@ -501,7 +505,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       deployment.reload
 
       assert_equal deployment.status, Execution::STATUS_FAILED
-      assert_includes deployment.events.first.dig('update'), 'Missing instance image'
+      assert_includes deployment.events.first['update'], 'Missing instance image'
     end
   end
 end

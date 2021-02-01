@@ -41,8 +41,8 @@ class ConfigsController < InstancesController
   def update_configs
     variables = params[:configs].to_unsafe_h
 
-    variables.keys.each do |variable|
-      change_config!(variable, variables.dig(variable))
+    variables.each_key do |variable|
+      change_config!(variable, variables[variable])
     end
 
     @website_event_obj = {

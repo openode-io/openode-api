@@ -24,7 +24,7 @@ module Api
         payload: { "grant_type" => "client_credentials" }
       )
 
-      @access_token = JSON.parse(result).dig('access_token')
+      @access_token = JSON.parse(result)['access_token']
     end
 
     def execute(method, path, payload = nil)

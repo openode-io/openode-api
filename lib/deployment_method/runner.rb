@@ -1,9 +1,7 @@
 module DeploymentMethod
   class Runner
-    attr_accessor :execution
-    attr_reader :execution_method
-    attr_reader :cloud_provider
-    attr_accessor :hooks
+    attr_accessor :execution, :hooks
+    attr_reader :execution_method, :cloud_provider
 
     def initialize(type, cloud_type, configs = {})
       @type = type
@@ -14,7 +12,7 @@ module DeploymentMethod
       @execution_method = get_execution_method
       @cloud_provider = get_cloud_provider
 
-      if @execution_method&.respond_to?('location')
+      if @execution_method.respond_to?('location')
         @execution_method.location = configs[:location]
       end
     end
@@ -146,7 +144,7 @@ module DeploymentMethod
         result = hook.call(level, given_result)
 
         if result
-          given_result[:update] = result if given_result.class == Hash
+          given_result[:update] = result if given_result.instance_of?(Hash)
           @execution_method.notify(level, result)
         end
       rescue StandardError => e

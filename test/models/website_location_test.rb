@@ -321,7 +321,7 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     wl.notify_force_stop(reason)
 
     assert_equal wl.website.stop_events.length, 1
-    assert_equal wl.website.stop_events.last.obj.dig('reason'), reason
+    assert_equal wl.website.stop_events.last.obj['reason'], reason
 
     assert_equal wl.website.notifications.reload.last.content, reason
     assert_equal wl.website.notifications.last.level, 'critical'
@@ -343,6 +343,6 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     wl.notify_force_stop(reason)
 
     assert_equal wl.website.stop_events.length, 1
-    assert_equal wl.website.stop_events.last.obj.dig('reason'), 'no!'
+    assert_equal wl.website.stop_events.last.obj['reason'], 'no!'
   end
 end

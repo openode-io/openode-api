@@ -65,7 +65,7 @@ namespace :kube_maintenance do
 
       (result&.dig('items') || []).each do |pod|
         ns = pod.dig('metadata', 'namespace')
-        status = pod.dig('status')
+        status = pod['status']
         label_app = pod.dig('metadata', 'labels', 'app')
 
         next unless ns.to_s.start_with?(cluster_runner.execution_method.namespace_of)
@@ -134,7 +134,7 @@ namespace :kube_maintenance do
                             s_arguments: "get pvc --all-namespaces -o json"
                           ))
 
-      result.dig('items').each do |pvc|
+      result['items'].each do |pvc|
         ns = pvc.dig('metadata', 'namespace')
         pvc_name = pvc.dig('metadata', 'name')
 
@@ -225,7 +225,7 @@ namespace :kube_maintenance do
                             skip_result_storage: true
                           ))
 
-      result.dig('items').each do |deployment|
+      result['items'].each do |deployment|
         ns = deployment.dig('metadata', 'name')
 
         next unless instance_ns?(ns)
@@ -274,7 +274,7 @@ namespace :kube_maintenance do
                             skip_result_storage: true
                           ))
 
-      result.dig('items').each do |deployment|
+      result['items'].each do |deployment|
         ns = deployment.dig('metadata', 'namespace')
         deployment_name = deployment.dig('metadata', 'name')
 

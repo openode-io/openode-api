@@ -6,7 +6,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '2.7.1'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 6.0.3'
+gem 'rails', '6.0.3.4'
 
 gem 'mysql2'
 
@@ -20,7 +20,6 @@ gem 'puma'
 # Use ActiveModel has_secure_password
 gem 'bcrypt'
 
-gem 'andand'
 gem 'attr_encrypted'
 gem 'bcrypt_pbkdf'
 gem 'countries'

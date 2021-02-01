@@ -96,7 +96,7 @@ module DeploymentMethod
             .lines
             .drop(1)
             .map do |line|
-        parts = line.strip.scan(/[\S]+/)
+        parts = line.strip.scan(/\S+/)
 
         return nil unless [3, 4].include?(parts.count)
 
@@ -275,8 +275,7 @@ module DeploymentMethod
 
       namespace = options[:with_namespace] ? "-n #{namespace_of(website)} " : ""
 
-      cmd = "KUBECONFIG=#{config_path} kubectl #{namespace}#{options[:s_arguments]}"
-      cmd
+      "KUBECONFIG=#{config_path} kubectl #{namespace}#{options[:s_arguments]}"
     end
 
     def raw_kubectl(options = {})
@@ -284,8 +283,7 @@ module DeploymentMethod
 
       config_path = kubeconfig_path(options[:location] || location)
 
-      cmd = "KUBECONFIG=#{config_path} kubectl #{options[:s_arguments]}"
-      cmd
+      "KUBECONFIG=#{config_path} kubectl #{options[:s_arguments]}"
     end
 
     @@test_kubectl_file_path = nil
@@ -586,7 +584,7 @@ module DeploymentMethod
       persistent_path = website_addon.obj['persistent_path']
       chmod_cmds = "chmod 777 \"#{persistent_path}\""
 
-      yml = "" \
+      "" \
 "      volumes:\n" \
 "      - name: main-volume\n" \
 "        persistentVolumeClaim:\n" \
@@ -598,8 +596,6 @@ module DeploymentMethod
 "        volumeMounts:\n" \
 "        - mountPath: \"#{persistent_path}\"\n"\
 "          name: main-volume\n"
-
-      yml
     end
 
     def deployment_strategy(website, memory)
@@ -697,9 +693,9 @@ module DeploymentMethod
         spec:
           type: ClusterIP
           ports:
-          - port: #{website_addon.obj.dig('exposed_port')}
-            targetPort: #{website_addon.addon.obj.dig('target_port') || 80}
-            protocol: #{website_addon.addon.obj.dig('protocol')}
+          - port: #{website_addon.obj['exposed_port']}
+            targetPort: #{website_addon.addon.obj['target_port'] || 80}
+            protocol: #{website_addon.addon.obj['protocol']}
           selector:
             app: #{website_addon.name}
         ---
@@ -735,7 +731,7 @@ module DeploymentMethod
                 - configMapRef:
                     name: dotenv-#{website_addon.name}
                 ports:
-                - containerPort: #{website_addon.addon.obj.dig('target_port') || 80}
+                - containerPort: #{website_addon.addon.obj['target_port'] || 80}
                 resources:
                   limits:
                     ephemeral-storage: 100Mi
@@ -906,7 +902,7 @@ module DeploymentMethod
     end
 
     def prepare_instance_up(options = {})
-      get_pods_json(options).dig('items')
+      get_pods_json(options)['items']
     rescue StandardError => e
       Ex::Logger.info(e, 'Issue during prepare instance up')
       []
@@ -930,7 +926,7 @@ module DeploymentMethod
       all_ready = pods.all? do |pod|
         statuses = pod.dig('status', 'containerStatuses') || []
 
-        statuses.all? { |status| status.dig('ready') }
+        statuses.all? { |status| status['ready'] }
       end
 
       all_ready = false if pods.blank?
@@ -969,7 +965,7 @@ module DeploymentMethod
     def ex_on_all_pods_stdout(cmd, options = {})
       pods_result = get_pods_json(options)
 
-      pods_result.dig('items').map do |pod|
+      pods_result['items'].map do |pod|
         pod_name = pod.dig('metadata', 'name')
 
         {
@@ -1213,7 +1209,7 @@ module DeploymentMethod
     end
 
     def store_services(options = {})
-      wl = options.dig(:website_location)
+      wl = options[:website_location]
 
       args = {
         website_location: wl,
@@ -1288,7 +1284,7 @@ module DeploymentMethod
                   cmd: "netstat -tl",
                   pod_name: lastest_pod_name)
 
-      netstats = Io::Netstat.parse(result.dig(:stdout))
+      netstats = Io::Netstat.parse(result[:stdout])
 
       # check the port
       port_available = netstats.any? do |netstat|
@@ -1326,12 +1322,12 @@ module DeploymentMethod
         with_namespace: true,
         s_arguments: "get events -o json"
       }
-      result = JSON.parse(ex("kubectl", kubectl_args).dig(:stdout))
+      result = JSON.parse(ex("kubectl", kubectl_args)[:stdout])
 
-      result.dig('items').each do |event|
+      result['items'].each do |event|
         entity = event.dig('involvedObject', 'kind')
-        reason = event.dig('reason')
-        message = event.dig('message')
+        reason = event['reason']
+        message = event['message']
         notify("debug", "Event - entity: #{entity}, reason: #{reason}, message: #{message}")
       end
     rescue StandardError => e
@@ -1356,11 +1352,11 @@ module DeploymentMethod
     end
 
     def self.hook_cmd_is(obj, cmds_name)
-      cmds_name.include?(obj.andand[:cmd_name])
+      cmds_name.include?(obj&.dig(:cmd_name))
     end
 
     def self.hook_cmd_state_is(obj, cmd_state)
-      obj.andand[:cmd_state] == cmd_state
+      obj&.dig(:cmd_state) == cmd_state
     end
 
     def self.hook_cmd_and_state(cmds_name, cmd_state, output)
@@ -1488,7 +1484,7 @@ module DeploymentMethod
     end
 
     def pods_contain_oom?(pods, app = nil)
-      list_pods = pods.class == Hash ? pods.dig('items') : pods
+      list_pods = pods.instance_of?(Hash) ? pods['items'] : pods
 
       (list_pods || []).any? do |pod|
         label_app = pod.dig('metadata', 'labels', 'app')
@@ -1544,7 +1540,7 @@ module DeploymentMethod
 
     def auto_update_deployment(website, new_auto_account_type)
       website_location = website.website_locations.first
-      latest_image = website.deployments.last.obj.dig('image_name_tag')
+      latest_image = website.deployments.last.obj['image_name_tag']
 
       raise "No latest image available" unless latest_image
 

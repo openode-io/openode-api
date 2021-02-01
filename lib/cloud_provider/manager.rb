@@ -1,7 +1,6 @@
 module CloudProvider
   class Manager
-    attr_accessor :clouds
-    attr_accessor :application
+    attr_accessor :clouds, :application
 
     @@instance = nil
 

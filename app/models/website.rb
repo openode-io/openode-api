@@ -520,8 +520,8 @@ class Website < ApplicationRecord
   end
 
   def self.domain_valid?(domain)
-    (domain =~ %r{^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,10}(:[0-9]{1,5})?(/.*)?$})
-      .andand.zero?
+    (domain =~ %r{^[a-z0-9]+([\-.]{1}[a-z0-9]+)*\.[a-z]{2,10}(:[0-9]{1,5})?(/.*)?$})
+      &.zero?
   end
 
   def self.clean_domain(domain)
@@ -695,7 +695,7 @@ class Website < ApplicationRecord
 
   # ENV stored in the db
   def env
-    ((secret || {}).dig(:env) || {})
+    ((secret || {})[:env] || {})
       .stringify_keys
   end
 
@@ -939,8 +939,8 @@ class Website < ApplicationRecord
   end
 
   def blue_green_deployment_option_cost
-    pricing_params = CloudProvider::Manager.instance.application.dig('pricing')
-    cost_ratio = pricing_params.dig('blue_green_ratio_plan_cost').to_f
+    pricing_params = CloudProvider::Manager.instance.application['pricing']
+    cost_ratio = pricing_params['blue_green_ratio_plan_cost'].to_f
 
     Website.cost_price_to_credits(plan[:cost_per_hour]) * cost_ratio *
       (website_locations.first&.replicas || 1)

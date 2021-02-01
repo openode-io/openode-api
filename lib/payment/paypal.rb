@@ -35,7 +35,7 @@ module Payment
     def self.validate_ipn_notification(raw)
       live = PAYPAL_VERIFICATION_URL
 
-      uri = URI.parse(live + '/webscr?cmd=_notify-validate')
+      uri = URI.parse("#{live}/webscr?cmd=_notify-validate")
 
       http = Net::HTTP.new(uri.host, uri.port)
       http.open_timeout = 60

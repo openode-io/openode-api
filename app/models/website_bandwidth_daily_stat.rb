@@ -24,8 +24,8 @@ class WebsiteBandwidthDailyStat < History
     last_stat = WebsiteBandwidthDailyStat.last_stat_of(website)
 
     if last_stat
-      data.keys.each do |variable|
-        if last_stat.obj[variable]&.is_a?(Numeric)
+      data.each_key do |variable|
+        if last_stat.obj[variable].is_a?(Numeric)
           last_stat.obj[variable] += data[variable]
         else
           last_stat.obj[variable] = data[variable]

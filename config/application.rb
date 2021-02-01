@@ -74,7 +74,7 @@ puts "Env: #{ENV['RAILS_ENV']}"
 
 # Relational db connection verification
 
-require './config/environment.rb'
+require './config/environment'
 
 unless ENV['SKIP_BOOT_DB_CHECK']
   puts 'Verifying database connection...'

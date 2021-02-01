@@ -27,8 +27,8 @@ class MyAddonsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_equal response.parsed_body.length, 2
-    assert_equal response.parsed_body[0].dig('name'), 'aello-toto'
-    assert_equal response.parsed_body[1].dig('name'), 'hello-toto'
+    assert_equal response.parsed_body[0]['name'], 'aello-toto'
+    assert_equal response.parsed_body[1]['name'], 'hello-toto'
 
     assert_equal response.parsed_body[0].dig('addon', 'id'), addon.id
     assert_equal response.parsed_body[1].dig('addon', 'id'), addon.id
@@ -52,7 +52,7 @@ class MyAddonsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
-    assert_equal response.parsed_body.dig('name'), wa.name
+    assert_equal response.parsed_body['name'], wa.name
   end
 
   test 'POST /instances/:instance_id/addons - with new line' do

@@ -202,7 +202,7 @@ class InstancesControllerDeployDockerTest < ActionDispatch::IntegrationTest
       assert_equal finalized_event, true
 
       final_details_event = website.deployments.last.events.find do |e|
-        e['update'].andand['details'].andand['result']
+        e.dig('update', 'details', 'result') rescue nil
       end
 
       assert_not_nil final_details_event

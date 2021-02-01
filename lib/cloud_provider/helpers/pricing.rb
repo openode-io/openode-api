@@ -8,11 +8,11 @@ module CloudProvider
       COST_EXTRA_CPU_PER_HOUR = COST_EXTRA_CPU / (24 * 31)
 
       def calc_cost_per_month(ram)
-        pricing_params = CloudProvider::Manager.instance.application.dig('pricing')
+        pricing_params = CloudProvider::Manager.instance.application['pricing']
 
-        server_cost = pricing_params.dig('typical_server_cost').to_f
-        allocatable_ram = pricing_params.dig('typical_allocatable_ram').to_f
-        price_multiplier = pricing_params.dig('price_multiplier').to_f
+        server_cost = pricing_params['typical_server_cost'].to_f
+        allocatable_ram = pricing_params['typical_allocatable_ram'].to_f
+        price_multiplier = pricing_params['price_multiplier'].to_f
 
         price_per_mb = server_cost / allocatable_ram
 

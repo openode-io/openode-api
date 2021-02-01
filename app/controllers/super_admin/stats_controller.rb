@@ -34,7 +34,7 @@ class SuperAdmin::StatsController < SuperAdmin::SuperAdminController
 
     json(
       stats
-      .map { |s| { date: s.created_at.to_date, value: s.obj.dig(variable_name) } }
+      .map { |s| { date: s.created_at.to_date, value: s.obj[variable_name] } }
       .sort_by do |e|
         e[:created_at]
       end

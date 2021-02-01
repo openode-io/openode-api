@@ -1,10 +1,7 @@
 module DeploymentMethod
   module Util
     class InstanceImageManager
-      attr_accessor :runner
-      attr_accessor :docker_images_location
-      attr_accessor :website
-      attr_accessor :deployment
+      attr_accessor :runner, :docker_images_location, :website, :deployment
 
       LIMIT_REPOSITORY_BYTES = 1024 * 1024 * 1024 # MB * KB * B -> 1 GB
       MAX_BUILD_TIMEOUT = 360
