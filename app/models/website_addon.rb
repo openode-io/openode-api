@@ -16,6 +16,7 @@ class WebsiteAddon < ApplicationRecord
   validates :website, presence: true
   validates :addon, presence: true
 
+  validate :validate_ports
   validate :validate_account_type
   validate :validate_disallow_open_source
   validate :validate_addon_obj_fields, on: :update
@@ -38,6 +39,21 @@ class WebsiteAddon < ApplicationRecord
     if addon&.obj
       self.obj['exposed_port'] ||= addon.obj['target_port']
       self.obj['persistent_path'] ||= addon.obj['persistent_path']
+      self.obj['ports'] ||= addon.obj['ports']
+    end
+
+    unless obj['ports']
+      self.obj['ports'] = [
+        {
+          'exposed_port' => obj['exposed_port'],
+          'target_port' => addon&.obj&.dig('target_port'),
+          'protocol' => obj['protocol']
+        }
+      ]
+    end
+
+    obj['ports'].each do |port|
+      port['service_name'] = name
     end
 
     self.obj['tag'] ||= "latest"
@@ -53,6 +69,37 @@ class WebsiteAddon < ApplicationRecord
     end
 
     default_env_variables
+  end
+
+  def ports
+    self.obj['ports'] || [
+      {
+        'exposed_port' => obj['exposed_port'],
+        'target_port' => addon&.obj&.dig('target_port'),
+        'protocol' => obj['protocol'],
+        'service_name' => name
+      }
+    ]
+  end
+
+  def validate_ports
+    (self.obj['ports'] || []).each do |port|
+      if port['target_port'] && port['target_port'].to_i.to_s != (port['target_port']).to_s
+        errors.add(:ports, "invalid target port")
+      end
+
+      if port['exposed_port'] && port['exposed_port'].to_i.to_s != (port['exposed_port']).to_s
+        errors.add(:ports, "invalid exposed port")
+      end
+
+      if port['protocol'] && !%w[TCP UDP].include?(port['protocol'])
+        errors.add(:ports, "invalid protocol port")
+      end
+
+      if port['http_endpoint'].present? && !Io::Path.valid?(port['http_endpoint'])
+        errors.add(:ports, "invalid HTTP endpoint")
+      end
+    end
   end
 
   def enforce_image_tag

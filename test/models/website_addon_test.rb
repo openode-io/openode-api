@@ -12,7 +12,15 @@ class WebsiteAddonTest < ActiveSupport::TestCase
       addon: addon,
       obj: {
         attrib: 'val1',
-        tag: "1.1.1"
+        tag: "1.1.1",
+        ports: [
+          {
+            target_port: "66",
+            exposed_port: "66",
+            http_endpoint: "/asdf",
+            protocol: "TCP"
+          }
+        ]
       }
     )
 
@@ -21,6 +29,102 @@ class WebsiteAddonTest < ActiveSupport::TestCase
     assert wa.valid?
     assert wa.storage_gb.zero?
     assert_equal wa.obj['tag'], "1.1.1"
+  end
+
+  test "create - validate port target port" do
+    w = default_website
+    addon = Addon.first
+
+    wa = WebsiteAddon.new(
+      name: 'hi-world',
+      account_type: 'second',
+      website: w,
+      addon: addon,
+      obj: {
+        ports: [
+          {
+            target_port: "66test",
+            exposed_port: 6611,
+            http_endpoint: "/",
+            protocol: "TCP"
+          }
+        ]
+      }
+    )
+
+    assert_equal wa.valid?, false
+  end
+
+  test "create - validate port exposed port" do
+    w = default_website
+    addon = Addon.first
+
+    wa = WebsiteAddon.new(
+      name: 'hi-world',
+      account_type: 'second',
+      website: w,
+      addon: addon,
+      obj: {
+        ports: [
+          {
+            target_port: "66",
+            exposed_port: "66test",
+            http_endpoint: "/",
+            protocol: "TCP"
+          }
+        ]
+      }
+    )
+
+    assert_equal wa.valid?, false
+  end
+
+  test "create - validate port protocol" do
+    w = default_website
+    addon = Addon.first
+
+    wa = WebsiteAddon.new(
+      name: 'hi-world',
+      account_type: 'second',
+      website: w,
+      addon: addon,
+      obj: {
+        ports: [
+          {
+            target_port: "66",
+            exposed_port: "66",
+            http_endpoint: "/",
+            protocol: "HTTP"
+          }
+        ]
+      }
+    )
+
+    assert_equal wa.valid?, false
+  end
+
+  test "create - validate http_endpoint port" do
+    w = default_website
+    addon = Addon.first
+
+    wa = WebsiteAddon.new(
+      name: 'hi-world',
+      account_type: 'second',
+      website: w,
+      addon: addon,
+      obj: {
+        ports: [
+          {
+            target_port: "66",
+            exposed_port: "66",
+            http_endpoint: "/asdf\n",
+            protocol: "TCP"
+          }
+        ]
+      }
+    )
+
+    assert_equal wa.valid?, false
   end
 
   test "create - website with two addons with the same name is invalid" do
@@ -178,6 +282,53 @@ class WebsiteAddonTest < ActiveSupport::TestCase
 
     assert_equal wa.obj.dig('env', 'TITI'), "asdf"
     assert_equal wa.obj.dig('env', 'TOTO'), 1234
+  end
+
+  test "create - with ports" do
+    w = default_website
+    addon = Addon.first
+    addon.obj ||= {}
+    addon.obj['minimum_memory_mb'] = 100
+    addon.obj['ports'] = [
+      {
+        target_port: "9000"
+      }
+    ]
+    addon.save!
+
+    wa = WebsiteAddon.create!(
+      name: 'hi-world',
+      account_type: 'second',
+      website: w,
+      addon: addon,
+      obj: {
+        attrib: 'val1'
+      }
+    )
+
+    assert_equal wa.obj['ports'], addon.obj['ports']
+  end
+
+  test "create - should copy target_port to ports" do
+    w = default_website
+    addon = Addon.first
+    addon.obj ||= {}
+    addon.obj['minimum_memory_mb'] = 100
+    addon.obj['target_port'] = "9000"
+    addon.save!
+
+    wa = WebsiteAddon.create!(
+      name: 'hi-world',
+      account_type: 'second',
+      website: w,
+      addon: addon,
+      obj: {
+        attrib: 'val1'
+      }
+    )
+    puts "was ---> #{wa.inspect}"
+
+    assert_equal wa.obj['ports'][0]['target_port'], "9000"
   end
 
   test "create - with too high storage gb" do

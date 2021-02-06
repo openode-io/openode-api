@@ -678,8 +678,17 @@ module DeploymentMethod
         .join("\n---\n")
     end
 
+    def service_port_yml(port)
+      "- port: #{port['exposed_port']}\n" \
+      "  name: \"#{port['exposed_port']}\"\n" \
+      "  targetPort: #{port['target_port'] || 80}\n" \
+      "  protocol: #{port['protocol']}\n"
+    end
+
     def generate_deployment_addon_yml(website_addon, opts = {})
       include_volume_claim = opts[:with_pvc_object] && website_addon.persistence?
+      ports = website_addon.obj['ports'] || []
+      ports_yml = ports.map { |port| service_port_yml(port) }.join("\n")
 
       <<~END_YML
         ---
@@ -693,9 +702,7 @@ module DeploymentMethod
         spec:
           type: ClusterIP
           ports:
-          - port: #{website_addon.obj['exposed_port']}
-            targetPort: #{website_addon.addon.obj['target_port'] || 80}
-            protocol: #{website_addon.addon.obj['protocol']}
+        #{tabulate(1, ports_yml)}
           selector:
             app: #{website_addon.name}
         ---
@@ -850,11 +857,14 @@ module DeploymentMethod
       rules.each do |rule|
         result += "    - host: #{rule[:hostname]}\n" \
                   "      http:\n" \
-                  "        paths:\n" \
-                  "        - path: /\n" \
-                  "          backend:\n" \
-                  "            serviceName: main-service\n" \
-                  "            servicePort: 80\n"
+                  "        paths:\n"
+
+        (rule[:ports] || []).each do |port|
+          result += "        - path: #{port['http_endpoint']}\n" \
+                    "          backend:\n" \
+                    "            serviceName: #{port['service_name']}\n" \
+                    "            servicePort: #{port['exposed_port']}\n"
+        end
       end
 
       result
@@ -879,7 +889,7 @@ module DeploymentMethod
 
     def generate_ingress_yml(website, website_location)
       domains = website_location.compute_domains
-      rules_domains = domains.map { |d| { hostname: d } }
+      rules_domains = domains.map { |d| { hostname: d, ports: website.all_ports } }
 
       <<~END_YML
         apiVersion: extensions/v1beta1
