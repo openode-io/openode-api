@@ -81,7 +81,7 @@ module CloudProvider
         {
           id: '50-MB',
           internal_id: 'first',
-          name: '50MB Memory',
+          name: '50MB Memory (On Demand)',
           ram: 50,
           storage: 1000,
           bandwidth: 100
@@ -89,7 +89,7 @@ module CloudProvider
         {
           id: '100-MB',
           internal_id: 'second',
-          name: '100MB Memory',
+          name: '100MB Memory (On Demand)',
           ram: 100,
           storage: 1000,
           bandwidth: 200
@@ -97,7 +97,7 @@ module CloudProvider
         {
           id: '200-MB',
           internal_id: 'third',
-          name: '200MB Memory',
+          name: '200MB Memory (On Demand)',
           ram: 200,
           storage: 1000,
           bandwidth: 400
@@ -105,7 +105,7 @@ module CloudProvider
         {
           id: '500-MB',
           internal_id: 'fourth',
-          name: '500MB Memory',
+          name: '500MB Memory (On Demand)',
           ram: 500,
           storage: 1000,
           bandwidth: 1000
@@ -113,7 +113,7 @@ module CloudProvider
         {
           id: '1-GB',
           internal_id: 'fifth',
-          name: '1GB Memory',
+          name: '1GB Memory (On Demand)',
           ram: 1024,
           storage: 1000,
           bandwidth: 2000
@@ -121,7 +121,7 @@ module CloudProvider
         {
           id: '2-GB',
           internal_id: 'sixth',
-          name: '2GB Memory',
+          name: '2GB Memory (On Demand)',
           ram: 2048,
           storage: 1000,
           bandwidth: 4000
@@ -129,7 +129,7 @@ module CloudProvider
         {
           id: 'auto',
           internal_id: 'auto',
-          name: 'Auto',
+          name: 'Auto (Subscription)',
           ram: 999,
           storage: 1000,
           bandwidth: 2000
