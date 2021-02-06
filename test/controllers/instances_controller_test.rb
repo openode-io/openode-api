@@ -922,7 +922,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal response.parsed_body['id'], '100-MB'
-    assert_equal response.parsed_body['name'], '100MB Memory'
+    assert_equal response.parsed_body['name'], '100MB Memory (On Demand)'
   end
 
   # /plans
