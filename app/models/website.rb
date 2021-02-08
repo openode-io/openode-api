@@ -938,6 +938,29 @@ class Website < ApplicationRecord
     Website.cost_price_to_credits(website_addon.plan[:cost_per_hour])
   end
 
+  def main_service_name
+    "main-service"
+  end
+
+  def main_ports
+    [
+      {
+        "service_name" => main_service_name,
+        "http_endpoint" => "/",
+        "exposed_port" => 80
+      }
+    ]
+  end
+
+  def addon_http_endpoint_ports
+    website_addons.map { |wa| wa.ports || [] }.flatten
+                  .select { |port| port&.dig('http_endpoint')&.present? }
+  end
+
+  def all_ports
+    main_ports + addon_http_endpoint_ports
+  end
+
   def blue_green_deployment_option_cost
     pricing_params = CloudProvider::Manager.instance.application['pricing']
     cost_ratio = pricing_params['blue_green_ratio_plan_cost'].to_f

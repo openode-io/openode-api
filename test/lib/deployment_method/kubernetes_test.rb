@@ -811,6 +811,22 @@ VAR2=5678
     assert_includes yml, "storage: 1Gi"
   end
 
+  # service_port_yml
+
+  test 'service_port_yml - happy path' do
+    port = {
+      "exposed_port" => 9000,
+      "target_port" => 8000,
+      "protocol" => "TCP"
+    }
+
+    yml = kubernetes_method.service_port_yml(port)
+
+    assert_includes yml, "port: 9000"
+    assert_includes yml, "targetPort: 8000"
+    assert_includes yml, "protocol: TCP"
+  end
+
   test 'generate_deployment_addon_volumes_yml - without persistence' do
     w = default_website
 

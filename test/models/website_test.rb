@@ -2186,4 +2186,71 @@ class WebsiteTest < ActiveSupport::TestCase
 
     assert_equal w.calc_memory, 200
   end
+
+  test "addon http endpoints - happy path" do
+    w = default_website
+    addon = Addon.first
+
+    WebsiteAddon.create!(
+      name: 'hi-world',
+      account_type: 'second',
+      website: w,
+      addon: addon,
+      obj: {
+        attrib: 'val1',
+        tag: "1.1.1",
+        ports: [
+          {
+            target_port: "66",
+            exposed_port: "66",
+            http_endpoint: "/asdf",
+            protocol: "TCP"
+          }
+        ]
+      }
+    )
+
+    WebsiteAddon.create!(
+      name: 'hi-world2',
+      account_type: 'second',
+      website: w,
+      addon: addon,
+      obj: {
+        attrib: 'val1',
+        tag: "1.1.1",
+        ports: [
+          {
+            target_port: "789",
+            exposed_port: "999",
+            http_endpoint: "/asdf2",
+            protocol: "TCP"
+          }
+        ]
+      }
+    )
+
+    WebsiteAddon.create!(
+      name: 'hi-world3',
+      account_type: 'second',
+      website: w,
+      addon: addon,
+      obj: {
+        attrib: 'val1',
+        tag: "1.1.1",
+        ports: [
+          {
+            target_port: "789",
+            exposed_port: "999",
+            protocol: "TCP"
+          }
+        ]
+      }
+    )
+
+    ports = w.addon_http_endpoint_ports
+
+    assert_equal ports.count, 2
+    assert_equal ports[0]['exposed_port'], "66"
+    assert_equal ports[1]['exposed_port'], "999"
+  end
 end
