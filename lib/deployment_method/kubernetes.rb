@@ -689,6 +689,8 @@ module DeploymentMethod
       include_volume_claim = opts[:with_pvc_object] && website_addon.persistence?
       ports = website_addon.obj['ports'] || []
       ports_yml = ports.map { |port| service_port_yml(port) }.join("\n")
+      addon_args = website_addon.addon&.obj&.dig('args') || []
+      addon_args_s = addon_args.map { |a| "\"#{a}\"" }.join(", ")
 
       <<~END_YML
         ---
@@ -732,6 +734,7 @@ module DeploymentMethod
         #{generate_deployment_addon_volumes_yml(website_addon)}
               containers:
               - image: #{website_addon.image_tag}
+                args: [#{addon_args_s}]
                 imagePullPolicy: Always
                 name: #{website_addon.name}
                 envFrom:
