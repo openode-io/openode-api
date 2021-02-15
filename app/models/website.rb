@@ -260,6 +260,10 @@ class Website < ApplicationRecord
   def init_custom_domain
     self.domains ||= []
 
+    if site_name_was != site_name
+      self.domains = []
+    end
+
     self.domains.unshift(site_name)
 
     self.domains = domains.uniq
