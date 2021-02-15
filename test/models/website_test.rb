@@ -1777,6 +1777,24 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website2.valid?, false
   end
 
+  test 'update - custom domain - allowed if root domain used if same website' do
+    user = User.first
+    user.websites.destroy_all
+
+    website = Website.create!(
+      site_name: 'www.hello.world',
+      domains: ["www2.www.hello.world"],
+      user_id: user.id
+    )
+
+    website.site_name = "hello.world"
+    website.save!
+
+    website.reload
+
+    assert_equal website.domains, ["hello.world"]
+  end
+
   # # accessible_by
 
   test 'accessible_by? its own user' do
