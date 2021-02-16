@@ -16,6 +16,8 @@ class WebsiteAddon < ApplicationRecord
   validates :website, presence: true
   validates :addon, presence: true
 
+  validate :validate_paid_user, on: :create
+
   validate :validate_ports
   validate :validate_account_type
   validate :validate_disallow_open_source
@@ -80,6 +82,12 @@ class WebsiteAddon < ApplicationRecord
         'service_name' => name
       }
     ]
+  end
+
+  def validate_paid_user
+    unless user.orders?
+      errors.add(:user, "requires paid orders")
+    end
   end
 
   def validate_ports
