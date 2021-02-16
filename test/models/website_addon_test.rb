@@ -1,6 +1,16 @@
 require 'test_helper'
 
 class WebsiteAddonTest < ActiveSupport::TestCase
+  def create_order_to(user)
+    Order.create!(
+      user: user,
+      amount: 10.0,
+      payment_status: 'Completed',
+      gateway: 'paypal',
+      content: { 'payment_status' => 'Completed' }
+    )
+  end
+
   test "create - happy path" do
     w = default_website
     addon = Addon.first
@@ -29,6 +39,37 @@ class WebsiteAddonTest < ActiveSupport::TestCase
     assert wa.valid?
     assert wa.storage_gb.zero?
     assert_equal wa.obj['tag'], "1.1.1"
+
+    # allowed to update
+    wa.name = "newnamehere"
+    wa.save!
+  end
+
+  test "create - not allowed if no paid order" do
+    w = default_website
+    w.user.orders.destroy_all
+    addon = Addon.first
+
+    wa = WebsiteAddon.create(
+      name: 'hi-world',
+      account_type: 'second',
+      website: w,
+      addon: addon,
+      obj: {
+        attrib: 'val1',
+        tag: "1.1.1",
+        ports: [
+          {
+            target_port: "66",
+            exposed_port: "66",
+            http_endpoint: "/asdf",
+            protocol: "TCP"
+          }
+        ]
+      }
+    )
+
+    assert_not wa.valid?
   end
 
   test "create - validate port target port" do
@@ -156,6 +197,7 @@ class WebsiteAddonTest < ActiveSupport::TestCase
 
   test "create - 2 websites with 2 addons with the same name are valid" do
     w = Website.first
+    create_order_to(w.user)
     w2 = Website.last
     addon = Addon.first
 
@@ -184,6 +226,7 @@ class WebsiteAddonTest < ActiveSupport::TestCase
 
   test "required fields should be specified" do
     w = Website.first
+    create_order_to(w.user)
     addon = Addon.first
     addon.obj ||= {}
     addon.obj['required_fields'] = %w[exposed_port what]
