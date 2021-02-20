@@ -465,7 +465,6 @@ services:
   test 'verify_instance_up without skip port check, instance up' do
     website = default_website
     website.container_id = 'cc2304677be0'
-    website.valid = false
     website.save
     dep_method = docker_compose_method
 
@@ -479,8 +478,6 @@ services:
       dep_method.verify_instance_up(website: website, website_location: default_website_location)
 
       website.reload
-
-      assert_equal website.valid, true
     end
   end
 

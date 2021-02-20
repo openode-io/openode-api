@@ -560,7 +560,7 @@ class ActiveSupport::TestCase
       url: 'https://mydomain.freshdesk.com/api/v2/tickets',
       method: :post,
       with: {
-        body: "{\"status\":2,\"priority\":1,\"description\":\"this is a message\\u003cbr /\\u003e\\u003cbr /\\u003e\\u003chr /\\u003e\\u003cActionController::Parameters {\\\"hi\\\"=\\u003e\\\"world\\\", \\\"controller\\\"=\\u003e\\\"super_admin/support\\\", \\\"action\\\"=\\u003e\\\"contact\\\", \\\"support\\\"=\\u003e{\\\"hi\\\"=\\u003e\\\"world\\\", \\\"message\\\"=\\u003e\\\"this is a message\\\"}} permitted: false\\u003e\",\"subject\":\"opeNode Contact\",\"cc_emails\":[],\"email\":null}"
+        body: "{\"status\":2,\"priority\":1,\"description\":\"this is a message\\u003cbr /\\u003e\\u003cbr /\\u003e\\u003chr /\\u003e#\\u003cActionController::Parameters {\\\"hi\\\"=\\u003e\\\"world\\\", \\\"controller\\\"=\\u003e\\\"super_admin/support\\\", \\\"action\\\"=\\u003e\\\"contact\\\", \\\"support\\\"=\\u003e{\\\"hi\\\"=\\u003e\\\"world\\\", \\\"message\\\"=\\u003e\\\"this is a message\\\"}} permitted: false\\u003e\",\"subject\":\"opeNode Contact\",\"cc_emails\":[],\"email\":null}"
       },
       content_type: 'application/json',
       response_status: 200,

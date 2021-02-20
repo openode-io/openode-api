@@ -12,8 +12,8 @@ class ExecutionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal response.parsed_body.length, deployments.length
 
-    assert_equal response.parsed_body[0].keys,
-                 %w[id website_id status created_at obj parent_execution_id type]
+    assert_equal response.parsed_body[0].keys.sort,
+                 %w[id website_id status created_at obj parent_execution_id type].sort
   end
 
   test '/instances/:instance_id/executions/type with status' do
@@ -29,8 +29,8 @@ class ExecutionsControllerTest < ActionDispatch::IntegrationTest
     assert_not deployments.empty?
     assert_equal response.parsed_body.length, deployments.length
 
-    assert_equal response.parsed_body[0].keys,
-                 %w[id website_id status created_at obj parent_execution_id type]
+    assert_equal response.parsed_body[0].keys.sort,
+                 %w[id website_id status created_at obj parent_execution_id type].sort
 
     ids_response = response.parsed_body.map { |e| e['id'] }
     assert_not_includes ids_response, failed_deployment.id

@@ -78,8 +78,8 @@ class OrderTest < ActiveSupport::TestCase
       content: { 'payment_status' => 'Completed' }
     )
 
-    assert_includes order.errors.inspect.to_s, 'is not included in the list'
     assert_equal order.valid?, false
+    assert order.errors.count.positive?
   end
 
   test 'gateway credit' do

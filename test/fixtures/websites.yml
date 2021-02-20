@@ -4,7 +4,6 @@ one:
   user: one
   site_name: testsite
   pm2_info: MyText
-  valid: false
   last_access_at: 2019-08-10 14:24:22
   status: online
   type: docker
@@ -26,7 +25,6 @@ two:
   user: two
   site_name: testsite2
   pm2_info: MyText
-  valid: false
   last_access_at: 2019-08-10 14:24:22
   status: online
   type: docker
@@ -48,7 +46,6 @@ three:
   user: two
   site_name: www.what.is
   pm2_info: MyText
-  valid: false
   last_access_at: 2019-08-10 14:24:22
   status: online
   type: docker
@@ -70,7 +67,6 @@ app_what_is:
   user: two
   site_name: app.what.is
   pm2_info: MyText
-  valid: false
   last_access_at: 2019-08-10 14:24:22
   status: online
   type: docker
@@ -92,7 +88,6 @@ with_private_cloud:
   user: one
   site_name: testprivatecloud
   pm2_info: MyText
-  valid: false
   last_access_at: 2019-08-10 14:24:22
   status: online
   type: docker
@@ -114,7 +109,6 @@ with_type_kubernetes:
   user: one
   site_name: testkubernetes-type
   pm2_info: MyText
-  valid: false
   last_access_at: 2019-08-10 14:24:22
   status: online
   type: kubernetes

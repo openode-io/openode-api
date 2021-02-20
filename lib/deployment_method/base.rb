@@ -275,7 +275,6 @@ module DeploymentMethod
         is_up = false
       end
 
-      website.valid = is_up
       website.http_port_available = is_up
       website.save!
       website.change_status!(Website::STATUS_ONLINE, skip_validations: true) if is_up
