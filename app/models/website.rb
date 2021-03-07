@@ -11,6 +11,7 @@ class Website < ApplicationRecord
   serialize :storage_areas, JSON
   serialize :data, JSON
   serialize :auto_account_types_history, JSON
+  serialize :one_click_app, JSON
 
   self.inheritance_column = :_type
 
@@ -58,6 +59,13 @@ class Website < ApplicationRecord
 
   def deployments
     Deployment.type_dep.where(website: self)
+  end
+
+  def active_one_click_app
+    return nil unless one_click_app
+    return nil unless one_click_app['id']
+
+    OneClickApp.find_by(id: one_click_app['id'])
   end
 
   scope :custom_domain, -> { where(domain_type: 'custom_domain') }

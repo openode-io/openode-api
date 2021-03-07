@@ -3,7 +3,6 @@
 one:
   user: one
   site_name: testsite
-  pm2_info: MyText
   last_access_at: 2019-08-10 14:24:22
   status: online
   type: docker
@@ -19,12 +18,10 @@ one:
   instance_type: MyString
   sub_status: MyString
   cloud_type: cloud
-  init_script: MyText
 
 two:
   user: two
   site_name: testsite2
-  pm2_info: MyText
   last_access_at: 2019-08-10 14:24:22
   status: online
   type: docker
@@ -40,12 +37,10 @@ two:
   instance_type: MyString
   sub_status: MyString
   cloud_type: cloud
-  init_script: MyText
 
 three:
   user: two
   site_name: www.what.is
-  pm2_info: MyText
   last_access_at: 2019-08-10 14:24:22
   status: online
   type: docker
@@ -61,12 +56,10 @@ three:
   instance_type: MyString
   sub_status: MyString
   cloud_type: cloud
-  init_script: MyText
 
 app_what_is:
   user: two
   site_name: app.what.is
-  pm2_info: MyText
   last_access_at: 2019-08-10 14:24:22
   status: online
   type: docker
@@ -82,12 +75,10 @@ app_what_is:
   instance_type: MyString
   sub_status: MyString
   cloud_type: cloud
-  init_script: MyText
 
 with_private_cloud:
   user: one
   site_name: testprivatecloud
-  pm2_info: MyText
   last_access_at: 2019-08-10 14:24:22
   status: online
   type: docker
@@ -103,12 +94,10 @@ with_private_cloud:
   instance_type: MyString
   sub_status: MyString
   cloud_type: private-cloud
-  init_script: MyText
 
 with_type_kubernetes:
   user: one
   site_name: testkubernetes-type
-  pm2_info: MyText
   last_access_at: 2019-08-10 14:24:22
   status: online
   type: kubernetes
@@ -124,5 +113,4 @@ with_type_kubernetes:
   instance_type: MyString
   sub_status: MyString
   cloud_type: cloud
-  init_script: MyText
   open_source_activated: true

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_02_20_232234) do
+ActiveRecord::Schema.define(version: 2021_03_07_153353) do
 
   create_table "addons", charset: "latin1", force: :cascade do |t|
     t.string "name"
@@ -151,6 +151,16 @@ ActiveRecord::Schema.define(version: 2021_02_20_232234) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["website_id"], name: "index_notifications_on_website_id"
+  end
+
+  create_table "one_click_apps", charset: "latin1", force: :cascade do |t|
+    t.string "name"
+    t.text "prepare", size: :medium
+    t.text "config", size: :medium
+    t.text "dockerfile", size: :medium
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["name"], name: "index_one_click_apps_on_name", unique: true
   end
 
   create_table "orders", charset: "latin1", force: :cascade do |t|
@@ -303,7 +313,6 @@ ActiveRecord::Schema.define(version: 2021_02_20_232234) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.text "data"
-    t.text "pm2_info"
     t.timestamp "last_access_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.string "status", default: "N/A"
     t.string "type", limit: 100, default: "nodejs"
@@ -323,11 +332,11 @@ ActiveRecord::Schema.define(version: 2021_02_20_232234) do
     t.string "instance_type", limit: 50, default: "server"
     t.string "sub_status"
     t.string "cloud_type", limit: 150, default: "cloud"
-    t.text "init_script"
     t.boolean "open_source_activated", default: false
     t.text "alerts"
     t.string "auto_account_type", default: "third"
     t.text "auto_account_types_history"
+    t.text "one_click_app", size: :medium
     t.index ["cloud_type"], name: "website_cloud_type"
     t.index ["credits_check_at"], name: "credits_check_at_website_id"
     t.index ["domains"], name: "domains_websites"

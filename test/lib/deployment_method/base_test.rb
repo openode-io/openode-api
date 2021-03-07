@@ -215,4 +215,19 @@ class DeploymentMethodBaseTest < ActiveSupport::TestCase
     assert_equal new_opts[:last_trial], true
     assert_equal opts, orig_opts
   end
+
+  # direct_template
+  test 'direct_template_finalize_dockerfile - already has tag' do
+    result = @base_dep_method.direct_template_finalize_dockerfile("FROM test:1.0.0\ntest")
+
+    assert_equal result, "FROM test:1.0.0\ntest"
+  end
+
+  test 'direct_template_finalize_dockerfile - with specified version' do
+    one_click_options = { "version" => "latest" }
+    result = @base_dep_method.direct_template_finalize_dockerfile("FROM test\ntest2",
+                                                                  one_click_options)
+
+    assert_equal result, "FROM test:latest\ntest2"
+  end
 end

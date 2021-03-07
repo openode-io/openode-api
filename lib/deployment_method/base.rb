@@ -4,6 +4,7 @@ module DeploymentMethod
     include Plugins::Git
     include Plugins::OpenodeCli
     include Plugins::Subscription
+    include Plugins::DirectTemplate
 
     RuntimeError = Class.new(StandardError)
 
@@ -132,6 +133,7 @@ module DeploymentMethod
       website.change_status!(Website::STATUS_STARTING, skip_validations: true)
 
       auto_init(website)
+      direct_template_init(options)
     end
 
     def auto_init(website)
