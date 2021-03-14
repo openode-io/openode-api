@@ -9,6 +9,7 @@ module DeploymentMethod
 
         return unless app
 
+        ex('ensure_remote_repository', path: website.repo_dir)
         dockerfile = direct_template_finalize_dockerfile(app.dockerfile, website.one_click_app)
 
         runner.upload_content_to(dockerfile,
