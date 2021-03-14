@@ -73,7 +73,10 @@ class GlobalController < ApplicationController
     json(msg || {})
   end
 
-  PERMITTED_TYPE_LISTS = ['Website::ALERT_TYPES'].freeze
+  PERMITTED_TYPE_LISTS = [
+    'Website::ALERT_TYPES',
+    'OneClickApps'
+  ].freeze
   api :GET, 'global/type-lists/:type'
   description 'Type lists.'
   param :type, String, desc: "Permitted values: #{PERMITTED_TYPE_LISTS}",
@@ -83,6 +86,11 @@ class GlobalController < ApplicationController
       validation_error!('Invalid type')
     end
 
-    json(eval(params[:type]))
+    types = {
+      "Website::ALERT_TYPES" => "Website::ALERT_TYPES",
+      "OneClickApps" => "OneClickApp.all.order(:name)"
+    }
+
+    json(eval(types[params[:type]]))
   end
 end

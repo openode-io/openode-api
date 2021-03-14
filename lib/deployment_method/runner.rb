@@ -30,6 +30,21 @@ module DeploymentMethod
         @website.merge_secret!(repository_url: args["repository_url"])
       end
 
+      if !args["template"] && type == "Deployment"
+        @website&.one_click_app = {}
+        @website&.save
+      elsif args["template"] && @website
+        app = OneClickApp
+              .where(id: args["template"])
+              .or(OneClickApp.where(name: args["template"])).first
+
+        if app.present?
+          @website.one_click_app ||= {}
+          @website.one_click_app['id'] = app.id
+          @website.save
+        end
+      end
+
       execution.obj ||= {}
       execution.obj['with_repository_url'] = args["repository_url"]
 

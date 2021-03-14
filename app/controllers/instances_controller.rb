@@ -22,6 +22,10 @@ class InstancesController < ApplicationController
     requires_status_in [Website::STATUS_ONLINE]
   end
 
+  before_action only: %i[prepare_one_click_app one_click_app] do
+    requires_status_in [Website::STATUS_OFFLINE]
+  end
+
   before_action only: [:restart, :logs] do
     requires_status_in [Website::STATUS_ONLINE, Website::STATUS_OFFLINE]
   end
@@ -486,6 +490,8 @@ class InstancesController < ApplicationController
   param :parent_execution_id, String, desc: 'Rollback to parent_execution_id', required: false
   param :repository_url, String, desc: 'Deploy with a repository url (example: git)',
                                  required: false
+  param :template, String, desc: 'Deploy directly with a build template',
+                           required: false
   def restart
     # run in background:
 
@@ -534,6 +540,34 @@ class InstancesController < ApplicationController
     json(
       deployment_response(deploymentId: @runner.execution&.id)
     )
+  end
+
+  api :POST, 'instances/:id/prepare-one-click-app'
+  description 'Prepare a one click app'
+  param :one_click_app_id, String, desc: 'The One Click App id to prepare', required: true
+  def prepare_one_click_app
+    app = OneClickApp.find_by!(id: params[:one_click_app_id])
+
+    eval(app.prepare)
+
+    @website.one_click_app ||= {}
+    @website.one_click_app['id'] = app.id
+    @website.save
+
+    json({})
+  end
+
+  api :PATCH, 'instances/:id/one-click-app'
+  description 'Set attributes for a one click app'
+  param :attributes, Hash, desc: 'One Click App attributes', required: true
+  def update_one_click_app
+    @website.one_click_app ||= {}
+    attribs = params.require(:attributes).permit(:version)
+
+    @website.one_click_app = @website.one_click_app.merge(attribs)
+    @website.save!
+
+    json({})
   end
 
   protected

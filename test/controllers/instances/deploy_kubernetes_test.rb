@@ -311,6 +311,8 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
   # stop with kubernetes
   test '/instances/:instance_id/stop ' do
+    @website.one_click_app = { id: 123 }
+    @website.save!
     prepare_make_secret(@kubernetes_method, @website, @website_location, "result")
     prepare_get_dotenv(@kubernetes_method, @website, "VAR1=12")
 
@@ -337,6 +339,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
       assert_equal @website.status, Website::STATUS_OFFLINE
       assert_equal @website.executions.last.type, 'Task'
+      assert_equal @website.one_click_app, { "id" => 123 }
 
       last_credit_action = @website.credit_actions.reload.last
       expected_ratio = 0.4950

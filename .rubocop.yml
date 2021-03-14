@@ -20,6 +20,7 @@ Rails/OutputSafety:
 Security/Eval:
   Exclude:
     - 'app/controllers/global_controller.rb'
+    - 'app/controllers/instances_controller.rb'
 
 Rails/InverseOf:
   Enabled: false

@@ -1164,4 +1164,80 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :forbidden
   end
+
+  test 'post /instances/:instance_id/prepare-one-click-app happy path' do
+    website = default_website
+    website.change_status!(Website::STATUS_OFFLINE)
+    app = OneClickApp.last
+    wl = website.website_locations.first.reload
+    wl.extra_storage = 0
+    wl.save!
+
+    app.prepare = """
+    wl = @website.website_locations.first
+
+    unless wl.extra_storage.positive?
+      wl.extra_storage += 1
+      wl.save
+    end
+    """
+
+    app.save!
+
+    post "/instances/#{website.id}/prepare-one-click-app",
+         as: :json,
+         params: { one_click_app_id: app.id.to_s },
+         headers: default_headers_auth
+
+    assert_response :success
+
+    wl.reload
+
+    assert_equal wl.extra_storage, 1
+  end
+
+  test 'post /instances/:instance_id/prepare-one-click-app with invalid one click app' do
+    website = default_website
+    website.change_status!(Website::STATUS_OFFLINE)
+    app = OneClickApp.last
+    wl = website.website_locations.first.reload
+    wl.extra_storage = 0
+    wl.save!
+
+    app.prepare = """
+    wl = @website.website_locations.first
+
+    unless wl.extra_storage.positive?
+      wl.extra_storage += 1
+      wl.save
+    end
+    """
+
+    app.save!
+
+    post "/instances/#{website.id}/prepare-one-click-app",
+         as: :json,
+         params: { one_click_app_id: "invalid" },
+         headers: default_headers_auth
+
+    assert_response :not_found
+  end
+
+  test 'patch /instances/:instance_id/one-click-app happy path' do
+    website = default_website
+    website.change_status!(Website::STATUS_OFFLINE)
+    website.one_click_app = { "test" => "22" }
+    website.save!
+
+    patch "/instances/#{website.id}/one-click-app",
+          as: :json,
+          params: { attributes: { "version" => "latest" } },
+          headers: default_headers_auth
+
+    assert_response :success
+
+    website.reload
+
+    assert_equal website.one_click_app, { "version" => "latest", "test" => "22" }
+  end
 end

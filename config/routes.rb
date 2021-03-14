@@ -112,6 +112,8 @@ Rails.application.routes.draw do
     patch '/:site_name/', to: 'instances#update'
     delete '/:site_name/', to: 'instances#destroy_instance'
     post '/:site_name/crontab', to: 'instances#update_crontab'
+    post '/:site_name/prepare-one-click-app', to: 'instances#prepare_one_click_app'
+    patch '/:site_name/one-click-app', to: 'instances#update_one_click_app'
     get '/:site_name/status', to: 'instances#status'
     get '/:site_name/summary', to: 'instances#instance_summary'
     get '/:site_name/routes', to: 'instances#routes'
