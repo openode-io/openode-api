@@ -27,6 +27,7 @@ class User < ApplicationRecord
 
   has_many :websites, dependent: :destroy
   has_many :orders, dependent: :destroy
+  has_many :collaborators, dependent: :destroy
   has_many :viewed_notifications, dependent: :destroy
   has_many :friend_invites, dependent: :destroy
   has_many :subscriptions, dependent: :destroy
