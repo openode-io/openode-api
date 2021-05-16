@@ -666,8 +666,19 @@ VAR2=5678
     assert_equal yml, ""
   end
 
+  test 'generate_persistence_volume_claim_yml - has storage alloc but without path' do
+    @website_location.change_storage!(3)
+    @website.storage_areas = []
+    @website.save!
+    yml = kubernetes_method.generate_persistence_volume_claim_yml(@website_location)
+
+    assert_equal yml, ""
+  end
+
   test 'generate_persistence_volume_claim_yml - with extra storage' do
     @website_location.change_storage!(3)
+    @website.storage_areas = ["/data"]
+    @website.save!
     yml = kubernetes_method.generate_persistence_volume_claim_yml(@website_location)
 
     assert_includes yml, "kind: PersistentVolumeClaim"
@@ -1454,6 +1465,8 @@ VAR2=5678
     cmd_get_dotenv = kubernetes_method.retrieve_dotenv_cmd(website: @website)
     prepare_ssh_session(cmd_get_dotenv, '')
     @website_location.change_storage!(3)
+    @website.storage_areas = ["/data"]
+    @website.save!
 
     assert_scripted do
       begin_ssh
@@ -1465,7 +1478,8 @@ VAR2=5678
       assert_includes yml, "kind: PersistentVolumeClaim"
       assert_includes yml, "storageClassName: do-block-storage"
       assert_contains_namespace_yml(yml, @website)
-      assert_contains_deployment_yml(yml, @website, @website_location, with_probes: true)
+      assert_contains_deployment_yml(yml, @website, @website_location,
+                                     with_probes: true, with_persistence: true)
       assert_contains_service_yml(yml, @website)
       assert_contains_ingress_yml(yml, @website, @website_location,
                                   with_certificate_secret: true)
