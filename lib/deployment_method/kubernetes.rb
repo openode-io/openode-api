@@ -479,7 +479,9 @@ module DeploymentMethod
     end
 
     def generate_persistence_volume_claim_yml(website_location)
-      return '' unless website_location.extra_storage?
+      if !website_location.extra_storage? || website_location.website.storage_areas.empty?
+        return ''
+      end
 
       generate_generic_persistence_volume_claim_yml(
         website_location,
