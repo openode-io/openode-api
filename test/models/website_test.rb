@@ -1960,7 +1960,7 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal mail_sent.to, ['info@openode.io']
   end
 
-  test "open source invalid due to missing back link" do
+  test "open source valid even if missing back link" do
     w = default_website
 
     w.open_source = {
@@ -1974,7 +1974,7 @@ class WebsiteTest < ActiveSupport::TestCase
 
     w.save
 
-    assert_equal w.valid?, false
+    assert_equal w.valid?, true
   end
 
   test "able to save if already approved, w/ invalid due to missing back link" do
