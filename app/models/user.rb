@@ -54,7 +54,7 @@ class User < ApplicationRecord
     (?=.*\d)           # Must contain a digit
     (?=.*[a-z])        # Must contain a lower case character
     (?=.*[A-Z])        # Must contain an upper case character
-  /x.freeze
+  /x
   validates :password, if: :password?, format: {
     with: PASSWORD_FORMAT,
     message: 'must contain: 8 characters, a lowercase letter, an uppercase letter, a digit'
