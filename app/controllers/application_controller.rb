@@ -24,6 +24,9 @@ class ApplicationController < ActionController::API
 
     @user = User.find_by!(token: token)
 
+    # fail the request if the user is suspended
+    authorization_error!("Unauthorized") if @user.suspended?
+
     # update user updated_at to know which user is active
     threshold_user_should_update = (Time.zone.now - @user.updated_at) / (60 * 60) >= 1
 

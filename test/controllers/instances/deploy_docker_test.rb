@@ -96,23 +96,25 @@ class InstancesControllerDeployDockerTest < ActionDispatch::IntegrationTest
          params: base_params,
          headers: default_headers_auth
 
-    prepare_logs_container(dep_method, website, '123456789', 'done logs')
+    assert_response :unauthorized
 
-    prepare_default_kill_all(dep_method)
+    #prepare_logs_container(dep_method, website, '123456789', 'done logs')
 
-    assert_scripted do
-      begin_ssh
-      invoke_all_jobs
+    #prepare_default_kill_all(dep_method)
 
-      deployment = website.deployments.last
-      website.reload
+    #assert_scripted do
+    #  begin_ssh
+    #  invoke_all_jobs
 
-      assert_equal website.status, Website::STATUS_OFFLINE
-      assert_equal deployment.status, Deployment::STATUS_FAILED
-      assert_equal deployment.result['steps'].length, 5 # global, 2 kills, finalize
+    #  deployment = website.deployments.last
+    #  website.reload
 
-      assert_includes deployment.result['errors'][0]['title'], 'User suspended'
-    end
+    #  assert_equal website.status, Website::STATUS_OFFLINE
+    #  assert_equal deployment.status, Deployment::STATUS_FAILED
+    #  assert_equal deployment.result['steps'].length, 5 # global, 2 kills, finalize
+
+    #  assert_includes deployment.result['errors'][0]['title'], 'User suspended'
+    #end
   end
 
   test '/instances/:instance_id/restart - happy path' do
