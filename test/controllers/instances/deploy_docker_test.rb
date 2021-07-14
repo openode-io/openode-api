@@ -97,24 +97,6 @@ class InstancesControllerDeployDockerTest < ActionDispatch::IntegrationTest
          headers: default_headers_auth
 
     assert_response :unauthorized
-
-    #prepare_logs_container(dep_method, website, '123456789', 'done logs')
-
-    #prepare_default_kill_all(dep_method)
-
-    #assert_scripted do
-    #  begin_ssh
-    #  invoke_all_jobs
-
-    #  deployment = website.deployments.last
-    #  website.reload
-
-    #  assert_equal website.status, Website::STATUS_OFFLINE
-    #  assert_equal deployment.status, Deployment::STATUS_FAILED
-    #  assert_equal deployment.result['steps'].length, 5 # global, 2 kills, finalize
-
-    #  assert_includes deployment.result['errors'][0]['title'], 'User suspended'
-    #end
   end
 
   test '/instances/:instance_id/restart - happy path' do
