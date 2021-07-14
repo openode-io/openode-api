@@ -83,8 +83,6 @@ class InstancesControllerDeployDockerTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/restart should not allow when user suspended' do
-    dep_method = prepare_default_execution_method
-
     website = default_website
     website.user.suspended = true
     website.user.save
@@ -96,23 +94,7 @@ class InstancesControllerDeployDockerTest < ActionDispatch::IntegrationTest
          params: base_params,
          headers: default_headers_auth
 
-    prepare_logs_container(dep_method, website, '123456789', 'done logs')
-
-    prepare_default_kill_all(dep_method)
-
-    assert_scripted do
-      begin_ssh
-      invoke_all_jobs
-
-      deployment = website.deployments.last
-      website.reload
-
-      assert_equal website.status, Website::STATUS_OFFLINE
-      assert_equal deployment.status, Deployment::STATUS_FAILED
-      assert_equal deployment.result['steps'].length, 5 # global, 2 kills, finalize
-
-      assert_includes deployment.result['errors'][0]['title'], 'User suspended'
-    end
+    assert_response :unauthorized
   end
 
   test '/instances/:instance_id/restart - happy path' do
