@@ -83,8 +83,6 @@ class InstancesControllerDeployDockerTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/restart should not allow when user suspended' do
-    dep_method = prepare_default_execution_method
-
     website = default_website
     website.user.suspended = true
     website.user.save
