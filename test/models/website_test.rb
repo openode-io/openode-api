@@ -1929,7 +1929,7 @@ class WebsiteTest < ActiveSupport::TestCase
     }
     w.save
 
-    assert ! w.valid?
+    assert_not w.valid?
   end
 
   test "open source validation - default description not allowed" do
@@ -1942,7 +1942,7 @@ class WebsiteTest < ActiveSupport::TestCase
     }
     w.save
 
-    assert ! w.valid?
+    assert_not w.valid?
   end
 
   test "open source - invalid url still work if status rejected" do
