@@ -112,6 +112,7 @@ class Website < ApplicationRecord
   DEFAULT_ACCOUNT_TYPE = 'second'
   AUTO_ACCOUNT_TYPE = 'auto'
   OPEN_SOURCE_ACCOUNT_TYPE = 'open_source'
+  DEFAULT_OPEN_SOURCE_REPO_URL = 'https://repourl.com'
 
   CLOUD_TYPE_PRIVATE_CLOUD = 'private-cloud'
   CLOUD_TYPE_CLOUD = 'cloud'
@@ -616,6 +617,14 @@ class Website < ApplicationRecord
       errors.add(:open_source, "invalid repository URL")
     end
 
+    if open_source["repository_url"] == DEFAULT_OPEN_SOURCE_REPO_URL
+      errors.add(:open_source, "invalid repository URL")
+    end
+
+    if open_source["description"]&.include?("Description Description")
+      errors.add(:open_source, "invalid description")
+    end
+
     # then url must contain www.openode.io
     # if !open_source_activated &&
     #    !Website.contains_open_source_backlink(open_source['repository_url'],
@@ -830,7 +839,7 @@ class Website < ApplicationRecord
     end
 
     if open_source['repository_url'].blank?
-      self.open_source['repository_url'] = 'https://repourl.com'
+      self.open_source['repository_url'] = DEFAULT_OPEN_SOURCE_REPO_URL
     end
   end
 

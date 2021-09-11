@@ -1919,6 +1919,32 @@ class WebsiteTest < ActiveSupport::TestCase
     end
   end
 
+  test "open source validation - default repo url not allowed" do
+    w = default_website
+    w.account_type = Website::OPEN_SOURCE_ACCOUNT_TYPE
+    w.open_source = {
+      'status' => Website::OPEN_SOURCE_STATUS_APPROVED,
+      'description' => " asdf " * 200,
+      'repository_url' => Website::DEFAULT_OPEN_SOURCE_REPO_URL
+    }
+    w.save
+
+    assert_not w.valid?
+  end
+
+  test "open source validation - default description not allowed" do
+    w = default_website
+    w.account_type = Website::OPEN_SOURCE_ACCOUNT_TYPE
+    w.open_source = {
+      'status' => Website::OPEN_SOURCE_STATUS_APPROVED,
+      'description' => "Description " * 50,
+      'repository_url' => "https://google.com/"
+    }
+    w.save
+
+    assert_not w.valid?
+  end
+
   test "open source - invalid url still work if status rejected" do
     w = default_website
     w.open_source = sample_open_source_attributes(Website::OPEN_SOURCE_STATUS_PENDING)
