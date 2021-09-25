@@ -448,7 +448,7 @@ VAR2=5678
       )
 
       pod_name = "www-deployment-5889df69dc-xg9xl"
-      assert_includes result, "kubectl -n instance-#{@website.id} exec #{pod_name} -- ls -la"
+      assert_includes result, "kubectl -n instance-#{@website.id} exec -c www #{pod_name} -- ls -la"
     end
   end
 
@@ -1670,7 +1670,8 @@ VAR2=5678
                                   0,
                                   website: @website,
                                   website_location: @website_location,
-                                  pod_name: "www-deployment-5889df69dc-xg9xl")
+                                  pod_name: "www-deployment-5889df69dc-xg9xl",
+                                  app: "www")
 
     prepare_kubernetes_logs(kubernetes_method, "hello logs", 0,
                             website: @website,
