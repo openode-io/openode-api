@@ -108,7 +108,7 @@ class ActiveSupport::TestCase
     # exec www-deployment-5889df69dc-xg9xl -- netstat -tl
     cmd = kubernetes_method.kubectl(
       website_location: opts[:website_location],
-      s_arguments: "-n instance-#{opts[:website].id} exec #{opts[:pod_name]}" \
+      s_arguments: "-n instance-#{opts[:website].id} exec -c #{opts[:app]} #{opts[:pod_name]}" \
                     " -- #{cmd}"
     )
 

@@ -1115,12 +1115,13 @@ module DeploymentMethod
       website, website_location = get_website_fields(options)
       cmd = options[:cmd]
       pod_name = get_pod_name_by_app(options)
+      app = options[:app] || WWW_DEPLOYMENT_LABEL
 
       args = {
         website: website,
         website_location: website_location,
         with_namespace: true,
-        s_arguments: "exec #{pod_name} -- #{cmd}"
+        s_arguments: "exec -c #{app} #{pod_name} -- #{cmd}"
       }
 
       kubectl(args)
