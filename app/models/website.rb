@@ -99,7 +99,8 @@ class Website < ApplicationRecord
 
   TYPE_DOCKER = 'docker'
   TYPE_KUBERNETES = 'kubernetes'
-  TYPES = ['nodejs', TYPE_DOCKER, TYPE_KUBERNETES].freeze
+  TYPE_GCLOUD_RUN = 'gcloud_run'
+  TYPES = ['nodejs', TYPE_DOCKER, TYPE_KUBERNETES, TYPE_GCLOUD_RUN].freeze
 
   ALERT_STOP_LACK_CREDITS = 'stop_lacking_credits'
   ALERT_TYPES = [

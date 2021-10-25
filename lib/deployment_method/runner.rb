@@ -57,11 +57,15 @@ module DeploymentMethod
     def get_execution_method
       dep_method = @configs[:execution_method]
 
+      puts "type == #{@type}"
+
       dep_method ||= case @type
                      when 'docker'
                        DeploymentMethod::DockerCompose.new
                      when 'kubernetes'
                        DeploymentMethod::Kubernetes.new
+                     when 'gcloud_run'
+                       DeploymentMethod::GcloudRun.new
       end
 
       # for convenience, to call back the runner from any dep method

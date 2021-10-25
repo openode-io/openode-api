@@ -1359,67 +1359,6 @@ module DeploymentMethod
 
     ### End Finalization analysis
 
-    # the following hooks are notification procs.
-
-    def self.hook_error
-      proc do |level, msg|
-        msg if level == 'error'
-      end
-    end
-
-    def self.hook_cmd_is(obj, cmds_name)
-      cmds_name.include?(obj&.dig(:cmd_name))
-    end
-
-    def self.hook_cmd_state_is(obj, cmd_state)
-      obj&.dig(:cmd_state) == cmd_state
-    end
-
-    def self.hook_cmd_and_state(cmds_name, cmd_state, output)
-      proc do |_, msg|
-        if hook_cmd_is(msg, cmds_name) && hook_cmd_state_is(msg, cmd_state)
-          output
-        end
-      end
-    end
-
-    def self.hook_verify_can_deploy
-      DockerCompose.hook_cmd_and_state(['verify_can_deploy'], 'before',
-                                       'Verifying allowed to deploy...')
-    end
-
-    def self.hook_logs
-      proc do |_, msg|
-        if hook_cmd_is(msg, ['logs']) && hook_cmd_state_is(msg, 'after')
-          msg[:result][:stdout]
-        end
-      end
-    end
-
-    def self.hook_verify_instance_up
-      Kubernetes.hook_cmd_and_state(%w[verify_instance_up],
-                                    'before',
-                                    'Verifying instance up...')
-    end
-
-    def self.hook_verify_instance_up_done
-      Kubernetes.hook_cmd_and_state(['verify_instance_up'],
-                                    'after',
-                                    '...instance verification finished.')
-    end
-
-    def self.hook_finalize
-      Kubernetes.hook_cmd_and_state(['finalize'],
-                                    'before',
-                                    'Finalizing...')
-    end
-
-    def self.hook_finalize_done
-      Kubernetes.hook_cmd_and_state(['finalize'],
-                                    'after',
-                                    '...finalized.')
-    end
-
     def hooks
       [
         Kubernetes.hook_error,
