@@ -46,12 +46,43 @@ module DeploymentMethod
 
       image_url = image_tag_url(options)
 
+      # build
+
       result = ex("gcloud_cmd", {
         website: website,
         website_location: website_location,
-        subcommand: "builds submit --tag #{image_url}"
+        subcommand: "builds submit --tag #{image_url} --gcs-log-dir=gs://builds_logs/",
+        ensure_exit_code: 0
       })
-      puts "image_url built = #{image_url}"
+      
+      raise "Unable to complete successfully the image build" if result[:exit_code] != 0
+
+      # retrieve the build ID, it looks like:
+      # Created
+      # [https://.../71a90edd-6cbb-4898-9abf-1a58319df67e]
+      line_with_build = result[:stderr]
+        .lines.find { |line| line.include?("Created [https://cloudbuild.googleapis.com/") }
+
+      unless line_with_build.present?
+        raise "No created build link available"
+      end
+
+      build_id = line_with_build[line_with_build.rindex("/")+1..line_with_build.rindex("]")-1]
+
+      if build_id.blank? || build_id.size <= 10
+        raise "Unable to retrieve the build ID"
+      end
+
+      # retrieve the logs build
+      result = ex("gcloud_cmd", {
+        website: website,
+        website_location: website_location,
+        subcommand: "builds log #{build_id}",
+        ensure_exit_code: 0
+      })
+
+      puts "OKOK result -> #{result}"
+      # gcloud builds log "d4792597-70fb-4ac1-b326-f0a5e2901a96"
 
       image_url
     end
