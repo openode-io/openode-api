@@ -70,6 +70,10 @@ module DeploymentMethod
         raise "Unable to retrieve the build ID"
       end
 
+      # save the image name tag and build ID
+      save_extra_execution_attrib('image_name_tag', image_url)
+      save_extra_execution_attrib('build_id', build_id)
+
       # retrieve the logs build
       result = ex("gcloud_cmd", {
         website: website,
@@ -85,6 +89,19 @@ module DeploymentMethod
       image_url
     end
 
+    def deploy(options = {})
+      website, website_location = get_website_fields(options)
+      image_url = options[:image_url]
+
+      result = ex("gcloud_cmd", {
+        website: website,
+        website_location: website_location,
+        subcommand: "run deploy instance-#{website.id} --image #{image_url} --platform managed --region us-central1 --allow-unauthenticated"
+      })
+
+      puts "result -> #{result}"
+    end
+
     def launch(options = {})
       website, website_location = get_website_fields(options)
 
@@ -94,12 +111,10 @@ module DeploymentMethod
       #  subcommand: "auth activate-service-account --key-file=/home/martin/works/openode-api/config/service_accounts/openode-deploy.json"
       #})
 
-      image_name_tag = build_image(options)
+      image_url = build_image(options)
 
-      puts "image_name_tag --> #{image_name_tag}"
+      deploy(options.merge(image_url: image_url))
 
-      # save the image name tag
-      save_extra_execution_attrib('image_name_tag', image_name_tag)
     end
 
     def hooks
