@@ -89,6 +89,31 @@ module DeploymentMethod
       image_url
     end
 
+    def service_id(website)
+      "instance-#{website.id}"
+    end
+
+    def first_safe_json(str)
+      result_json = JSON.parse(str)
+
+      result_json.length.positive? ? result_json.first : nil
+    end
+
+    def region_of(website_location)
+      website_location.location.str_id
+    end
+
+    def retrieve_run_service(options = {})
+      website, website_location = get_website_fields(options)
+
+      result = ex("gcloud_cmd", options.merge(
+        subcommand: "run services list --region=#{region_of(website_location)} " \
+          "--filter=\"metadata.name=#{service_id(website)}\" --format=json"
+      ))
+
+      first_safe_json(result[:stdout])
+    end
+
     def deploy(options = {})
       website, website_location = get_website_fields(options)
       image_url = options[:image_url]
@@ -96,14 +121,19 @@ module DeploymentMethod
       result = ex("gcloud_cmd", {
         website: website,
         website_location: website_location,
-        subcommand: "run deploy instance-#{website.id} --image #{image_url} --platform managed --region us-central1 --allow-unauthenticated"
+        subcommand: "run deploy #{service_id(website)} --image #{image_url} --platform managed --region us-central1 --allow-unauthenticated"
       })
 
       puts "result -> #{result}"
     end
 
+    def upsert_neg(options = {})
+
+    end
+
     def launch(options = {})
       website, website_location = get_website_fields(options)
+      simplified_options = { website: website, website_location: website_location }
 
       #ex("gcloud_cmd", {
       #  website: website,
@@ -112,6 +142,10 @@ module DeploymentMethod
       #})
 
       image_url = build_image(options)
+
+      service = retrieve_run_service(simplified_options)
+
+      puts "woo service #{service.inspect}"
 
       deploy(options.merge(image_url: image_url))
 
