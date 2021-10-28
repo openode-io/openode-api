@@ -27,7 +27,7 @@ module DeploymentMethod
     def gcloud_cmd(options = {})
       website, website_location = get_website_fields(options)
       project_path = website.repo_dir
-      "timeout 300 sh -c \"cd #{project_path} && gcloud --project #{GCLOUD_PROJECT_ID} #{options[:subcommand]}\""
+      "timeout 300 sh -c 'cd #{project_path} && gcloud --project #{GCLOUD_PROJECT_ID} #{options[:subcommand]}'"
     end
 
     def image_tag_url(options = {})
@@ -100,9 +100,25 @@ module DeploymentMethod
     end
 
     def region_of(website_location)
-      website_location.location.str_id
+      #website_location.location.str_id
+      "us-central1"
     end
 
+    def retrieve_logs_cmd(options = {})
+      website, website_location = get_website_fields(options)
+      options[:nb_lines] ||= 100
+
+      subcommand = "logging read \"resource.labels.service_name=#{service_id(website)}\" " \
+        "--format=\"value(textPayload)\" --limit #{options[:nb_lines]}"
+
+      gcloud_cmd({
+        website: website,
+        website_location: website_location,
+        subcommand: subcommand
+      })
+    end
+
+    # returns the service if available, nil otherwise
     def retrieve_run_service(options = {})
       website, website_location = get_website_fields(options)
 
@@ -110,6 +126,7 @@ module DeploymentMethod
         subcommand: "run services list --region=#{region_of(website_location)} " \
           "--filter=\"metadata.name=#{service_id(website)}\" --format=json"
       ))
+      
 
       first_safe_json(result[:stdout])
     end
@@ -121,9 +138,22 @@ module DeploymentMethod
       result = ex("gcloud_cmd", {
         website: website,
         website_location: website_location,
-        subcommand: "run deploy #{service_id(website)} --image #{image_url} --platform managed --region us-central1 --allow-unauthenticated"
+        subcommand: "run deploy #{service_id(website)} --port=80 --image #{image_url} " \
+          "--platform managed --region #{region_of(website_location)} --allow-unauthenticated"
       })
 
+      unless result[:exit_code].zero?
+        logs_instance = ex_stdout(
+          "retrieve_logs_cmd",
+          { website: website, website_location: website_location }
+        )
+        notify("info", logs_instance)
+        result_stderr = "#{result[:stderr]}"
+        notify("error", result_stderr.slice(0..(result_stderr.downcase.index("logs url:")-1)))
+        raise "Unable to deploy the instance with success"
+      end
+
+      puts "success!"
       puts "result -> #{result}"
     end
 
