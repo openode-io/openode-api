@@ -48,6 +48,8 @@ module DeploymentMethod
 
       # build
 
+      notify("info", "Building instance image...")
+
       result_build = ex("gcloud_cmd", {
         website: website,
         website_location: website_location,
@@ -135,6 +137,8 @@ module DeploymentMethod
       website, website_location = get_website_fields(options)
       image_url = options[:image_url]
 
+      notify("info", "Deploying instance...")
+
       result = ex("gcloud_cmd", {
         website: website,
         website_location: website_location,
@@ -142,19 +146,22 @@ module DeploymentMethod
           "--platform managed --region #{region_of(website_location)} --allow-unauthenticated"
       })
 
+      notify("info", "--------------- Instance boot logs ---------------")
+      logs_instance = ex_stdout(
+        "retrieve_logs_cmd",
+        { website: website, website_location: website_location, nb_lines: 20 }
+      )
+      notify("info", logs_instance)
+      notify("info", "--------------------------------------------------")
+
       unless result[:exit_code].zero?
-        logs_instance = ex_stdout(
-          "retrieve_logs_cmd",
-          { website: website, website_location: website_location }
-        )
-        notify("info", logs_instance)
+        
         result_stderr = "#{result[:stderr]}"
         notify("error", result_stderr.slice(0..(result_stderr.downcase.index("logs url:")-1)))
         raise "Unable to deploy the instance with success"
       end
 
-      puts "success!"
-      puts "result -> #{result}"
+      notify("info", "Instance deployed successfully")
     end
 
     def upsert_neg(options = {})
