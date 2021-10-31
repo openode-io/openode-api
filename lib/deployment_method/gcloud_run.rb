@@ -172,19 +172,16 @@ module DeploymentMethod
       website, website_location = get_website_fields(options)
       simplified_options = { website: website, website_location: website_location }
 
-      #ex("gcloud_cmd", {
-      #  website: website,
-      #  website_location: website_location,
-      #  subcommand: "auth activate-service-account --key-file=/home/martin/works/openode-api/config/service_accounts/openode-deploy.json"
-      #})
-
       image_url = build_image(options)
+
+      deploy(options.merge(image_url: image_url))
 
       service = retrieve_run_service(simplified_options)
 
-      puts "woo service #{service.inspect}"
-
-      deploy(options.merge(image_url: image_url))
+      website_location.load_balancer_synced = false
+      website_location.obj ||= {}
+      website_location.obj["gcloud_url"] = service["status"]&.dig("url")
+      website_location.save!
 
     end
 

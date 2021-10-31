@@ -43,6 +43,17 @@ class SuperAdmin::WebsitesController < SuperAdmin::SuperAdminController
     json({})
   end
 
+  def load_balancer_requiring_sync
+    json(
+      WebsiteLocation.where(load_balancer_synced: false)
+      .map do |wl|
+        {
+          website_id: wl.id
+        }
+      end
+    )
+  end
+
   protected
 
   def open_source_request_params

@@ -112,4 +112,35 @@ class SuperAdmin::WebsitesControllerTest < ActionDispatch::IntegrationTest
     assert_includes mail_sent.body.raw_source, 'invalid project'
     assert_equal mail_sent.to, [w.user.email]
   end
+
+  test "load balancer requiring sync" do
+    w = default_website
+    wl = w.website_locations.first
+    user = w.user
+
+    wl.load_balancer_synced = false
+    wl.save!
+
+    get "/super_admin/website_locations/load_balancer_requiring_sync",
+        as: :json,
+        headers: super_admin_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body.length, 1
+    assert_equal response.parsed_body.first["website_id"], w.id
+  end
+
+  test "load balancer requiring sync - without any" do
+    w = default_website
+    wl = w.website_locations.first
+    user = w.user
+
+    get "/super_admin/website_locations/load_balancer_requiring_sync",
+        as: :json,
+        headers: super_admin_headers_auth
+
+    assert_response :success
+    assert_equal response.parsed_body, []
+  end
 end
