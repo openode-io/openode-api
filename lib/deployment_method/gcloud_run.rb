@@ -8,6 +8,7 @@ module DeploymentMethod
     KUBE_TMP_PATH = "/home/tmp/"
     WWW_DEPLOYMENT_LABEL = "www"
     GCLOUD_PROJECT_ID = ENV["GOOGLE_CLOUD_PROJECT"]
+    GCP_CERTS_BUCKET = ENV["GCP_CERTS_BUCKET"]
 
     # gcloud run deploy helloworld   --image gcr.io/$GOOGLE_CLOUD_PROJECT/helloworld   --platform managed   --region us-central1   --allow-unauthenticated
     # gcloud builds submit --tag gcr.io/$GOOGLE_CLOUD_PROJECT/helloworld
@@ -133,6 +134,63 @@ module DeploymentMethod
       first_safe_json(result[:stdout])
     end
 
+    def server_file_exists_cmd(options = {})
+      path = options[:path]
+      "ls #{path}"
+    end
+
+    def gs_cp_cmd(options = {})
+      server_path = options[:server_path]
+      gs_url = options[:gs_url]
+
+      "gsutil cp #{server_path} #{gs_url}"
+    end
+
+    def sync_file_to_gcp_storage(server_file_path, gstorage_url)
+      return if ex("server_file_exists_cmd", path: server_file_path)[:exit_code] != 0
+
+      ex("gs_cp_cmd",
+        server_path: server_file_path,
+        gs_url: gstorage_url
+      )[:exit_code].zero?
+    end
+
+    def sync_certs(website, website_location)
+      Rails.logger.info("Considering syncing certs for website id #{website.id}")
+
+      unless website.certs.present?
+        website_location.obj["gcloud_ssl_cert_url"] = nil
+        website_location.obj["gcloud_ssl_key_url"] = nil
+        website_location.save
+        return
+      end
+
+      Rails.logger.info("Syncing certs for website id #{website.id}")
+
+      # GCP_CERTS_BUCKET
+      project_path = website.repo_dir
+
+      # SSL cert
+      cert_file_path = "#{project_path}#{website.certs[:cert_path]}"
+      cert_gstorage_url = "#{GCP_CERTS_BUCKET}#{website.id}.cert"
+
+      if sync_file_to_gcp_storage(cert_file_path, cert_gstorage_url)
+        website_location.obj ||= {}
+        website_location.obj["gcloud_ssl_cert_url"] = cert_gstorage_url
+        website_location.save
+      end
+
+      # SSL key
+      cert_file_path = "#{project_path}#{website.certs[:cert_key_path]}"
+      cert_gstorage_url = "#{GCP_CERTS_BUCKET}#{website.id}.key"
+
+      if sync_file_to_gcp_storage(cert_file_path, cert_gstorage_url)
+        website_location.obj ||= {}
+        website_location.obj["gcloud_ssl_key_url"] = cert_gstorage_url
+        website_location.save
+      end
+    end
+
     def deploy(options = {})
       website, website_location = get_website_fields(options)
       image_url = options[:image_url]
@@ -160,6 +218,8 @@ module DeploymentMethod
         notify("error", result_stderr.slice(0..(result_stderr.downcase.index("logs url:")-1)))
         raise "Unable to deploy the instance with success"
       end
+
+      sync_certs(website, website_location)
 
       notify("info", "Instance deployed successfully")
     end
