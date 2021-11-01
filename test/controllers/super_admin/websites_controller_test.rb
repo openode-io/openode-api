@@ -119,6 +119,7 @@ class SuperAdmin::WebsitesControllerTest < ActionDispatch::IntegrationTest
     user = w.user
 
     wl.load_balancer_synced = false
+    wl.obj = {"gcloud_url"=>"https://remote.com"}
     wl.save!
 
     get "/super_admin/website_locations/load_balancer_requiring_sync",
@@ -129,6 +130,9 @@ class SuperAdmin::WebsitesControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal response.parsed_body.length, 1
     assert_equal response.parsed_body.first["website_id"], w.id
+    assert_equal response.parsed_body.first["hosts"], ["testsite.openode.io"]
+    assert_equal response.parsed_body.first["backend_url"], "https://remote.com"
+    assert_equal response.parsed_body.first["domain_type"], "subdomain"
   end
 
   test "load balancer requiring sync - without any" do
@@ -142,5 +146,25 @@ class SuperAdmin::WebsitesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal response.parsed_body, []
+  end
+
+  test "update website location" do
+    w = default_website
+    wl = w.website_locations.first
+
+    patch "/super_admin/website_locations/#{wl.id}",
+         as: :json,
+         params: {
+           website_location: {
+             load_balancer_synced: false
+           }
+         },
+         headers: super_admin_headers_auth
+
+    assert_response :success
+
+    wl.reload
+
+    assert_equal wl.load_balancer_synced, false
   end
 end

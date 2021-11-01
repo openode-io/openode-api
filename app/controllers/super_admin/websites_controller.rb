@@ -3,6 +3,10 @@ class SuperAdmin::WebsitesController < SuperAdmin::SuperAdminController
     if params['id']
       @website = Website.find_by! id: params['id']
     end
+
+    if params['website_location_id']
+      @website_location = WebsiteLocation.find_by! id: params['website_location_id']
+    end
   end
 
   def index
@@ -48,15 +52,33 @@ class SuperAdmin::WebsitesController < SuperAdmin::SuperAdminController
       WebsiteLocation.where(load_balancer_synced: false)
       .map do |wl|
         {
-          website_id: wl.id
+          id: wl.id,
+          website_id: wl.website.id,
+          hosts: wl.compute_domains,
+          backend_url: wl.obj&.dig("gcloud_url"),
+          domain_type: wl.website.domain_type,
+          has_certificate: wl.website.certs.present? || wl.website.subdomain?
         }
       end
     )
   end
 
+  def update
+    @website_location.attributes = website_location_params
+    @website_location.save!
+
+    json({})
+  end
+
+
+
   protected
 
   def open_source_request_params
     params.require(:open_source_request).permit(:status, :reason)
+  end
+
+  def website_location_params
+    params.require(:website_location).permit(:load_balancer_synced)
   end
 end

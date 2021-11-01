@@ -22,6 +22,7 @@ Rails.application.routes.draw do
 
     get 'website_locations/load_balancer_requiring_sync',
         to: 'websites#load_balancer_requiring_sync'
+    patch 'website_locations/:website_location_id', to: 'websites#update'
 
     get 'newsletters', to: 'newsletters#index'
     post 'newsletters', to: 'newsletters#create'
