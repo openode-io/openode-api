@@ -228,10 +228,6 @@ module DeploymentMethod
       notify("info", "Instance deployed successfully")
     end
 
-    def upsert_neg(options = {})
-
-    end
-
     def launch(options = {})
       website, website_location = get_website_fields(options)
       simplified_options = { website: website, website_location: website_location }
@@ -247,6 +243,31 @@ module DeploymentMethod
       website_location.obj["gcloud_url"] = service["status"]&.dig("url")
       website_location.save!
 
+    end
+
+    # stop
+    def delete_service_cmd(options = {})
+      website, website_location = get_website_fields(options)
+
+      gcloud_cmd({
+        website: website,
+        website_location: website_location,
+        subcommand: "run services delete #{service_id(website)} " \
+          "--region #{region_of(website_location)} --quiet"
+      })
+    end
+
+    def do_stop(options = {})
+      website, website_location = get_website_fields(options)
+
+      ex("delete_service_cmd",
+        {
+          website: website,
+          website_location: website_location,
+          ensure_exit_code: 0,
+          default_retry_scheme: true
+        }
+      )
     end
 
     def hooks
