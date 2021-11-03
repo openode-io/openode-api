@@ -25,6 +25,10 @@ module DeploymentMethod
       super(options)
     end
 
+    def instance_up?(options = {})
+      true
+    end
+
     def gcloud_cmd(options = {})
       website, website_location = get_website_fields(options)
       project_path = website.repo_dir
