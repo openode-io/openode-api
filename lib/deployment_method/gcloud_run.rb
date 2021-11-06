@@ -195,6 +195,21 @@ module DeploymentMethod
       end
     end
 
+    def escape_quoted_command_line(value)
+      "#{value}".gsub("\"", "\\\"").gsub("'", "''")
+    end
+
+    def env_variables(website)
+      variables_strings = website.env.keys.map do |variable_name|
+        value = escape_quoted_command_line(website.env[variable_name])
+        variable = escape_quoted_command_line(variable_name)
+
+        "#{variable}=#{value}"
+      end
+
+      variables_strings.join(",")
+    end
+
     def deploy(options = {})
       website, website_location = get_website_fields(options)
       image_url = options[:image_url]
@@ -205,7 +220,8 @@ module DeploymentMethod
         website: website,
         website_location: website_location,
         subcommand: "run deploy #{service_id(website)} --port=80 --image #{image_url} " \
-          "--platform managed --region #{region_of(website_location)} --allow-unauthenticated"
+          "--platform managed --region #{region_of(website_location)} " \
+          "--allow-unauthenticated --set-env-vars=\"#{env_variables(website)}\""
       })
 
       notify("info", "--------------- Instance boot logs ---------------")
@@ -219,7 +235,15 @@ module DeploymentMethod
       unless result[:exit_code].zero?
         
         result_stderr = "#{result[:stderr]}"
-        notify("error", result_stderr.slice(0..(result_stderr.downcase.index("logs url:")-1)))
+        url_log_index = result_stderr.downcase.index("logs url:")
+
+        if url_log_index
+          notify("error", result_stderr.slice(0..(url_log_index-1)))
+        else
+          notify("error", result_stderr)
+        end
+        
+
         raise "Unable to deploy the instance with success"
       end
 

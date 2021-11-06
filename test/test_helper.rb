@@ -715,6 +715,27 @@ class ActiveSupport::TestCase
     runner
   end
 
+  def prepare_gcloud_run_runner(website, website_location)
+    cloud_provider_manager = CloudProvider::Manager.instance
+    build_server = cloud_provider_manager.docker_build_server
+
+    configs = {
+      website: website,
+      website_location: website_location,
+      host: build_server['ip'],
+      secret: {
+        user: build_server['user'],
+        private_key: build_server['private_key']
+      }
+    }
+
+    runner = DeploymentMethod::Runner.new(Website::TYPE_GCLOUD_RUN, 'cloud', configs)
+
+    runner.init_execution!("Deployment")
+
+    runner
+  end
+
   def prepare_default_ports
     website_location = default_website_location
     website_location.port = 33_129
