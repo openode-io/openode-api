@@ -14,7 +14,7 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
   end
 
   test 'env variables string - happy path' do
-    @website.overwrite_env_variables!({TEST: "TOTO1", TEST2: "TOTO2"})
+    @website.overwrite_env_variables!({ TEST: "TOTO1", TEST2: "TOTO2" })
     result = gcloud_run_method.env_variables(@website)
 
     assert_equal result, "TEST=TOTO1,TEST2=TOTO2"

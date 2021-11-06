@@ -25,7 +25,7 @@ module DeploymentMethod
       super(options)
     end
 
-    def instance_up?(options = {})
+    def instance_up?(_options = {})
       true
     end
 
@@ -56,22 +56,22 @@ module DeploymentMethod
       notify("info", "Building instance image...")
 
       result_build = ex("gcloud_cmd", {
-        website: website,
-        website_location: website_location,
-        subcommand: "builds submit --tag #{image_url} --gcs-log-dir=gs://builds_logs/"
-      })
+                          website: website,
+                          website_location: website_location,
+                          subcommand: "builds submit --tag #{image_url} --gcs-log-dir=gs://builds_logs/"
+                        })
 
       # retrieve the build ID, it looks like:
       # Created
       # [https://.../71a90edd-6cbb-4898-9abf-1a58319df67e]
       line_with_build = result_build[:stderr]
-        .lines.find { |line| line.include?("Created [https://cloudbuild.googleapis.com/") }
+                        .lines.find { |line| line.include?("Created [https://cloudbuild.googleapis.com/") }
 
-      unless line_with_build.present?
+      if line_with_build.blank?
         raise "No created build link available"
       end
 
-      build_id = line_with_build[line_with_build.rindex("/")+1..line_with_build.rindex("]")-1]
+      build_id = line_with_build[line_with_build.rindex("/") + 1..line_with_build.rindex("]") - 1]
 
       if build_id.blank? || build_id.size <= 10
         raise "Unable to retrieve the build ID"
@@ -83,11 +83,11 @@ module DeploymentMethod
 
       # retrieve the logs build
       result = ex("gcloud_cmd", {
-        website: website,
-        website_location: website_location,
-        subcommand: "builds log #{build_id}",
-        ensure_exit_code: 0
-      })
+                    website: website,
+                    website_location: website_location,
+                    subcommand: "builds log #{build_id}",
+                    ensure_exit_code: 0
+                  })
 
       notify("info", result[:stdout])
 
@@ -106,8 +106,8 @@ module DeploymentMethod
       result_json.length.positive? ? result_json.first : nil
     end
 
-    def region_of(website_location)
-      #website_location.location.str_id
+    def region_of(_website_location)
+      # website_location.location.str_id
       "us-central1"
     end
 
@@ -119,10 +119,10 @@ module DeploymentMethod
         "--format=\"value(textPayload)\" --limit #{options[:nb_lines]}"
 
       gcloud_cmd({
-        website: website,
-        website_location: website_location,
-        subcommand: subcommand
-      })
+                   website: website,
+                   website_location: website_location,
+                   subcommand: subcommand
+                 })
     end
 
     # returns the service if available, nil otherwise
@@ -130,10 +130,9 @@ module DeploymentMethod
       website, website_location = get_website_fields(options)
 
       result = ex("gcloud_cmd", options.merge(
-        subcommand: "run services list --region=#{region_of(website_location)} " \
-          "--filter=\"metadata.name=#{service_id(website)}\" --format=json"
-      ))
-      
+                                  subcommand: "run services list --region=#{region_of(website_location)} " \
+                                    "--filter=\"metadata.name=#{service_id(website)}\" --format=json"
+                                ))
 
       first_safe_json(result[:stdout])
     end
@@ -154,15 +153,14 @@ module DeploymentMethod
       return if ex("server_file_exists_cmd", path: server_file_path)[:exit_code] != 0
 
       ex("gs_cp_cmd",
-        server_path: server_file_path,
-        gs_url: gstorage_url
-      )[:exit_code].zero?
+         server_path: server_file_path,
+         gs_url: gstorage_url)[:exit_code].zero?
     end
 
     def sync_certs(website, website_location)
       Rails.logger.info("Considering syncing certs for website id #{website.id}")
 
-      unless website.certs.present?
+      if website.certs.blank?
         website_location.obj["gcloud_ssl_cert_url"] = nil
         website_location.obj["gcloud_ssl_key_url"] = nil
         website_location.save
@@ -196,7 +194,7 @@ module DeploymentMethod
     end
 
     def escape_quoted_command_line(value)
-      "#{value}".gsub("\"", "\\\"").gsub("'", "''")
+      value.to_s.gsub("\"", "\\\"").gsub("'", "''")
     end
 
     def env_variables(website)
@@ -217,12 +215,12 @@ module DeploymentMethod
       notify("info", "Deploying instance...")
 
       result = ex("gcloud_cmd", {
-        website: website,
-        website_location: website_location,
-        subcommand: "run deploy #{service_id(website)} --port=80 --image #{image_url} " \
+                    website: website,
+                    website_location: website_location,
+                    subcommand: "run deploy #{service_id(website)} --port=80 --image #{image_url} " \
           "--platform managed --region #{region_of(website_location)} " \
           "--allow-unauthenticated --set-env-vars=\"#{env_variables(website)}\""
-      })
+                  })
 
       notify("info", "--------------- Instance boot logs ---------------")
       logs_instance = ex_stdout(
@@ -233,16 +231,15 @@ module DeploymentMethod
       notify("info", "--------------------------------------------------")
 
       unless result[:exit_code].zero?
-        
-        result_stderr = "#{result[:stderr]}"
+
+        result_stderr = (result[:stderr]).to_s
         url_log_index = result_stderr.downcase.index("logs url:")
 
         if url_log_index
-          notify("error", result_stderr.slice(0..(url_log_index-1)))
+          notify("error", result_stderr.slice(0..(url_log_index - 1)))
         else
           notify("error", result_stderr)
         end
-        
 
         raise "Unable to deploy the instance with success"
       end
@@ -266,7 +263,6 @@ module DeploymentMethod
       website_location.obj ||= {}
       website_location.obj["gcloud_url"] = service["status"]&.dig("url")
       website_location.save!
-
     end
 
     # stop
@@ -274,24 +270,23 @@ module DeploymentMethod
       website, website_location = get_website_fields(options)
 
       gcloud_cmd({
-        website: website,
-        website_location: website_location,
-        subcommand: "run services delete #{service_id(website)} " \
+                   website: website,
+                   website_location: website_location,
+                   subcommand: "run services delete #{service_id(website)} " \
           "--region #{region_of(website_location)} --quiet"
-      })
+                 })
     end
 
     def do_stop(options = {})
       website, website_location = get_website_fields(options)
 
       ex("delete_service_cmd",
-        {
-          website: website,
-          website_location: website_location,
-          ensure_exit_code: 0,
-          default_retry_scheme: true
-        }
-      )
+         {
+           website: website,
+           website_location: website_location,
+           ensure_exit_code: 0,
+           default_retry_scheme: true
+         })
     end
 
     def hooks

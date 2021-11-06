@@ -59,7 +59,8 @@ class SuperAdmin::WebsitesController < SuperAdmin::SuperAdminController
           domain_type: wl.website.domain_type,
           has_certificate: wl.website.certs.present? || wl.website.subdomain?,
           gcloud_ssl_cert_url: wl.obj&.dig("gcloud_ssl_cert_url"),
-          gcloud_ssl_key_url: wl.obj&.dig("gcloud_ssl_key_url")
+          gcloud_ssl_key_url: wl.obj&.dig("gcloud_ssl_key_url"),
+          redir_http_to_https: wl.website.get_config("REDIR_HTTP_TO_HTTPS")
         }
       end
     )
@@ -71,8 +72,6 @@ class SuperAdmin::WebsitesController < SuperAdmin::SuperAdminController
 
     json({})
   end
-
-
 
   protected
 
