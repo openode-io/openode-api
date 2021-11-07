@@ -116,7 +116,6 @@ class SuperAdmin::WebsitesControllerTest < ActionDispatch::IntegrationTest
   test "load balancer requiring sync" do
     w = default_website
     wl = w.website_locations.first
-    user = w.user
 
     wl.load_balancer_synced = false
     wl.obj = { "gcloud_url" => "https://remote.com" }
@@ -136,10 +135,6 @@ class SuperAdmin::WebsitesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "load balancer requiring sync - without any" do
-    w = default_website
-    wl = w.website_locations.first
-    user = w.user
-
     get "/super_admin/website_locations/load_balancer_requiring_sync",
         as: :json,
         headers: super_admin_headers_auth

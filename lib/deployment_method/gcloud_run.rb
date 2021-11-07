@@ -10,9 +10,6 @@ module DeploymentMethod
     GCLOUD_PROJECT_ID = ENV["GOOGLE_CLOUD_PROJECT"]
     GCP_CERTS_BUCKET = ENV["GCP_CERTS_BUCKET"]
 
-    # gcloud run deploy helloworld   --image gcr.io/$GOOGLE_CLOUD_PROJECT/helloworld   --platform managed   --region us-central1   --allow-unauthenticated
-    # gcloud builds submit --tag gcr.io/$GOOGLE_CLOUD_PROJECT/helloworld
-
     def initialize; end
 
     # verify can deploy
@@ -30,13 +27,14 @@ module DeploymentMethod
     end
 
     def gcloud_cmd(options = {})
-      website, website_location = get_website_fields(options)
+      website, = get_website_fields(options)
       project_path = website.repo_dir
-      "timeout 300 sh -c 'cd #{project_path} && gcloud --project #{GCLOUD_PROJECT_ID} #{options[:subcommand]}'"
+      "timeout 300 sh -c 'cd #{project_path} && gcloud --project #{GCLOUD_PROJECT_ID} " \
+      "#{options[:subcommand]}'"
     end
 
     def image_tag_url(options = {})
-      website, website_location = get_website_fields(options)
+      website, = get_website_fields(options)
 
       tag_name = DeploymentMethod::Util::InstanceImageManager.tag_name(
         website: website,
@@ -50,8 +48,6 @@ module DeploymentMethod
       website, website_location = get_website_fields(options)
 
       parent_execution = runner.execution&.parent_execution
-
-      puts "whatparent #{parent_execution.inspect}"
 
       if parent_execution
         return parent_execution&.obj&.dig('image_name_tag')
@@ -68,14 +64,17 @@ module DeploymentMethod
       result_build = ex("gcloud_cmd", {
                           website: website,
                           website_location: website_location,
-                          subcommand: "builds submit --tag #{image_url} --gcs-log-dir=gs://builds_logs/"
+                          subcommand: "builds submit --tag #{image_url} " \
+                          "--gcs-log-dir=gs://builds_logs/"
                         })
 
       # retrieve the build ID, it looks like:
       # Created
       # [https://.../71a90edd-6cbb-4898-9abf-1a58319df67e]
       line_with_build = result_build[:stderr]
-                        .lines.find { |line| line.include?("Created [https://cloudbuild.googleapis.com/") }
+                        .lines.find do |line|
+                          line.include?("Created [https://cloudbuild.googleapis.com/")
+                        end
 
       if line_with_build.blank?
         raise "No created build link available"
@@ -140,8 +139,10 @@ module DeploymentMethod
       website, website_location = get_website_fields(options)
 
       result = ex("gcloud_cmd", options.merge(
-                                  subcommand: "run services list --region=#{region_of(website_location)} " \
-                                    "--filter=\"metadata.name=#{service_id(website)}\" --format=json"
+                                  subcommand: "run services list " \
+                                    "--region=#{region_of(website_location)} " \
+                                    "--filter=\"metadata.name=#{service_id(website)}\" " \
+                                    "--format=json"
                                 ))
 
       first_safe_json(result[:stdout])
@@ -227,9 +228,11 @@ module DeploymentMethod
       result = ex("gcloud_cmd", {
                     website: website,
                     website_location: website_location,
-                    subcommand: "run deploy #{service_id(website)} --port=80 --image #{image_url} " \
+                    subcommand: "run deploy #{service_id(website)} --port=80 " \
+          "--image #{image_url} " \
           "--platform managed --region #{region_of(website_location)} " \
-          "--allow-unauthenticated --set-env-vars=\"#{env_variables(website)}\""
+          "--allow-unauthenticated --set-env-vars=\"#{env_variables(website)}\" " \
+          "--memory=#{website.memory}Mi"
                   })
 
       notify("info", "--------------- Instance boot logs ---------------")
@@ -275,7 +278,21 @@ module DeploymentMethod
       website_location.save!
     end
 
+    # logs
+
+    def logs(options = {})
+      website, website_location = get_website_fields(options)
+      options[:nb_lines] ||= 100
+
+      retrieve_logs_cmd(
+        website: website,
+        website_location: website_location,
+        nb_lines: options[:nb_lines]
+      )
+    end
+
     # stop
+
     def delete_service_cmd(options = {})
       website, website_location = get_website_fields(options)
 
@@ -321,7 +338,6 @@ module DeploymentMethod
       confs['locations'].find { |l| l['str_id'] == str_id }
     end
 
-
     def final_instance_details(opts = {})
       result = {}
 
@@ -350,7 +366,7 @@ module DeploymentMethod
     end
 
     def finalize(options = {})
-      website, website_location = get_website_fields(options)
+      website, = get_website_fields(options)
       super(options)
       website.reload
 

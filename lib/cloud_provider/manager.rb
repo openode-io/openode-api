@@ -45,7 +45,7 @@ module CloudProvider
     end
 
     def first_of_type(type)
-      cloud = @clouds.find { |c| c['type'] == type }
+      cloud = @clouds.find { |c| c['type'] == type || c['cloud_type'] == type }
 
       cloud ? cloud['instance'] : nil
     end
@@ -102,6 +102,7 @@ module CloudProvider
 
     def available_plans_of_type_at(type, location_str_id)
       provider = first_of_internal_type(type)
+
       provider.plans_at(location_str_id)
     end
 

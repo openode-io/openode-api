@@ -117,6 +117,7 @@ class Website < ApplicationRecord
 
   CLOUD_TYPE_PRIVATE_CLOUD = 'private-cloud'
   CLOUD_TYPE_CLOUD = 'cloud'
+  CLOUD_TYPE_GCLOUD = 'gcloud'
 
   PERMISSION_ROOT = 'root' # all permissions
   PERMISSION_DEPLOY = 'deploy'
@@ -263,6 +264,7 @@ class Website < ApplicationRecord
   validates :status, inclusion: { in: STATUSES }
 
   before_save :initialize_domains
+  before_save :set_cloud_type
   after_save :notify_open_source_requested
 
   def init_subdomain; end
@@ -361,6 +363,10 @@ class Website < ApplicationRecord
        !self.domains.include?("www.#{site_name}")
       self.domains << "www.#{site_name}"
     end
+  end
+
+  def set_cloud_type
+    self.cloud_type = CLOUD_TYPE_GCLOUD if type == TYPE_GCLOUD_RUN
   end
 
   def locations

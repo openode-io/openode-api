@@ -8,16 +8,13 @@ class AvailableLocationsController < ApplicationController
     manager = if type
                 # TODO: -> deprecate next line
                 real_type = type == 'docker' ? 'internal' : type
-                real_type = 'kubernetes' unless %w[internal kubernetes gcloud_run].include?(real_type)
-
-                puts "real type -> #{real_type}"
+                real_type = 'kubernetes' unless %w[internal kubernetes
+                                                   gcloud_run].include?(real_type)
 
                 CloudProvider::Manager.instance.first_of_type(real_type)
               else
                 CloudProvider::Manager.instance
               end
-
-    puts "manager --> #{manager.inspect}"
 
     json(manager.available_locations)
   end

@@ -36,6 +36,25 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal w.status, Website::DEFAULT_STATUS
   end
 
+  test 'should auto set cloud type gcloud if gcloud_run' do
+    w = Website.new(
+      site_name: 'thisisauniquesite',
+      cloud_type: 'cloud',
+      user_id: default_user.id,
+      type: 'docker',
+      domain_type: 'subdomain'
+    )
+
+    w.save!
+
+    w.type = Website::TYPE_GCLOUD_RUN
+    w.save!
+
+    w.reload
+
+    assert_equal w.cloud_type, Website::CLOUD_TYPE_GCLOUD
+  end
+
   test 'destroying a website should destroy its secret if any' do
     w = Website.create(
       site_name: 'thisisauniquesite',

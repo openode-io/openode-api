@@ -132,6 +132,7 @@ Metrics/MethodLength:
     - 'lib/deployment_method/deployer.rb'
     - 'lib/cloud_provider/internal.rb'
     - 'lib/cloud_provider/kubernetes.rb'
+    - 'lib/cloud_provider/gcloud_run.rb'
     - 'db/migrate/*.rb'
     - 'app/workers/deploy_worker.rb'
 

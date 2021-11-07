@@ -57,8 +57,6 @@ module DeploymentMethod
     def get_execution_method
       dep_method = @configs[:execution_method]
 
-      puts "type == #{@type}"
-
       dep_method ||= case @type
                      when 'docker'
                        DeploymentMethod::DockerCompose.new

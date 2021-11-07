@@ -1,6 +1,6 @@
 module CloudProvider
   class GcloudRun < Base
-    TYPE = 'cloud'
+    TYPE = 'gcloud'
     COST_EXTRA_CPU = 5.00
     COST_EXTRA_CPU_PER_HOUR = COST_EXTRA_CPU / (24 * 31)
 
@@ -14,7 +14,7 @@ module CloudProvider
     end
 
     def type
-      Internal::TYPE
+      TYPE
     end
 
     def limit_resources?
@@ -77,32 +77,32 @@ module CloudProvider
           bandwidth: 10
         },
         {
-          id: '100-MB',
-          internal_id: 'second',
-          name: '100MB Memory (On Demand)',
-          ram: 100,
+          id: '128-MB',
+          internal_id: 'grun-128',
+          name: '128MB Memory (On Demand)',
+          ram: 128,
           storage: 1000,
           bandwidth: 200
         },
         {
-          id: '200-MB',
-          internal_id: 'third',
+          id: '256-MB',
+          internal_id: 'grun-256',
           name: '200MB Memory (On Demand)',
           ram: 200,
           storage: 1000,
           bandwidth: 400
         },
         {
-          id: '500-MB',
-          internal_id: 'fourth',
-          name: '500MB Memory (On Demand)',
-          ram: 500,
+          id: '512-MB',
+          internal_id: 'grun-512',
+          name: '512MB Memory (On Demand)',
+          ram: 512,
           storage: 1000,
           bandwidth: 1000
         },
         {
           id: '1-GB',
-          internal_id: 'fifth',
+          internal_id: 'grun-1000',
           name: '1GB Memory (On Demand)',
           ram: 1024,
           storage: 1000,
@@ -110,7 +110,7 @@ module CloudProvider
         },
         {
           id: '2-GB',
-          internal_id: 'sixth',
+          internal_id: 'grun-2000',
           name: '2GB Memory (On Demand)',
           ram: 2048,
           storage: 1000,
@@ -120,7 +120,7 @@ module CloudProvider
           id: 'auto',
           internal_id: 'auto',
           name: 'Auto (Subscription)',
-          ram: 999,
+          ram: 2048,
           storage: 1000,
           bandwidth: 2000
         }
@@ -132,7 +132,7 @@ module CloudProvider
         plan[:cost_per_minute] = calc_cost_per_minute(plan[:ram])
         plan[:cost_per_hour] = calc_cost_per_hour(plan[:ram])
         plan[:cost_per_month] = calc_cost_per_month(plan[:ram])
-        plan[:type] = Internal::TYPE
+        plan[:type] = TYPE
 
         plan
       end
