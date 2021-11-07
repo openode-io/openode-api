@@ -100,6 +100,21 @@ class WebsiteLocation < ApplicationRecord
     }
   end
 
+  def prepare_runner_configs_gcloud_run
+    cloud_provider_manager = CloudProvider::Manager.instance
+    build_server = cloud_provider_manager.docker_build_server
+
+    {
+      website: website,
+      website_location: self,
+      host: build_server['ip'],
+      secret: {
+        user: build_server['user'],
+        private_key: build_server['private_key']
+      }
+    }
+  end
+
   def prepare_runner_configs
     send("prepare_runner_configs_#{website.type}")
   end

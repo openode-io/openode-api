@@ -20,6 +20,10 @@ Rails.application.routes.draw do
     post 'websites/:id/update_open_source_request',
          to: 'websites#update_open_source_request'
 
+    get 'website_locations/load_balancer_requiring_sync',
+        to: 'websites#load_balancer_requiring_sync'
+    patch 'website_locations/:website_location_id', to: 'websites#update'
+
     get 'newsletters', to: 'newsletters#index'
     post 'newsletters', to: 'newsletters#create'
     post 'newsletters/:id/send', to: 'newsletters#deliver'

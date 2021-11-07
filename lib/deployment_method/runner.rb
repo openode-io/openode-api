@@ -62,6 +62,8 @@ module DeploymentMethod
                        DeploymentMethod::DockerCompose.new
                      when 'kubernetes'
                        DeploymentMethod::Kubernetes.new
+                     when 'gcloud_run'
+                       DeploymentMethod::GcloudRun.new
       end
 
       # for convenience, to call back the runner from any dep method
