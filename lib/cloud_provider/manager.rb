@@ -18,7 +18,7 @@ module CloudProvider
 
       @clouds.each do |cloud|
         cloud['instance'] =
-          "CloudProvider::#{cloud['type'].capitalize}".constantize.new(cloud)
+          "CloudProvider::#{cloud['type'].camelize}".constantize.new(cloud)
       end
     end
 

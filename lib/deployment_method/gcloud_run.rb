@@ -49,6 +49,16 @@ module DeploymentMethod
     def build_image(options = {})
       website, website_location = get_website_fields(options)
 
+      parent_execution = runner.execution&.parent_execution
+
+      puts "whatparent #{parent_execution.inspect}"
+
+      if parent_execution
+        return parent_execution&.obj&.dig('image_name_tag')
+      elsif website.reference_website_image.present?
+        return website.latest_reference_website_image_tag_address
+      end
+
       image_url = image_tag_url(options)
 
       # build
@@ -299,6 +309,56 @@ module DeploymentMethod
         Kubernetes.hook_verify_instance_up,
         Kubernetes.hook_verify_instance_up_done
       ]
+    end
+
+    def self.gcloud_run_configs
+      CloudProvider::Manager.instance.first_details_of_type('gcloud_run')
+    end
+
+    def self.gcloud_run_configs_at_location(str_id)
+      confs = gcloud_run_configs
+
+      confs['locations'].find { |l| l['str_id'] == str_id }
+    end
+
+
+    def final_instance_details(opts = {})
+      result = {}
+
+      website, website_location = get_website_fields(opts)
+
+      result['result'] = 'success'
+      result['url'] = "http://#{website_location.main_domain}/"
+
+      if website.domain_type == 'custom_domain'
+        notify('info', 'Custom domain - The DNS documentation is available at ' \
+                        'https://www.openode.io/docs/platform/dns.md')
+
+        confs_at = GcloudRun.gcloud_run_configs_at_location(website_location.location.str_id)
+
+        result['CNAME Record'] = confs_at['cname']
+      end
+
+      result
+    end
+
+    def notify_final_instance_details(opts = {})
+      get_website_fields(opts)
+      final_details = final_instance_details(opts)
+
+      notify('info', details: final_details)
+    end
+
+    def finalize(options = {})
+      website, website_location = get_website_fields(options)
+      super(options)
+      website.reload
+
+      if website.online?
+        notify_final_instance_details(options)
+      end
+
+      notify('info', "\n\n*** Final Deployment state: #{runner&.execution&.status&.upcase} ***\n")
     end
   end
 end
