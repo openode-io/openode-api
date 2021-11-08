@@ -182,7 +182,13 @@ class Website < ApplicationRecord
       variable: 'TYPE',
       description: 'Deployment method (internal)',
       type: 'website',
-      enum: [TYPE_KUBERNETES, TYPE_DOCKER]
+      enum: [TYPE_KUBERNETES, TYPE_DOCKER, TYPE_GCLOUD_RUN]
+    },
+    {
+      variable: 'VERSION',
+      description: 'opeNode version',
+      type: 'website',
+      enum: ['', 'v3']
     },
     {
       variable: 'MAX_BUILD_DURATION',
@@ -264,6 +270,7 @@ class Website < ApplicationRecord
   validates :status, inclusion: { in: STATUSES }
 
   before_save :initialize_domains
+  before_save :set_type_based_on_version
   before_save :set_cloud_type
   after_save :notify_open_source_requested
 
@@ -325,7 +332,6 @@ class Website < ApplicationRecord
     self.type = TYPE_KUBERNETES
     self.redir_http_to_https = false
     self.open_source ||= {}
-    self.instance_type = 'server' # to deprecate
   end
 
   def prepare_site
@@ -363,6 +369,10 @@ class Website < ApplicationRecord
        !self.domains.include?("www.#{site_name}")
       self.domains << "www.#{site_name}"
     end
+  end
+
+  def set_type_based_on_version
+    self.type = TYPE_GCLOUD_RUN if get_config("VERSION") == "v3"
   end
 
   def set_cloud_type

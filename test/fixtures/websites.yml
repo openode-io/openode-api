@@ -15,7 +15,6 @@ one:
   container_id: 123456789
   crontab: MyText
   redir_http_to_https: false
-  instance_type: MyString
   sub_status: MyString
   cloud_type: cloud
 
@@ -34,7 +33,6 @@ two:
   container_id: MyString
   crontab: MyText
   redir_http_to_https: false
-  instance_type: MyString
   sub_status: MyString
   cloud_type: cloud
 
@@ -53,7 +51,6 @@ three:
   container_id: MyString
   crontab: MyText
   redir_http_to_https: false
-  instance_type: MyString
   sub_status: MyString
   cloud_type: cloud
 
@@ -72,7 +69,6 @@ app_what_is:
   container_id: MyString
   crontab: MyText
   redir_http_to_https: false
-  instance_type: MyString
   sub_status: MyString
   cloud_type: cloud
 
@@ -91,7 +87,6 @@ with_private_cloud:
   container_id: MyString
   crontab: MyText
   redir_http_to_https: false
-  instance_type: MyString
   sub_status: MyString
   cloud_type: private-cloud
 
@@ -110,7 +105,6 @@ with_type_kubernetes:
   container_id: MyString
   crontab: MyText
   redir_http_to_https: false
-  instance_type: MyString
   sub_status: MyString
   cloud_type: cloud
   open_source_activated: true
