@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_31_022931) do
+ActiveRecord::Schema.define(version: 2021_11_08_124320) do
 
   create_table "addons", charset: "latin1", force: :cascade do |t|
     t.string "name"
@@ -330,7 +330,6 @@ ActiveRecord::Schema.define(version: 2021_10_31_022931) do
     t.boolean "redir_http_to_https", default: false
     t.text "configs"
     t.text "open_source"
-    t.string "instance_type", limit: 50, default: "server"
     t.string "sub_status"
     t.string "cloud_type", limit: 150, default: "cloud"
     t.boolean "open_source_activated", default: false
@@ -338,6 +337,7 @@ ActiveRecord::Schema.define(version: 2021_10_31_022931) do
     t.string "auto_account_type", default: "third"
     t.text "auto_account_types_history"
     t.text "one_click_app", size: :medium
+    t.string "version", default: ""
     t.index ["cloud_type"], name: "website_cloud_type"
     t.index ["credits_check_at"], name: "credits_check_at_website_id"
     t.index ["domains"], name: "domains_websites"

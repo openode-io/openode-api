@@ -55,6 +55,48 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal w.cloud_type, Website::CLOUD_TYPE_GCLOUD
   end
 
+  test 'should auto set cloud run if v3' do
+    w = Website.new(
+      site_name: 'thisisauniquesite',
+      cloud_type: 'cloud',
+      user_id: default_user.id,
+      type: 'docker',
+      domain_type: 'subdomain'
+    )
+
+    w.save!
+
+    w.configs ||= {}
+    w.configs['VERSION'] = 'v3'
+    w.save!
+
+    w.reload
+
+    assert_equal w.get_config('VERSION'), 'v3'
+    assert_equal w.type, Website::TYPE_GCLOUD_RUN
+  end
+
+  test 'should not auto set cloud run if not v3' do
+    w = Website.new(
+      site_name: 'thisisauniquesite',
+      cloud_type: 'cloud',
+      user_id: default_user.id,
+      type: 'kubernetes',
+      domain_type: 'subdomain'
+    )
+
+    w.save!
+
+    w.configs ||= {}
+    w.configs['VERSION'] = ''
+    w.save!
+
+    w.reload
+
+    assert_equal w.get_config('VERSION'), ''
+    assert_equal w.type, 'kubernetes'
+  end
+
   test 'destroying a website should destroy its secret if any' do
     w = Website.create(
       site_name: 'thisisauniquesite',
