@@ -59,7 +59,7 @@ module DeploymentMethod
 
       # build
 
-      notify("info", "Building instance image...")
+      notify("info", "Preparing instance image...")
 
       result_build = ex("gcloud_cmd", {
                           website: website,
@@ -318,13 +318,13 @@ module DeploymentMethod
 
     def hooks
       [
-        Kubernetes.hook_error,
-        Kubernetes.hook_verify_can_deploy,
-        Kubernetes.hook_logs,
-        Kubernetes.hook_finalize,
-        Kubernetes.hook_finalize_done,
-        Kubernetes.hook_verify_instance_up,
-        Kubernetes.hook_verify_instance_up_done
+        GcloudRun.hook_error,
+        GcloudRun.hook_verify_can_deploy,
+        GcloudRun.hook_logs,
+        GcloudRun.hook_finalize,
+        GcloudRun.hook_finalize_done,
+        GcloudRun.hook_verify_instance_up,
+        GcloudRun.hook_verify_instance_up_done
       ]
     end
 
