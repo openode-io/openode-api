@@ -145,14 +145,6 @@ class SuperAdmin::WebsitesControllerTest < ActionDispatch::IntegrationTest
     w.version = 'v3'
     w.save(validate: false)
 
-    res = WebsiteLocation.includes(:website).where(
-      "websites.status = ? AND websites.type = ?",
-      Website::STATUS_ONLINE,
-      Website::TYPE_GCLOUD_RUN
-    ).references(:websites)
-
-    puts "whattt ?? #{res.reload.inspect}"
-
     get "/super_admin/website_locations/online/#{Website::TYPE_GCLOUD_RUN}",
         as: :json,
         headers: super_admin_headers_auth
