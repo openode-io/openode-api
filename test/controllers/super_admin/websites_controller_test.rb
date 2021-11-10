@@ -134,6 +134,35 @@ class SuperAdmin::WebsitesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body.first["domain_type"], "subdomain"
   end
 
+  test "online of type - happy path" do
+    w = default_website
+    wl = w.website_locations.first
+
+    assert wl
+
+    w.status = Website::STATUS_ONLINE
+    w.type = Website::TYPE_GCLOUD_RUN
+    w.version = 'v3'
+    w.save(validate: false)
+
+    res = WebsiteLocation.includes(:website).where(
+      "websites.status = ? AND websites.type = ?",
+      Website::STATUS_ONLINE,
+      Website::TYPE_GCLOUD_RUN
+    ).references(:websites)
+
+    puts "whattt ?? #{res.reload.inspect}"
+
+    get "/super_admin/website_locations/online/#{Website::TYPE_GCLOUD_RUN}",
+        as: :json,
+        headers: super_admin_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body.length, 1
+    assert_equal response.parsed_body[0]["id"], w.id
+  end
+
   test "load balancer requiring sync - without any" do
     get "/super_admin/website_locations/load_balancer_requiring_sync",
         as: :json,
