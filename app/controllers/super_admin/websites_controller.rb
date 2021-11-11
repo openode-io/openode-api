@@ -63,6 +63,11 @@ class SuperAdmin::WebsitesController < SuperAdmin::SuperAdminController
       params["type"]
     ).references(:websites)
 
+    if params["location"]
+      location = Location.find_by! str_id: params["location"]
+      website_locations = website_locations.where("location_id = ?", location.id)
+    end
+
     json(
       website_locations
       .map do |wl|

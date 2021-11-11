@@ -155,6 +155,29 @@ class SuperAdmin::WebsitesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body[0]["id"], w.id
   end
 
+  test "online of type with location str id - happy path" do
+    w = default_website
+    wl = w.website_locations.first
+    location = wl.location
+
+    assert wl
+
+    w.status = Website::STATUS_ONLINE
+    w.type = Website::TYPE_GCLOUD_RUN
+    w.version = 'v3'
+    w.save(validate: false)
+
+    get "/super_admin/website_locations/online/#{Website::TYPE_GCLOUD_RUN}" \
+      "?location=#{location.str_id}",
+        as: :json,
+        headers: super_admin_headers_auth
+
+    assert_response :success
+
+    assert_equal response.parsed_body.length, 1
+    assert_equal response.parsed_body[0]["id"], w.id
+  end
+
   test "load balancer requiring sync - without any" do
     get "/super_admin/website_locations/load_balancer_requiring_sync",
         as: :json,
