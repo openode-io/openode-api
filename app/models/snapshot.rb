@@ -44,12 +44,16 @@ class Snapshot < ApplicationRecord
     end
   end
 
+  def get_url
+    "https://#{DEFAULT_HOSTNAME}#{destination_path}"
+  end
+
   def prepare_new_snapshot
     self.status = DEFAULT_STATUS
     self.expire_at = Time.zone.now + DEFAULT_EXPIRATION_HOURS.hours
     self.uid = SecureRandom.hex(32)
     self.destination_path = get_destination_path(DEFAULT_SNAPSHOT_EXTENSION)
-    self.url = "https://#{DEFAULT_HOSTNAME}#{destination_path}"
+    self.url = get_url
     self.steps = []
   end
 
