@@ -11,7 +11,5 @@ class SnapshotWorker
                      cmd_name: 'make_snapshot',
                      options: { is_complex: true, snapshot: snapshot, app: snapshot.app }
                    }])
-
-    runner.execute([{ cmd_name: 'reload', options: { is_complex: true } }])
   end
 end

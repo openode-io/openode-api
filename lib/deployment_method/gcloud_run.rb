@@ -154,18 +154,18 @@ module DeploymentMethod
     end
 
     def gs_cp_cmd(options = {})
-      server_path = options[:server_path]
-      gs_url = options[:gs_url]
+      source = options[:source]
+      destination = options[:destination]
 
-      "gsutil cp #{server_path} #{gs_url}"
+      "gsutil cp #{source} #{destination}"
     end
 
     def sync_file_to_gcp_storage(server_file_path, gstorage_url)
       return if ex("server_file_exists_cmd", path: server_file_path)[:exit_code] != 0
 
       ex("gs_cp_cmd",
-         server_path: server_file_path,
-         gs_url: gstorage_url)[:exit_code].zero?
+         source: server_file_path,
+         destination: gstorage_url)[:exit_code].zero?
     end
 
     def sync_certs(website, website_location)
@@ -276,6 +276,50 @@ module DeploymentMethod
       website_location.obj ||= {}
       website_location.obj["gcloud_url"] = service["status"]&.dig("url")
       website_location.save!
+    end
+
+    # snapshot
+
+    def make_snapshot(options = {})
+      require_fields([:snapshot], options)
+      website, website_location = get_website_fields(options)
+      snapshot = options[:snapshot]
+
+      latest_deployment = website.deployments.last
+
+      raise "No latest deployment available" if latest_deployment.blank?
+
+      latest_build_id = latest_deployment.obj["build_id"]
+
+      # get the latest build details
+      snapshot.steps << { name: 'retrieving latest build', result: latest_build_id }
+
+      result = ex("gcloud_cmd", {
+                    website: website,
+                    website_location: website_location,
+                    subcommand: "builds describe #{latest_build_id} --format=json"
+                  })
+      result_json = JSON.parse(result[:stdout])
+      storage_source = result_json.dig("source", "storageSource")
+
+      url_build = "gs://#{storage_source['bucket']}/#{storage_source['object']}"
+
+      result_cp = ex("gs_cp_cmd",
+                     source: url_build,
+                     destination: snapshot.destination_path)
+
+      raise "Unable to copy the build" unless result_cp[:exit_code].zero?
+
+      snapshot.steps << { name: 'make archive', result: result_cp[:stdout] }
+
+      snapshot.status = Snapshot::STATUS_SUCCEED
+    rescue StandardError => e
+      Ex::Logger.info(e, 'issue to make the snapshot')
+
+      snapshot.steps << { name: 'fail to complete snapshot', result: e }
+      snapshot.status = Snapshot::STATUS_FAILED
+    ensure
+      snapshot.save
     end
 
     # logs
