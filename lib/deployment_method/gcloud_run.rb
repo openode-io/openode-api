@@ -285,6 +285,11 @@ module DeploymentMethod
       website, website_location = get_website_fields(options)
       snapshot = options[:snapshot]
 
+      # configure snapshot for gcloud
+      snapshot.destination_path = snapshot.get_destination_path(".tgz")
+      snapshot.url = snapshot.get_url
+      snapshot.save
+
       latest_deployment = website.deployments.last
 
       raise "No latest deployment available" if latest_deployment.blank?
