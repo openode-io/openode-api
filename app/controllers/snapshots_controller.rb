@@ -29,8 +29,8 @@ class SnapshotsController < InstancesController
 
   api :POST, 'instances/:id/snapshots'
   description 'Make a snapshot of the files at a given path.'
-  param :path, String, desc: "", required: true
-  param :app, String, desc: "", required: true
+  param :path, String, desc: "", required: false
+  param :app, String, desc: "", required: false
   def create_snapshot
     path = params[:path]
     app = params[:app]
