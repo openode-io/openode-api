@@ -171,6 +171,8 @@ module DeploymentMethod
     def sync_certs(website, website_location)
       Rails.logger.info("Considering syncing certs for website id #{website.id}")
 
+      website_location.obj ||= {}
+
       if website.certs.blank?
         website_location.obj["gcloud_ssl_cert_url"] = nil
         website_location.obj["gcloud_ssl_key_url"] = nil
