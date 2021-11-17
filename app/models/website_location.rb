@@ -130,6 +130,10 @@ class WebsiteLocation < ApplicationRecord
     @runner
   end
 
+  def deployment_method_configs
+    website.deployment_method_klass.configs_at_location(location.str_id)
+  end
+
   def available_plans
     manager = CloudProvider::Manager.instance
 

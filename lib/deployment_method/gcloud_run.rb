@@ -389,6 +389,10 @@ module DeploymentMethod
       confs['locations'].find { |l| l['str_id'] == str_id }
     end
 
+    def self.configs_at_location(str_id)
+      GcloudRun.gcloud_run_configs_at_location(str_id)
+    end
+
     def final_instance_details(opts = {})
       result = {}
 
