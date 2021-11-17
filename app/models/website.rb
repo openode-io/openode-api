@@ -466,9 +466,10 @@ class Website < ApplicationRecord
   end
 
   def deployment_method_klass
-    if type == 'kubernetes'
+    case type
+    when 'kubernetes'
       DeploymentMethod::Kubernetes
-    elsif type == 'gcloud_run'
+    when 'gcloud_run'
       DeploymentMethod::GcloudRun
     end
   end
