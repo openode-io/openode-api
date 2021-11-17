@@ -32,6 +32,10 @@ module DeploymentMethod
       confs['locations'].find { |l| l['str_id'] == str_id }
     end
 
+    def self.configs_at_location(str_id)
+      Kubernetes.kube_configs_at_location(str_id)
+    end
+
     def send_crontab(options = {})
       super(options)
     end

@@ -36,9 +36,7 @@ class DnsController < InstancesController
   api!
   def settings
     # returns the custom domain DNS settings
-    location_str_id = @website_location.location.str_id
-
-    configs_at = DeploymentMethod::Kubernetes.kube_configs_at_location(location_str_id)
+    configs_at = @website_location.deployment_method_configs
 
     json(
       external_addr: configs_at['external_addr'],

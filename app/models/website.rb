@@ -465,6 +465,14 @@ class Website < ApplicationRecord
     end
   end
 
+  def deployment_method_klass
+    if type == 'kubernetes'
+      DeploymentMethod::Kubernetes
+    elsif type == 'gcloud_run'
+      DeploymentMethod::GcloudRun
+    end
+  end
+
   def config_file_in_repo_must_comply(_config, value)
     cur_dir = "#{repo_dir}#{value}"
 
