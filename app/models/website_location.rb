@@ -167,7 +167,8 @@ class WebsiteLocation < ApplicationRecord
   end
 
   def domain_subdomain
-    location_subdomain = Location::SUBDOMAIN[location.str_id.to_sym]
+    confs = deployment_method_configs
+    location_subdomain = confs["location_subdomain"]
 
     first_part = if location_subdomain && location_subdomain != ''
                    "#{website.site_name}.#{location_subdomain}"
@@ -175,7 +176,7 @@ class WebsiteLocation < ApplicationRecord
                    website.site_name.to_s
                  end
 
-    "#{first_part}.#{CloudProvider::Manager.base_hostname}"
+    "#{first_part}.#{confs['base_hostname']}"
   end
 
   def domain_custom_domain

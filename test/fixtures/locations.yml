@@ -23,3 +23,9 @@ eu:
   full_name: Amsterdam (Netherlands, Europe)
   country_fullname: Netherlands
   cloud_provider: internal
+
+us_central_1:
+  str_id: us-central-1
+  full_name: Iowa (USA)
+  country_fullname: United States
+  cloud_provider: internal

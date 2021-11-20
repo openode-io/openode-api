@@ -189,8 +189,10 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   test '/instances/summary happy path' do
     website = Website.find_by site_name: 'testsite'
+    website.type = "kubernetes"
     website.storage_areas = ['/opt/app/data/']
-    website.save!
+    website.save(validate: false)
+
     get '/instances/summary?with=last_deployment',
         as: :json,
         headers: default_headers_auth
@@ -247,6 +249,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   test '/instances/summary using search' do
     website = Website.find_by site_name: 'testsite'
+    website.type = "kubernetes"
+    website.save!
     website.storage_areas = ['/opt/app/data/']
     website.save!
     get '/instances/summary?with=last_deployment&search=stsit',
@@ -275,6 +279,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   test '/instances/summary happy path - with collaborators' do
     website = default_website
+    website.type = "kubernetes"
+    website.save!
     collaborators = website.collaborators
     website.overwrite_env_variables!(TEST: 1234)
 
@@ -311,6 +317,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   test '/instances/summary happy path, without persistence and offline' do
     website = Website.find_by site_name: 'testsite'
+    website.type = "kubernetes"
+    website.save!
     wl = website.website_locations.first
     wl.extra_storage = 0
     wl.save!
@@ -382,6 +390,8 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   test '/instances/routes happy path' do
     website = default_website
+    website.type = "kubernetes"
+    website.save!
     wl = website.website_locations.first
     wl.obj = { "services" => { "apiVersion" => "v1",
                                "items" => [{ "apiVersion" => "v1", "kind" => "Service",
