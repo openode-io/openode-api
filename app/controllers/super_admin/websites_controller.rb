@@ -48,8 +48,12 @@ class SuperAdmin::WebsitesController < SuperAdmin::SuperAdminController
   end
 
   def load_balancer_requiring_sync
-    json(
+    website_locations = filter_location(
       WebsiteLocation.includes(:website).where(load_balancer_synced: false)
+    )
+
+    json(
+      website_locations
       .map do |wl|
         prepare_website_location_listing(wl)
       end
@@ -63,13 +67,8 @@ class SuperAdmin::WebsitesController < SuperAdmin::SuperAdminController
       params["type"]
     ).references(:websites)
 
-    if params["location"]
-      location = Location.find_by! str_id: params["location"]
-      website_locations = website_locations.where("location_id = ?", location.id)
-    end
-
     json(
-      website_locations
+      filter_location(website_locations)
       .map do |wl|
         prepare_website_location_listing(wl)
       end
@@ -84,6 +83,15 @@ class SuperAdmin::WebsitesController < SuperAdmin::SuperAdminController
   end
 
   protected
+
+  def filter_location(website_locations)
+    if params["location"]
+      location = Location.find_by! str_id: params["location"]
+      website_locations = website_locations.where("location_id = ?", location.id)
+    end
+
+    website_locations
+  end
 
   def prepare_website_location_listing(website_location)
     wl = website_location
