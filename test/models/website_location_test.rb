@@ -102,15 +102,24 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert_equal wl.valid?, true
   end
 
+  # domain
+
   test 'domain with canada subdomain' do
     website = default_website
+    website.type = "kubernetes"
+    website.save!
+
     wl = website.website_locations[0]
 
     assert wl.main_domain == 'testsite.openode.io'
+    assert wl.location.str_id == "canada"
   end
 
   test 'domain with usa subdomain' do
     website = Website.find_by site_name: 'testsite2'
+    website.type = "kubernetes"
+    website.save!
+
     wl = website.website_locations[0]
 
     assert wl.main_domain == 'testsite2.openode.io'
@@ -137,12 +146,29 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert wl.main_domain == 'testsite2.eu.openode.io'
   end
 
+  test 'domain with gcloud_run subdomain - us central 1' do
+    website = Website.find_by site_name: 'testsite2'
+    website.type = Website::TYPE_GCLOUD_RUN
+    website.save!
+
+    wl = website.website_locations[0]
+
+    location = Location.find_by str_id: 'us-central-1'
+    wl.location_id = location.id
+    wl.save!
+
+    result = wl.main_domain
+    assert result == 'testsite2.us.openode.dev'
+  end
+
   test 'domain with usa custom domain' do
     website = Website.find_by site_name: 'www.what.is'
     wl = website.website_locations[0]
 
     assert wl.main_domain == 'www.what.is'
   end
+
+  # root_domain
 
   # root domain of website location
   test 'root domain with usa custom domain' do
@@ -164,6 +190,9 @@ class WebsiteLocationTest < ActiveSupport::TestCase
 
   test 'compute domains with usa subdomain' do
     website = Website.find_by site_name: 'testsite2'
+    website.type = "kubernetes"
+    website.save!
+
     wl = website.website_locations[0]
 
     assert wl.compute_domains == ['testsite2.openode.io']

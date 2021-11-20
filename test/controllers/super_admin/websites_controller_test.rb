@@ -142,6 +142,7 @@ class SuperAdmin::WebsitesControllerTest < ActionDispatch::IntegrationTest
 
     w.status = Website::STATUS_ONLINE
     w.type = Website::TYPE_GCLOUD_RUN
+    w.cloud_type = "gcloud"
     w.version = 'v3'
     w.save(validate: false)
 

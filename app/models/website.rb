@@ -467,6 +467,8 @@ class Website < ApplicationRecord
 
   def deployment_method_klass
     case type
+    when 'docker'
+      DeploymentMethod::Kubernetes
     when 'kubernetes'
       DeploymentMethod::Kubernetes
     when 'gcloud_run'

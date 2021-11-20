@@ -4,9 +4,4 @@ class Location < ApplicationRecord
 
   validates_uniqueness_of :str_id, case_sensitive: true
   validates :cloud_provider, inclusion: { in: %w[internal vultr kubernetes] }
-
-  SUBDOMAIN = {
-    usa: '',
-    eu: 'eu'
-  }.freeze
 end
