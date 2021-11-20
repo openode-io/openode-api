@@ -168,7 +168,7 @@ class WebsiteLocation < ApplicationRecord
 
   def domain_subdomain
     confs = deployment_method_configs
-    location_subdomain = confs["location_subdomain"]
+    location_subdomain = confs&.dig('location_subdomain') || ''
 
     first_part = if location_subdomain && location_subdomain != ''
                    "#{website.site_name}.#{location_subdomain}"
@@ -176,7 +176,8 @@ class WebsiteLocation < ApplicationRecord
                    website.site_name.to_s
                  end
 
-    "#{first_part}.#{confs['base_hostname']}"
+    base_hostname = confs&.dig('base_hostname') || 'openode.io'
+    "#{first_part}.#{base_hostname}"
   end
 
   def domain_custom_domain
