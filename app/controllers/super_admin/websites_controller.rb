@@ -102,6 +102,7 @@ class SuperAdmin::WebsitesController < SuperAdmin::SuperAdminController
       hosts: wl.compute_domains,
       backend_url: wl.obj&.dig("gcloud_url"),
       domain_type: wl.website.domain_type,
+      cname: wl.deployment_method_configs&.dig("cname"),
       has_certificate: wl.website.certs.present? || wl.website.subdomain?,
       gcloud_ssl_cert_url: wl.obj&.dig("gcloud_ssl_cert_url"),
       gcloud_ssl_key_url: wl.obj&.dig("gcloud_ssl_key_url"),
