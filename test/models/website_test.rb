@@ -151,6 +151,7 @@ class WebsiteTest < ActiveSupport::TestCase
     large_plan = plans.find { |p| p[:ram] > Website::MAX_RAM_PLAN_WITHOUT_PAID_ORDER }
 
     assert default_user.orders?
+    puts "larg #{large_plan.inspect}"
 
     w = Website.new(
       site_name: 'test3344',

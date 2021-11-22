@@ -28,9 +28,9 @@ class InternalTest < ActiveSupport::TestCase
     plans = internal_provider.plans
     assert_equal plans.length, 8
     assert_equal plans[0][:internal_id], 'open_source'
-    assert_equal plans[0][:cost_per_minute], internal_provider.calc_cost_per_minute(100)
-    assert_equal plans[0][:cost_per_hour], internal_provider.calc_cost_per_hour(100)
-    assert_equal plans[0][:cost_per_month], internal_provider.calc_cost_per_month(100)
+    assert_equal plans[0][:cost_per_minute], internal_provider.calc_cost_per_minute(128)
+    assert_equal plans[0][:cost_per_hour], internal_provider.calc_cost_per_hour(128)
+    assert_equal plans[0][:cost_per_month], internal_provider.calc_cost_per_month(128)
   end
 
   test 'plans_at with existing' do

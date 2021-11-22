@@ -67,7 +67,7 @@ module CloudProvider
           id: 'open-source',
           internal_id: Website::OPEN_SOURCE_ACCOUNT_TYPE,
           name: 'Open Source',
-          ram: 100,
+          ram: 128,
           storage: 1000,
           bandwidth: 10
         },
