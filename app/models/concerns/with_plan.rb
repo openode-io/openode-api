@@ -1,6 +1,6 @@
 
 module WithPlan
-  MAX_RAM_PLAN_WITHOUT_PAID_ORDER = 100
+  MAX_RAM_PLAN_WITHOUT_PAID_ORDER = 128
 
   def self.plan_of(acc_type)
     plans = CloudProvider::Manager.instance.available_plans

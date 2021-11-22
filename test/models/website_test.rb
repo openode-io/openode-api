@@ -143,7 +143,7 @@ class WebsiteTest < ActiveSupport::TestCase
 
     assert_equal w.save, false
     assert_includes w.errors.inspect.to_s, "Maximum available plan"
-    assert_includes w.errors.inspect.to_s, "100 MB RAM"
+    assert_includes w.errors.inspect.to_s, "128 MB RAM"
   end
 
   test 'using large plans successfully' do
