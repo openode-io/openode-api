@@ -64,8 +64,7 @@ module DeploymentMethod
 
       # clear some files
       ex("clear_certain_files_prior_build_cmd",
-        { website: website, website_location: website_location }
-      )
+         { website: website, website_location: website_location })
 
       # build
 
