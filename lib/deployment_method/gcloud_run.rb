@@ -44,6 +44,11 @@ module DeploymentMethod
       "gcr.io/#{GCLOUD_PROJECT_ID}/#{website.site_name}:#{tag_name}"
     end
 
+    def clear_certain_files_prior_build_cmd(options = {})
+      website, = get_website_fields(options)
+      "cd #{website.repo_dir} ; rm -f .gitignore"
+    end
+
     def build_image(options = {})
       website, website_location = get_website_fields(options)
 
@@ -56,6 +61,11 @@ module DeploymentMethod
       end
 
       image_url = image_tag_url(options)
+
+      # clear some files
+      ex("clear_certain_files_prior_build_cmd",
+        { website: website, website_location: website_location }
+      )
 
       # build
 
