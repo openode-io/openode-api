@@ -432,15 +432,14 @@ module DeploymentMethod
           notify("info", "Please notice that DNS propagation can take few minutes for " \
                 "the main URL. The temp_backend_url can be used in the meantime.")
         else
-            # stop it
-            do_stop(options.merge(skip_notify_errors: true))
+          # stop it
+          do_stop(options.merge(skip_notify_errors: true))
         end
       rescue StandardError => e
         Ex::Logger.info(e, 'Unable to finalize completely')
       end
 
       notify('info', "\n\n*** Final Deployment state: #{runner&.execution&.status&.upcase} ***\n")
-      
     end
   end
 end
