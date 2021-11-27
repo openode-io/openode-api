@@ -29,7 +29,7 @@ module DeploymentMethod
     def gcloud_cmd(options = {})
       website, = get_website_fields(options)
       project_path = website.repo_dir
-      "timeout 300 sh -c 'cd #{project_path} && gcloud --project #{GCLOUD_PROJECT_ID} " \
+      "timeout 400 sh -c 'cd #{project_path} && gcloud --project #{GCLOUD_PROJECT_ID} " \
       "#{options[:subcommand]}'"
     end
 
@@ -435,13 +435,20 @@ module DeploymentMethod
       super(options)
       website.reload
 
-      if website.online?
-        notify_final_instance_details(options)
+      begin
+        if website.online?
+          notify_final_instance_details(options)
+          notify("info", "Please notice that DNS propagation can take few minutes for " \
+                "the main URL. The temp_backend_url can be used in the meantime.")
+        else
+          # stop it
+          do_stop(options.merge(skip_notify_errors: true))
+        end
+      rescue StandardError => e
+        Ex::Logger.info(e, 'Unable to finalize completely')
       end
 
       notify('info', "\n\n*** Final Deployment state: #{runner&.execution&.status&.upcase} ***\n")
-      notify("info", "Please notice that DNS propagation can take few minutes for " \
-              "the main URL. The temp_backend_url can be used in the meantime.")
     end
   end
 end
