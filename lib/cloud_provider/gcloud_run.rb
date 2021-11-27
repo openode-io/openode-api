@@ -87,8 +87,8 @@ module CloudProvider
         {
           id: '256-MB',
           internal_id: 'grun-256',
-          name: '200MB Memory (On Demand)',
-          ram: 200,
+          name: '256MB Memory (On Demand)',
+          ram: 256,
           storage: 1000,
           bandwidth: 400
         },
