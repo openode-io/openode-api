@@ -166,7 +166,7 @@ class User < ApplicationRecord
 
     plan = internal_provider.plans.find { |p| p[:id] == '100-MB' }
 
-    self.credits = Website.cost_price_to_credits(plan[:cost_per_hour] * 24.0 * 30*1.28)
+    self.credits = Website.cost_price_to_credits(plan[:cost_per_hour] * 24.0 * 30 * 1.28)
   end
 
   def verify_authentication(passwd)
