@@ -28,8 +28,10 @@ module DeploymentMethod
 
     def gcloud_cmd(options = {})
       website, = get_website_fields(options)
+      timeout = options[:timeout] || 400
+
       project_path = website.repo_dir
-      "timeout 400 sh -c 'cd #{project_path} && gcloud --project #{GCLOUD_PROJECT_ID} " \
+      "timeout #{timeout} sh -c 'cd #{project_path} && gcloud --project #{GCLOUD_PROJECT_ID} " \
       "#{options[:subcommand]}'"
     end
 
@@ -243,7 +245,8 @@ module DeploymentMethod
           "--image #{image_url} " \
           "--platform managed --region #{region_of(website_location)} " \
           "--allow-unauthenticated --set-env-vars=\"#{env_variables(website)}\" " \
-          "--memory=#{website.memory}Mi"
+          "--memory=#{website.memory}Mi " \
+          "--timeout=#{website.max_build_duration}"
                   })
 
       notify("info", "--------------- Instance boot logs ---------------")
@@ -355,24 +358,27 @@ module DeploymentMethod
 
     def delete_service_cmd(options = {})
       website, website_location = get_website_fields(options)
+      async = options[:async_argument] || "--no-async"
 
       gcloud_cmd({
                    website: website,
                    website_location: website_location,
                    subcommand: "run services delete #{service_id(website)} " \
-          "--region #{region_of(website_location)} --quiet"
+          "--region #{region_of(website_location)} --quiet #{async}"
                  })
     end
 
     def do_stop(options = {})
       website, website_location = get_website_fields(options)
+      async = options[:async_argument] || "--no-async"
 
       ex("delete_service_cmd",
          {
            website: website,
            website_location: website_location,
            ensure_exit_code: 0,
-           default_retry_scheme: true
+           default_retry_scheme: true,
+           async_argument: async
          })
     end
 
@@ -442,7 +448,8 @@ module DeploymentMethod
                 "the main URL. The temp_backend_url can be used in the meantime.")
         else
           # stop it
-          do_stop(options.merge(skip_notify_errors: true))
+          notify("info", "Stopping instance...")
+          do_stop(options.merge(skip_notify_errors: true, async_argument: "--no-async"))
         end
       rescue StandardError => e
         Ex::Logger.info(e, 'Unable to finalize completely')
