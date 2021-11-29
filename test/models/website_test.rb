@@ -1256,6 +1256,33 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
   end
 
+  test 'spend hourly credits - v3 normal plan' do
+    website = default_website
+    website.credit_actions.destroy_all
+    website.account_type = "grun-128"
+    website.version = "v3"
+    website.type = "gcloud_run"
+    website.cloud_type = "gcloud"
+    wl = default_website_location
+    wl.nb_cpus = 1
+    wl.extra_storage = 0
+    wl.save!
+
+    website.spend_online_hourly_credits!
+
+    plan = website.plan
+
+    assert_equal plan[:internal_id], "grun-128"
+    assert_equal plan[:cost_per_month], 0.75
+    
+    assert_equal website.credit_actions.reload.length, 1
+    ca = website.credit_actions.first
+
+    assert_equal(ca.credits_spent.to_f.round(4),
+                 (plan[:cost_per_hour] * 100.0).to_f.round(4))
+    assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
+  end
+
   test 'application_name_valid? - with default' do
     w = default_website
 
