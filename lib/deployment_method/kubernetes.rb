@@ -156,9 +156,9 @@ module DeploymentMethod
       website, website_location = get_website_fields(options)
 
       if website.open_source_plan? && website.open_source_activated
-        msg = 'Please migrate your open source site to the v3 system, ' \
-          'see https://www.openode.io/docs/installation/legacy_upgrade.md for instructions'
-        notify("error", msg)
+        msg = '*** IMPORTANT NOTICE *** Please migrate your open source site to the v3 ' \
+          'system, see https://www.openode.io/docs/installation/legacy_upgrade.md for ' \
+          'instructions'
         raise msg
       end
 
