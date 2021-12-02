@@ -14,15 +14,6 @@ module DeploymentMethod
 
     def verify_can_deploy(options = {})
       super(options)
-
-      website, = get_website_fields(options)
-
-      if website.open_source_plan? && website.open_source_activated
-        msg = 'Please migrate your open source site to the v3 system, ' \
-          'see https://www.openode.io/docs/installation/legacy_upgrade.md for instructions'
-        notify("error", msg)
-        raise msg
-      end
     end
 
     def initialization(options = {})
@@ -163,6 +154,13 @@ module DeploymentMethod
 
     def launch(options = {})
       website, website_location = get_website_fields(options)
+
+      if website.open_source_plan? && website.open_source_activated
+        msg = 'Please migrate your open source site to the v3 system, ' \
+          'see https://www.openode.io/docs/installation/legacy_upgrade.md for instructions'
+        notify("error", msg)
+        raise msg
+      end
 
       initialize_ns(options) unless options[:skip_initialize_ns]
 
