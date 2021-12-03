@@ -1167,8 +1167,4 @@ class Website < ApplicationRecord
     logger.info("Issue normalizing storage areas #{e.inspect}")
     []
   end
-
-  def has_valid_location_plan?
-    # if the plan (account_type) available at website_locations
-  end
 end

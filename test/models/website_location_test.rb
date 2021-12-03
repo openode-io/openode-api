@@ -374,4 +374,32 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert_equal wl.website.stop_events.length, 1
     assert_equal wl.website.stop_events.last.obj['reason'], 'no!'
   end
+
+  # has_valid_location_plan?
+
+  test "valid_location_plan? - happy path" do
+    w = default_website
+    w.type = "gcloud_run"
+    w.cloud_type = "gcloud"
+    w.version = "v3"
+    w.account_type = "grun-128"
+    w.save(validate: false)
+
+    wl = w.website_locations.first
+
+    assert wl.valid_location_plan?
+  end
+
+  test "valid_location_plan? - invalid plan" do
+    w = default_website
+    w.type = "gcloud_run"
+    w.cloud_type = "gcloud"
+    w.version = "v3"
+    w.account_type = "first"
+    w.save(validate: false)
+
+    wl = w.website_locations.first
+
+    assert_not wl.valid_location_plan?
+  end
 end
