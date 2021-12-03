@@ -280,6 +280,14 @@ module DeploymentMethod
       website, website_location = get_website_fields(options)
       simplified_options = { website: website, website_location: website_location }
 
+      location_valid =
+        website_location.valid_location_plan? && website_location.available_location?
+
+      if website.version == "v3" && !location_valid
+        raise 'Invalid location for the selected plan. Make sure to remove your current' \
+          ' location and add a location available for that plan.'
+      end
+
       image_url = build_image(options)
 
       deploy(options.merge(image_url: image_url))

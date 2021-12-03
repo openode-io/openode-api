@@ -402,4 +402,19 @@ class WebsiteLocationTest < ActiveSupport::TestCase
 
     assert_not wl.valid_location_plan?
   end
+
+  # available_location?
+
+  test "available_location? - valid" do
+    w = default_website
+    w.type = "gcloud_run"
+    w.cloud_type = "gcloud"
+    w.version = "v3"
+    w.account_type = "grun-128"
+    w.save(validate: false)
+
+    wl = w.website_locations.first
+
+    assert wl.available_location?
+  end
 end
