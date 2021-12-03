@@ -255,6 +255,26 @@ class WebsiteLocation < ApplicationRecord
       .select(&:present?)
   end
 
+  def valid_location_plan?
+    # if the plan (account_type) available at website_locations
+
+    available_plans = CloudProvider::Manager.instance.available_plans_of_type_at(
+      website.cloud_type, location.str_id
+    )
+
+    available_plans.any? { |p| p[:internal_id] == website.account_type }
+  end
+
+  def available_location?
+    manager = CloudProvider::Manager.instance
+
+    type_cloud = manager.clouds.find { |c| c["type"] == website.type }
+
+    available_locations = type_cloud["locations"].map { |l| l["str_id"] }
+
+    available_locations.include?(location.str_id)
+  end
+
   protected
 
   def generate_port(min, max, other_reserved = [])
