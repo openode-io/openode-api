@@ -40,18 +40,7 @@ module CloudProvider
     end
 
     def calc_cost_per_month(ram)
-      amount_ram_server = 2000
-      cost_server = 5.16 # in $
-
-      nb_possible_instances = amount_ram_server.to_f / ram
-      base_cost = cost_server / nb_possible_instances
-
-      charge = base_cost * 1.50
-      price = charge * 2.6
-
-      degressive_saving = 2.0 * ram * 0.001
-
-      price - degressive_saving
+      ENV["GCLOUD_1MB_RAM_PRICE"].to_f * ram
     end
 
     def credits_per_month(ram)
