@@ -123,7 +123,7 @@ module CloudProvider
           id: 'auto',
           internal_id: 'auto',
           name: 'Auto (Subscription)',
-          ram: 999,
+          ram: 2048,
           storage: 1000,
           bandwidth: 2000
         }
