@@ -3,8 +3,15 @@ require 'test_helper'
 
 module DeploymentMethod
   class GcloudRun < Base
-    def ex(_cmd, _options = {})
-      puts "exxxx"
+    attr_accessor :ex_return
+
+    def ex(cmd, options = {})
+      @ex_history ||= []
+      @ex_history << { cmd: cmd, options: options }
+      @ind_ex_return ||= -1
+      @ind_ex_return += 1
+
+      @ex_return[@ind_ex_return]
     end
   end
 end
@@ -74,11 +81,29 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
   # build_image
 
   test 'build_image - happy path' do
-    # result = gcloud_run_method.build_image(
-    #  website: @website,
-    #  website_location: @website_location,
-    # )
+    run_method = gcloud_run_method
+    run_method.ex_return = [
+      {
 
-    puts "test"
+      },
+      {
+        stderr: "Created [https://cloudbuild.googleapis.com/build-id-1234567]",
+        exit_code: 0
+      },
+      {
+        exit_code: 0,
+        stdout: "output"
+      }
+    ]
+    result = run_method.build_image(
+      website: @website,
+      website_location: @website_location
+    )
+
+    site_name = @website.site_name
+    exec_id = @runner.execution.id
+
+    expected_result = "gcr.io/openode/#{site_name}:#{site_name}--#{@website.id}--#{exec_id}"
+    assert_equal result, expected_result
   end
 end
