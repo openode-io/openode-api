@@ -2,8 +2,6 @@
 require 'test_helper'
 require 'test_gcloud_run_helper'
 
-
-
 class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
   def setup
     @website = default_kube_website
@@ -69,7 +67,7 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
   # build_image
 
   test 'build_image - happy path' do
-    run_method = gcloud_run_method #DeploymentMethod::GcloudRun.new #gcloud_run_method
+    run_method = gcloud_run_method
     run_method.ex_return = [
       {
 
