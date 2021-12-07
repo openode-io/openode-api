@@ -1,29 +1,8 @@
 
 require 'test_helper'
+require 'test_gcloud_run_helper'
 
-module DeploymentMethod
-  class GcloudRun < Base
-    attr_accessor :ex_return, :ex_history, :ex_stdout_return, :ex_stdout_history
 
-    def ex(cmd, options = {})
-      @ex_history ||= []
-      @ex_history << { cmd: cmd, options: options }
-      @ind_ex_return ||= -1
-      @ind_ex_return += 1
-
-      @ex_return[@ind_ex_return]
-    end
-
-    def ex_stdout(cmd, options_cmd = {}, _global_options = {})
-      @ex_stdout_history ||= []
-      @ex_stdout_history << { cmd: cmd, options: options_cmd }
-      @ind_ex_stdout_return ||= -1
-      @ind_ex_stdout_return += 1
-
-      @ex_stdout_return[@ind_ex_stdout_return]
-    end
-  end
-end
 
 class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
   def setup
@@ -90,7 +69,7 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
   # build_image
 
   test 'build_image - happy path' do
-    run_method = gcloud_run_method
+    run_method = gcloud_run_method #DeploymentMethod::GcloudRun.new #gcloud_run_method
     run_method.ex_return = [
       {
 
