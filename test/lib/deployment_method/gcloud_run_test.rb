@@ -3,7 +3,7 @@ require 'test_helper'
 
 module DeploymentMethod
   class GcloudRun < Base
-    attr_accessor :ex_return
+    attr_accessor :ex_return, :ex_history, :ex_stdout_return, :ex_stdout_history
 
     def ex(cmd, options = {})
       @ex_history ||= []
@@ -12,6 +12,15 @@ module DeploymentMethod
       @ind_ex_return += 1
 
       @ex_return[@ind_ex_return]
+    end
+
+    def ex_stdout(cmd, options_cmd = {}, _global_options = {})
+      @ex_stdout_history ||= []
+      @ex_stdout_history << { cmd: cmd, options: options_cmd }
+      @ind_ex_stdout_return ||= -1
+      @ind_ex_stdout_return += 1
+
+      @ex_stdout_return[@ind_ex_stdout_return]
     end
   end
 end
@@ -105,5 +114,45 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
 
     expected_result = "gcr.io/openode/#{site_name}:#{site_name}--#{@website.id}--#{exec_id}"
     assert_equal result, expected_result
+  end
+
+  # launch
+
+  test 'launch - happy path' do
+    run_method = gcloud_run_method
+    run_method.ex_return = [
+      {
+        exit_code: 0
+      },
+      {
+        stderr: "Created [https://cloudbuild.googleapis.com/build-id-1234567]",
+        exit_code: 0
+      },
+      {
+        exit_code: 0,
+        stdout: "output"
+      },
+      {
+        exit_code: 0
+      },
+      {
+        stdout: "[{\"status\": {\"url\": \"https://serviceurl\"}}]",
+        exit_code: 0
+      }
+    ]
+    run_method.ex_stdout_return = [
+      "output_logs"
+    ]
+
+    result = run_method.launch(
+      website: @website,
+      website_location: @website_location
+    )
+
+    assert_equal result, true
+    assert_equal run_method.ex_history.count, 5
+    assert_equal run_method.ex_stdout_history.count, 1
+
+    assert_equal @website_location.obj["gcloud_url"], "https://serviceurl"
   end
 end
