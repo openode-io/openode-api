@@ -417,4 +417,19 @@ class WebsiteLocationTest < ActiveSupport::TestCase
 
     assert wl.available_location?
   end
+
+  # location_config
+
+  test "location_config - happy path" do
+    w = default_website
+    w.type = "gcloud_run"
+    w.cloud_type = "gcloud"
+    w.version = "v3"
+    w.account_type = "grun-128"
+    w.save(validate: false)
+
+    wl = w.website_locations.first
+
+    assert wl.location_config["provider_id"] == "can"
+  end
 end

@@ -33,6 +33,7 @@ application:
       cloud_type: cloud
       locations:
         - str_id: canada2
+          provider_id: can2
           full_name: Montreal (Canada2)
           country_fullname: Canada2
           servers:
@@ -56,6 +57,7 @@ application:
           location_subdomain: ""
           base_hostname: openode.io
         - str_id: canada
+          provider_id: mycan
           full_name: Montreal (Canada)
           country_fullname: Canada
           servers:
@@ -83,6 +85,7 @@ application:
       limit_memory_for_rolling_update_strategy: 0 # if >=, will use Recreate strategy
       locations:
         - str_id: canada
+          provider_id: kubecan
           full_name: Montreal (Canada2)
           country_fullname: Canada2
           builder_kubeconfig_path: /var/www/openode-api/config/kubernetes/production-canada2.yml
@@ -110,6 +113,7 @@ application:
       cloud_type: gcloud
       locations:
         - str_id: us-central-1
+          provider_id: us-central1
           full_name: Iowa (USA)
           country_fullname: USA
           cname: us_central_1.openode.io
@@ -117,6 +121,7 @@ application:
           location_subdomain: us
           base_hostname: openode.dev
         - str_id: canada
+          provider_id: can
           full_name: Can (Can)
           country_fullname: Canada
           cname: ca.openode.io

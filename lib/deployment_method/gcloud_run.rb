@@ -127,9 +127,8 @@ module DeploymentMethod
       result_json.length.positive? ? result_json.first : nil
     end
 
-    def region_of(_website_location)
-      # website_location.location.str_id
-      "us-central1"
+    def region_of(website_location)
+      website_location.location_config["provider_id"]
     end
 
     def retrieve_logs_cmd(options = {})
