@@ -11,7 +11,11 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
   def gcloud_run_method
     @runner ||= prepare_gcloud_run_runner(@website, @website_location)
 
-    @runner.get_execution_method
+    gcloud_test = DeploymentMethod::GcloudRunTest.new
+
+    @runner.set_execution_method(gcloud_test)
+
+    gcloud_test
   end
 
   test 'env variables string - happy path' do
@@ -26,6 +30,14 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
     result = gcloud_run_method.env_variables(@website)
 
     assert_equal result, ""
+  end
+
+  # region_of
+
+  test 'region_of - happy path' do
+    result = gcloud_run_method.region_of(@website_location)
+
+    assert_equal result, "kubecan"
   end
 
   # gcloud_cmd

@@ -266,13 +266,15 @@ class WebsiteLocation < ApplicationRecord
   end
 
   def available_location?
+    location_config.present?
+  end
+
+  def location_config
     manager = CloudProvider::Manager.instance
 
     type_cloud = manager.clouds.find { |c| c["type"] == website.type }
 
-    available_locations = type_cloud["locations"].map { |l| l["str_id"] }
-
-    available_locations.include?(location.str_id)
+    type_cloud["locations"].select { |l| l["str_id"] == location.str_id }.first
   end
 
   protected

@@ -1,5 +1,5 @@
 module DeploymentMethod
-  class GcloudRun < Base
+  class GcloudRunTest < GcloudRun
     attr_accessor :ex_return, :ex_history, :ex_stdout_return, :ex_stdout_history
 
     def ex(cmd, options = {})
