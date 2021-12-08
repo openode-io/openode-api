@@ -1,6 +1,6 @@
 
 require 'test_helper'
-require 'test_gcloud_run_helper'
+# require 'test_gcloud_run_helper'
 
 class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
   def setup
