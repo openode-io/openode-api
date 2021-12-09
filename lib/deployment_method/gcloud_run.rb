@@ -363,6 +363,19 @@ module DeploymentMethod
       )
     end
 
+    # status
+
+    def status_cmd(options = {})
+      website, website_location = get_website_fields(options)
+
+      gcloud_cmd({
+                   website: website,
+                   website_location: website_location,
+                   subcommand: "run services describe #{service_id(website)} " \
+          "--region=#{region_of(website_location)} --format=json"
+                 })
+    end
+
     # stop
 
     def delete_service_cmd(options = {})

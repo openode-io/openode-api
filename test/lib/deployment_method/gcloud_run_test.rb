@@ -144,4 +144,15 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
 
     assert_equal @website_location.obj["gcloud_url"], "https://serviceurl"
   end
+
+  # status_cmd
+
+  test 'status_cmd - happy path' do
+    result = gcloud_run_method.status_cmd(
+      website: @website,
+      website_location: @website_location
+    )
+
+    assert_includes result, "run services describe instance-#{@website.id}"
+  end
 end
