@@ -138,19 +138,23 @@ class InstancesController < ApplicationController
   api!
   def status
     result = if @website.version.present?
-               cmds = [{
-                 cmd_name: 'status_cmd',
-                 options: {
-                   website: @website,
-                   website_location: @website_location || @website.website_locations.first
-                 }
-               }]
+               if @website.online?
+                 cmds = [{
+                   cmd_name: 'status_cmd',
+                   options: {
+                     website: @website,
+                     website_location: @website_location || @website.website_locations.first
+                   }
+                 }]
 
-               exec_result = @runner.execute(cmds)
+                 exec_result = @runner.execute(cmds)
 
-               json_result = JSON.parse(exec_result.first[:result][:stdout])
+                 json_result = JSON.parse(exec_result.first[:result][:stdout])
 
-               json_result["status"]
+                 json_result["status"]
+               else
+                 []
+               end
              else
                @website.statuses.last&.obj || []
     end
