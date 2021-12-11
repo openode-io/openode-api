@@ -51,6 +51,16 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
       "&& gcloud --project openode '"
   end
 
+  test 'gcloud_cmd - without chg_dir_workspace' do
+    result = gcloud_run_method.gcloud_cmd(
+      website: @website,
+      website_location: @website_location,
+      chg_dir_workspace: false
+    )
+
+    assert_equal result, "timeout 400 sh -c 'gcloud --project openode '"
+  end
+
   test 'gcloud_cmd - with custom timeout' do
     result = gcloud_run_method.gcloud_cmd(
       website: @website,
