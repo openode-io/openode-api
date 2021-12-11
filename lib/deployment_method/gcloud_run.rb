@@ -30,9 +30,15 @@ module DeploymentMethod
     def gcloud_cmd(options = {})
       website, = get_website_fields(options)
       timeout = options[:timeout] || 400
+      chg_dir_workspace = options[:chg_dir_workspace]
+
+      chg_dir_workspace = true if chg_dir_workspace.nil?
 
       project_path = website.repo_dir
-      "timeout #{timeout} sh -c 'cd #{project_path} && gcloud --project #{GCLOUD_PROJECT_ID} " \
+
+      chg_dir_cmd = chg_dir_workspace ? "cd #{project_path} && " : ""
+
+      "timeout #{timeout} sh -c '#{chg_dir_cmd}gcloud --project #{GCLOUD_PROJECT_ID} " \
       "#{options[:subcommand]}'"
     end
 
@@ -141,7 +147,8 @@ module DeploymentMethod
       gcloud_cmd({
                    website: website,
                    website_location: website_location,
-                   subcommand: subcommand
+                   subcommand: subcommand,
+                   chg_dir_workspace: false
                  })
     end
 
@@ -153,7 +160,8 @@ module DeploymentMethod
                                   subcommand: "run services list " \
                                     "--region=#{region_of(website_location)} " \
                                     "--filter=\"metadata.name=#{service_id(website)}\" " \
-                                    "--format=json"
+                                    "--format=json",
+                                  chg_dir_workspace: false
                                 ))
 
       first_safe_json(result[:stdout])
@@ -241,6 +249,7 @@ module DeploymentMethod
       result = ex("gcloud_cmd", {
                     website: website,
                     website_location: website_location,
+                    chg_dir_workspace: false,
                     subcommand: "run deploy #{service_id(website)} --port=80 " \
           "--image #{image_url} " \
           "--platform managed --region #{region_of(website_location)} " \
@@ -325,6 +334,7 @@ module DeploymentMethod
       result = ex("gcloud_cmd", {
                     website: website,
                     website_location: website_location,
+                    chg_dir_workspace: false,
                     subcommand: "builds describe #{latest_build_id} --format=json"
                   })
       result_json = JSON.parse(result[:stdout])
@@ -372,7 +382,8 @@ module DeploymentMethod
                    website: website,
                    website_location: website_location,
                    subcommand: "run services describe #{service_id(website)} " \
-          "--region=#{region_of(website_location)} --format=json"
+          "--region=#{region_of(website_location)} --format=json",
+                   chg_dir_workspace: false
                  })
     end
 
@@ -385,6 +396,7 @@ module DeploymentMethod
       gcloud_cmd({
                    website: website,
                    website_location: website_location,
+                   chg_dir_workspace: false,
                    subcommand: "run services delete #{service_id(website)} " \
           "--region #{region_of(website_location)} --quiet #{async}"
                  })
