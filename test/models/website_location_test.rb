@@ -161,6 +161,21 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert result == 'testsite2.us.openode.dev'
   end
 
+  test 'domain with gcloud_run subdomain - europe west 1' do
+    website = Website.find_by site_name: 'testsite2'
+    website.type = Website::TYPE_GCLOUD_RUN
+    website.save!
+
+    wl = website.website_locations[0]
+
+    location = Location.find_by str_id: 'eu-west-1'
+    wl.location_id = location.id
+    wl.save!
+
+    result = wl.main_domain
+    assert result == 'testsite2.eu.openode.dev'
+  end
+
   test 'domain with usa custom domain' do
     website = Website.find_by site_name: 'www.what.is'
     wl = website.website_locations[0]
