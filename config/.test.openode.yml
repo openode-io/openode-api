@@ -120,6 +120,14 @@ application:
           external_addr: 127.0.0.2
           location_subdomain: us
           base_hostname: openode.dev
+        - str_id: eu-west-1
+          provider_id: europe-west1
+          full_name: Belgium (Europe)
+          country_fullname: Belgium
+          cname: eu_west_1.openode.io
+          external_addr: 127.0.0.2
+          location_subdomain: eu
+          base_hostname: openode.dev
         - str_id: canada
           provider_id: can
           full_name: Can (Can)

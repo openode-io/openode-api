@@ -29,3 +29,9 @@ us_central_1:
   full_name: Iowa (USA)
   country_fullname: United States
   cloud_provider: internal
+
+eu_west_1:
+  str_id: eu-west-1
+  full_name: Belgium (Europe)
+  country_fullname: Belgium
+  cloud_provider: internal
