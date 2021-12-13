@@ -6,7 +6,7 @@ module CloudProvider
 
     def initialize(configs = nil)
       @configs = configs
-      initialize_locations
+      initialize_locations if @configs.present?
     end
 
     def deployment_protocol

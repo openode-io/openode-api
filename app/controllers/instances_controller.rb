@@ -207,6 +207,7 @@ class InstancesController < ApplicationController
                                   'domain for custom domains.', required: true
   param :account_type, String, desc: 'Plan internal id. Use /global/available-plans to ' \
                                       'get the list.', required: false
+  param :openode_version, String, desc: '', required: false
   def create_instance
     plan = Website.plan_of(params['account_type'])
 
@@ -218,7 +219,8 @@ class InstancesController < ApplicationController
         title: params['open_source_title'],
         description: params['open_source_description'],
         repository_url: params['open_source_repository']
-      }
+      },
+      version: params["openode_version"] || "v3"
     )
 
     # if a location is specified, create website location

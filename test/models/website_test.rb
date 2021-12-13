@@ -94,7 +94,7 @@ class WebsiteTest < ActiveSupport::TestCase
     w.reload
 
     assert_equal w.get_config('VERSION'), ''
-    assert_equal w.type, 'kubernetes'
+    assert_equal w.type, 'gcloud_run'
   end
 
   test 'destroying a website should destroy its secret if any' do
@@ -1712,7 +1712,7 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.site_name, 'helloworld'
     assert_equal website.account_type, Website::DEFAULT_ACCOUNT_TYPE
     assert_equal website.domains, []
-    assert_equal website.type, 'kubernetes'
+    assert_equal website.type, 'gcloud_run'
   end
 
   test 'create - subdomain downcase if upper cases' do

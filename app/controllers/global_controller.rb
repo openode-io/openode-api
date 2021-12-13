@@ -29,6 +29,12 @@ class GlobalController < ApplicationController
   end
 
   api!
+  def available_plans_gcloud_run
+    plans = CloudProvider::GcloudRun.new.plans
+    json(plans)
+  end
+
+  api!
   def available_plans_at
     manager = CloudProvider::Manager.instance
 
