@@ -329,7 +329,8 @@ class Website < ApplicationRecord
   end
 
   def prepare_new_site
-    self.type = TYPE_KUBERNETES
+    self.type = TYPE_GCLOUD_RUN
+    self.cloud_type = CLOUD_TYPE_GCLOUD
     self.redir_http_to_https = false
     self.open_source ||= {}
   end

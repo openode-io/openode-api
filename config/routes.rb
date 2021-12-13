@@ -87,6 +87,7 @@ Rails.application.routes.draw do
 
     get 'available-configs', to: 'global#available_configs'
     get 'available-plans', to: 'global#available_plans'
+    get 'available-plans/gcloud_run', to: 'global#available_plans_gcloud_run'
     get 'available-plans-at/:type/:location_str_id', to: 'global#available_plans_at'
 
     get 'type-lists/:type', to: 'global#type_lists'
