@@ -110,7 +110,7 @@ class Website < ApplicationRecord
     }
   ]
 
-  DEFAULT_ACCOUNT_TYPE = 'second'
+  DEFAULT_ACCOUNT_TYPE = 'grun-128'
   AUTO_ACCOUNT_TYPE = 'auto'
   OPEN_SOURCE_ACCOUNT_TYPE = 'open_source'
   DEFAULT_OPEN_SOURCE_REPO_URL = 'https://repourl.com'
