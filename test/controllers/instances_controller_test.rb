@@ -481,7 +481,7 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
 
   test '/instances/create with id instead of internal id' do
     post '/instances/create',
-         params: { site_name: 'helloworld123', account_type: '100-MB' },
+         params: { site_name: 'helloworld123', account_type: 'grun-128' },
          as: :json,
          headers: default_headers_auth
 
