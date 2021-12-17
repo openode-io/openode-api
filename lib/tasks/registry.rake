@@ -1,20 +1,73 @@
 
+def first_build_server_configs(build_server)
+  {
+    host: build_server['ip'],
+    secret: {
+      user: build_server['user'],
+      private_key: build_server['private_key']
+    }
+  }
+end
+
+def deployment_method()
+  manager = CloudProvider::Manager.instance
+
+  build_server_configs = first_build_server_configs(
+    manager.application['docker']['build_servers'].first
+  )
+
+  puts "build_server_configs -> #{build_server_configs}"
+
+  runner = DeploymentMethod::Runner.new(
+    Website::TYPE_GCLOUD_RUN,
+    "gcloud",
+    build_server_configs.merge(location: nil)
+  )
+
+  dep_method = DeploymentMethod::GcloudRun.new
+  dep_method.runner = runner
+
+  dep_method
+end
+
 namespace :registry do
   desc ''
   task clean: :environment do
     name = "Task registry__clean"
     Rails.logger.info "[#{name}] begin"
 
-    manager = CloudProvider::Manager.instance
-    image_location = manager.application.dig(
-      'docker', 'images_location'
-    )
-    registry_type = image_location['registry_impl_type']
+    dep_method = deployment_method
 
-    img_registry = DeploymentMethod::Util::ImageRegistry.instance(
-      registry_type,
-      registry_name: image_location['repository_name']
-    )
+    puts "runner = #{dep_method.inspect}"
+
+    images_list = JSON.parse(dep_method.ex("gcloud_cmd",
+      website: true,
+      website_location: true,
+      chg_dir_workspace: false,
+      subcommand: "container images list --format json"
+    )[:stdout])
+
+    images_list.each do |image_obj|
+      img_fullname = image_obj.dig("name")
+      img_name = img_fullname.gsub("gcr.io/openode/", "")
+      puts "img_name -> #{img_name}"
+
+      tags = JSON.parse(dep_method.ex("gcloud_cmd",
+        website: true,
+        website_location: true,
+        chg_dir_workspace: false,
+        subcommand: "container images list-tags #{img_fullname} --format json"
+      )[:stdout])
+
+      tags.each do |tag_obj|
+        tag_obj.dig("tags").each do |tag_name|
+          puts "#{img_fullname} tag name -> #{tag_name}"
+        end
+      end
+    end
+    
+
+    return
 
     img_registry.repositories.each do |repository|
       sleep 1 unless Rails.env.test?
