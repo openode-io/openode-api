@@ -105,7 +105,6 @@ module DeploymentMethod
       end
 
       # save the image name tag and build ID
-      save_extra_execution_attrib('image_name_tag', image_url)
       save_extra_execution_attrib('build_id', build_id)
 
       # retrieve the logs build
@@ -299,6 +298,7 @@ module DeploymentMethod
       end
 
       image_url = build_image(options)
+      save_extra_execution_attrib('image_name_tag', image_url)
 
       deploy(options.merge(image_url: image_url))
 
