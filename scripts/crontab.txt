@@ -33,5 +33,6 @@ PATH=PATH=/bin:/usr/bin:/home/ubuntu/.rvm/rubies/ruby-3.0.1/bin/:/home/ubuntu/.n
 */2 * * * * cd $PATH_REPO && rails kube_maintenance:auto_manage_memory >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 #10 10 * * * cd $PATH_REPO && rails registry:clean >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 10 */22 * * * cd $PATH_REPO && /bin/bash scripts/backup-kubes.sh >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+0 * * * * cd /home/ubuntu && /bin/bash backup-db.sh >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 5 */3 * * * /usr/sbin/logrotate -s ~/logrotate.status /var/www/openode-api/scripts/logrotate.d/openode_api
 15 */3 * * * /usr/sbin/logrotate -s ~/openode-www-logrotate.status /var/www/openode-www/scripts/logrotate.d/openode_www
