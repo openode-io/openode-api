@@ -289,7 +289,13 @@ class InstancesController < ApplicationController
   def set_plan
     plan_id = params['plan']
 
-    plan = Website.plan_of(plan_id)
+    website_location = @website.website_locations.first
+
+    validation_error!('Location required to change plan') unless website_location
+
+    plans = website_location.available_plans
+
+    plan = plans.find { |p| [p[:id], p[:internal_id]].include?(plan_id) }
 
     validation_error!('Unavailable plan') unless plan
 

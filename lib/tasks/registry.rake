@@ -30,6 +30,19 @@ def deployment_method
   dep_method
 end
 
+def destroy_tag_image(image_fullname, tag_obj)
+  digest = tag_obj["digest"]
+  path_to_delete = "#{image_fullname}@#{digest}"
+  Rails.logger.info "[#{name}] removing image tag #{path_to_delete}"
+
+  subcommand_del_image = "container images delete #{path_to_delete} --quiet"
+  # dep_method.ex("gcloud_cmd",
+  #              website: true,
+  #              website_location: true,
+  #              chg_dir_workspace: false,
+  #              subcommand: subcommand_del_image)
+end
+
 namespace :registry do
   desc ''
   task clean: :environment do
@@ -55,8 +68,11 @@ namespace :registry do
                                       chg_dir_workspace: false,
                                       subcommand: subcommand_list_tags)[:stdout])
 
+      has_tags = false
+
       tags.each do |tag_obj|
         tag_obj["tags"].each do |tag_name|
+          has_tags = true
           tag_parts = DeploymentMethod::Util::InstanceImageManager.tag_parts(tag_name)
 
           next unless tag_parts[:execution_id]
@@ -70,17 +86,24 @@ namespace :registry do
             next if Rails.env.development?
 
             full_img_tag = "#{img_fullname}:#{tag_name}"
-            Rails.logger.info "[#{name}] removing image tag #{full_img_tag}"
+            Rails.logger.info "[#{name}] untag #{full_img_tag}"
 
+            subcommand_untag = "container images untag #{full_img_tag} --quiet --format json"
             Rails.logger.info dep_method.ex("gcloud_cmd",
                                             website: true,
                                             website_location: true,
                                             chg_dir_workspace: false,
-                                            subcommand: "container images untag #{full_img_tag} --quiet --format json")
+                                            subcommand: subcommand_untag)
+
+            destroy_tag_image(img_fullname, tag_obj)
           end
 
         rescue StandardError => e
           Ex::Logger.error(e, 'Issue removing tag')
+        end
+
+        if tag_obj["tags"].count.zero?
+          destroy_tag_image(img_fullname, tag_obj)
         end
       end
 
