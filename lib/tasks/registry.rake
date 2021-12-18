@@ -9,7 +9,7 @@ def first_build_server_configs(build_server)
   }
 end
 
-def deployment_method()
+def deployment_method
   manager = CloudProvider::Manager.instance
 
   build_server_configs = first_build_server_configs(
@@ -38,62 +38,50 @@ namespace :registry do
 
     dep_method = deployment_method
 
-    puts "runner = #{dep_method.inspect}"
-
     images_list = JSON.parse(dep_method.ex("gcloud_cmd",
-      website: true,
-      website_location: true,
-      chg_dir_workspace: false,
-      subcommand: "container images list --format json"
-    )[:stdout])
+                                           website: true,
+                                           website_location: true,
+                                           chg_dir_workspace: false,
+                                           subcommand: "container images list --format json")[:stdout])
 
     images_list.each do |image_obj|
-      img_fullname = image_obj.dig("name")
+      img_fullname = image_obj["name"]
       img_name = img_fullname.gsub("gcr.io/openode/", "")
-      puts "img_name -> #{img_name}"
 
       tags = JSON.parse(dep_method.ex("gcloud_cmd",
-        website: true,
-        website_location: true,
-        chg_dir_workspace: false,
-        subcommand: "container images list-tags #{img_fullname} --format json"
-      )[:stdout])
+                                      website: true,
+                                      website_location: true,
+                                      chg_dir_workspace: false,
+                                      subcommand: "container images list-tags #{img_fullname} --format json")[:stdout])
 
       tags.each do |tag_obj|
-        tag_obj.dig("tags").each do |tag_name|
-          puts "#{img_fullname} tag name -> #{tag_name}"
+        tag_obj["tags"].each do |tag_name|
+
+          tag_parts = DeploymentMethod::Util::InstanceImageManager.tag_parts(tag_name)
+
+          next unless tag_parts[:execution_id]
+
+          execution = Execution.find_by id: tag_parts[:execution_id]
+
+          unless execution
+            Rails.logger.info "[#{name}] Should remove tag #{tag_name} for " \
+                              "execution #{tag_parts[:execution_id]}"
+
+            next if Rails.env.development?
+
+            full_img_tag = "#{img_fullname}:#{tag_name}"
+            Rails.logger.info "[#{name}] removing image tag #{full_img_tag}"
+            
+          end
+
+        rescue StandardError => e
+          Ex::Logger.error(e, 'Issue removing tag')
+
         end
-      end
-    end
-    
-
-    return
-
-    img_registry.repositories.each do |repository|
-      sleep 1 unless Rails.env.test?
-      tags = img_registry.tags(repository.name)
-
-      tags.each do |tag|
-        tag_parts = DeploymentMethod::Util::InstanceImageManager.tag_parts(tag.tag)
-
-        next unless tag_parts[:execution_id]
-
-        execution = Execution.find_by id: tag_parts[:execution_id]
-
-        unless execution
-          Rails.logger.info "[#{name}] Should remove tag #{tag.tag} for " \
-                            "execution #{tag_parts[:execution_id]}"
-
-          next if Rails.env.development?
-
-          img_registry.destroy_tag(repository.name, tag.tag)
-        end
-      rescue StandardError => e
-        Ex::Logger.error(e, 'Issue removing tag')
       end
 
     rescue StandardError => e
-      Ex::Logger.error(e, 'Issue with repository')
+      Ex::Logger.error(e, 'Issue removing')
     end
   end
 end
