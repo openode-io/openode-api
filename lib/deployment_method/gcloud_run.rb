@@ -34,9 +34,7 @@ module DeploymentMethod
 
       chg_dir_workspace = true if chg_dir_workspace.nil?
 
-      project_path = website.repo_dir
-
-      chg_dir_cmd = chg_dir_workspace ? "cd #{project_path} && " : ""
+      chg_dir_cmd = chg_dir_workspace ? "cd #{website.repo_dir} && " : ""
 
       "timeout #{timeout} sh -c '#{chg_dir_cmd}gcloud --project #{GCLOUD_PROJECT_ID} " \
       "#{options[:subcommand]}'"
