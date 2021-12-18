@@ -72,6 +72,11 @@ namespace :registry do
             full_img_tag = "#{img_fullname}:#{tag_name}"
             Rails.logger.info "[#{name}] removing image tag #{full_img_tag}"
 
+            Rails.logger.info dep_method.ex("gcloud_cmd",
+                                            website: true,
+                                            website_location: true,
+                                            chg_dir_workspace: false,
+                                            subcommand: "container images untag #{full_img_tag} --quiet --format json")
           end
 
         rescue StandardError => e
