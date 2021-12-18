@@ -35,12 +35,12 @@ def destroy_tag_image(image_fullname, tag_obj)
   path_to_delete = "#{image_fullname}@#{digest}"
   Rails.logger.info "[#{TASK_NAME}] removing image tag #{path_to_delete}"
 
-  # subcommand_del_image = "container images delete #{path_to_delete} --quiet"
-  # dep_method.ex("gcloud_cmd",
-  #              website: true,
-  #              website_location: true,
-  #              chg_dir_workspace: false,
-  #              subcommand: subcommand_del_image)
+  subcommand_del_image = "container images delete #{path_to_delete} --quiet"
+  dep_method.ex("gcloud_cmd",
+                website: true,
+                website_location: true,
+                chg_dir_workspace: false,
+                subcommand: subcommand_del_image)
 end
 
 namespace :registry do
@@ -101,7 +101,7 @@ namespace :registry do
           end
 
         rescue StandardError => e
-          Ex::Logger.error(e, 'Issue removing tag')
+          Ex::Logger.error(e, "[#{name}] Issue removing tag")
         end
 
         if tag_obj["tags"].count.zero?
@@ -112,7 +112,7 @@ namespace :registry do
       end
 
     rescue StandardError => e
-      Ex::Logger.error(e, 'Issue removing')
+      Ex::Logger.error(e, "[#{name}] Issue removing")
     end
   end
 end
