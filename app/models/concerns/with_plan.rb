@@ -5,7 +5,7 @@ module WithPlan
   def self.plan_of(acc_type)
     plans = CloudProvider::Manager.instance.available_plans
 
-    plans.find { |p| [p[:id], p[:internal_id]].include?(acc_type) }
+    plans.find { |p| [p[:internal_id]].include?(acc_type) }
   end
 
   def self.find_min_plan(minimum_memory, exclude = [])

@@ -97,7 +97,7 @@ module CloudProvider
       @clouds
         .map { |cloud| cloud['instance'].plans }
         .flatten
-        .uniq { |plan| plan[:id] }
+        .uniq { |plan| plan[:internal_id] }
     end
 
     def available_plans_of_type_at(type, location_str_id)
