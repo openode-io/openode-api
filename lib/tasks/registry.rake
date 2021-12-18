@@ -35,7 +35,7 @@ def destroy_tag_image(image_fullname, tag_obj)
   path_to_delete = "#{image_fullname}@#{digest}"
   Rails.logger.info "[#{name}] removing image tag #{path_to_delete}"
 
-  subcommand_del_image = "container images delete #{path_to_delete} --quiet"
+  # subcommand_del_image = "container images delete #{path_to_delete} --quiet"
   # dep_method.ex("gcloud_cmd",
   #              website: true,
   #              website_location: true,
