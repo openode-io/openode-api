@@ -30,7 +30,7 @@ def deployment_method
   dep_method
 end
 
-def destroy_tag_image(image_fullname, tag_obj)
+def destroy_tag_image(dep_method, image_fullname, tag_obj)
   digest = tag_obj["digest"]
   path_to_delete = "#{image_fullname}@#{digest}"
   Rails.logger.info "[#{TASK_NAME}] removing image tag #{path_to_delete}"
@@ -97,7 +97,7 @@ namespace :registry do
 
             Rails.logger.info "[#{name}] #{result}"
 
-            destroy_tag_image(img_fullname, tag_obj)
+            destroy_tag_image(dep_method, img_fullname, tag_obj)
           end
 
         rescue StandardError => e
@@ -107,7 +107,7 @@ namespace :registry do
         if tag_obj["tags"].count.zero?
           next if Rails.env.development?
 
-          destroy_tag_image(img_fullname, tag_obj)
+          destroy_tag_image(dep_method, img_fullname, tag_obj)
         end
       end
 
