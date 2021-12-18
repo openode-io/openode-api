@@ -1,4 +1,6 @@
 
+TASK_NAME = "Task registry__clean"
+
 def first_build_server_configs(build_server)
   {
     host: build_server['ip'],
@@ -16,8 +18,6 @@ def deployment_method
     manager.application['docker']['build_servers'].first
   )
 
-  puts "build_server_configs -> #{build_server_configs}"
-
   runner = DeploymentMethod::Runner.new(
     Website::TYPE_GCLOUD_RUN,
     "gcloud",
@@ -33,7 +33,7 @@ end
 def destroy_tag_image(image_fullname, tag_obj)
   digest = tag_obj["digest"]
   path_to_delete = "#{image_fullname}@#{digest}"
-  Rails.logger.info "[#{name}] removing image tag #{path_to_delete}"
+  Rails.logger.info "[#{TASK_NAME}] removing image tag #{path_to_delete}"
 
   # subcommand_del_image = "container images delete #{path_to_delete} --quiet"
   # dep_method.ex("gcloud_cmd",
@@ -46,7 +46,7 @@ end
 namespace :registry do
   desc ''
   task clean: :environment do
-    name = "Task registry__clean"
+    name = TASK_NAME
     Rails.logger.info "[#{name}] begin"
 
     dep_method = deployment_method
@@ -89,11 +89,13 @@ namespace :registry do
             Rails.logger.info "[#{name}] untag #{full_img_tag}"
 
             subcommand_untag = "container images untag #{full_img_tag} --quiet --format json"
-            Rails.logger.info dep_method.ex("gcloud_cmd",
-                                            website: true,
-                                            website_location: true,
-                                            chg_dir_workspace: false,
-                                            subcommand: subcommand_untag)
+            result = dep_method.ex("gcloud_cmd",
+                                   website: true,
+                                   website_location: true,
+                                   chg_dir_workspace: false,
+                                   subcommand: subcommand_untag)
+
+            Rails.logger.info "[#{name}] #{result}"
 
             destroy_tag_image(img_fullname, tag_obj)
           end
@@ -103,6 +105,8 @@ namespace :registry do
         end
 
         if tag_obj["tags"].count.zero?
+          next if Rails.env.development?
+
           destroy_tag_image(img_fullname, tag_obj)
         end
       end
