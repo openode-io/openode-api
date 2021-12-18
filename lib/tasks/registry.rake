@@ -38,25 +38,25 @@ namespace :registry do
 
     dep_method = deployment_method
 
+    subcommand_img_list = "container images list --format json"
     images_list = JSON.parse(dep_method.ex("gcloud_cmd",
                                            website: true,
                                            website_location: true,
                                            chg_dir_workspace: false,
-                                           subcommand: "container images list --format json")[:stdout])
+                                           subcommand: subcommand_img_list)[:stdout])
 
     images_list.each do |image_obj|
       img_fullname = image_obj["name"]
-      img_name = img_fullname.gsub("gcr.io/openode/", "")
 
+      subcommand_list_tags = "container images list-tags #{img_fullname} --format json"
       tags = JSON.parse(dep_method.ex("gcloud_cmd",
                                       website: true,
                                       website_location: true,
                                       chg_dir_workspace: false,
-                                      subcommand: "container images list-tags #{img_fullname} --format json")[:stdout])
+                                      subcommand: subcommand_list_tags)[:stdout])
 
       tags.each do |tag_obj|
         tag_obj["tags"].each do |tag_name|
-
           tag_parts = DeploymentMethod::Util::InstanceImageManager.tag_parts(tag_name)
 
           next unless tag_parts[:execution_id]
@@ -71,12 +71,11 @@ namespace :registry do
 
             full_img_tag = "#{img_fullname}:#{tag_name}"
             Rails.logger.info "[#{name}] removing image tag #{full_img_tag}"
-            
+
           end
 
         rescue StandardError => e
           Ex::Logger.error(e, 'Issue removing tag')
-
         end
       end
 
