@@ -39,17 +39,17 @@ namespace :gcloud_run_maintenance do
 
     subcommand_services_list = "run services list --format json"
     services_list = JSON.parse(dep_method.ex("gcloud_cmd",
-                                    website: true,
-                                    website_location: true,
-                                    chg_dir_workspace: false,
-                                    subcommand: subcommand_services_list)[:stdout])
+                                             website: true,
+                                             website_location: true,
+                                             chg_dir_workspace: false,
+                                             subcommand: subcommand_services_list)[:stdout])
 
     services_list.each do |service|
       site_id = service.dig("metadata", "name").split("-").last.to_i
 
       website = Website.find_by(id: site_id)
 
-      next unless website.present?
+      next if website.blank?
 
       if website.status == Website::STATUS_OFFLINE
         Rails.logger.info "[#{name}] will remove instance #{website.site_name}"
