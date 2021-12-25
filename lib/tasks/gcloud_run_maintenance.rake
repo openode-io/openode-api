@@ -53,6 +53,12 @@ namespace :gcloud_run_maintenance do
 
       if website.status == Website::STATUS_OFFLINE
         Rails.logger.info "[#{name}] will remove instance #{website.site_name}"
+        subcommand_del = "run services delete #{dep_method.service_id(website)}"
+        dep_method.ex("gcloud_cmd",
+                      website: true,
+                      website_location: true,
+                      chg_dir_workspace: false,
+                      subcommand: subcommand_del)
       end
     rescue StandardError => e
       Ex::Logger.error(e, "[#{name}] Issue processing service #{service.inspect}")
