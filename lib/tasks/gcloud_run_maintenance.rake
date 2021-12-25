@@ -56,7 +56,7 @@ namespace :gcloud_run_maintenance do
 
         website_location = website.website_locations.first
         subcommand_del = "run services delete #{dep_method.service_id(website)} " \
-          "--region #{dep_method.region_of(website_location)}"
+          "--region #{dep_method.region_of(website_location)} --quiet"
         dep_method.ex("gcloud_cmd",
                       website: true,
                       website_location: true,
