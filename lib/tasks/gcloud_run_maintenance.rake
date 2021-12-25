@@ -52,8 +52,11 @@ namespace :gcloud_run_maintenance do
       next if website.blank?
 
       if website.status == Website::STATUS_OFFLINE
-        Rails.logger.info "[#{name}] will remove instance #{website.site_name}"
-        subcommand_del = "run services delete #{dep_method.service_id(website)}"
+        Rails.logger.info "[#{name}] will remove instance #{website.site_name} "
+
+        website_location = website.website_locations.first
+        subcommand_del = "run services delete #{dep_method.service_id(website)} " \
+          "--region #{dep_method.region_of(website_location)}"
         dep_method.ex("gcloud_cmd",
                       website: true,
                       website_location: true,
