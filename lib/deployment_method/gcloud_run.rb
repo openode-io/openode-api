@@ -447,7 +447,6 @@ module DeploymentMethod
 
       result['result'] = 'success'
       result['url'] = "http://#{website_location.main_domain}/"
-      result['temp_backend_url'] = website_location.obj["gcloud_url"]
 
       if website.domain_type == 'custom_domain'
         notify('info', 'Custom domain - The DNS documentation is available at ' \
@@ -477,7 +476,7 @@ module DeploymentMethod
         if website.online?
           notify_final_instance_details(options)
           notify("info", "Please notice that DNS propagation can take few minutes for " \
-                "the main URL. The temp_backend_url can be used in the meantime.")
+                "the main URL.")
         else
           # stop it
           notify("info", "Stopping instance...")
