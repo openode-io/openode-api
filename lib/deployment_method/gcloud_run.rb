@@ -9,7 +9,7 @@ module DeploymentMethod
     WWW_DEPLOYMENT_LABEL = "www"
     GCLOUD_PROJECT_ID = ENV["GOOGLE_CLOUD_PROJECT"]
     GCP_CERTS_BUCKET = ENV["GCP_CERTS_BUCKET"]
-    DEFAULT_MAX_INSTANCES = 5
+    DEFAULT_MAX_INSTANCES = 1
 
     def initialize; end
 
