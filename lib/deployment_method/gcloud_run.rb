@@ -252,7 +252,7 @@ module DeploymentMethod
           "--platform managed --region #{region_of(website_location)} " \
           "--allow-unauthenticated --set-env-vars=\"#{env_variables(website)}\" " \
           "--memory=#{website.memory}Mi " \
-          "--timeout=#{website.max_build_duration} " \
+          "--timeout=30 " \
           "--max-instances=#{DEFAULT_MAX_INSTANCES} "
                   })
 
