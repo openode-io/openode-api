@@ -67,6 +67,19 @@ module DeploymentMethod
       path
     end
 
+    def load_balancer_ip(location)
+      location_str_id = location.str_id
+      configs = GcloudRun.kube_configs_at_location(location_str_id)
+
+      raise "missing load_balancer_ip for #{location_str_id}" unless configs
+
+      path = configs['load_balancer_ip']
+
+      assert path
+
+      path
+    end
+
     def kubectl_cmd(options = {})
       assert options[:website_location]
       assert options[:s_arguments]
@@ -418,28 +431,126 @@ module DeploymentMethod
       END_YML
     end
 
-    def kube_yml(website)
+    def tabulate(nb_tabs, str)
+      str.lines.map do |line|
+        "  " * nb_tabs + line.sub("\n", "")
+      end
+         .join("\n")
+    end
+
+    def kube_ingress_rule_body
+      "paths:\n" \
+      "  - backend:\n" \
+      "      service:\n" \
+      "        name: main-service\n" \
+      "        port: \n" \
+      "          number: 80\n" \
+      "    path: /\n" \
+      "    pathType: ImplementationSpecific"
+    end
+
+    def kube_ingress_rule(host)
+      <<~END_YML
+        - host: #{host}
+          #{tabulate 1, 'http:'}
+          #{tabulate 2, kube_ingress_rule_body}
+      END_YML
+    end
+
+    def kube_ingress_rules(website_location)
+      domains = website_location.compute_domains
+
+      result = ""
+
+      domains.each do |domain|
+        result += "#{kube_ingress_rule(domain)}\n\n"
+      end
+
+      result
+    end
+
+    def kube_ingress(website, website_location)
+      <<~END_YML
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          annotations:
+            kubernetes.io/ingress.class: nginx
+            nginx.ingress.kubernetes.io/limit-rpm: "6000"
+            nginx.ingress.kubernetes.io/proxy-body-size: 100m
+            nginx.org/websocket-services: main-service
+          name: main-ingress
+          namespace: #{namespace_of(website)}
+        spec:
+          rules:
+          #{kube_ingress_rules(website_location)}
+      END_YML
+    end
+
+    def kube_deployment(website, image_url)
+      <<~END_YML
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: www-deployment
+          namespace: #{namespace_of(website)}
+        spec:
+          selector:
+            matchLabels:
+              app: www
+          strategy:
+            type: Recreate
+          template:
+            metadata:
+              labels:
+                app: www
+                deploymentId: "#{deployment_id}"
+            spec:
+              containers:
+              - image: #{image_url}
+                name: www
+                ports:
+                - containerPort: 80
+                  protocol: TCP
+                resources:
+                  limits:
+                    ephemeral-storage: 100Mi
+                    memory: #{website.memory}Mi
+                  requests:
+                    ephemeral-storage: 100Mi
+                    memory: #{website.memory}Mi
+              restartPolicy: Always
+      END_YML
+    end
+
+    def kube_yml(website, website_location, image_url)
       <<~END_YML
         #{kube_ns(website)}
         ---
         #{kube_service(website)}
+        ---
+        #{kube_ingress(website, website_location)}
+        ---
+        #{kube_deployment(website, image_url)}
       END_YML
     end
 
     def launch_kubernetes(options = {})
       website, website_location = get_website_fields(options)
       # simplified_options = { website: website, website_location: website_location }
-      # image_url = options[:image_url]
+      image_url = options[:image_url]
 
-      kube_yml = kube_yml(website)
+      kube_yml = kube_yml(website, website_location, image_url)
+
       result = kubectl_yml_action(website_location, "apply", kube_yml, ensure_exit_code: 0)
 
       notify("info", result[:stdout])
 
-      # website_location.load_balancer_synced = false
-      # website_location.obj ||= {}
-      # website_location.obj["gcloud_url"] = service["status"]&.dig("url")
-      # website_location.save!
+      website_location.load_balancer_synced = false
+      website_location.obj ||= {}
+      ip = "http://#{load_balancer_ip(website_location.location)}/"
+      website_location.obj["gcloud_url"] = ip
+      website_location.save!
 
       result
     end
