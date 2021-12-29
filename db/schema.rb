@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_08_124320) do
+ActiveRecord::Schema.define(version: 2021_12_29_002622) do
 
   create_table "addons", charset: "latin1", force: :cascade do |t|
     t.string "name"
@@ -303,6 +303,7 @@ ActiveRecord::Schema.define(version: 2021_11_08_124320) do
     t.text "obj"
     t.integer "replicas", default: 1
     t.boolean "load_balancer_synced", default: true
+    t.string "execution_layer", default: "gcloud_run"
     t.index ["location_id"], name: "location_id"
     t.index ["location_server_id"], name: "location_server_id"
     t.index ["website_id"], name: "website_id"

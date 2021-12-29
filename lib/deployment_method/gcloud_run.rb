@@ -27,6 +27,8 @@ module DeploymentMethod
       true
     end
 
+    # gcloud cmd
+
     def gcloud_cmd(options = {})
       website, = get_website_fields(options)
       timeout = options[:timeout] || 400
@@ -38,6 +40,80 @@ module DeploymentMethod
 
       "timeout #{timeout} sh -c '#{chg_dir_cmd}gcloud --project #{GCLOUD_PROJECT_ID} " \
       "#{options[:subcommand]}'"
+    end
+
+    # kubernetes
+
+    def self.kube_configs
+      CloudProvider::Manager.instance.first_details_of_type('gcloud_run')
+    end
+
+    def self.kube_configs_at_location(str_id)
+      confs = kube_configs
+
+      confs['locations'].find { |l| l['str_id'] == str_id }
+    end
+
+    def kubeconfig_path(location)
+      location_str_id = location.str_id
+      configs = GcloudRun.kube_configs_at_location(location_str_id)
+
+      raise "missing kubeconfig for #{location_str_id}" unless configs
+
+      path = configs['builder_kubeconfig_path']
+
+      assert path
+
+      path
+    end
+
+    def kubectl_cmd(options = {})
+      assert options[:website_location]
+      assert options[:s_arguments]
+      website = options[:website_location].website
+
+      config_path = kubeconfig_path(options[:website_location].location)
+
+      namespace = options[:with_namespace] ? "-n #{namespace_of(website)} " : ""
+
+      "KUBECONFIG=#{config_path} kubectl #{namespace}#{options[:s_arguments]}"
+    end
+
+    @@test_kubectl_file_path = nil
+
+    def self.set_kubectl_file_path(kube_file_path)
+      @@test_kubectl_file_path = kube_file_path
+    end
+
+    def self.yml_remote_file_path(action)
+      if !@@test_kubectl_file_path
+        tmp_file = Tempfile.new("kubectl-#{action}", KUBE_TMP_PATH)
+
+        tmp_file.path
+      else
+        @@test_kubectl_file_path
+      end
+    end
+
+    def kubectl_yml_action(website_location, action, content, opts = {})
+      tmp_file_path = GcloudRun.yml_remote_file_path(action)
+      runner.upload_content_to(content, tmp_file_path)
+
+      result = nil
+
+      begin
+        options_last_retry = opts[:last_trial] ? opts[:options_on_last_retry] : ""
+
+        result = ex('kubectl_cmd', {
+          website_location: website_location,
+          s_arguments: "#{action}#{opts[:kubectl_options]}#{options_last_retry} " \
+                        "-f #{tmp_file_path}"
+        }.merge(opts))
+      ensure
+        ex("delete_files", files: [tmp_file_path])
+      end
+
+      result
     end
 
     def image_tag_url(options = {})
@@ -285,7 +361,6 @@ module DeploymentMethod
 
     def launch(options = {})
       website, website_location = get_website_fields(options)
-      simplified_options = { website: website, website_location: website_location }
 
       location_valid =
         website_location.valid_location_plan? && website_location.available_location?
@@ -298,7 +373,15 @@ module DeploymentMethod
       image_url = build_image(options)
       save_extra_execution_attrib('image_name_tag', image_url)
 
-      deploy(options.merge(image_url: image_url))
+      send("launch_#{website.get_config('EXECUTION_LAYER')}",
+           options.merge(image_url: image_url))
+    end
+
+    def launch_gcloud_run(options = {})
+      website, website_location = get_website_fields(options)
+      simplified_options = { website: website, website_location: website_location }
+
+      deploy(options.merge(image_url: options[:image_url]))
 
       service = retrieve_run_service(simplified_options)
 
@@ -306,6 +389,59 @@ module DeploymentMethod
       website_location.obj ||= {}
       website_location.obj["gcloud_url"] = service["status"]&.dig("url")
       website_location.save!
+    end
+
+    def kube_ns(website)
+      <<~END_YML
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: #{namespace_of(website)}
+      END_YML
+    end
+
+    def kube_service(website)
+      <<~END_YML
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: main-service
+          namespace: #{namespace_of(website)}
+        spec:
+          ports:
+          - port: 80
+            protocol: TCP
+            targetPort: 80
+          selector:
+            app: www
+          type: ClusterIP
+      END_YML
+    end
+
+    def kube_yml(website)
+      <<~END_YML
+        #{kube_ns(website)}
+        ---
+        #{kube_service(website)}
+      END_YML
+    end
+
+    def launch_kubernetes(options = {})
+      website, website_location = get_website_fields(options)
+      # simplified_options = { website: website, website_location: website_location }
+      # image_url = options[:image_url]
+
+      kube_yml = kube_yml(website)
+      result = kubectl_yml_action(website_location, "apply", kube_yml, ensure_exit_code: 0)
+
+      notify("info", result[:stdout])
+
+      # website_location.load_balancer_synced = false
+      # website_location.obj ||= {}
+      # website_location.obj["gcloud_url"] = service["status"]&.dig("url")
+      # website_location.save!
+
+      result
     end
 
     # snapshot

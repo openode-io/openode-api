@@ -18,6 +18,10 @@ module DeploymentMethod
       (runner&.execution&.id || 'not_available').to_s
     end
 
+    def namespace_of(website = nil)
+      "instance-#{website&.id}"
+    end
+
     def destroy_execution
       Rails.logger.info "Destroying execution"
       result = runner&.execution&.destroy
