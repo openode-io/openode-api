@@ -326,6 +326,26 @@ module DeploymentMethod
       variables_strings.join(",")
     end
 
+    def env_variables_configmap(variables)
+      vars_s = variables.keys.map do |v|
+        "  #{v}: \"#{variables[v].to_s.gsub('\\', '\\\\\\').gsub('"', '\\"')}\""
+      end
+
+      vars_s.join("\n")
+    end
+
+    def generate_config_map_yml(opts = {})
+      <<~END_YML
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: #{opts[:name]}
+          namespace: #{opts[:namespace]}
+        data:
+        #{env_variables_configmap(opts[:variables])}
+      END_YML
+    end
+
     def deploy(options = {})
       website, website_location = get_website_fields(options)
       image_url = options[:image_url]
@@ -509,6 +529,9 @@ module DeploymentMethod
               containers:
               - image: #{image_url}
                 name: www
+                envFrom:
+                - configMapRef:
+                    name: dotenv
                 ports:
                 - containerPort: 80
                   protocol: TCP
@@ -524,6 +547,10 @@ module DeploymentMethod
     end
 
     def kube_yml(website, website_location, image_url)
+      ns = namespace_of(website)
+      env = website.env.clone
+      env["OPENODE_VERSION"] = website.version
+
       <<~END_YML
         #{kube_ns(website)}
         ---
@@ -532,6 +559,8 @@ module DeploymentMethod
         #{kube_ingress(website, website_location)}
         ---
         #{kube_deployment(website, image_url)}
+        ---
+        #{generate_config_map_yml(name: 'dotenv', namespace: ns, variables: env)}
       END_YML
     end
 
