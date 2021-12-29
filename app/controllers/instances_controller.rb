@@ -114,7 +114,13 @@ class InstancesController < ApplicationController
     extras = extra_fields_summary(params[:with])
     skip = params[:skip].present? ? params[:skip].to_i : 0
 
-    json(@user.websites_with_access
+    user = @user
+
+    if @user.is_admin? && params["user_id"].to_i.positive?
+      user = User.find_by id: params["user_id"]
+    end
+
+    json(user.websites_with_access
       .select { |w| params[:search] ? w.site_name.include?(params[:search]) : true }
       .sort_by { |w| w['created_at'] }
       .reverse
