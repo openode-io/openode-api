@@ -648,6 +648,12 @@ module DeploymentMethod
     end
 
     def do_stop(options = {})
+      website, = get_website_fields(options)
+
+      send("do_stop_#{website.get_config('EXECUTION_LAYER')}", options)
+    end
+
+    def do_stop_gcloud_run(options = {})
       website, website_location = get_website_fields(options)
       async = options[:async_argument] || "--no-async"
 
@@ -659,6 +665,18 @@ module DeploymentMethod
            default_retry_scheme: true,
            async_argument: async
          })
+    end
+
+    def do_stop_kubernetes(options = {})
+      website, website_location = get_website_fields(options)
+
+      kube_yml = kube_ns(website)
+
+      result = kubectl_yml_action(website_location, "delete", kube_yml, ensure_exit_code: 0)
+
+      notify("info", result[:stdout])
+
+      result
     end
 
     def hooks
