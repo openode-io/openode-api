@@ -101,6 +101,7 @@ class SuperAdmin::WebsitesController < SuperAdmin::SuperAdminController
       website_id: wl.website.id,
       hosts: wl.compute_domains,
       backend_url: wl.obj&.dig("gcloud_url"),
+      execution_layer: wl.website.get_config("EXECUTION_LAYER"),
       domain_type: wl.website.domain_type,
       cname: wl.deployment_method_configs&.dig("cname"),
       has_certificate: wl.website.certs.present? || wl.website.subdomain?,

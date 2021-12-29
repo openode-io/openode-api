@@ -185,6 +185,13 @@ class Website < ApplicationRecord
       enum: [TYPE_KUBERNETES, TYPE_DOCKER, TYPE_GCLOUD_RUN]
     },
     {
+      variable: 'EXECUTION_LAYER',
+      description: 'Execution layer',
+      type: 'website_location',
+      enum: [TYPE_KUBERNETES, TYPE_GCLOUD_RUN],
+      default: TYPE_GCLOUD_RUN
+    },
+    {
       variable: 'VERSION',
       description: 'opeNode version',
       type: 'website',
