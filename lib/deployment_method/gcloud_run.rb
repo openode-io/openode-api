@@ -457,8 +457,8 @@ module DeploymentMethod
     def kube_ingress_rule(host)
       <<~END_YML
         - host: #{host}
-          #{tabulate 1, 'http:'}
-          #{tabulate 2, kube_ingress_rule_body}
+          #{tabulate 0, 'http:'}
+          #{tabulate 1, kube_ingress_rule_body}
       END_YML
     end
 
@@ -488,7 +488,7 @@ module DeploymentMethod
           namespace: #{namespace_of(website)}
         spec:
           rules:
-          #{kube_ingress_rules(website_location)}
+        #{tabulate 1, kube_ingress_rules(website_location)}
       END_YML
     end
 
