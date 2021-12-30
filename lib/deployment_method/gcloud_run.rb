@@ -642,17 +642,17 @@ module DeploymentMethod
            nb_lines: options[:nb_lines])
     end
 
-    def retrieve_logs_gcloud_run_cmd(options = {})
+    def retrieve_logs_kubernetes_cmd(options = {})
       _, website_location = get_website_fields(options)
 
       kubectl_cmd(
         website_location: website_location,
         with_namespace: true,
-        s_arguments: "logs --tail #{options[:nb_lines]}"
+        s_arguments: "logs -l app=www --tail #{options[:nb_lines]}"
       )
     end
 
-    def retrieve_logs_kubernetes_cmd(options = {})
+    def retrieve_logs_gcloud_run_cmd(options = {})
       website, website_location = get_website_fields(options)
 
       subcommand = "logging read \"resource.labels.service_name=#{service_id(website)}\" " \
@@ -671,6 +671,14 @@ module DeploymentMethod
     def status_cmd(options = {})
       website, website_location = get_website_fields(options)
 
+      send("status_#{website.get_config('EXECUTION_LAYER')}_cmd",
+           website: website,
+           website_location: website_location)
+    end
+
+    def status_gcloud_run_cmd(options = {})
+      website, website_location = get_website_fields(options)
+
       gcloud_cmd({
                    website: website,
                    website_location: website_location,
@@ -678,6 +686,16 @@ module DeploymentMethod
           "--region=#{region_of(website_location)} --format=json",
                    chg_dir_workspace: false
                  })
+    end
+
+    def status_kubernetes_cmd(options = {})
+      _, website_location = get_website_fields(options)
+
+      kubectl_cmd(
+        website_location: website_location,
+        with_namespace: true,
+        s_arguments: "describe deployment www-deployment"
+      )
     end
 
     # stop

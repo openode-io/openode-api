@@ -154,10 +154,15 @@ class InstancesController < ApplicationController
                  }]
 
                  exec_result = @runner.execute(cmds)
+                 raw_exec_result = exec_result.first[:result][:stdout]
 
-                 json_result = JSON.parse(exec_result.first[:result][:stdout])
+                 if @website.get_config("EXECUTION_LAYER") == Website::TYPE_GCLOUD_RUN
+                   json_result = JSON.parse(raw_exec_result)
 
-                 json_result["status"]
+                   json_result["status"]
+                 else
+                   { result: raw_exec_result.lines }
+                 end
                else
                  []
                end
