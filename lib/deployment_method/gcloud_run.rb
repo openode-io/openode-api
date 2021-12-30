@@ -223,21 +223,6 @@ module DeploymentMethod
       website_location.location_config["provider_id"]
     end
 
-    def retrieve_logs_cmd(options = {})
-      website, website_location = get_website_fields(options)
-      options[:nb_lines] ||= 100
-
-      subcommand = "logging read \"resource.labels.service_name=#{service_id(website)}\" " \
-        "--format=\"value(textPayload)\" --limit #{options[:nb_lines]}"
-
-      gcloud_cmd({
-                   website: website,
-                   website_location: website_location,
-                   subcommand: subcommand,
-                   chg_dir_workspace: false
-                 })
-    end
-
     # returns the service if available, nil otherwise
     def retrieve_run_service(options = {})
       website, website_location = get_website_fields(options)
@@ -645,6 +630,40 @@ module DeploymentMethod
         website_location: website_location,
         nb_lines: options[:nb_lines]
       )
+    end
+
+    def retrieve_logs_cmd(options = {})
+      website, website_location = get_website_fields(options)
+      options[:nb_lines] ||= 100
+
+      send("retrieve_logs_#{website.get_config('EXECUTION_LAYER')}_cmd",
+           website: website,
+           website_location: website_location,
+           nb_lines: options[:nb_lines])
+    end
+
+    def retrieve_logs_gcloud_run_cmd(options = {})
+      _, website_location = get_website_fields(options)
+
+      kubectl_cmd(
+        website_location: website_location,
+        with_namespace: true,
+        s_arguments: "logs --tail #{options[:nb_lines]}"
+      )
+    end
+
+    def retrieve_logs_kubernetes_cmd(options = {})
+      website, website_location = get_website_fields(options)
+
+      subcommand = "logging read \"resource.labels.service_name=#{service_id(website)}\" " \
+        "--format=\"value(textPayload)\" --limit #{options[:nb_lines]}"
+
+      gcloud_cmd({
+                   website: website,
+                   website_location: website_location,
+                   subcommand: subcommand,
+                   chg_dir_workspace: false
+                 })
     end
 
     # status

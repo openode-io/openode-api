@@ -165,4 +165,17 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
 
     assert_includes result, "run services describe instance-#{@website.id}"
   end
+
+  # retrieve_logs_gcloud_run_cmd
+
+  test 'retrieve_logs_gcloud_run_cmd - happy path' do
+    result = gcloud_run_method.retrieve_logs_gcloud_run_cmd(
+      website: @website,
+      website_location: @website_location,
+      nb_lines: 10
+    )
+
+    assert_includes result, "instance-#{@website.id}"
+    assert_includes result, "logs --tail 10"
+  end
 end
