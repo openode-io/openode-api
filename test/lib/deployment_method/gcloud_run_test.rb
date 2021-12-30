@@ -166,16 +166,26 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
     assert_includes result, "run services describe instance-#{@website.id}"
   end
 
-  # retrieve_logs_gcloud_run_cmd
+  # retrieve_logs_kubernetes_cmd
 
-  test 'retrieve_logs_gcloud_run_cmd - happy path' do
-    result = gcloud_run_method.retrieve_logs_gcloud_run_cmd(
+  test 'retrieve_logs_kubernetes_cmd - happy path' do
+    result = gcloud_run_method.retrieve_logs_kubernetes_cmd(
       website: @website,
       website_location: @website_location,
       nb_lines: 10
     )
 
     assert_includes result, "instance-#{@website.id}"
-    assert_includes result, "logs --tail 10"
+    assert_includes result, "logs -l app=www --tail 10"
+  end
+
+  test 'status_kubernetes_cmd - happy path' do
+    result = gcloud_run_method.status_kubernetes_cmd(
+      website: @website,
+      website_location: @website_location
+    )
+
+    assert_includes result, "instance-#{@website.id}"
+    assert_includes result, "describe deployment www-deployment"
   end
 end
