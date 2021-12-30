@@ -120,6 +120,8 @@ application:
           external_addr: 127.0.0.2
           location_subdomain: us
           base_hostname: openode.dev
+          builder_kubeconfig_path: /home/user/works/openode-api/config/kubernetes/development-us-central-1.yml
+          load_balancer_ip: 34.69.135.171
         - str_id: eu-west-1
           provider_id: europe-west1
           full_name: Belgium (Europe)
@@ -128,6 +130,8 @@ application:
           external_addr: 127.0.0.2
           location_subdomain: eu
           base_hostname: openode.dev
+          builder_kubeconfig_path: /home/user/works/openode-api/config/kubernetes/development-us-central-1.yml
+          load_balancer_ip: 34.69.135.171
         - str_id: canada
           provider_id: can
           full_name: Can (Can)
@@ -136,4 +140,6 @@ application:
           external_addr: 127.0.0.2
           location_subdomain: ""
           base_hostname: openode.io
+          builder_kubeconfig_path: /home/user/works/openode-api/config/kubernetes/development-us-central-1.yml
+          load_balancer_ip: 34.69.135.171
     - type: dummy
