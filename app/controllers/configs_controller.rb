@@ -9,7 +9,7 @@ class ConfigsController < InstancesController
 
   api!
   def get_config
-    validate_variable_name(@var_name)
+    validate_variable_name_exists(@var_name)
 
     json(
       result: 'success',
@@ -71,11 +71,15 @@ class ConfigsController < InstancesController
     @website.save!
   end
 
-  def validate_variable_name(var_name)
+  def validate_variable_name_exists(var_name)
     unless Website.valid_config_variable?(var_name)
       msg = 'Invalid variable name, Run openode available-configs for the list of valid variables.'
       raise ApplicationRecord::ValidationError, msg
     end
+  end
+
+  def validate_variable_name(var_name)
+    validate_variable_name_exists(var_name)
 
     conf_def = Website.config_def(var_name)
 
