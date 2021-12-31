@@ -76,5 +76,12 @@ class ConfigsController < InstancesController
       msg = 'Invalid variable name, Run openode available-configs for the list of valid variables.'
       raise ApplicationRecord::ValidationError, msg
     end
+
+    conf_def = Website.config_def(var_name)
+
+    if conf_def[:requires_stopped_instance] && !@website.offline?
+      msg = 'Cannot change this variable. Make sure to stop your instance first.'
+      raise ApplicationRecord::ValidationError, msg
+    end
   end
 end

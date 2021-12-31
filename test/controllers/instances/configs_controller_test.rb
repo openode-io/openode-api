@@ -67,6 +67,41 @@ class ConfigsControllerTest < ActionDispatch::IntegrationTest
     assert_equal w.reload.configs['REPLICAS'], 3
   end
 
+  test '/instances/:instance_id/set-config with EXECUTION_LAYER fail if online' do
+    w = Website.find_by site_name: 'testsite'
+    w.status = 'online'
+    w.save!
+    wl = w.website_locations.first
+    wl.extra_storage = 0
+    wl.save!
+
+    post '/instances/testsite/set-config',
+         as: :json,
+         params: { variable: 'EXECUTION_LAYER', value: 'kubernetes' },
+         headers: default_headers_auth
+
+    assert_response :bad_request
+  end
+
+  test '/instances/:instance_id/set-config with EXECUTION_LAYER success if offline' do
+    w = Website.find_by site_name: 'testsite'
+    w.status = 'N/A'
+    w.save!
+    wl = w.website_locations.first
+    wl.extra_storage = 0
+    wl.save!
+
+    post '/instances/testsite/set-config',
+         as: :json,
+         params: { variable: 'EXECUTION_LAYER', value: 'kubernetes' },
+         headers: default_headers_auth
+
+    assert_response :success
+
+    w.reload
+    assert_equal w.configs["EXECUTION_LAYER"], "kubernetes"
+  end
+
   test '/instances/:instance_id/set-config with valid variable, enum' do
     post '/instances/testsite/set-config',
          as: :json,

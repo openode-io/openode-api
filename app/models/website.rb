@@ -189,6 +189,7 @@ class Website < ApplicationRecord
       description: 'Execution layer',
       type: 'website_location',
       enum: [TYPE_KUBERNETES, TYPE_GCLOUD_RUN],
+      requires_stopped_instance: true,
       default: TYPE_GCLOUD_RUN
     },
     {
