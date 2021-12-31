@@ -188,4 +188,16 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
     assert_includes result, "instance-#{@website.id}"
     assert_includes result, "describe deployment www-deployment"
   end
+
+  # execution_layer_to_close
+
+  test 'execution_layer_to_close - current gcloud run' do
+    assert_equal gcloud_run_method.execution_layer_to_close(@website), 'kubernetes'
+  end
+
+  test 'execution_layer_to_close - current kubernetes' do
+    @website.configs ||= {}
+    @website.configs["EXECUTION_LAYER"] = "kubernetes"
+    assert_equal gcloud_run_method.execution_layer_to_close(@website), 'gcloud_run'
+  end
 end
