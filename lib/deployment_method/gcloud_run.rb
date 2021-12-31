@@ -383,21 +383,6 @@ module DeploymentMethod
       (EXECUTION_LAYERS - [original_exec_layer]).first
     end
 
-    def ensure_close_other_execution_layer(options = {})
-      website, = get_website_fields(options)
-
-      original_exec_layer = website.get_config("EXECUTION_LAYER")
-      other_exec_layer = execution_layer_to_close(website)
-      website.configs["EXECUTION_LAYER"] = other_exec_layer
-
-      Rails.logger.info("Ensuring stop execution layer #{other_exec_layer}")
-      do_stop(options)
-    rescue StandardError => e
-      Ex::Logger.info(e, 'Unable to ensure_close_other_execution_layer')
-    ensure
-      website.configs["EXECUTION_LAYER"] = original_exec_layer
-    end
-
     def launch(options = {})
       website, website_location = get_website_fields(options)
 
@@ -408,8 +393,6 @@ module DeploymentMethod
         raise 'Invalid location for the selected plan. Make sure to remove your current' \
           ' location and add a location available for that plan.'
       end
-
-      ensure_close_other_execution_layer(options)
 
       image_url = build_image(options)
       save_extra_execution_attrib('image_name_tag', image_url)
