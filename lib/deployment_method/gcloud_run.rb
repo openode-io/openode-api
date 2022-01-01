@@ -170,8 +170,10 @@ module DeploymentMethod
       result_build = ex("gcloud_cmd", {
                           website: website,
                           website_location: website_location,
+                          timeout: website.max_build_duration + 10,
                           subcommand: "builds submit --tag #{image_url} " \
-                          "--gcs-log-dir=gs://builds_logs/"
+                          "--timeout=#{website.max_build_duration} " \
+                          "--gcs-log-dir=gs://builds_logs/ "
                         })
 
       # retrieve the build ID, it looks like:
