@@ -24,7 +24,7 @@ test:
   adapter: mysql2
   database: openode_test
   username: root
-  password: root
+  password: test1234
   host: 127.0.0.1
 
 production:
