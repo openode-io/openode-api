@@ -146,6 +146,30 @@ module DeploymentMethod
       "cd #{website.repo_dir} ; rm -f .gitignore"
     end
 
+    def verify_image_size_limit(website)
+      cloned_runner = runner.clone
+      image_manager = Util::InstanceImageManager.new(
+        website: website,
+        runner: runner,
+        deployment: runner.execution
+      )
+      cloned_runner.set_execution_method(image_manager)
+      image_manager.verify_size_repo
+    end
+
+    def retrive_build_id(result_build)
+      line_with_build = result_build[:stderr]
+                        .lines.find do |line|
+        line.include?("Created [https://cloudbuild.googleapis.com/")
+      end
+
+      if line_with_build.blank?
+        raise "No created build link available"
+      end
+
+      line_with_build[line_with_build.rindex("/") + 1..line_with_build.rindex("]") - 1]
+    end
+
     def build_image(options = {})
       website, website_location = get_website_fields(options)
 
@@ -156,6 +180,9 @@ module DeploymentMethod
       elsif website.reference_website_image.present?
         return website.latest_reference_website_image_tag_address
       end
+
+      # verify image size limit
+      verify_image_size_limit(website)
 
       image_url = image_tag_url(options)
 
@@ -179,16 +206,7 @@ module DeploymentMethod
       # retrieve the build ID, it looks like:
       # Created
       # [https://.../71a90edd-6cbb-4898-9abf-1a58319df67e]
-      line_with_build = result_build[:stderr]
-                        .lines.find do |line|
-                          line.include?("Created [https://cloudbuild.googleapis.com/")
-                        end
-
-      if line_with_build.blank?
-        raise "No created build link available"
-      end
-
-      build_id = line_with_build[line_with_build.rindex("/") + 1..line_with_build.rindex("]") - 1]
+      build_id = retrive_build_id(result_build)
 
       if build_id.blank? || build_id.size <= 10
         raise "Unable to retrieve the build ID"
@@ -830,7 +848,8 @@ module DeploymentMethod
   end
 
   class GcloudRunTest < GcloudRun
-    attr_accessor :ex_return, :ex_history, :ex_stdout_return, :ex_stdout_history
+    attr_accessor :ex_return, :ex_history, :ex_stdout_return, :ex_stdout_history,
+                  :verify_image_size_limit_history
 
     def ex(cmd, options = {})
       @ex_history ||= []
@@ -848,6 +867,12 @@ module DeploymentMethod
       @ind_ex_stdout_return += 1
 
       @ex_stdout_return[@ind_ex_stdout_return]
+    end
+
+    def verify_image_size_limit(website)
+      @verify_image_size_limit_history ||= []
+
+      @verify_image_size_limit_history << { website: website }
     end
   end
 end

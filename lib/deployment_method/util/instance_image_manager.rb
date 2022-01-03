@@ -10,7 +10,6 @@ module DeploymentMethod
 
       def initialize(args)
         assert args[:runner]
-        assert args[:docker_images_location]
         assert args[:website]
         assert args[:deployment]
 

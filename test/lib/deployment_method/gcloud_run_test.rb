@@ -113,6 +113,8 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
 
     expected_result = "gcr.io/openode/#{site_name}:#{site_name}--#{@website.id}--#{exec_id}"
     assert_equal result, expected_result
+
+    assert_equal run_method.verify_image_size_limit_history.first[:website], @website
   end
 
   # launch
