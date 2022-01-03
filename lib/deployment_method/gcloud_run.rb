@@ -158,10 +158,16 @@ module DeploymentMethod
     end
 
     def retrive_build_id(result_build)
-      result_build[:stderr]
+      line_with_build = result_build[:stderr]
         .lines.find do |line|
         line.include?("Created [https://cloudbuild.googleapis.com/")
       end
+
+      if line_with_build.blank?
+        raise "No created build link available"
+      end
+
+      line_with_build[line_with_build.rindex("/") + 1..line_with_build.rindex("]") - 1]
     end
 
     def build_image(options = {})
@@ -200,13 +206,7 @@ module DeploymentMethod
       # retrieve the build ID, it looks like:
       # Created
       # [https://.../71a90edd-6cbb-4898-9abf-1a58319df67e]
-      line_with_build = retrive_build_id(result_build)
-
-      if line_with_build.blank?
-        raise "No created build link available"
-      end
-
-      build_id = line_with_build[line_with_build.rindex("/") + 1..line_with_build.rindex("]") - 1]
+      build_id = retrive_build_id(result_build)
 
       if build_id.blank? || build_id.size <= 10
         raise "Unable to retrieve the build ID"
