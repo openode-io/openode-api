@@ -159,7 +159,7 @@ module DeploymentMethod
 
     def retrive_build_id(result_build)
       line_with_build = result_build[:stderr]
-        .lines.find do |line|
+                        .lines.find do |line|
         line.include?("Created [https://cloudbuild.googleapis.com/")
       end
 
