@@ -48,7 +48,7 @@ module DeploymentMethod
         statuses = pod.dig('status', 'containerStatuses') || []
 
         statuses.any? do |status|
-          status.dig('ready')
+          status['ready']
         end
       end
     end
@@ -130,6 +130,22 @@ module DeploymentMethod
       namespace = options[:with_namespace] ? "-n #{namespace_of(website)} " : ""
 
       "KUBECONFIG=#{config_path} kubectl #{namespace}#{options[:s_arguments]}"
+    end
+
+    def custom_cmd(options = {})
+      website, website_location = get_website_fields(options)
+      cmd = options[:cmd]
+      pod_name = get_pod_name_by_app(options)
+      app = options[:app] || WWW_DEPLOYMENT_LABEL
+
+      args = {
+        website: website,
+        website_location: website_location,
+        with_namespace: true,
+        s_arguments: "exec -c #{app} #{pod_name} -- #{cmd}"
+      }
+
+      kubectl_cmd(args)
     end
 
     @@test_kubectl_file_path = nil
@@ -488,6 +504,56 @@ module DeploymentMethod
       JSON.parse(ex("kubectl_cmd", args)[:stdout])
     end
 
+    def get_latest_pod_in(pods_json)
+      return nil if !pods_json || !pods_json['items']
+
+      pods_json['items'].max_by do |pod|
+        Time.zone.parse(pod['metadata']['creationTimestamp'])
+      end
+    end
+
+    def get_latest_pod_name_in(pods_json)
+      get_latest_pod_in(pods_json)['metadata']['name']
+    end
+
+    def get_pod_by_app_name(website, website_location, app_name)
+      args_get_app_pod = {
+        website: website,
+        website_location: website_location,
+        with_namespace: true,
+        s_arguments: "get pod -l app=#{app_name} -o json"
+      }
+
+      result = JSON.parse(ex("kubectl_cmd", args_get_app_pod)[:stdout])
+
+      result&.dig('items')&.first
+    end
+
+    def get_pod_name_by_app_name(website, website_location, app_name)
+      result = get_pod_by_app_name(website, website_location, app_name)
+
+      result&.dig('metadata', 'name')
+    end
+
+    def verify_application_name(website, name)
+      unless website.application_name_valid?(name)
+        raise raise ApplicationRecord::ValidationError, "Invalid application name"
+      end
+    end
+
+    def get_pod_name_by_app(options = {})
+      website, website_location = get_website_fields(options)
+      options[:app] ||= Website::DEFAULT_APPLICATION_NAME
+
+      verify_application_name(website, options[:app])
+
+      pod_name = get_pod_name_by_app_name(website, website_location, options[:app])
+
+      raise "Unable to find the application #{options[:app]}" unless pod_name
+
+      pod_name
+    end
+
     def kube_ns(website)
       <<~END_YML
         apiVersion: v1
@@ -571,7 +637,26 @@ module DeploymentMethod
       END_YML
     end
 
+    def generate_deployment_probes_yml(opts = {})
+      return '' unless opts[:with_readiness_probe]
+
+      <<~END_YML
+        readinessProbe:
+          httpGet:
+            path: #{opts[:status_probe_path]}
+            port: 80
+          periodSeconds: #{opts[:status_probe_period]}
+          initialDelaySeconds: 10
+      END_YML
+    end
+
     def kube_deployment(website, image_url)
+      deployment_probes = generate_deployment_probes_yml(
+        with_readiness_probe: !website.skip_port_check?,
+        status_probe_path: website.status_probe_path,
+        status_probe_period: website.status_probe_period
+      )
+
       <<~END_YML
         apiVersion: apps/v1
         kind: Deployment
@@ -599,6 +684,7 @@ module DeploymentMethod
                 ports:
                 - containerPort: 80
                   protocol: TCP
+        #{tabulate 4, deployment_probes}
                 resources:
                   limits:
                     ephemeral-storage: 100Mi
@@ -646,6 +732,105 @@ module DeploymentMethod
       website_location.save!
 
       result
+    end
+
+    def finalize_pre_stop_steps(website, website_location)
+      return if website.get_config('EXECUTION_LAYER') != "kubernetes"
+
+      Timeout.timeout(50) do
+        pods = get_pods_json(
+          website: website,
+          website_location: website_location
+        )
+
+        analyze_final_pods_state(pods)
+
+        unless website.online?
+          analyze_deployment_failure(
+            website: website,
+            website_location: website_location,
+            pods: pods
+          )
+        end
+
+        ex_stdout('logs', website: website,
+                          website_location: website_location,
+                          pod_name: get_latest_pod_name_in(pods),
+                          nb_lines: 1_000)
+      end
+    rescue Timeout::Error => e
+      Ex::Logger.info(e, 'Timeout during pre stop steps')
+    rescue StandardError => e
+      Ex::Logger.info(e, 'Unable to retrieve the logs')
+    end
+
+    def analyse_pod_status_for_lack_memory(name, status)
+      reason = status.dig('lastState', 'terminated', 'reason')&.downcase
+
+      return unless reason == "oomkilled"
+
+      msg = "\n\n*** FATAL: Lack of memory detected on application #{name}! " \
+            "Consider upgrading your plan. ***\n"
+
+      notify('info', msg)
+
+      msg
+    end
+
+    def analyze_final_pods_state(pods)
+      pods['items'].each do |pod|
+        pod.dig('status', 'containerStatuses').each do |st|
+          analyse_pod_status_for_lack_memory(st['name'], st)
+        end
+      end
+    rescue StandardError => e
+      Ex::Logger.error(e, 'Issue analysing the pods state')
+    end
+
+    # PORT analysis
+    def analyze_netstat_tcp_ports(opts = {})
+      lastest_pod_name = get_latest_pod_name_in(opts[:pods])
+      result = ex('custom_cmd',
+                  website: opts[:website],
+                  website_location: opts[:website_location],
+                  cmd: "netstat -tl",
+                  pod_name: lastest_pod_name)
+
+      netstats = Io::Netstat.parse(result[:stdout])
+
+      # check the port
+      port_available = netstats.any? do |netstat|
+        Io::Netstat.addr_port_available?(netstat[:local_addr], %w[80 http HTTP]) &&
+          netstat[:state] == 'listen'
+      end
+
+      unless port_available
+        notify('error', "IMPORTANT: HTTP port (80) NOT listening. " \
+                        "Currently listening ports: #{Io::Netstat.local_addr_ports(netstats)}")
+      end
+
+      # check hostname
+      hostname_all = netstats.any? do |netstat|
+        Io::Netstat.addr_port_available?(netstat[:local_addr], %w[80 http HTTP]) &&
+          Io::Netstat.addr_host_to_all?(netstat[:local_addr])
+      end
+
+      if port_available && !hostname_all
+        notify('error', "IMPORTANT: The proper port is listening, BUT not to all hosts" \
+                        " (more likely only listening to localhost for example)")
+      end
+
+      if !port_available || !hostname_all
+        notify('debug', "Netstat: #{netstats.inspect}")
+      end
+    rescue StandardError => e
+      Ex::Logger.error(e, 'Issue analysing the port-host listening')
+    end
+
+    def analyze_deployment_failure(opts = {})
+      require_fields([:website, :website_location, :pods], opts)
+
+      analyze_netstat_tcp_ports(opts)
     end
 
     # snapshot
@@ -878,9 +1063,11 @@ module DeploymentMethod
     end
 
     def finalize(options = {})
-      website, = get_website_fields(options)
+      website, website_location = get_website_fields(options)
       super(options)
       website.reload
+
+      finalize_pre_stop_steps(website, website_location)
 
       begin
         if website.online?
