@@ -191,6 +191,23 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
     assert_includes result, "describe deployment www-deployment"
   end
 
+  test 'kube_yml - happy path' do
+    yml = gcloud_run_method.kube_yml(@website, @website_location, "gcp/image")
+
+    assert_includes yml, "name: www-deployment"
+    assert_includes yml, "readinessProbe:"
+  end
+
+  test 'kube_yml - without check port' do
+    @website.configs = { "SKIP_PORT_CHECK" => "true" }
+    @website.save!
+
+    yml = gcloud_run_method.kube_yml(@website, @website_location, "gcp/image")
+
+    assert_includes yml, "name: www-deployment"
+    assert_not_includes yml, "readinessProbe:"
+  end
+
   # execution_layer_to_close
 
   test 'execution_layer_to_close - current gcloud run' do
