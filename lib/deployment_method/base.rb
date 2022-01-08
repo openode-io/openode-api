@@ -224,8 +224,6 @@ module DeploymentMethod
                            website_location: website_location,
                            instance_up_preparation: options[:instance_up_preparation])
 
-        auto_manage_memory_on_oom(website, options[:instance_up_preparation])
-
         result_up_cmd && (result_up_cmd[:exit_code]).zero?
       end
     end

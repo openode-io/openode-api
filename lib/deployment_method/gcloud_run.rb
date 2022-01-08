@@ -24,8 +24,47 @@ module DeploymentMethod
       super(options)
     end
 
-    def instance_up?(_options = {})
-      true
+    def instance_up?(options = {})
+      website = options[:website]
+
+      if website.get_config('EXECUTION_LAYER') == "kubernetes"
+        super(options)
+      else
+        true
+      end
+    end
+
+    def prepare_instance_up(options = {})
+      get_pods_json(options)['items']
+    rescue StandardError => e
+      Ex::Logger.info(e, 'Issue during prepare instance up')
+      []
+    end
+
+    def node_available?(options = {})
+      pods = options[:instance_up_preparation]
+
+      pods.any? do |pod|
+        statuses = pod.dig('status', 'containerStatuses') || []
+
+        statuses.any? do |status|
+          status.dig('ready')
+        end
+      end
+    end
+
+    def instance_up_cmd(options = {})
+      pods = options[:instance_up_preparation]
+
+      all_ready = pods.any? do |pod|
+        statuses = pod.dig('status', 'containerStatuses') || []
+
+        statuses.all? { |status| status['ready'] }
+      end
+
+      all_ready = false if pods.blank?
+
+      "echo #{all_ready} | grep true"
     end
 
     # gcloud cmd
@@ -433,6 +472,20 @@ module DeploymentMethod
       website_location.obj ||= {}
       website_location.obj["gcloud_url"] = service["status"]&.dig("url")
       website_location.save!
+    end
+
+    def get_pods_json(options = {})
+      _, website_location = get_website_fields(options)
+
+      args = {
+        website_location: website_location,
+        with_namespace: true,
+        s_arguments: "get pods -o json",
+        default_retry_scheme: true,
+        ensure_exit_code: 0
+      }
+
+      JSON.parse(ex("kubectl_cmd", args)[:stdout])
     end
 
     def kube_ns(website)
