@@ -909,10 +909,14 @@ module DeploymentMethod
     def retrieve_logs_kubernetes_cmd(options = {})
       _, website_location = get_website_fields(options)
 
+      pods = get_pods_json(options)
+      latest_pod = get_latest_pod_in(pods)
+      pod_name = latest_pod&.dig("metadata", "name")
+
       kubectl_cmd(
         website_location: website_location,
         with_namespace: true,
-        s_arguments: "logs -l app=www --tail #{options[:nb_lines]}"
+        s_arguments: "logs #{pod_name} --tail #{options[:nb_lines]}"
       )
     end
 
@@ -1097,6 +1101,7 @@ module DeploymentMethod
       @ind_ex_return ||= -1
       @ind_ex_return += 1
 
+      puts "@ex_return -> #{@ex_return.inspect}, ind #{@ind_ex_return}"
       @ex_return[@ind_ex_return]
     end
 
