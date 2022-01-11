@@ -1101,7 +1101,6 @@ module DeploymentMethod
       @ind_ex_return ||= -1
       @ind_ex_return += 1
 
-      puts "@ex_return -> #{@ex_return.inspect}, ind #{@ind_ex_return}"
       @ex_return[@ind_ex_return]
     end
 

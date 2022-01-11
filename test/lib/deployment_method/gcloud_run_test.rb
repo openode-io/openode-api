@@ -171,21 +171,20 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
   # retrieve_logs_kubernetes_cmd
 
   test 'retrieve_logs_kubernetes_cmd - happy path' do
-
     run_method = gcloud_run_method
 
-    run_method.ex_return = {
+    run_method.ex_return = [{
       stdout: {
         "items" => [
           {
             "metadata" => {
-              "creationTimestamp" => 123,
+              "creationTimestamp" => '2022-01-11T19:42:21Z',
               "name" => "www-dep123"
             }
           }
         ]
       }.to_json
-    }
+    }]
 
     result = run_method.retrieve_logs_kubernetes_cmd(
       website: @website,
@@ -194,7 +193,7 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
     )
 
     assert_includes result, "instance-#{@website.id}"
-    assert_includes result, "logs -l app=www --tail 10"
+    assert_includes result, "logs www-dep123 --tail 10"
   end
 
   test 'status_kubernetes_cmd - happy path' do
