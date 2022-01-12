@@ -669,6 +669,8 @@ module DeploymentMethod
               app: www
           strategy:
             type: Recreate
+          nodeSelector:
+            priority: normal
           template:
             metadata:
               labels:
