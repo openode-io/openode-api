@@ -669,14 +669,14 @@ module DeploymentMethod
               app: www
           strategy:
             type: Recreate
-          nodeSelector:
-            priority: normal
           template:
             metadata:
               labels:
                 app: www
                 deploymentId: "#{deployment_id}"
             spec:
+              nodeSelector:
+                priority: normal
               containers:
               - image: #{image_url}
                 name: www
