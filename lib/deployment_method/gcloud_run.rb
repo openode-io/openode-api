@@ -1077,6 +1077,8 @@ module DeploymentMethod
 
       begin
         if website.online?
+          # when it's online, print the original logs (both kubernetes and gcloud run)
+
           notify_final_instance_details(options)
           notify("info", "Please notice that DNS propagation can take few minutes for " \
                 "the main URL.")
