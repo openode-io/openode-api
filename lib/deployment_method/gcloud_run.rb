@@ -426,14 +426,6 @@ module DeploymentMethod
           "--max-instances=#{DEFAULT_MAX_INSTANCES} "
                   })
 
-      notify("info", "--------------- Instance boot logs ---------------")
-      logs_instance = ex_stdout(
-        "retrieve_logs_cmd",
-        { website: website, website_location: website_location, nb_lines: 20 }
-      )
-      notify("info", logs_instance)
-      notify("info", "--------------------------------------------------")
-
       unless result[:exit_code].zero?
 
         result_stderr = (result[:stderr]).to_s
@@ -1068,6 +1060,20 @@ module DeploymentMethod
       notify('info', details: final_details)
     end
 
+    def output_boot_logs(options = {})
+      website, website_location = get_website_fields(options)
+
+      notify("info", "--------------- Instance boot logs ---------------")
+
+      logs = ex_stdout(
+        "retrieve_logs_cmd",
+        { website: website, website_location: website_location, nb_lines: 20 }
+      )
+
+      notify("info", logs)
+      notify("info", "--------------------------------------------------")
+    end
+
     def finalize(options = {})
       website, website_location = get_website_fields(options)
       super(options)
@@ -1077,6 +1083,9 @@ module DeploymentMethod
 
       begin
         if website.online?
+          # when it's online, print the original logs (both kubernetes and gcloud run)
+          output_boot_logs(options)
+
           notify_final_instance_details(options)
           notify("info", "Please notice that DNS propagation can take few minutes for " \
                 "the main URL.")

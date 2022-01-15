@@ -141,9 +141,7 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
         exit_code: 0
       }
     ]
-    run_method.ex_stdout_return = [
-      "output_logs"
-    ]
+    run_method.ex_stdout_return = []
 
     result = run_method.launch(
       website: @website,
@@ -152,7 +150,6 @@ class DeploymentMethodGcloudRunTest < ActiveSupport::TestCase
 
     assert_equal result, true
     assert_equal run_method.ex_history.count, 5
-    assert_equal run_method.ex_stdout_history.count, 1
 
     assert_equal @website_location.obj["gcloud_url"], "https://serviceurl"
   end
