@@ -685,7 +685,7 @@ module DeploymentMethod
                     memory: #{website.memory}Mi
                   requests:
                     ephemeral-storage: 100Mi
-                    memory: #{website.memory}Mi
+                    memory: #{(website.memory/2.0).to_i}Mi
               restartPolicy: Always
       END_YML
     end
