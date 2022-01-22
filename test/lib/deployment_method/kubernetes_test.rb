@@ -126,15 +126,6 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     assert_equal generated_cmd, "cat #{w.repo_dir}.env"
   end
 
-  test 'retrieve_dotenv_cmd with custom dotenv filepath' do
-    w = default_website
-    w.configs ||= {}
-    w.configs['DOTENV_FILEPATH'] = '.production.env'
-    w.save!
-    generated_cmd = kubernetes_method.retrieve_dotenv_cmd(website: w)
-    assert_equal generated_cmd, "cat #{w.repo_dir}.production.env"
-  end
-
   test 'retrieve_dotenv without dotenv' do
     generated_cmd = kubernetes_method.retrieve_dotenv_cmd(website: @website)
 
