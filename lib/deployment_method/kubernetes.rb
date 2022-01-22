@@ -614,7 +614,7 @@ module DeploymentMethod
 
       raise "Missing #{attr_limit_memory}" if limit_mem_rolling_update.blank?
 
-      if memory <= limit_mem_rolling_update || website.blue_green_deployment?
+      if memory <= limit_mem_rolling_update
         "RollingUpdate"
       else
         "Recreate"

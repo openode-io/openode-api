@@ -37,7 +37,6 @@ class Website < ApplicationRecord
                       class_name: :WebsiteStatus,
                       dependent: :destroy
 
-  LIMIT_RAM_BLUE_GREEN_DEPLOYMENT = 1000
   DEFAULT_APPLICATION_NAME = 'www'
 
   def application_name_valid?(app_name)
@@ -217,14 +216,6 @@ class Website < ApplicationRecord
       min: 10,
       max: 60,
       default: 20
-    },
-    {
-      variable: 'BLUE_GREEN_DEPLOYMENT',
-      description: 'Avoid downtime while deploying, ' \
-                    'temporarily keeps the old instance running while the new one is preparing.',
-      type: 'blue_green_deployment',
-      enum: [true, false, 'true', 'false', ''],
-      default: false
     },
     {
       variable: 'SKIP_PORT_CHECK',
@@ -450,7 +441,7 @@ class Website < ApplicationRecord
         end
       end
 
-      if %w[blue_green_deployment boolean].include?(config[:type])
+      if %w[boolean].include?(config[:type])
         self.configs[var_name] = [true, 'true'].include?(value)
       end
 
@@ -458,13 +449,6 @@ class Website < ApplicationRecord
         # call method based on type type, see below
         send("config_#{config[:type]}_must_comply", config, self.configs[var_name])
       end
-    end
-  end
-
-  def config_blue_green_deployment_must_comply(_config, value)
-    if value && plan[:ram] > LIMIT_RAM_BLUE_GREEN_DEPLOYMENT
-      errors.add(:configs, "Maximum RAM with blue green deployment is " \
-                            "#{LIMIT_RAM_BLUE_GREEN_DEPLOYMENT} MB")
     end
   end
 
@@ -733,10 +717,6 @@ class Website < ApplicationRecord
 
   def dotenv_filepath
     get_config("DOTENV_FILEPATH")
-  end
-
-  def blue_green_deployment?
-    get_config("BLUE_GREEN_DEPLOYMENT")
   end
 
   def reference_website_image
@@ -1019,14 +999,6 @@ class Website < ApplicationRecord
     main_ports + addon_http_endpoint_ports
   end
 
-  def blue_green_deployment_option_cost
-    pricing_params = CloudProvider::Manager.instance.application['pricing']
-    cost_ratio = pricing_params['blue_green_ratio_plan_cost'].to_f
-
-    Website.cost_price_to_credits(plan[:cost_per_hour]) * cost_ratio *
-      (website_locations.first&.replicas || 1)
-  end
-
   def subscription_spend_online_hourly_ratio
     subscription_websites.reload.last&.activated? ? 0.0 : 1.0
   end
@@ -1048,15 +1020,6 @@ class Website < ApplicationRecord
         subscription: subscription
       }
     ]
-
-    if blue_green_deployment?
-      spendings << {
-        action_type: CreditAction::TYPE_CONSUME_BLUE_GREEN,
-        credits_cost: blue_green_deployment_option_cost * hourly_ratio *
-                      subscription_spend_online_hourly_ratio,
-        subscription: subscription
-      }
-    end
 
     spendings += website_addons.map do |website_addon|
       {
