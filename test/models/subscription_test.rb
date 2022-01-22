@@ -48,10 +48,6 @@ class SubscriptionTest < ActiveSupport::TestCase
     website.website_locations
     user = website.user
 
-    website.configs ||= {}
-    website.configs["REPLICAS"] = 1
-    website.save!
-
     s = Subscription.create!(user_id: user.id, quantity: 3, active: true)
 
     website.reload
@@ -77,10 +73,6 @@ class SubscriptionTest < ActiveSupport::TestCase
 
     website.website_locations
     user = website.user
-
-    website.configs ||= {}
-    website.configs["REPLICAS"] = 1
-    website.save!
 
     s = Subscription.create!(user_id: user.id, quantity: 3, active: true)
 
@@ -111,10 +103,6 @@ class SubscriptionTest < ActiveSupport::TestCase
     website.website_locations
     user = website.user
 
-    website.configs ||= {}
-    website.configs["REPLICAS"] = 1
-    website.save!
-
     s = Subscription.create!(user_id: user.id, quantity: 3, active: true)
 
     website.reload
@@ -141,10 +129,6 @@ class SubscriptionTest < ActiveSupport::TestCase
 
     website.website_locations
 
-    website.configs ||= {}
-    website.configs["REPLICAS"] = 1
-    website.save!
-
     user = website.user
     Website.where.not(id: website.id).destroy_all
 
@@ -165,10 +149,6 @@ class SubscriptionTest < ActiveSupport::TestCase
     website.save!
 
     website.website_locations
-
-    website.configs ||= {}
-    website.configs["REPLICAS"] = 1
-    website.save!
 
     user = website.user
     Website.where.not(id: website.id).destroy_all
@@ -191,10 +171,6 @@ class SubscriptionTest < ActiveSupport::TestCase
     website.save!
 
     website.website_locations
-
-    website.configs ||= {}
-    website.configs["REPLICAS"] = 1
-    website.save!
 
     user = website.user
     order = user.orders.last
@@ -231,10 +207,6 @@ class SubscriptionTest < ActiveSupport::TestCase
 
     website.website_locations
 
-    website.configs ||= {}
-    website.configs["REPLICAS"] = 1
-    website.save!
-
     user = website.user
     order = user.orders.last
 
@@ -270,10 +242,6 @@ class SubscriptionTest < ActiveSupport::TestCase
 
     website.website_locations
 
-    website.configs ||= {}
-    website.configs["REPLICAS"] = 1
-    website.save!
-
     user = website.user
     Website.where.not(id: website.id).destroy_all
     user.orders.destroy_all
@@ -295,10 +263,6 @@ class SubscriptionTest < ActiveSupport::TestCase
     website.website_locations
     user = website.user
 
-    website.configs ||= {}
-    website.configs["REPLICAS"] = 1
-    website.save!
-
     Subscription.create!(user_id: user.id, quantity: 1, active: true)
 
     website.reload
@@ -312,10 +276,6 @@ class SubscriptionTest < ActiveSupport::TestCase
     website = default_website
     website.website_locations
     user = website.user
-
-    website.configs ||= {}
-    website.configs["REPLICAS"] = 1
-    website.save!
 
     s = Subscription.create!(user_id: user.id, quantity: 2, active: true)
 
@@ -331,66 +291,11 @@ class SubscriptionTest < ActiveSupport::TestCase
     assert_equal result2[:subscription_website], result[:subscription_website]
   end
 
-  test "start_using_subscription - many subscriptions, find with proper quantity" do
-    SubscriptionWebsite.destroy_all
-    Subscription.destroy_all
-    website = default_website
-    wl = website.website_locations.first
-    user = website.user
-
-    wl.extra_storage = 0
-    wl.save!
-
-    website.website_locations.reload
-
-    website.configs ||= {}
-    website.configs["REPLICAS"] = 2
-    website.save!
-
-    Subscription.create!(user_id: user.id, quantity: 1, active: true)
-    s2 = Subscription.create!(user_id: user.id, quantity: 3, active: true)
-
-    result = Subscription.start_using_subscription(user, website)
-
-    assert_equal result[:subscription], s2
-    assert_equal result[:subscription_website].quantity, 2
-    assert_equal result[:subscription_website].subscription, s2
-    assert_equal result[:subscription_website].website, website
-  end
-
-  test "start_using_subscription - many subscriptions, not enough quantity" do
-    SubscriptionWebsite.destroy_all
-    Subscription.destroy_all
-    website = default_website
-    wl = website.website_locations.first
-    user = website.user
-
-    wl.extra_storage = 0
-    wl.save!
-
-    website.website_locations.reload
-
-    website.configs ||= {}
-    website.configs["REPLICAS"] = 4
-    website.save!
-
-    Subscription.create!(user_id: user.id, quantity: 1, active: true)
-    Subscription.create!(user_id: user.id, quantity: 3, active: true)
-
-    result = Subscription.start_using_subscription(user, website)
-
-    assert_nil result
-  end
-
   test "stop_using_subscription - happy path" do
     SubscriptionWebsite.destroy_all
     Subscription.destroy_all
     website = default_website
     user = website.user
-
-    website.configs ||= {}
-    website.configs["REPLICAS"] = 1
-    website.save!
 
     s = Subscription.create!(user_id: user.id, quantity: 2, active: true)
     Subscription.create!(user_id: user.id, quantity: 1, active: true)

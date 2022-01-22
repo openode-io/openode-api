@@ -41,7 +41,7 @@ class Subscription < ApplicationRecord
 
     subscription = nil
     subscription_website = nil
-    quantity_needed = website.website_locations.first.replicas
+    quantity_needed = 1
 
     ActiveRecord::Base.transaction do
       subscription = user.subscriptions.reload.activated.find do |s|

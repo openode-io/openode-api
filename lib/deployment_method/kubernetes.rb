@@ -645,7 +645,7 @@ module DeploymentMethod
           selector:
             matchLabels:
               app: www
-          replicas: #{website_location.replicas}
+          replicas: 1
           strategy:
             type: #{deployment_strategy(website, website.memory)}
           template:
