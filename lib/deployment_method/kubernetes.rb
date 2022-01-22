@@ -607,14 +607,14 @@ module DeploymentMethod
 "          name: main-volume\n"
     end
 
-    def deployment_strategy(website, memory)
+    def deployment_strategy(_website, memory)
       kube_cloud = Kubernetes.kube_configs
       attr_limit_memory = 'limit_memory_for_rolling_update_strategy'
       limit_mem_rolling_update = kube_cloud[attr_limit_memory]
 
       raise "Missing #{attr_limit_memory}" if limit_mem_rolling_update.blank?
 
-      if memory <= limit_mem_rolling_update || website.blue_green_deployment?
+      if memory <= limit_mem_rolling_update
         "RollingUpdate"
       else
         "Recreate"

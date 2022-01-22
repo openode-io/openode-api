@@ -750,45 +750,6 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.dotenv_filepath, '.env'
   end
 
-  test 'blue_green_deployment if set with str' do
-    website = default_website
-    website.configs ||= {}
-    website.configs['BLUE_GREEN_DEPLOYMENT'] = 'true'
-    website.save!
-    website.reload
-
-    assert_equal website.blue_green_deployment?, true
-  end
-
-  test 'blue_green_deployment if set with bool' do
-    website = default_website
-    website.configs ||= {}
-    website.configs['BLUE_GREEN_DEPLOYMENT'] = false
-    website.save!
-    website.reload
-
-    assert_equal website.blue_green_deployment?, false
-  end
-
-  test 'blue_green_deployment if default' do
-    website = default_website
-    website.configs ||= {}
-    website.save!
-    website.reload
-
-    assert_equal website.blue_green_deployment?, false
-  end
-
-  test 'blue_green_deployment not allowed if 2 GB plan' do
-    website = default_website
-    website.configs ||= {}
-    website.configs['BLUE_GREEN_DEPLOYMENT'] = true
-    website.account_type = 'sixth'
-    website.save
-
-    assert_equal website.valid?, false
-  end
-
   test 'dotenv filepath should be secure' do
     website = default_website
     website.configs ||= {}
@@ -1355,35 +1316,6 @@ class WebsiteTest < ActiveSupport::TestCase
                  (plan[:cost_per_hour] * 200.0).to_f.round(4))
   end
 
-  test 'spend hourly credits - plan with blue green deployment' do
-    website = default_website
-    website.credit_actions.destroy_all
-    website.configs ||= {}
-    website.configs['BLUE_GREEN_DEPLOYMENT'] = true
-    website.save!
-
-    wl = default_website_location
-    wl.nb_cpus = 1
-    wl.extra_storage = 0
-    wl.save!
-
-    website.user.reload.credits
-
-    website.spend_online_hourly_credits!
-
-    plan = website.plan
-
-    assert_equal website.credit_actions.reload.length, 2
-    ca = website.credit_actions.first
-
-    assert_equal(ca.credits_spent.to_f.round(4),
-                 (plan[:cost_per_hour] * 100.0).to_f.round(4))
-    assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
-
-    ca_blue_green = website.credit_actions.last
-    assert_in_delta ca_blue_green.credits_spent, ca.credits_spent * 0.20, 0.000001
-  end
-
   test 'spend hourly credits - partial hour' do
     website = default_website
     website.credit_actions.destroy_all
@@ -1402,38 +1334,6 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal(ca.credits_spent.to_f.round(4),
                  (plan[:cost_per_hour] * 100.0 * 0.5).to_f.round(4))
     assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
-  end
-
-  test 'spend hourly credits - plan with blue green deployment, partial' do
-    website = default_website
-    website.credit_actions.destroy_all
-    website.configs ||= {}
-    website.configs['BLUE_GREEN_DEPLOYMENT'] = true
-    website.save!
-
-    wl = default_website_location
-    wl.nb_cpus = 1
-    wl.extra_storage = 0
-    wl.save!
-
-    orig_credits = website.user.reload.credits
-
-    website.spend_online_hourly_credits!(0.5)
-
-    plan = website.plan
-
-    assert_equal website.credit_actions.reload.length, 2
-    ca = website.credit_actions.first
-
-    assert_equal(ca.credits_spent.to_f.round(4),
-                 (plan[:cost_per_hour] * 100.0 * 0.5).to_f.round(4))
-    assert_equal ca.action_type, CreditAction::TYPE_CONSUME_PLAN
-
-    ca_blue_green = website.credit_actions.last
-    assert_in_delta ca_blue_green.credits_spent, ca.credits_spent * 0.20, 0.000001
-
-    assert_in_delta orig_credits - ca.credits_spent - ca_blue_green.credits_spent,
-                    website.user.reload.credits, 0.000001
   end
 
   test 'spend hourly credits - skip if open source' do
@@ -2282,24 +2182,6 @@ class WebsiteTest < ActiveSupport::TestCase
     w.website_locations.reload
 
     assert_in_delta w.plan_cost, 0.2016 * 2, 0.00005
-  end
-
-  test "blue_green_deployment_option_cost - replicas = 1" do
-    w = default_website
-
-    assert_in_delta w.blue_green_deployment_option_cost, 0.2016 * 0.20, 0.00001
-  end
-
-  test "blue_green_deployment_option_cost - replicas = 2" do
-    w = default_website
-    wl = w.website_locations.first
-    wl.extra_storage = 0
-    wl.replicas = 2
-    wl.save!
-
-    w.website_locations.reload
-
-    assert_in_delta w.blue_green_deployment_option_cost, 0.2016 * 0.20 * 2, 0.00001
   end
 
   test "calc_memory - regular plan" do
