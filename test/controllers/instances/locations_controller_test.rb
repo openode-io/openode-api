@@ -42,10 +42,6 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   test '/instances/:instance_id/remove-location then add, with website location configs' do
     w = Website.find_by site_name: 'testsite'
 
-    w.configs ||= {}
-    w.configs['REPLICAS'] = 1
-    w.save!
-
     w.change_status! Website::STATUS_OFFLINE
     wl = w.website_locations.first
     wl.extra_storage = 0

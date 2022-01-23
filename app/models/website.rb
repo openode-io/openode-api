@@ -172,12 +172,6 @@ class Website < ApplicationRecord
       max: 60 * 1000
     },
     {
-      variable: 'REPLICAS',
-      description: 'Number of replicas of the given instance.',
-      type: 'website_location',
-      default: 1
-    },
-    {
       variable: 'TYPE',
       description: 'Deployment method (internal)',
       type: 'website',
@@ -968,8 +962,7 @@ class Website < ApplicationRecord
   end
 
   def plan_cost
-    Website.cost_price_to_credits(plan[:cost_per_hour]) *
-      (website_locations.first&.replicas || 1)
+    Website.cost_price_to_credits(plan[:cost_per_hour])
   end
 
   def addon_plan_cost(website_addon)

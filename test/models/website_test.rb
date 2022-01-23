@@ -868,25 +868,6 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.latest_reference_website_image_tag_address, img_name_tag
   end
 
-  test 'set config REPLICAS - happy path' do
-    website = default_website
-    wl = website.website_locations.first
-    wl.extra_storage = 0
-    wl.save!
-
-    website.website_locations.reload
-    website.configs ||= {}
-    website.configs['REPLICAS'] = 2
-    website.save
-
-    wl = website.website_locations.first
-    wl.reload
-
-    assert_equal website.valid?, true
-
-    assert_equal wl.replicas, 2
-  end
-
   test 'set config LIMIT_RPM - default' do
     website = default_website
 
@@ -2166,22 +2147,10 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_nil w.first_location
   end
 
-  test "plan price - replicas = 1" do
+  test "plan price" do
     w = default_website
 
     assert_in_delta w.plan_cost, 0.201612, 0.00001
-  end
-
-  test "plan price - replicas = 2" do
-    w = default_website
-    wl = w.website_locations.first
-    wl.extra_storage = 0
-    wl.replicas = 2
-    wl.save!
-
-    w.website_locations.reload
-
-    assert_in_delta w.plan_cost, 0.2016 * 2, 0.00005
   end
 
   test "calc_memory - regular plan" do

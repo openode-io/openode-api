@@ -49,59 +49,6 @@ class WebsiteLocationTest < ActiveSupport::TestCase
     assert_equal wl.valid?, false
   end
 
-  test 'extra storage - extra storage cannot be used with replicas > 1' do
-    website = default_website
-    wl = website.website_locations.first
-    wl.extra_storage = 1
-    wl.replicas = 2
-    wl.save
-
-    assert_equal wl.valid?, false
-  end
-
-  test 'extra storage - largest plan cannot be used with replicas > 1' do
-    website = default_website
-    website.account_type = 'sixth'
-    website.save!
-
-    wl = website.website_locations.first
-    wl.extra_storage = 0
-    wl.replicas = 2
-    wl.save
-
-    assert_equal wl.valid?, false
-  end
-
-  test 'extra storage - replicas too low' do
-    website = default_website
-    wl = website.website_locations.first
-    wl.extra_storage = 0
-    wl.replicas = 0
-    wl.save
-
-    assert_equal wl.valid?, false
-  end
-
-  test 'extra storage - replicas too high' do
-    website = default_website
-    wl = website.website_locations.first
-    wl.extra_storage = 0
-    wl.replicas = WebsiteLocation::MAX_REPLICAS + 1
-    wl.save
-
-    assert_equal wl.valid?, false
-  end
-
-  test 'extra storage - using max replicas' do
-    website = default_website
-    wl = website.website_locations.first
-    wl.extra_storage = 0
-    wl.replicas = WebsiteLocation::MAX_REPLICAS
-    wl.save!
-
-    assert_equal wl.valid?, true
-  end
-
   # domain
 
   test 'domain with canada subdomain' do

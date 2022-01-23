@@ -620,22 +620,6 @@ VAR2=5678
                                    with_probes: true)
   end
 
-  test 'generate_deployment_yml - with replicas 2' do
-    @website.configs ||= {}
-    @website.configs['REPLICAS'] = 2
-    @website.save!
-
-    @website_location.reload
-
-    yml = kubernetes_method.generate_deployment_yml(@website, @website_location, {})
-
-    assert_contains_deployment_yml(yml, @website, @website_location,
-                                   requested_memory: @website.memory,
-                                   limited_memory: @website.memory,
-                                   with_probes: true,
-                                   replicas: 2)
-  end
-
   test 'generate_deployment_yml - with persisted storage' do
     @website.storage_areas = ["/opt/data"]
     @website.save!
