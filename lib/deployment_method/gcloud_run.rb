@@ -719,6 +719,8 @@ module DeploymentMethod
 
       notify("info", result[:stdout])
 
+      sync_certs(website, website_location)
+
       website_location.load_balancer_synced = false
       website_location.obj ||= {}
       ip = "http://#{load_balancer_ip(website_location.location)}/"
