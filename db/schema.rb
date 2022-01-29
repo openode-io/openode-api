@@ -12,7 +12,7 @@
 
 ActiveRecord::Schema.define(version: 2021_12_29_002622) do
 
-  create_table "addons", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "addons", charset: "latin1", force: :cascade do |t|
     t.string "name"
     t.string "category"
     t.text "obj"
@@ -21,7 +21,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["name"], name: "index_addons_on_name", unique: true
   end
 
-  create_table "collaborators", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "collaborators", charset: "latin1", force: :cascade do |t|
     t.bigint "website_id", null: false
     t.bigint "user_id", null: false
     t.datetime "created_at", precision: 6, null: false
@@ -31,7 +31,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["website_id"], name: "index_collaborators_on_website_id"
   end
 
-  create_table "coupons", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "coupons", charset: "latin1", force: :cascade do |t|
     t.string "str_id"
     t.float "extra_ratio_rebate"
     t.integer "nb_days_valid"
@@ -40,14 +40,14 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["str_id"], name: "index_coupons_on_str_id", unique: true
   end
 
-  create_table "credit_action_loops", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "credit_action_loops", charset: "latin1", force: :cascade do |t|
     t.string "type"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["type"], name: "index_credit_action_loops_on_type"
   end
 
-  create_table "credit_actions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "credit_actions", charset: "latin1", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "website_id", null: false
     t.string "action_type"
@@ -63,7 +63,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["website_id"], name: "index_credit_actions_on_website_id"
   end
 
-  create_table "executions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "executions", charset: "latin1", force: :cascade do |t|
     t.bigint "website_id"
     t.bigint "website_location_id"
     t.string "status"
@@ -79,7 +79,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["website_location_id"], name: "index_executions_on_website_location_id"
   end
 
-  create_table "friend_invites", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "friend_invites", charset: "latin1", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "order_id"
     t.string "status"
@@ -91,7 +91,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["user_id"], name: "index_friend_invites_on_user_id"
   end
 
-  create_table "global_storages", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "global_storages", charset: "latin1", force: :cascade do |t|
     t.string "type"
     t.text "obj"
     t.datetime "created_at", precision: 6, null: false
@@ -100,7 +100,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["key"], name: "index_global_storages_on_key"
   end
 
-  create_table "histories", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "histories", charset: "latin1", force: :cascade do |t|
     t.integer "ref_id"
     t.string "type"
     t.text "obj", size: :medium
@@ -110,7 +110,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["type"], name: "index_histories_on_type"
   end
 
-  create_table "location_servers", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "location_servers", charset: "latin1", force: :cascade do |t|
     t.bigint "location_id"
     t.string "ip"
     t.integer "ram_mb"
@@ -124,7 +124,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["location_id"], name: "index_location_servers_on_location_id"
   end
 
-  create_table "locations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "locations", charset: "latin1", force: :cascade do |t|
     t.string "str_id"
     t.string "full_name"
     t.string "country_fullname"
@@ -133,7 +133,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.string "cloud_provider", default: "internal"
   end
 
-  create_table "newsletters", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "newsletters", charset: "latin1", force: :cascade do |t|
     t.string "title"
     t.string "recipients_type"
     t.text "content", size: :medium
@@ -143,7 +143,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  create_table "notifications", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "notifications", charset: "latin1", force: :cascade do |t|
     t.string "type"
     t.string "level"
     t.text "content"
@@ -153,7 +153,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["website_id"], name: "index_notifications_on_website_id"
   end
 
-  create_table "one_click_apps", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "one_click_apps", charset: "latin1", force: :cascade do |t|
     t.string "name"
     t.text "prepare", size: :medium
     t.text "config", size: :medium
@@ -163,7 +163,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["name"], name: "index_one_click_apps_on_name", unique: true
   end
 
-  create_table "orders", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "orders", charset: "latin1", force: :cascade do |t|
     t.bigint "user_id"
     t.text "content"
     t.float "amount"
@@ -175,7 +175,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
-  create_table "snapshots", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "snapshots", charset: "latin1", force: :cascade do |t|
     t.bigint "website_id", null: false
     t.string "status", default: "pending"
     t.datetime "expire_at"
@@ -191,7 +191,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["website_id"], name: "index_snapshots_on_website_id"
   end
 
-  create_table "statuses", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "statuses", charset: "latin1", force: :cascade do |t|
     t.string "name"
     t.string "status"
     t.datetime "created_at", precision: 6, null: false
@@ -199,7 +199,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["name"], name: "index_statuses_on_name", unique: true
   end
 
-  create_table "subscription_websites", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "subscription_websites", charset: "latin1", force: :cascade do |t|
     t.integer "website_id"
     t.bigint "subscription_id", null: false
     t.integer "quantity"
@@ -209,7 +209,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["website_id"], name: "index_subscription_websites_on_website_id"
   end
 
-  create_table "subscriptions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "subscriptions", charset: "latin1", force: :cascade do |t|
     t.integer "user_id"
     t.integer "quantity"
     t.boolean "active"
@@ -221,7 +221,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["user_id"], name: "index_subscriptions_on_user_id"
   end
 
-  create_table "users", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "users", charset: "latin1", force: :cascade do |t|
     t.string "email"
     t.string "password_hash"
     t.string "reset_token"
@@ -252,7 +252,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["token"], name: "index_users_on_token", unique: true
   end
 
-  create_table "vaults", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "vaults", charset: "latin1", force: :cascade do |t|
     t.integer "ref_id"
     t.string "entity_type"
     t.text "encrypted_data"
@@ -263,7 +263,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["ref_id"], name: "index_vaults_on_ref_id"
   end
 
-  create_table "viewed_notifications", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "viewed_notifications", charset: "latin1", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "notification_id", null: false
     t.datetime "created_at", precision: 6, null: false
@@ -273,7 +273,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["user_id"], name: "index_viewed_notifications_on_user_id"
   end
 
-  create_table "website_addons", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "website_addons", charset: "latin1", force: :cascade do |t|
     t.bigint "website_id"
     t.bigint "addon_id"
     t.string "name"
@@ -287,7 +287,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["website_id"], name: "index_website_addons_on_website_id"
   end
 
-  create_table "website_locations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "website_locations", charset: "latin1", force: :cascade do |t|
     t.bigint "website_id"
     t.bigint "location_id"
     t.bigint "location_server_id"
@@ -307,7 +307,7 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["website_id"], name: "index_website_locations_on_website_id"
   end
 
-  create_table "websites", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "websites", charset: "latin1", force: :cascade do |t|
     t.bigint "user_id"
     t.string "site_name"
     t.text "data"
