@@ -38,7 +38,9 @@ class WebsiteLocation < ApplicationRecord
     max_cpus = (location_server.cpus * 0.75).to_i
     max_cpus = 1 if max_cpus < 1
 
-    if nb_cpus <= 0 || nb_cpus > max_cpus
+    cur_nb_cpus = nb_cpus || 1
+
+    if cur_nb_cpus <= 0 || cur_nb_cpus > max_cpus
       errors.add(:nb_cpus, "Invalid value, valid ones: [1..#{max_cpus}]")
     end
   end

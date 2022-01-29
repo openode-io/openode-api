@@ -8,6 +8,7 @@ class LibTasksUpdateFriendInviteTest < ActiveSupport::TestCase
     user = User.last
     user_invited = User.where.not(id: user.id).first
     user_invited.latest_request_ip = "127.0.0.2"
+    user_invited.activated = true
     user_invited.save!
 
     invite = FriendInvite.create!(user: user, status: FriendInvite::STATUS_PENDING,
