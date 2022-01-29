@@ -78,7 +78,7 @@ class UserTest < ActiveSupport::TestCase
   test 'user type - regular' do
     u = default_user
 
-    assert_equal u.is_admin, 0
+    assert [0, false].include?(u.is_admin)
     assert_equal u.type, 'regular'
   end
 
@@ -88,7 +88,7 @@ class UserTest < ActiveSupport::TestCase
     u.is_admin = true
     u.save!
 
-    assert_equal u.is_admin, 1
+    assert [1, true].include?(u.is_admin)
     assert_equal u.type, 'admin'
   end
 
@@ -525,7 +525,7 @@ class UserTest < ActiveSupport::TestCase
     user.reload
 
     assert_equal user.email, new_email
-    assert_equal user.activated, 0
+    assert [0, false].include?(user.activated)
     assert_not_equal user.activation_hash, original_activation_hash
 
     mail_sent = ActionMailer::Base.deliveries.first
@@ -544,7 +544,7 @@ class UserTest < ActiveSupport::TestCase
     user.reload
 
     assert_equal user.token, 'toto'
-    assert_equal user.activated, 1
+    assert [1, true].include?(user.activated)
     assert_equal user.activation_hash, original_activation_hash
 
     mail_sent = ActionMailer::Base.deliveries.first
@@ -606,7 +606,7 @@ class UserTest < ActiveSupport::TestCase
 
     user.reload
 
-    assert_equal user.activated, 1
+    assert [1, true].include?(user.activated)
     verification = user.user_email_verifications.last
 
     assert verification

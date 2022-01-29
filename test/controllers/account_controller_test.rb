@@ -87,7 +87,7 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
     u.save!
     u.reload
 
-    assert_equal u.newsletter, 0
+    assert [0, false].include?(u.newsletter)
 
     patch '/account/me',
           headers: default_headers_auth,
@@ -106,7 +106,7 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
     u.reload
 
     assert_response :success
-    assert_equal u.newsletter, 1
+    assert [1, true].include?(u.newsletter)
     assert_equal u.nb_credits_threshold_notification, 100
     assert_equal u.account['name'], 'elvis'
     assert_equal u.account['company'], 'Microsse'
@@ -243,7 +243,7 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal user.email, account[:email]
     assert_equal user.token, response.parsed_body['token']
-    assert_equal user.newsletter, 1
+    assert [true, 1].include?(user.newsletter)
     assert_equal user.credits.positive?, true
     assert_in_delta user.credits, 185.806
 
@@ -269,7 +269,7 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal user.email, account[:email]
     assert_equal user.token, response.parsed_body['token']
-    assert_equal user.newsletter, 0
+    assert [0, false].include?(user.newsletter)
 
     mail_sent = ActionMailer::Base.deliveries.first
     assert_equal mail_sent.subject, 'Welcome to opeNode!'
@@ -357,7 +357,7 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
 
     user.reload
 
-    assert_equal user.activated, 1
+    assert [1, true].include?(user.activated)
 
     assert response.parsed_body, {}
   end
@@ -374,7 +374,7 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
 
     user.reload
 
-    assert_equal user.activated, 0
+    assert [0, false].include?(user.activated)
   end
 
   test 'POST /account/activate with invalid user id' do
@@ -389,6 +389,6 @@ class AccountControllerTest < ActionDispatch::IntegrationTest
 
     user.reload
 
-    assert_equal user.activated, 0
+    assert [0, false].include?(user.activated)
   end
 end

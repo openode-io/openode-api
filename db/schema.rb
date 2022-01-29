@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_29_002622) do
+ActiveRecord::Schema.define(version: 2022_01_29_191538) do
 
   create_table "addons", charset: "latin1", force: :cascade do |t|
     t.string "name"
@@ -21,14 +21,14 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["name"], name: "index_addons_on_name", unique: true
   end
 
-  create_table "collaborators", id: :integer, charset: "latin1", force: :cascade do |t|
-    t.integer "website_id"
-    t.integer "user_id"
+  create_table "collaborators", charset: "latin1", force: :cascade do |t|
+    t.bigint "website_id", null: false
+    t.bigint "user_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.text "permissions", size: :medium
     t.index ["website_id", "user_id"], name: "index_collaborators_on_website_id_and_user_id", unique: true
-    t.index ["website_id"], name: "website_id_collaborators"
+    t.index ["website_id"], name: "index_collaborators_on_website_id"
   end
 
   create_table "coupons", charset: "latin1", force: :cascade do |t|
@@ -110,26 +110,26 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["type"], name: "index_histories_on_type"
   end
 
-  create_table "location_servers", id: :integer, charset: "latin1", force: :cascade do |t|
-    t.integer "location_id"
-    t.string "ip", limit: 100
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+  create_table "location_servers", charset: "latin1", force: :cascade do |t|
+    t.bigint "location_id"
+    t.string "ip"
     t.integer "ram_mb"
     t.integer "cpus"
     t.integer "disk_gb"
     t.text "docker_snapshot"
-    t.string "cloud_type", limit: 150, default: "cloud"
-    t.index ["cloud_type"], name: "location_server_cloud_type"
-    t.index ["location_id"], name: "location_id"
-  end
-
-  create_table "locations", id: :integer, charset: "latin1", force: :cascade do |t|
-    t.string "full_name", limit: 100
-    t.string "str_id", limit: 100
+    t.string "cloud_type"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.string "country_fullname", limit: 150, default: ""
+    t.index ["cloud_type"], name: "index_location_servers_on_cloud_type"
+    t.index ["location_id"], name: "index_location_servers_on_location_id"
+  end
+
+  create_table "locations", charset: "latin1", force: :cascade do |t|
+    t.string "str_id"
+    t.string "full_name"
+    t.string "country_fullname"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.string "cloud_provider", default: "internal"
   end
 
@@ -221,37 +221,35 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["user_id"], name: "index_subscriptions_on_user_id"
   end
 
-  create_table "users", id: :integer, charset: "latin1", force: :cascade do |t|
+  create_table "users", charset: "latin1", force: :cascade do |t|
     t.string "email"
     t.string "password_hash"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.timestamp "last_admin_access_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.string "reset_token", limit: 250, default: ""
-    t.integer "is_admin", default: 0
-    t.timestamp "first_admin_entry_at"
+    t.string "reset_token"
+    t.boolean "is_admin", default: false
+    t.datetime "first_admin_entry_at"
     t.string "token"
-    t.timestamp "day_one_mail_at"
-    t.float "credits", limit: 53, default: 0.0
-    t.timestamp "last_free_credit_distribute_at", default: "1970-01-01 00:00:01", null: false
-    t.integer "newsletter", limit: 1, default: 1
+    t.datetime "day_one_mail_at"
+    t.float "credits", default: 0.0
+    t.datetime "last_free_credit_distribute_at"
+    t.datetime "last_admin_access_at", default: -> { "CURRENT_TIMESTAMP" }
+    t.boolean "newsletter", default: true
     t.boolean "notified_low_credit", default: false
-    t.integer "has_free_sandbox", default: 0
     t.text "coupons"
     t.float "nb_credits_threshold_notification", default: 50.0
-    t.integer "activated"
-    t.string "activation_hash", limit: 200
-    t.integer "suspended", limit: 1, default: 0
+    t.boolean "activated"
+    t.string "activation_hash"
+    t.boolean "suspended", default: false
+    t.datetime "created_at", precision: 6
+    t.datetime "updated_at", precision: 6
     t.text "account"
     t.string "latest_request_ip", default: ""
-    t.index ["day_one_mail_at"], name: "users_day_one_mail_at"
-    t.index ["email"], name: "users_email_unique", unique: true
-    t.index ["is_admin"], name: "user_is_admin"
-    t.index ["last_free_credit_distribute_at"], name: "last_free_credit_distribute_at_user_id"
-    t.index ["newsletter"], name: "newsletter_users"
-    t.index ["notified_low_credit"], name: "users_notified_low_credit"
-    t.index ["reset_token"], name: "user_reset_token"
-    t.index ["token"], name: "users_token", unique: true
+    t.index ["day_one_mail_at"], name: "index_users_on_day_one_mail_at"
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["is_admin"], name: "index_users_on_is_admin"
+    t.index ["last_free_credit_distribute_at"], name: "index_users_on_last_free_credit_distribute_at"
+    t.index ["newsletter"], name: "index_users_on_newsletter"
+    t.index ["notified_low_credit"], name: "index_users_on_notified_low_credit"
+    t.index ["token"], name: "index_users_on_token", unique: true
   end
 
   create_table "vaults", charset: "latin1", force: :cascade do |t|
@@ -289,67 +287,70 @@ ActiveRecord::Schema.define(version: 2021_12_29_002622) do
     t.index ["website_id"], name: "index_website_addons_on_website_id"
   end
 
-  create_table "website_locations", id: :integer, charset: "latin1", force: :cascade do |t|
-    t.integer "website_id"
-    t.integer "location_id"
-    t.integer "location_server_id"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+  create_table "website_locations", charset: "latin1", force: :cascade do |t|
+    t.bigint "website_id"
+    t.bigint "location_id"
+    t.bigint "location_server_id"
     t.integer "extra_storage", default: 0
-    t.integer "port", default: 0
     t.integer "nb_cpus", default: 1
+    t.integer "port"
     t.integer "second_port"
     t.integer "running_port"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.text "obj"
     t.integer "replicas", default: 1
     t.boolean "load_balancer_synced", default: true
     t.string "execution_layer", default: "gcloud_run"
-    t.index ["location_id"], name: "location_id"
-    t.index ["location_server_id"], name: "location_server_id"
-    t.index ["website_id"], name: "website_id"
+    t.index ["location_id"], name: "index_website_locations_on_location_id"
+    t.index ["location_server_id"], name: "index_website_locations_on_location_server_id"
+    t.index ["website_id"], name: "index_website_locations_on_website_id"
   end
 
-  create_table "websites", id: :integer, charset: "latin1", force: :cascade do |t|
-    t.integer "user_id"
+  create_table "websites", charset: "latin1", force: :cascade do |t|
+    t.bigint "user_id"
     t.string "site_name"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
     t.text "data"
-    t.timestamp "last_access_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.string "status", default: "N/A"
-    t.string "type", limit: 100, default: "nodejs"
-    t.integer "http_port_available", default: 0
-    t.timestamp "first_online_at"
-    t.string "account_type", limit: 100, default: "free"
-    t.timestamp "credits_check_at", default: "1970-01-01 00:00:01", null: false
-    t.string "domain_type", limit: 100, default: "subdomain"
-    t.string "domains", limit: 3000
-    t.integer "nb_launch_issues", default: 0
+    t.datetime "last_access_at"
+    t.string "status"
+    t.string "type"
+    t.boolean "http_port_available"
+    t.datetime "first_online_at"
+    t.string "account_type"
+    t.datetime "credits_check_at"
+    t.string "domain_type"
+    t.string "domains"
+    t.integer "nb_launch_issues"
     t.text "storage_areas"
-    t.string "container_id", limit: 200
+    t.string "container_id"
     t.text "crontab"
-    t.boolean "redir_http_to_https", default: false
+    t.boolean "redir_http_to_https"
     t.text "configs"
     t.text "open_source"
     t.string "sub_status"
-    t.string "cloud_type", limit: 150, default: "cloud"
+    t.string "cloud_type"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.boolean "open_source_activated", default: false
     t.text "alerts"
     t.string "auto_account_type", default: "third"
     t.text "auto_account_types_history"
     t.text "one_click_app", size: :medium
     t.string "version", default: ""
-    t.index ["cloud_type"], name: "website_cloud_type"
-    t.index ["credits_check_at"], name: "credits_check_at_website_id"
-    t.index ["domains"], name: "domains_websites"
-    t.index ["last_access_at"], name: "website_last_access_at"
+    t.index ["cloud_type"], name: "index_websites_on_cloud_type"
+    t.index ["credits_check_at"], name: "index_websites_on_credits_check_at"
+    t.index ["domains"], name: "index_websites_on_domains"
+    t.index ["last_access_at"], name: "index_websites_on_last_access_at"
     t.index ["open_source_activated"], name: "index_websites_on_open_source_activated"
-    t.index ["site_name"], name: "website_sitename", unique: true
-    t.index ["status"], name: "website_status"
+    t.index ["site_name"], name: "index_websites_on_site_name", unique: true
+    t.index ["status"], name: "index_websites_on_status"
+    t.index ["user_id"], name: "index_websites_on_user_id"
   end
 
-  add_foreign_key "location_servers", "locations", name: "location_servers_ibfk_1"
+  add_foreign_key "location_servers", "locations"
   add_foreign_key "subscription_websites", "subscriptions"
-  add_foreign_key "website_locations", "locations", name: "website_locations_ibfk_2"
-  add_foreign_key "website_locations", "websites", name: "website_locations_ibfk_1", on_delete: :cascade
+  add_foreign_key "website_locations", "location_servers"
+  add_foreign_key "website_locations", "locations"
+  add_foreign_key "website_locations", "websites"
+  add_foreign_key "websites", "users"
 end
