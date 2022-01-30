@@ -70,7 +70,9 @@ class EnvVariablesControllerTest < ActionDispatch::IntegrationTest
         params: {
           variables: {
             VAR1: 'test123',
-            VAR2: 'tteesstt'
+            VAR2: 'tteesstt',
+            "VAR3 ": 'test3',
+            "VAR4\t": 'test4'
           }
         },
         headers: default_headers_auth
@@ -82,7 +84,9 @@ class EnvVariablesControllerTest < ActionDispatch::IntegrationTest
     assert_equal response.parsed_body, {}
     assert_equal w.env['VAR1'], 'test123'
     assert_equal w.env['VAR2'], 'tteesstt'
-    assert_equal w.env.keys, %w[VAR1 VAR2]
+    assert_equal w.env['VAR3'], 'test3'
+    assert_equal w.env['VAR4'], 'test4'
+    assert_equal w.env.keys, %w[VAR1 VAR2 VAR3 VAR4]
 
     assert_equal w.reload.events.count, 1
     assert_equal w.events.first.obj['title'], 'ENV Variables changed'
