@@ -119,73 +119,6 @@ namespace :kube_maintenance do
     end
   end
 
-  desc ''
-  task verify_states_pvcs: :environment do
-    name = "Task kube_maintenance__verify_states_main_pvc"
-    Rails.logger.info "[#{name}] begin"
-
-    kube_clusters_runners.each do |cluster_runner|
-      location = cluster_runner.execution_method.location
-      Rails.logger.info "[#{name}] Current location #{location.str_id}"
-
-      # PVC check
-      result = JSON.parse(cluster_runner.execution_method.ex_stdout(
-                            "raw_kubectl",
-                            s_arguments: "get pvc --all-namespaces -o json"
-                          ))
-
-      result['items'].each do |pvc|
-        ns = pvc.dig('metadata', 'namespace')
-        pvc_name = pvc.dig('metadata', 'name')
-
-        next unless instance_ns?(ns)
-
-        website_id = ns.split('-').last
-
-        Rails.logger.info "[#{name}] checking website id #{website_id}"
-
-        website = Website.find_by id: website_id
-
-        reason = ""
-
-        unless website
-          reason += " - no website found "
-        end
-
-        different_location = website&.first_location != location
-
-        if website && different_location
-          reason += " - location should be " \
-                            "#{website&.first_location&.str_id} " \
-                            "but is #{location.str_id} "
-        end
-
-        # main-pvc check
-        if !website.extra_storage? && pvc_name == "main-pvc"
-          reason += " - main-pvc should not be present "
-        end
-
-        if website && pvc_type(pvc_name) == "addon" && !valid_pvc_addon?(website, pvc_name)
-          reason += " - addon pvc #{pvc_name} should not be present "
-        end
-
-        # check unnessary PVC
-        unless reason.empty?
-          Rails.logger.info "[#{name}] should remove PVC in ns #{ns}, " \
-                            "pvc = #{pvc_name} - reason = #{reason}"
-
-          result = cluster_runner.execution_method.ex_stdout(
-            "raw_kubectl",
-            s_arguments: " -n #{ns} delete pvc #{pvc_name} "
-          )
-          Rails.logger.info "[#{name}] PVC #{pvc_name} destroyed result = #{result}"
-        end
-      end
-    ensure
-      cluster_runner.execution_method&.destroy_execution
-    end
-  end
-
   def deployment_type(name)
     name == "www-deployment" ? "www" : "addon"
   end
@@ -194,20 +127,6 @@ namespace :kube_maintenance do
     addon_names = website.website_addons.select(&:online?).map(&:name)
 
     addon_names.include?(deployment_name.delete_suffix("-deployment"))
-  end
-
-  def pvc_type(name)
-    name == "main-pvc" ? "www" : "addon"
-  end
-
-  def valid_pvc_addon?(website, pvc_name)
-    # website-addon-11-pvc
-    wa_id = pvc_name.delete_prefix("website-addon-").delete_suffix("-pvc")
-    wa = WebsiteAddon.find_by id: wa_id
-
-    return false unless wa
-
-    website.website_addons.select(&:online?).include?(wa)
   end
 
   desc ''

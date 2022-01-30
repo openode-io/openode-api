@@ -731,15 +731,29 @@ class Website < ApplicationRecord
       .stringify_keys
   end
 
+  def strip_var_names(variables)
+    new_vars = variables.clone
+
+    variables.each do |key, value|
+      if key.to_s != key.to_s.strip
+        new_vars.delete(key)
+        new_vars[key.to_s.strip] = value
+      end
+    end
+
+    new_vars
+  end
+
   def overwrite_env_variables!(variables)
-    merge_secret!(env: variables)
+    new_env = strip_var_names(variables)
+    merge_secret!(env: new_env)
 
     env
   end
 
   def update_env_variables!(variables)
     current_env_variables = env
-    current_env_variables.merge!(variables)
+    current_env_variables.merge!(strip_var_names(variables))
     merge_secret!(env: current_env_variables)
 
     env
@@ -748,7 +762,7 @@ class Website < ApplicationRecord
   def store_env_variable!(variable, value)
     current_env_variables = env
     current_env_variables[variable] = value
-    merge_secret!(env: current_env_variables)
+    merge_secret!(env: strip_var_names(current_env_variables))
 
     env
   end
