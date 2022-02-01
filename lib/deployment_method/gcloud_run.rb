@@ -685,6 +685,7 @@ module DeploymentMethod
                     memory: #{website.memory}Mi
                     cpu: 0.2
                   requests:
+                    cpu: 0.01
                     ephemeral-storage: 100Mi
                     memory: #{(website.memory / 2.0).to_i}Mi
               restartPolicy: Always
