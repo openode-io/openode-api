@@ -84,44 +84,6 @@ namespace :credits do
   end
 
   desc ''
-  task persistence_spend: :environment do
-    name = "Task credits__persistence_spend"
-    Rails.logger.info "[#{name}] begin"
-
-    credit_loop = CreditActionLoopPersistenceSpend.create!
-    websites = (Website.having_extra_storage + Website.having_addon_with_persistence).uniq
-
-    Rails.logger.info "[#{name}] #{websites.count} to process"
-
-    websites.each do |website|
-      Rails.logger.info "[#{name}] processing #{website.site_name}"
-
-      begin
-        website.spend_persistence_hourly_credits!(credit_loop)
-      rescue StandardError => e
-        begin
-          Rails.logger.error "[#{name}] #{e.message}"
-
-          if e.message.to_s.include?("No credits remaining")
-            # destroy the persistence:
-            destroy_persistence_instance(website, 'Destroying persistence (lacking credits)')
-            destroy_addon_persistence(website)
-
-            # notify the user:
-
-            UserMailer.with(
-              user: website.user,
-              website: website
-            ).stopped_due_no_credit_persistence.deliver_now
-          end
-        rescue StandardError => e
-          Rails.logger.error e.to_s
-        end
-      end
-    end
-  end
-
-  desc ''
   task verify_expired_open_source: :environment do
     name = "Task credits__verify_expired_open_source"
     Rails.logger.info "[#{name}] begin"

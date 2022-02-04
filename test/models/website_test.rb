@@ -180,21 +180,6 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal Website.domain_valid?("rnd.wedding"), true
   end
 
-  # scopes
-  test 'having extra storage' do
-    reset_all_extra_storage
-
-    w = default_website
-    wl = w.website_locations.first
-    wl.extra_storage = 2
-    wl.save!
-
-    websites_with_storage = Website.having_extra_storage
-
-    assert_equal websites_with_storage.count, 1
-    assert_equal websites_with_storage.first.id, w.id
-  end
-
   # domains:
 
   test 'getting empty domains' do
@@ -433,25 +418,6 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal results.length, 0
   end
 
-  # storage area validation
-
-  test 'storage area validate with valid ones' do
-    w = Website.where(site_name: 'testsite').first
-    w.storage_areas = ['tmp/', 'what/is/this']
-    w.save!
-    w.reload
-
-    assert_equal w.storage_areas, ['tmp/', 'what/is/this']
-  end
-
-  test 'storage area validate with invalid ones' do
-    w = Website.where(site_name: 'testsite').first
-    w.storage_areas = ['../tmp/', 'what/is/this']
-    w.save
-
-    assert_equal w.valid?, false
-  end
-
   # locations
 
   test 'locations for a given website' do
@@ -544,19 +510,6 @@ class WebsiteTest < ActiveSupport::TestCase
     website.save!
 
     assert_equal website.certs.blank?, true
-  end
-
-  # normalize_storage_areas
-  test 'normalized_storage_areas with two areas' do
-    w = Website.where(site_name: 'testsite').first
-    w.storage_areas = ['tmp/', 'what/is/this/']
-    w.save
-    w.reload
-
-    n_storage_areas = w.normalized_storage_areas
-
-    assert_equal n_storage_areas[0], './tmp/'
-    assert_equal n_storage_areas[1], './what/is/this/'
   end
 
   # can_deploy_to?
@@ -949,173 +902,6 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.valid?, false
   end
 
-  # subscription_spend_persistence_hourly_ratio
-  test 'subscription_spend_persistence_hourly_ratio - without extra storage' do
-    website = default_website
-    wl = default_website_location
-    wl.extra_storage = 0
-    wl.save!
-
-    assert_equal website.subscription_spend_persistence_hourly_ratio, 1.0
-  end
-
-  test 'subscription_spend_persistence_hourly_ratio - 2 extra storage and subscription' do
-    website = default_website
-    wl = default_website_location
-    wl.extra_storage = 2
-    wl.save!
-
-    subscription = Subscription.create!(user: website.user, quantity: 1, active: true)
-    SubscriptionWebsite.create!(website: website, subscription: subscription, quantity: 1)
-
-    assert_equal website.subscription_spend_persistence_hourly_ratio, 0.5
-  end
-
-  test 'subscription_spend_persistence_hourly_ratio - with 1 extra storage and subscription' do
-    website = default_website
-    wl = default_website_location
-    wl.extra_storage = 1
-    wl.save!
-
-    subscription = Subscription.create!(user: website.user, quantity: 1, active: true)
-    SubscriptionWebsite.create!(website: website, subscription: subscription, quantity: 1)
-
-    assert_equal website.subscription_spend_persistence_hourly_ratio, 0
-  end
-
-  # extra storage
-  test 'extra storage with extra storage' do
-    website = default_website
-    wl = default_website_location
-    wl.extra_storage = 2
-    wl.save!
-
-    assert_equal website.total_extra_storage, 2
-    assert_equal website.extra_storage?, true
-    assert_equal(website.extra_storage_credits_cost_per_hour(website.total_extra_storage),
-                 2 * 100 * CloudProvider::Internal::COST_EXTRA_STORAGE_GB_PER_HOUR)
-  end
-
-  test 'extra storage with addon storage' do
-    website = default_website
-    wl = default_website_location
-    wl.extra_storage = 0
-    wl.save!
-
-    addon = Addon.first
-    addon.obj ||= {}
-    addon.obj['minimum_memory_mb'] = 100
-    addon.obj['requires_persistence'] = true
-    addon.obj['persistent_path'] = "/var/www"
-    addon.obj['required_fields'] = ['persistent_path']
-    addon.save!
-
-    WebsiteAddon.create!(
-      name: 'hi-world',
-      account_type: 'second',
-      website: website,
-      addon: addon,
-      obj: {
-        attrib: 'val1'
-      },
-      storage_gb: 2
-    )
-
-    assert_equal website.addon_with_storage?, true
-  end
-
-  test 'extra storage without extra storage' do
-    website = default_website
-    wl = default_website_location
-    wl.extra_storage = 0
-    wl.save!
-
-    assert_equal website.total_extra_storage, 0
-    assert_equal website.extra_storage?, false
-    assert_equal website.extra_storage_credits_cost_per_hour(website.total_extra_storage), 0
-  end
-
-  test 'spend_persistence_hourly_credits! - with extra storage and subscription' do
-    w = default_website
-    wl = default_website_location
-    wl.extra_storage = 2
-    wl.save!
-
-    subscription = Subscription.create!(user: w.user, quantity: 1, active: true)
-    SubscriptionWebsite.create!(website: w, subscription: subscription, quantity: 1)
-
-    w.credit_actions.destroy_all
-    w.spend_persistence_hourly_credits!
-
-    assert_equal w.credit_actions.reload.length, 1
-    assert_in_delta(w.credit_actions.last.credits_spent,
-                    1 * 100 * CloudProvider::Internal::COST_EXTRA_STORAGE_GB_PER_HOUR,
-                    0.000001)
-  end
-
-  test 'spend_persistence_hourly_credits! - with 1 extra storage and subscription' do
-    w = default_website
-    wl = default_website_location
-    wl.extra_storage = 1
-    wl.save!
-
-    subscription = Subscription.create!(user: w.user, quantity: 1, active: true)
-    SubscriptionWebsite.create!(website: w, subscription: subscription, quantity: 1)
-
-    w.credit_actions.destroy_all
-    w.spend_persistence_hourly_credits!
-
-    assert_equal w.credit_actions.reload.length, 1
-    assert_equal w.credit_actions.last.credits_spent, 0
-  end
-
-  test 'website addon with extra storage' do
-    w = default_website
-    wl = default_website_location
-    wl.extra_storage = 0
-    wl.save!
-
-    addon = Addon.first
-    addon.obj ||= {}
-    addon.obj['minimum_memory_mb'] = 100
-    addon.obj['requires_persistence'] = true
-    addon.obj['persistent_path'] = "/var/www"
-    addon.obj['required_fields'] = ['persistent_path']
-    addon.save!
-
-    WebsiteAddon.create!(
-      name: 'hi-world',
-      account_type: 'second',
-      website: w,
-      addon: addon,
-      obj: {
-        attrib: 'val1'
-      },
-      storage_gb: 2,
-      status: WebsiteAddon::STATUS_ONLINE
-    )
-
-    WebsiteAddon.create!(
-      name: 'hi-world2',
-      account_type: 'second',
-      website: w,
-      addon: addon,
-      obj: {
-        attrib: 'val1'
-      },
-      storage_gb: 2,
-      status: WebsiteAddon::STATUS_OFFLINE
-    )
-
-    w.credit_actions.destroy_all
-    w.spend_persistence_hourly_credits!
-
-    assert_equal w.credit_actions.reload.length, 2
-    assert_in_delta(w.credit_actions.last.credits_spent,
-                    2 * 100 * CloudProvider::Internal::COST_EXTRA_STORAGE_GB_PER_HOUR,
-                    0.000001)
-  end
-
   # subscription_spend_online_hourly_ratio
   test 'subscription_spend_online_hourly_ratio - without subscription' do
     website = default_website
@@ -1479,27 +1265,6 @@ class WebsiteTest < ActiveSupport::TestCase
     expected_ratio = 0.495
 
     assert_in_delta website.spending_partial_hourly_ratio, expected_ratio, 0.001
-  end
-
-  test 'spend hourly credits - with persistent services' do
-    website = default_website
-    website.credit_actions.destroy_all
-    wl = default_website_location
-    wl.nb_cpus = 1
-    wl.extra_storage = 2
-    wl.save!
-
-    website.spend_persistence_hourly_credits!
-
-    assert_equal website.credit_actions.reload.length, 1
-    credits_actions = website.credit_actions
-
-    assert_equal credits_actions[0].action_type, CreditAction::TYPE_CONSUME_STORAGE
-
-    expected_credits_spent = Website.cost_price_to_credits(
-      2 * CloudProvider::Kubernetes::COST_EXTRA_STORAGE_GB_PER_HOUR
-    )
-    assert_in_delta credits_actions[0].credits_spent, expected_credits_spent, 0.0000001
   end
 
   # spend_exceeding_traffic
@@ -2043,28 +1808,6 @@ class WebsiteTest < ActiveSupport::TestCase
     w = default_website
     wl = default_website_location
     wl.extra_storage = 0
-    wl.save!
-
-    w.change_status!(Website::STATUS_ONLINE)
-
-    assert_equal w.active?, true
-  end
-
-  test "active? - true if not online and with storage" do
-    w = default_website
-    wl = default_website_location
-    wl.extra_storage = 1
-    wl.save!
-
-    w.change_status!(Website::STATUS_OFFLINE)
-
-    assert_equal w.active?, true
-  end
-
-  test "active? - true if online and with storage" do
-    w = default_website
-    wl = default_website_location
-    wl.extra_storage = 1
     wl.save!
 
     w.change_status!(Website::STATUS_ONLINE)

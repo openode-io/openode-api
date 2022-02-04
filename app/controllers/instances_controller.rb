@@ -339,7 +339,7 @@ class InstancesController < ApplicationController
                                                             }
                                                           ]).first[:result][:stdout])
 
-                Io::Dir.diff(files_client, files_server, @website.normalized_storage_areas)
+                Io::Dir.diff(files_client, files_server, [])
     end
 
     @website_event_obj = { title: 'sync-changes', changes: changes }
