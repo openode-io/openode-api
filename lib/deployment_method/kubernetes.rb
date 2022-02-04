@@ -188,10 +188,6 @@ module DeploymentMethod
       result
     end
 
-    def should_remove_namespace?(website)
-      !website.extra_storage? && !website.addon_with_storage?
-    end
-
     # stop
     def do_stop(options = {})
       website, website_location = get_website_fields(options)
@@ -200,7 +196,7 @@ module DeploymentMethod
 
       # the namespace object must not be generated, as we want to keep it,
       # to make sure for instance persitent objects are not destroyed
-      with_namespace_object = should_remove_namespace?(website.reload)
+      with_namespace_object = true
       kube_yml = generate_instance_yml(website, website_location,
                                        with_namespace_object: with_namespace_object,
                                        with_pvc_object: false,
@@ -485,16 +481,8 @@ module DeploymentMethod
       )
     end
 
-    def generate_persistence_volume_claim_yml(website_location)
-      if !website_location.extra_storage? || website_location.website.storage_areas.empty?
-        return ''
-      end
-
-      generate_generic_persistence_volume_claim_yml(
-        website_location,
-        "main-pvc",
-        website_location.extra_storage
-      )
+    def generate_persistence_volume_claim_yml(_website_location)
+      ''
     end
 
     def destroy_storage_cmd(options = {})
@@ -536,8 +524,8 @@ module DeploymentMethod
       END_YML
     end
 
-    def storage_volumes?(website, website_location)
-      website_location.extra_storage? && website.storage_areas && !website.storage_areas.empty?
+    def storage_volumes?(_website, _website_location)
+      false
     end
 
     def generic_deployment_mount_paths_yml(paths)

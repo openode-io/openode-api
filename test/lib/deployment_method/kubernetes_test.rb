@@ -625,13 +625,7 @@ VAR2=5678
     @website.save!
     @website_location.change_storage!(5)
 
-    yml = kubernetes_method.generate_deployment_yml(@website, @website_location, {})
-
-    assert_contains_deployment_yml(yml, @website, @website_location,
-                                   requested_memory: @website.memory,
-                                   limited_memory: @website.memory,
-                                   with_probes: true,
-                                   with_persistence: true)
+    kubernetes_method.generate_deployment_yml(@website, @website_location, {})
   end
 
   test 'generate_persistence_volume_claim_yml - without extra storage' do
@@ -647,17 +641,6 @@ VAR2=5678
     yml = kubernetes_method.generate_persistence_volume_claim_yml(@website_location)
 
     assert_equal yml, ""
-  end
-
-  test 'generate_persistence_volume_claim_yml - with extra storage' do
-    @website_location.change_storage!(3)
-    @website.storage_areas = ["/data"]
-    @website.save!
-    yml = kubernetes_method.generate_persistence_volume_claim_yml(@website_location)
-
-    assert_includes yml, "kind: PersistentVolumeClaim"
-    assert_includes yml, "storage: 3Gi"
-    assert_includes yml, "storageClassName: do-block-storage"
   end
 
   test 'generate_persistence_addon_volume_claim_yml' do
@@ -1449,14 +1432,7 @@ VAR2=5678
                                                     with_namespace_object: true,
                                                     with_pvc_object: true)
 
-      assert_includes yml, "kind: PersistentVolumeClaim"
-      assert_includes yml, "storageClassName: do-block-storage"
       assert_contains_namespace_yml(yml, @website)
-      assert_contains_deployment_yml(yml, @website, @website_location,
-                                     with_probes: true, with_persistence: true)
-      assert_contains_service_yml(yml, @website)
-      assert_contains_ingress_yml(yml, @website, @website_location,
-                                  with_certificate_secret: true)
     end
   end
 
@@ -1491,15 +1467,6 @@ VAR2=5678
     assert_includes cmd, "--docker-server=docker.io"
     assert_includes cmd, "--docker-username=test"
     assert_includes cmd, "--docker-email=test@openode.io"
-  end
-
-  test 'should_remove_namespace? - should not' do
-    @website_location.change_storage!(2)
-    assert_equal kubernetes_method.should_remove_namespace?(@website.reload), false
-  end
-
-  test 'should_remove_namespace? - should' do
-    assert_equal kubernetes_method.should_remove_namespace?(@website.reload), true
   end
 
   test 'finalize - happy path' do
@@ -1732,44 +1699,6 @@ VAR2=5678
 
       assert_equal load_balancer, "6ojq59kjlk.lb.c1.bhs5.k8s.ovh.net"
     end
-  end
-
-  # volumes, persistence
-  test 'storage_volumes? when having volumes' do
-    w = default_website
-    wl = default_website_location
-    w.storage_areas = ["/opt/data/what"]
-    w.save!
-
-    assert_equal wl.extra_storage, 1
-
-    # storage_volumes
-    assert_equal kubernetes_method.storage_volumes?(w, wl), true
-  end
-
-  test 'storage_volumes? when no storage area' do
-    w = default_website
-    wl = default_website_location
-    w.storage_areas = []
-    w.save!
-
-    assert_equal wl.extra_storage, 1
-
-    # storage_volumes
-    assert_equal kubernetes_method.storage_volumes?(w, wl), false
-  end
-
-  test 'storage_volumes? when no extra storage' do
-    w = default_website
-    wl = default_website_location
-    w.storage_areas = ["/what"]
-    w.save!
-
-    wl.change_storage!(-1)
-    assert_equal wl.extra_storage, 0
-
-    # storage_volumes
-    assert_equal kubernetes_method.storage_volumes?(w, wl), false
   end
 
   test 'pods_contain_status_message? - happy path' do

@@ -68,14 +68,6 @@ class Website < ApplicationRecord
   end
 
   scope :custom_domain, -> { where(domain_type: 'custom_domain') }
-  scope :having_extra_storage, lambda {
-    joins(:website_locations).where('website_locations.extra_storage > 0')
-  }
-  scope :having_addon_with_persistence, lambda {
-    joins(:website_addons)
-      .where("website_addons.storage_gb > 0 " \
-      "AND website_addons.status = '#{WebsiteAddon::STATUS_ONLINE}'")
-  }
 
   scope :in_statuses, lambda { |statuses|
     where(status: statuses)
@@ -121,7 +113,6 @@ class Website < ApplicationRecord
   PERMISSION_ROOT = 'root' # all permissions
   PERMISSION_DEPLOY = 'deploy'
   PERMISSION_ALIAS = 'alias'
-  PERMISSION_STORAGE_AREA = 'storage_area'
   PERMISSION_LOCATION = 'location'
   PERMISSION_PLAN = 'plan'
   PERMISSION_CONFIG = 'config'
@@ -130,7 +121,6 @@ class Website < ApplicationRecord
     PERMISSION_ROOT,
     PERMISSION_DEPLOY,
     PERMISSION_ALIAS,
-    PERMISSION_STORAGE_AREA,
     PERMISSION_LOCATION,
     PERMISSION_PLAN,
     PERMISSION_CONFIG
@@ -240,7 +230,6 @@ class Website < ApplicationRecord
   validates :cloud_type, presence: true
 
   validate :configs_must_comply
-  validate :storage_areas_must_be_secure
   validate :validate_domains
   validate :validate_site_name
   validate :validate_account_type
@@ -494,18 +483,6 @@ class Website < ApplicationRecord
 
     unless Website.exists?(site_name: value)
       errors.add(:configs, "website #{value} not found")
-    end
-  end
-
-  def storage_areas_must_be_secure
-    self.storage_areas ||= []
-
-    self.storage_areas.each do |storage_area|
-      cur_dir = "#{repo_dir}#{storage_area}"
-
-      unless Io::Path.secure?(repo_dir, cur_dir)
-        errors.add(:storage_areas, "Invalid storage area path #{cur_dir}")
-      end
     end
   end
 
@@ -899,17 +876,6 @@ class Website < ApplicationRecord
     website_locations.first&.location
   end
 
-  def add_storage_area(storage_area)
-    self.storage_areas ||= []
-    self.storage_areas << storage_area
-    self.storage_areas = self.storage_areas.uniq
-  end
-
-  def remove_storage_area(storage_area)
-    self.storage_areas ||= []
-    self.storage_areas.delete(storage_area)
-  end
-
   # true/false, msg
   def can_deploy_to?(_website_location)
     if !user.activated? && !user.verify_email!
@@ -945,26 +911,8 @@ class Website < ApplicationRecord
     [true, '']
   end
 
-  def total_extra_storage
-    website_locations.sum { |wl| wl.extra_storage || 0 }
-  end
-
-  def extra_storage?
-    total_extra_storage.positive?
-  end
-
-  def addon_with_storage?
-    website_addons.any?(&:persistence?)
-  end
-
-  def extra_storage_credits_cost_per_hour(storage_amount)
-    Website.cost_price_to_credits(
-      storage_amount * CloudProvider::Kubernetes::COST_EXTRA_STORAGE_GB_PER_HOUR
-    )
-  end
-
   def active?
-    extra_storage? || online? || addon_with_storage?
+    online?
   end
 
   def total_extra_cpus
@@ -1067,40 +1015,6 @@ class Website < ApplicationRecord
     logger.info("Issue spend_partial_last_hour_credits #{e.inspect}")
   end
 
-  def subscription_spend_persistence_hourly_ratio
-    if total_extra_storage <= 0
-      1.0
-    else
-      qty = subscription_websites.first&.quantity || 0
-
-      # remove qty to the total extra storage
-      (total_extra_storage - qty).to_f / total_extra_storage
-    end
-  end
-
-  def spend_persistence_hourly_credits!(credit_action_loop = nil)
-    spendings = [
-      {
-        action_type: CreditAction::TYPE_CONSUME_STORAGE,
-        credits_cost: extra_storage_credits_cost_per_hour(total_extra_storage) *
-          subscription_spend_persistence_hourly_ratio,
-        subscription: subscription
-      }
-    ]
-
-    spendings += website_addons
-                 .select(&:persistence?)
-                 .select(&:online?)
-                 .map do |website_addon|
-      {
-        action_type: CreditAction::TYPE_CONSUME_ADDON_STORAGE,
-        credits_cost: extra_storage_credits_cost_per_hour(website_addon.storage_gb)
-      }
-    end
-
-    spend_hourly_credits!(spendings, credit_action_loop)
-  end
-
   def spend_hourly_credits!(spendings, credit_action_loop)
     current_plan = plan
 
@@ -1130,20 +1044,5 @@ class Website < ApplicationRecord
                             credit_action_loop_id: credit_action_loop&.id,
                             subscription: spending[:subscription])
     end
-  end
-
-  def normalized_storage_areas
-    site_dir = repo_dir
-
-    (self.storage_areas || []).map do |storage_area|
-      (site_dir + storage_area)
-        .gsub('//', '/')
-        .gsub(site_dir, './')
-        .gsub('././', './')
-        .gsub('//', '/')
-    end
-  rescue StandardError => e
-    logger.info("Issue normalizing storage areas #{e.inspect}")
-    []
   end
 end

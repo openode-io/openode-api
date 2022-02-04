@@ -152,21 +152,6 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     assert_response :bad_request
   end
 
-  test '/instances/:instance_id/remove-location should not if has storage' do
-    w = default_website
-    w.change_status!(Website::STATUS_OFFLINE)
-    wl = w.website_locations.first
-    wl.extra_storage = 0
-    wl.change_storage!(2)
-
-    post "/instances/#{w.site_name}/remove-location",
-         as: :json,
-         params: { location_str_id: wl.location.str_id },
-         headers: default_headers_auth
-
-    assert_response :bad_request
-  end
-
   test '/instances/:instance_id/remove-location happy path' do
     w = default_website
     w.change_status!(Website::STATUS_OFFLINE)
