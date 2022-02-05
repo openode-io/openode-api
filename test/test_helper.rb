@@ -756,7 +756,8 @@ class ActiveSupport::TestCase
   end
 
   def prepare_logs_container(dep_method, website, container_id, result = 'done_logs')
-    website.container_id = nil
+    website.data ||= {}
+    website.data["container_id"] = container_id
     prepare_ssh_session(dep_method.logs(container_id: container_id, nb_lines: 10_000,
                                         website: website),
                         result)
