@@ -708,24 +708,6 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  # /logs with docker compose
-  test '/instances/:instance_id/logs with subdomain' do
-    set_dummy_secrets_to(LocationServer.all)
-
-    prepare_ssh_session('docker exec 123456789 docker-compose logs --tail=100',
-                        'hellooutput')
-
-    assert_scripted do
-      begin_ssh
-      get '/instances/testsite/logs?location_str_id=canada',
-          as: :json,
-          headers: default_headers_auth
-
-      assert_response :success
-      assert_equal response.parsed_body['logs'], 'hellooutput'
-    end
-  end
-
   test '/instances/:instance_id/logs offline, without deployment' do
     set_dummy_secrets_to(LocationServer.all)
     w = default_website
@@ -776,23 +758,6 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
   end
 
   # /cmd with docker compose
-  test '/instances/:instance_id/cmd with subdomain' do
-    set_dummy_secrets_to(LocationServer.all)
-
-    prepare_ssh_session('docker exec 123456789 docker-compose exec -T  www ls -la',
-                        'hellooutput')
-
-    assert_scripted do
-      begin_ssh
-      post '/instances/testsite/cmd?location_str_id=canada',
-           as: :json,
-           params: { app: 'www', cmd: 'ls -la' },
-           headers: default_headers_auth
-
-      assert_response :success
-      assert_equal response.parsed_body['result']['stdout'], 'hellooutput'
-    end
-  end
 
   test '/instances/:instance_id/cmd fail if offline' do
     set_dummy_secrets_to(LocationServer.all)
@@ -865,40 +830,6 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
          headers: default_headers_auth
 
     assert_response :forbidden
-  end
-
-  # reload
-  test '/instances/:instance_id/reload with internal' do
-    clear_all_queued_jobs
-    dep_method = prepare_default_execution_method
-    set_dummy_secrets_to(LocationServer.all)
-    prepare_default_ports
-
-    prepare_ssh_session(dep_method.down(front_container_id: '123456789'), '123456789')
-    prepare_ssh_session(dep_method.docker_compose(front_container_id: '123456789'),
-                        '123456789')
-
-    website = Website.find_by site_name: 'testsite'
-
-    assert_scripted do
-      begin_ssh
-
-      post '/instances/testsite/reload?location_str_id=canada',
-           as: :json,
-           params: {},
-           headers: default_headers_auth
-
-      invoke_all_jobs
-
-      assert_response :success
-      assert_equal response.parsed_body['result'], 'success'
-      assert_equal response.parsed_body.dig('website', 'id'), website.id
-      assert_equal response.parsed_body.dig('website', 'site_name'), website.site_name
-      assert response.parsed_body['deploymentId']
-
-      deployment = Deployment.find(response.parsed_body['deploymentId'])
-      assert_equal deployment.status, Deployment::STATUS_RUNNING
-    end
   end
 
   # /erase-all with docker compose

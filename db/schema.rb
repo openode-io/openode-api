@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_29_191538) do
+ActiveRecord::Schema.define(version: 2022_02_05_153129) do
 
   create_table "addons", charset: "latin1", force: :cascade do |t|
     t.string "name"
@@ -322,7 +322,6 @@ ActiveRecord::Schema.define(version: 2022_01_29_191538) do
     t.string "domains"
     t.integer "nb_launch_issues"
     t.text "storage_areas"
-    t.string "container_id"
     t.text "crontab"
     t.boolean "redir_http_to_https"
     t.text "configs"

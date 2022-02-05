@@ -51,15 +51,6 @@ class DockerComposeTest < ActiveSupport::TestCase
     end
   end
 
-  test 'logs should provide command if proper params' do
-    docker_compose = DeploymentMethod::DockerCompose.new
-
-    cmd = docker_compose.logs(container_id: '1234', nb_lines: 10)
-
-    assert_includes cmd, 'docker exec 1234 docker-compose logs'
-    assert_includes cmd, '=10'
-  end
-
   test 'should have change dir and node' do
     dep_method = DeploymentMethod::DockerCompose.new
 
@@ -337,41 +328,10 @@ services:
     end
   end
 
-  test 'launch' do
-    website = default_website
-    website.crontab = ''
-    website.save
-    website_location = default_website_location
-    dep_method = docker_compose_method
-
-    dep_method.get_file(repo_dir: website.repo_dir,
-                        file: 'docker-compose.yml')
-    expect_global_container(dep_method)
-    prepare_ssh_session(dep_method.kill_global_container(id: 'cc2304677be0'), 'good')
-
-    cmd_front_container =
-      dep_method.front_container(website: website, website_location: website_location,
-                                 in_port: 80, limit_resources: true)
-    prepare_ssh_session(cmd_front_container, 'ok')
-    expect_global_container(dep_method)
-    prepare_ssh_session(dep_method.docker_compose(front_container_id: 'cc2304677be0'),
-                        'ok')
-
-    assert_scripted do
-      begin_ssh
-      dep_method.launch(website: website,
-                        website_location: website_location,
-                        limit_resources: true)
-
-      website.reload
-
-      assert_equal website.container_id, 'cc2304677be0'
-    end
-  end
-
   test 'node_available?' do
     website = default_website
-    website.container_id = 'cc2304677be0'
+    website.data = {}
+    website.data["container_id"] = 'cc2304677be0'
     website.save
     dep_method = docker_compose_method
 
@@ -390,7 +350,8 @@ services:
     website = default_website
     website.configs ||= {}
     website.configs['SKIP_PORT_CHECK'] = true
-    website.container_id = 'cc2304677be0'
+    website.data = {}
+    website.data["container_id"] = 'cc2304677be0'
     website.save
     dep_method = docker_compose_method
 
@@ -409,7 +370,8 @@ services:
     website = default_website
     website.configs ||= {}
     website.configs['SKIP_PORT_CHECK'] = true
-    website.container_id = 'cc2304677be0'
+    website.data = {}
+    website.data["container_id"] = 'cc2304677be0'
     website.save
     dep_method = docker_compose_method
 
@@ -426,7 +388,8 @@ services:
 
   test 'instance_up? without skip port check, instance up' do
     website = default_website
-    website.container_id = 'cc2304677be0'
+    website.data = {}
+    website.data["container_id"] = 'cc2304677be0'
     website.save
     dep_method = docker_compose_method
 
@@ -445,7 +408,8 @@ services:
 
   test 'instance_up? without skip port check, instance down' do
     website = default_website
-    website.container_id = 'cc2304677be0'
+    website.data = {}
+    website.data["container_id"] = 'cc2304677be0'
     website.save
     dep_method = docker_compose_method
 
@@ -464,7 +428,8 @@ services:
 
   test 'verify_instance_up without skip port check, instance up' do
     website = default_website
-    website.container_id = 'cc2304677be0'
+    website.data = {}
+    website.data["container_id"] = 'cc2304677be0'
     website.save
     dep_method = docker_compose_method
 
@@ -478,37 +443,6 @@ services:
       dep_method.verify_instance_up(website: website, website_location: default_website_location)
 
       website.reload
-    end
-  end
-
-  test 'finalize ' do
-    set_dummy_secrets_to(LocationServer.all)
-    website = default_website
-    website_location = default_website_location
-    runner = DeploymentMethod::Runner.new('docker', 'cloud', dummy_ssh_configs)
-    dep_method = runner.get_execution_method
-
-    website.status = Website::STATUS_ONLINE
-    website.save!
-    website_location.port = 33_120
-    website_location.second_port = 33_121
-    website_location.running_port = 33_121
-    website_location.save!
-
-    prepare_ssh_session(dep_method.logs(container_id: 'b3621dd9d4dd', nb_lines: 10_000,
-                                        website: website),
-                        'done')
-
-    cmd = dep_method.global_containers({})
-    prepare_ssh_session(cmd, IO.read('test/fixtures/docker/global_containers.txt'))
-    prepare_ssh_session(dep_method.kill_global_container(id: 'b3621dd9d4dd'), 'killed b3621dd9d4dd')
-
-    assert_scripted do
-      begin_ssh
-      dep_method.finalize(website: website, website_location: website_location)
-
-      assert_equal website.online?, true
-      assert_equal website_location.running_port, 33_120
     end
   end
 

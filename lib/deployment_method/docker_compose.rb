@@ -108,7 +108,8 @@ module DeploymentMethod
 
       ex('docker_compose', options_docker_compose)
 
-      website.container_id = front_container[:ID]
+      website.data ||= {}
+      website.data["container_id"] = front_container[:ID]
       website.save!
     end
 
@@ -128,7 +129,7 @@ module DeploymentMethod
       # logs
       begin
         ex_stdout('logs', website: website,
-                          container_id: website.container_id,
+                          container_id: website&.data&.dig("container_id"),
                           nb_lines: 10_000)
       rescue StandardError => e
         Ex::Logger.info(e, 'Unable to retrieve the docker compose logs')
@@ -156,7 +157,7 @@ module DeploymentMethod
     def reload(options = {})
       website, = get_website_fields(options)
 
-      docker_compose_options = { front_container_id: website.container_id }
+      docker_compose_options = { front_container_id: website.data["container_id"] }
 
       ex('down', docker_compose_options)
       ex('docker_compose', docker_compose_options)
@@ -223,7 +224,7 @@ module DeploymentMethod
       website = options[:website]
 
       options_ps = {
-        front_container_id: website.container_id
+        front_container_id: website.data["container_id"]
       }
 
       result = ex('ps', options_ps)
@@ -305,7 +306,7 @@ module DeploymentMethod
     end
 
     def logs(options = {})
-      container_id = options[:website]&.container_id || options[:container_id]
+      container_id = options[:website]&.data&.dig("container_id")
 
       assert container_id
       require_fields([:nb_lines], options)
@@ -324,7 +325,7 @@ module DeploymentMethod
       require_fields(%i[website app cmd], options)
       website, app, cmd = options.values_at(:website, :app, :cmd)
 
-      "#{exec_begin(website.container_id)} #{app} #{cmd}"
+      "#{exec_begin(website.data['container_id'])} #{app} #{cmd}"
     end
 
     def self.default_docker_compose_file(opts = {})
