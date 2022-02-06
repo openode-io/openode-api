@@ -7,6 +7,13 @@ class GlobalController < ApplicationController
   end
 
   api!
+  def recently_auth
+    result = User.exists?(latest_request_ip: params["ip"])
+
+    json(result: result)
+  end
+
+  api!
   def version
     json(
       version: File.read('.version').strip
