@@ -77,6 +77,7 @@ Rails.application.routes.draw do
   scope :global do
     get 'test', to: 'global#test'
     get 'version', to: 'global#version'
+    post 'recently-auth', to: 'global#recently_auth'
     get 'status/job-queues', to: 'global#status_job_queues'
 
     get '/services/down', to: 'global#services_down'

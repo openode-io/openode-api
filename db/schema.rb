@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_02_05_153129) do
+ActiveRecord::Schema.define(version: 2022_02_06_235231) do
 
   create_table "addons", charset: "latin1", force: :cascade do |t|
     t.string "name"
@@ -247,6 +247,7 @@ ActiveRecord::Schema.define(version: 2022_02_05_153129) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["is_admin"], name: "index_users_on_is_admin"
     t.index ["last_free_credit_distribute_at"], name: "index_users_on_last_free_credit_distribute_at"
+    t.index ["latest_request_ip"], name: "index_users_on_latest_request_ip"
     t.index ["newsletter"], name: "index_users_on_newsletter"
     t.index ["notified_low_credit"], name: "index_users_on_notified_low_credit"
     t.index ["token"], name: "index_users_on_token", unique: true
