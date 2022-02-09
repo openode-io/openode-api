@@ -683,7 +683,7 @@ module DeploymentMethod
                   limits:
                     ephemeral-storage: 100Mi
                     memory: #{website.memory}Mi
-                    cpu: 0.2
+                    cpu: 0.5
                   requests:
                     cpu: 0.01
                     ephemeral-storage: 100Mi
