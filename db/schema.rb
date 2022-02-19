@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_02_06_235231) do
+ActiveRecord::Schema.define(version: 2022_02_19_184712) do
 
   create_table "addons", charset: "latin1", force: :cascade do |t|
     t.string "name"
@@ -173,6 +173,15 @@ ActiveRecord::Schema.define(version: 2022_02_06_235231) do
     t.string "gateway", default: "paypal"
     t.boolean "is_subscription", default: false
     t.index ["user_id"], name: "index_orders_on_user_id"
+  end
+
+  create_table "request_orders", charset: "latin1", force: :cascade do |t|
+    t.bigint "user_id"
+    t.float "amount"
+    t.string "provider_type"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_request_orders_on_user_id"
   end
 
   create_table "snapshots", charset: "latin1", force: :cascade do |t|
