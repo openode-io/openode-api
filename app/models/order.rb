@@ -12,7 +12,7 @@ class Order < ApplicationRecord
   REGULAR_GATEWAYS = %w[paypal credit]
   CRYPTO_GATEWAYS = %w[btc ether bch stellar cro]
 
-  validates :gateway, inclusion: { in: (REGULAR_GATEWAYS+CRYPTO_GATEWAYS) }
+  validates :gateway, inclusion: { in: (REGULAR_GATEWAYS + CRYPTO_GATEWAYS) }
 
   before_create :apply_coupon
   after_create :add_user_credits
@@ -32,11 +32,11 @@ class Order < ApplicationRecord
   end
 
   def add_credit_for_crypto_payments
-    if CRYPTO_GATEWAYS.include?(self.gateway)
+    if CRYPTO_GATEWAYS.include?(gateway)
       Order.create(
-        user_id: self.user_id,
-        content: {"type" => "customer", "reason" => "Credit for order ##{self.id}"},
-        amount: self.amount*0.05,
+        user_id: user_id,
+        content: { "type" => "customer", "reason" => "Credit for order ##{id}" },
+        amount: amount * 0.05,
         payment_status: "Completed",
         gateway: "credit"
       )
