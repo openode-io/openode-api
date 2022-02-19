@@ -8,10 +8,15 @@ class Order < ApplicationRecord
   validates :payment_status, presence: true
   validates :content, presence: true
   validates :gateway, presence: true
-  validates :gateway, inclusion: { in: %w[paypal btc ether bch stellar credit] }
+
+  REGULAR_GATEWAYS = %w[paypal credit]
+  CRYPTO_GATEWAYS = %w[btc ether bch stellar cro]
+
+  validates :gateway, inclusion: { in: (REGULAR_GATEWAYS+CRYPTO_GATEWAYS) }
 
   before_create :apply_coupon
   after_create :add_user_credits
+  after_create :add_credit_for_crypto_payments
   after_create :send_confirmation_email
 
   def apply_coupon
@@ -24,6 +29,18 @@ class Order < ApplicationRecord
     content['coupon'] = first_unused_coupon
 
     user.use_coupon!(first_unused_coupon)
+  end
+
+  def add_credit_for_crypto_payments
+    if CRYPTO_GATEWAYS.include?(self.gateway)
+      Order.create(
+        user_id: self.user_id,
+        content: {"type" => "customer", "reason" => "Credit for order ##{self.id}"},
+        amount: self.amount*0.05,
+        payment_status: "Completed",
+        gateway: "credit"
+      )
+    end
   end
 
   def add_user_credits

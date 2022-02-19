@@ -10,6 +10,6 @@ class BillingController < ApplicationController
   end
 
   def request_payment
-    json({})
+    json(RequestOrder.create!(user: @user, amount: params["amount"].to_f, provider_type: params["token"]))
   end
 end
