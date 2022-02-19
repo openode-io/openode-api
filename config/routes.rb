@@ -63,6 +63,7 @@ Rails.application.routes.draw do
 
   scope :billing do
     get  'orders', to: 'billing#orders'
+    post  'request_payment', to: 'billing#request_payment'
   end
 
   scope :notifications do

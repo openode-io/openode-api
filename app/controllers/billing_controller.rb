@@ -8,4 +8,8 @@ class BillingController < ApplicationController
 
     json(default_listing(@user.orders, attributes_to_search))
   end
+
+  def request_payment
+    json({})
+  end
 end
