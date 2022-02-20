@@ -46,11 +46,6 @@ class ActiveSupport::TestCase
                         expected_result)
   end
 
-  def prepare_get_dotenv(_kubernetes_method, website, expected_result)
-    prepare_ssh_session("cat /home/#{website.user_id}/#{website.site_name}/.env",
-                        expected_result)
-  end
-
   def prepare_action_yml(kubernetes_method, website_location, filename, s_arguments,
                          expected_result, expected_exit_code = 0)
     DeploymentMethod::Kubernetes.set_kubectl_file_path(filename)

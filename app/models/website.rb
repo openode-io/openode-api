@@ -207,12 +207,6 @@ class Website < ApplicationRecord
       enum: ['true', 'false', '']
     },
     {
-      variable: 'DOTENV_FILEPATH',
-      type: 'file_in_repo',
-      description: 'Relative dotenv (.env) file path. Example: .production.env',
-      default: '.env'
-    },
-    {
       variable: 'REFERENCE_WEBSITE_IMAGE',
       type: 'site_name',
       description: 'Use the image of a specified website site name'
@@ -684,10 +678,6 @@ class Website < ApplicationRecord
   def get_config(config_name)
     self.configs ||= {}
     configs[config_name] || Website.config_def(config_name)[:default]
-  end
-
-  def dotenv_filepath
-    get_config("DOTENV_FILEPATH")
   end
 
   def reference_website_image

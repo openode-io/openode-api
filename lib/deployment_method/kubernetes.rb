@@ -336,15 +336,6 @@ module DeploymentMethod
       "cat #{options[:path]}"
     end
 
-    def retrieve_dotenv_cmd(options = {})
-      website = options[:website]
-
-      project_path = website.repo_dir
-      dotenv_relative_filepath = website.dotenv_filepath
-
-      retrieve_file_cmd(path: "#{project_path}#{dotenv_relative_filepath}")
-    end
-
     def retrieve_remote_file(options = {})
       assert options[:cmd]
       assert options[:name]
@@ -374,16 +365,6 @@ module DeploymentMethod
       env_from_file.merge(stored_env)
     end
 
-    def retrieve_dotenv(website)
-      dotenv_content = retrieve_remote_file(
-        name: 'dotenv',
-        cmd: "retrieve_dotenv_cmd",
-        website: website
-      )
-
-      prepare_dotenv_hash(website, dotenv_content)
-    end
-
     def dotenv_vars_to_s(variables)
       vars_s = variables.keys.map do |v|
         "  #{v}: \"#{variables[v].to_s.gsub('\\', '\\\\\\').gsub('"', '\\"')}\""
@@ -407,7 +388,7 @@ module DeploymentMethod
     def generate_instance_yml(website, website_location, opts = {})
       assert !opts[:with_namespace_object].nil?
       assert !opts[:with_pvc_object].nil?
-      dotenv_vars = retrieve_dotenv(website)
+      dotenv_vars = {}
 
       <<~END_YML
         ---

@@ -28,7 +28,6 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       prepare_check_repo_size(kubernetes_method, website, "1231 /what")
       prepare_build_image(kubernetes_method, website, deployment, "new image built")
       prepare_push_image(kubernetes_method, website, deployment, "result")
-      prepare_get_dotenv(kubernetes_method, website, "VAR1=12")
     end
 
     prepare_action_yml(kubernetes_method, website_location, "apply.yml",
@@ -82,7 +81,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
       assert_equal @website.status, Website::STATUS_ONLINE
       assert_equal deployment.status, Deployment::STATUS_SUCCESS
-      assert_equal deployment.result['steps'].length, 18 # global, 2 kills, finalize
+      assert_equal deployment.result['steps'].length, 17 # global, 2 kills, finalize
 
       assert_equal deployment.result['errors'].length, 0
 
@@ -96,9 +95,6 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert deployment.obj['image_name_tag'].present?
       assert_includes deployment.obj['image_name_tag'],
                       'docker.io/openode_prod/testkubernetes-type:testkubernetes-type'
-
-      # check dotenv saved
-      assert_equal deployment.secret[:dotenv], "VAR1=12"
 
       steps_to_verify = [
         { "status" => "running", "level" => "info", "update" => "Verifying allowed to deploy..." },
@@ -175,7 +171,7 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
       assert_equal @website.status, Website::STATUS_ONLINE
       assert_equal deployment.status, Deployment::STATUS_SUCCESS
-      assert_equal deployment.result['steps'].length, 18 # global, 2 kills, finalize
+      assert_equal deployment.result['steps'].length, 17 # global, 2 kills, finalize
 
       assert_equal deployment.result['errors'].length, 0
 
@@ -189,9 +185,6 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
       assert deployment.obj['image_name_tag'].present?
       assert_includes deployment.obj['image_name_tag'],
                       'docker.io/openode_prod/testkubernetes-type:testkubernetes-type'
-
-      # check dotenv saved
-      assert_equal deployment.secret[:dotenv], "VAR1=12"
 
       steps_to_verify = [
         { "status" => "running", "level" => "info", "update" => "Verifying allowed to deploy..." },
@@ -314,7 +307,6 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     @website.one_click_app = { id: 123 }
     @website.save!
     prepare_make_secret(@kubernetes_method, @website, @website_location, "result")
-    prepare_get_dotenv(@kubernetes_method, @website, "VAR1=12")
 
     prepare_action_yml(@kubernetes_method, @website_location, "apply.yml",
                        "delete --timeout 30s  -f apply.yml", 'success')
@@ -358,7 +350,6 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
     SubscriptionWebsite.create!(website: @website, subscription: s, quantity: 1)
 
     prepare_make_secret(@kubernetes_method, @website, @website_location, "result")
-    prepare_get_dotenv(@kubernetes_method, @website, "VAR1=12")
 
     prepare_action_yml(@kubernetes_method, @website_location, "apply.yml",
                        "delete --timeout 30s  -f apply.yml", 'success')
@@ -398,7 +389,6 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
 
   test '/instances/:instance_id/stop - if kube stop fail, should put back to online' do
     prepare_make_secret(@kubernetes_method, @website, @website_location, "result")
-    prepare_get_dotenv(@kubernetes_method, @website, "VAR1=12")
 
     prepare_action_yml(@kubernetes_method, @website_location, "apply.yml",
                        "delete --timeout 30s  -f apply.yml", 'success', 1)
@@ -430,7 +420,6 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
                               'repository_url' => 'http://github.com/invalid')
 
     prepare_make_secret(@kubernetes_method, @website, @website_location, "result")
-    prepare_get_dotenv(@kubernetes_method, @website, "VAR1=12")
 
     prepare_action_yml(@kubernetes_method, @website_location, "apply.yml",
                        "delete --timeout 30s  -f apply.yml", 'success')

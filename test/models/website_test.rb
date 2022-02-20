@@ -684,34 +684,6 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal website.max_build_duration, 150
   end
 
-  test 'dotenv_filepath if set' do
-    website = default_website
-    website.configs ||= {}
-    website.configs['DOTENV_FILEPATH'] = '.production.env'
-    website.save!
-    website.reload
-
-    assert_equal website.dotenv_filepath, '.production.env'
-  end
-
-  test 'dotenv_filepath default' do
-    website = default_website
-    website.configs = {}
-    website.save!
-    website.reload
-
-    assert_equal website.dotenv_filepath, '.env'
-  end
-
-  test 'dotenv filepath should be secure' do
-    website = default_website
-    website.configs ||= {}
-    website.configs['DOTENV_FILEPATH'] = '../.production.env'
-    website.save
-
-    assert_equal website.valid?, false
-  end
-
   test 'account_type auto valid' do
     website = default_website
     website.configs ||= {}

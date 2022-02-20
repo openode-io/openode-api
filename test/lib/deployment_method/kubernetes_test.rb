@@ -118,181 +118,6 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
     assert_equal confs['external_addr'], '127.0.0.1'
   end
 
-  # DOTENV
-
-  test 'retrieve_dotenv_cmd' do
-    w = default_website
-    generated_cmd = kubernetes_method.retrieve_dotenv_cmd(website: w)
-    assert_equal generated_cmd, "cat #{w.repo_dir}.env"
-  end
-
-  test 'retrieve_dotenv_cmd with custom dotenv filepath' do
-    w = default_website
-    w.configs ||= {}
-    w.configs['DOTENV_FILEPATH'] = '.production.env'
-    w.save!
-    generated_cmd = kubernetes_method.retrieve_dotenv_cmd(website: w)
-    assert_equal generated_cmd, "cat #{w.repo_dir}.production.env"
-  end
-
-  test 'retrieve_dotenv without dotenv' do
-    generated_cmd = kubernetes_method.retrieve_dotenv_cmd(website: @website)
-
-    prepare_ssh_session(generated_cmd, '')
-
-    assert_scripted do
-      begin_ssh
-      dotenv_content = kubernetes_method.retrieve_dotenv(@website)
-
-      assert_equal dotenv_content, {}
-    end
-  end
-
-  test 'retrieve_dotenv with dotenv' do
-    generated_cmd = kubernetes_method.retrieve_dotenv_cmd(website: @website)
-
-    dotenv_content = '
-
-VAR1=1234
-VAR2=5678
-    '
-    prepare_ssh_session(generated_cmd, dotenv_content)
-
-    assert_scripted do
-      begin_ssh
-      dotenv_result = kubernetes_method.retrieve_dotenv(@website)
-
-      assert_equal dotenv_result["VAR1"], "1234"
-      assert_equal dotenv_result["VAR2"], "5678"
-    end
-  end
-
-  test 'retrieve_dotenv with dotenv and stored env' do
-    @website.store_env_variable!("VAR2", "56789")
-    @website.store_env_variable!("VAR3", "HIWORLD")
-    generated_cmd = kubernetes_method.retrieve_dotenv_cmd(website: @website)
-
-    dotenv_content = '
-
-VAR1=1234
-VAR2=5678
-    '
-    prepare_ssh_session(generated_cmd, dotenv_content)
-
-    assert_scripted do
-      begin_ssh
-      dotenv_result = kubernetes_method.retrieve_dotenv(@website)
-
-      assert_equal dotenv_result["VAR1"], "1234"
-      assert_equal dotenv_result["VAR2"], "56789"
-      assert_equal dotenv_result["VAR3"], "HIWORLD"
-    end
-  end
-
-  test 'dotenv_vars_to_s without variable' do
-    assert_equal kubernetes_method.dotenv_vars_to_s({}), ""
-  end
-
-  test 'dotenv_vars_to_s with variables' do
-    vars = {
-      'var1': 'val1',
-      'var12': 'val\\12',
-      'var2': 2,
-      'va_r3': 'va"l'
-    }
-
-    expected = "  var1: \"val1\"\n" \
-    "  var12: \"val\\\\12\"\n" \
-    "  var2: \"2\"\n" \
-    "  va_r3: \"va\\\"l\""
-
-    result = kubernetes_method.dotenv_vars_to_s(vars)
-
-    assert_equal result, expected
-  end
-
-  # retrieve_remote_file
-  test 'retrieve_remote_file - without parent execution' do
-    prepare_ssh_session("cat #{@website.repo_dir}.env", "TEST=123")
-
-    assert_scripted do
-      begin_ssh
-
-      result = kubernetes_method.retrieve_remote_file(
-        name: 'dotenv',
-        cmd: 'retrieve_dotenv_cmd',
-        website: @website
-      )
-
-      assert_equal result, "TEST=123"
-    end
-  end
-
-  test 'retrieve_remote_file - with parent execution' do
-    parent_execution = Deployment.create!(
-      website: @website,
-      website_location: @website_location,
-      status: Deployment::STATUS_RUNNING
-    )
-
-    assert_scripted do
-      begin_ssh
-
-      kubernetes_method.runner.init_execution!('Deployment',
-                                               'parent_execution_id' => parent_execution.id)
-
-      execution = kubernetes_method.runner.execution
-
-      execution.parent_execution = parent_execution
-      execution.save
-
-      # add dotenv in the vault
-      execution.parent_execution.save_secret!(dotenv: 'TITI=toto')
-
-      result = kubernetes_method.retrieve_remote_file(
-        name: 'dotenv',
-        cmd: 'retrieve_dotenv_cmd',
-        website: @website
-      )
-
-      assert_equal result, "TITI=toto"
-    end
-  end
-
-  test 'retrieve_remote_file - with reference_website_image' do
-    referenced_website = Website.last
-
-    img_name_tag = 'mypretty/image'
-
-    original_deployment = Deployment.create!(
-      website: referenced_website,
-      website_location: @website_location,
-      status: Deployment::STATUS_RUNNING,
-      obj: {
-        image_name_tag: img_name_tag
-      }
-    )
-
-    set_reference_image_website(@website, referenced_website)
-
-    assert_scripted do
-      begin_ssh
-
-      kubernetes_method.runner.init_execution!('Deployment')
-
-      # add dotenv in the vault
-      original_deployment.save_secret!(dotenv: 'TITI=toto')
-
-      result = kubernetes_method.retrieve_remote_file(
-        name: 'dotenv',
-        cmd: 'retrieve_dotenv_cmd',
-        website: @website
-      )
-
-      assert_equal result, "TITI=toto"
-    end
-  end
-
   test 'get_pods_json - happy path' do
     prepare_get_pods_happy(@website_location)
 
@@ -1419,8 +1244,6 @@ VAR2=5678
   end
 
   test 'generate_instance_yml - basic' do
-    cmd_get_dotenv = kubernetes_method.retrieve_dotenv_cmd(website: @website)
-    prepare_ssh_session(cmd_get_dotenv, '')
     @website_location.change_storage!(3)
     @website.storage_areas = ["/data"]
     @website.save!
@@ -1437,9 +1260,6 @@ VAR2=5678
   end
 
   test 'generate_instance_yml - without namespace object/pvc' do
-    cmd_get_dotenv = kubernetes_method.retrieve_dotenv_cmd(website: @website)
-    prepare_ssh_session(cmd_get_dotenv, '')
-
     assert_scripted do
       begin_ssh
 
@@ -1575,70 +1395,6 @@ VAR2=5678
       assert_equal result_details, expected_result
       assert_includes kubernetes_method.runner.execution.events.first['update'],
                       "The DNS documentation is available"
-    end
-  end
-
-  test 'finalize - when failing should stop' do
-    @website.status = Website::STATUS_OFFLINE
-    @website.save!
-
-    get_pods_json_content = IO.read('test/fixtures/kubernetes/1_pod_alive.json')
-    prepare_get_pods_json(kubernetes_method, @website, @website_location, get_pods_json_content,
-                          0)
-
-    cmd = kubernetes_method.kubectl(
-      website_location: @website_location,
-      with_namespace: true,
-      s_arguments: "get events -o json"
-    )
-
-    file_events =
-      "test/fixtures/kubernetes/get_events.json"
-    expected_result = IO.read(file_events)
-    prepare_ssh_session(cmd, expected_result, 0)
-
-    get_pods_json_content = IO.read('test/fixtures/kubernetes/1_pod_alive.json')
-    prepare_get_pods_json(kubernetes_method, @website, @website_location, get_pods_json_content,
-                          0, "get pod -l app=www")
-
-    netstat_result = "Active Internet connections (only servers)\n"\
-      "Proto Recv-Q Send-Q Local Address           Foreign Address         State       \n"\
-      "tcp        0      0 127.0.0.1:3000          0.0.0.0:*               LISTEN"
-
-    prepare_kubernetes_custom_cmd(kubernetes_method,
-                                  "netstat -tl",
-                                  netstat_result,
-                                  0,
-                                  website: @website,
-                                  website_location: @website_location,
-                                  pod_name: "www-deployment-5889df69dc-xg9xl",
-                                  app: "www")
-
-    prepare_kubernetes_logs(kubernetes_method, "hello logs", 0,
-                            website: @website,
-                            website_location: @website_location,
-                            pod_name: "www-deployment-5889df69dc-xg9xl",
-                            nb_lines: 1_000)
-    prepare_make_secret(kubernetes_method, @website, @website_location, "success")
-    prepare_get_dotenv(kubernetes_method, @website, "VAR=123")
-
-    prepare_action_yml(kubernetes_method, @website_location, "apply.yml",
-                       "delete --timeout 30s  -f apply.yml", 'success')
-
-    assert_scripted do
-      begin_ssh
-
-      kubernetes_method.finalize(
-        website: @website,
-        website_location: @website_location
-      )
-
-      event = kubernetes_method.runner.execution.events.first
-      expected_event = "entity: Ingress, reason: AddedOrUpdated, message: Configuration for"
-      assert_includes event['update'], expected_event
-
-      port_event = kubernetes_method.runner.execution.events[1]
-      assert_includes port_event['update'], "IMPORTANT: HTTP port (80) NOT listening"
     end
   end
 
