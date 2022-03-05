@@ -13,7 +13,6 @@ class Website < ApplicationRecord
   serialize :auto_account_types_history, JSON
   serialize :one_click_app, JSON
 
-
   self.inheritance_column = :_type
 
   belongs_to :user
@@ -249,6 +248,7 @@ class Website < ApplicationRecord
   before_save :initialize_domains
   before_save :set_type_based_on_version
   before_save :set_cloud_type
+  before_create :init_configs_on_create
   after_save :notify_open_source_requested
 
   def init_subdomain; end
@@ -263,6 +263,17 @@ class Website < ApplicationRecord
     self.domains.unshift(site_name)
 
     self.domains = domains.uniq
+  end
+
+  def init_configs_on_create
+    self.configs ||= {}
+
+    case domain_type
+    when DOMAIN_TYPE_SUBDOMAIN
+      self.configs["REDIR_HTTP_TO_HTTPS"] = "true"
+    when DOMAIN_TYPE_CUSTOM_DOMAIN
+      self.configs["REDIR_HTTP_TO_HTTPS"] = "false"
+    end
   end
 
   def can_create_new_site
