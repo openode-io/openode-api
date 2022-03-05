@@ -1,4 +1,4 @@
-
+require "redis"
 
 def first_build_server_configs(build_server)
   {
@@ -72,6 +72,7 @@ namespace :gcloud_run_maintenance do
   task collect_gke_traffic: :environment do
     name = "collect_gke_traffic"
     Rails.logger.info "[#{name}] begin"
+    redis = Redis.new(url: ENV["REDIS_URL_GKE_TRAFFIC"])
 
     dep_method = deployment_method
 
@@ -84,6 +85,27 @@ namespace :gcloud_run_maintenance do
       end
 
       puts "w kube -> #{w.site_name}"
+
+      pods_json = dep_method.get_pods_json(
+        website: w, website_location: w.website_locations.first
+      )
+
+      pod_name = dep_method.get_latest_pod_name_in(pods_json)
+
+      args = {
+        website: w,
+        website_location: w.website_locations.first,
+        with_namespace: true,
+        s_arguments: "exec #{pod_name} -- cat /proc/net/dev"
+      }
+      proc_dev_net_content = dep_method.ex("kubectl_cmd", args)[:stdout]
+
+      result = Io::Net.parse_proc_net_dev(proc_dev_net_content)
+      eth0_result = result.select { |r| r["interface"] == "eth0" }.first
+
+      key = "my_key"
+      redis.set("traffic_rcv_bytes", eth0_result["rcv_bytes"], ex: 10)
+      redis.set("traffic_tx_bytes", eth0_result["tx_bytes"], ex: 10)
     end
   end
 end
