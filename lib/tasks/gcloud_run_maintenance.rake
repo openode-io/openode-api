@@ -1,4 +1,4 @@
-
+require "redis"
 
 def first_build_server_configs(build_server)
   {
@@ -65,6 +65,81 @@ namespace :gcloud_run_maintenance do
       end
     rescue StandardError => e
       Ex::Logger.error(e, "[#{name}] Issue processing service #{service.inspect}")
+    end
+  end
+
+  desc ''
+  task collect_gke_traffic: :environment do
+    name = "collect_gke_traffic"
+    Rails.logger.info "[#{name}] begin"
+    redis = Redis.new(url: ENV["REDIS_URL_GKE_TRAFFIC"])
+
+    dep_method = deployment_method
+
+    websites = Website.where(status: 'online')
+
+    websites.each do |w|
+      website_location = w.website_locations.first
+
+      if (w.configs || {})["EXECUTION_LAYER"] != "kubernetes"
+
+        next
+      end
+
+      pods_json = dep_method.get_pods_json(
+        website: w, website_location: w.website_locations.first
+      )
+
+      pod_name = dep_method.get_latest_pod_name_in(pods_json)
+
+      args = {
+        website: w,
+        website_location: website_location,
+        with_namespace: true,
+        s_arguments: "exec #{pod_name} -- cat /proc/net/dev"
+      }
+      proc_dev_net_content = dep_method.ex("kubectl_cmd", args)[:stdout]
+
+      result = Io::Net.parse_proc_net_dev(proc_dev_net_content)
+      eth0_result = result.select { |r| r["interface"] == "eth0" }.first
+
+      ts = Time.now.getutc.to_i
+      expiration = 60 * 60
+
+      latest_key_recv = redis.keys("traffic--#{website_location.id}--raw-rcv--*").max
+      latest_key_tx = redis.keys("traffic--#{website_location.id}--raw-tx--*").max
+
+      redis.set("traffic--#{website_location.id}--raw-rcv--#{w.site_name}--#{ts}",
+                eth0_result["rcv_bytes"],
+                ex: expiration)
+      redis.set("traffic--#{website_location.id}--raw-tx--#{w.site_name}--#{ts}",
+                eth0_result["tx_bytes"],
+                ex: expiration)
+
+      if latest_key_recv.present?
+        latest_recv = redis.get(latest_key_recv).to_f
+
+        new_rcv = eth0_result["rcv_bytes"].to_f - latest_recv
+
+        k = "traffic--#{website_location.id}--rcv--#{w.site_name}--#{ts}"
+        Rails.logger.info "Writing #{k} -> #{new_rcv}"
+
+        redis.set(k, new_rcv, ex: expiration)
+      end
+
+      if latest_key_tx.present?
+        latest_tx = redis.get(latest_key_tx).to_f
+
+        new_tx = eth0_result["tx_bytes"].to_f - latest_tx
+
+        k = "traffic--#{website_location.id}--tx--#{w.site_name}--#{ts}"
+        Rails.logger.info "Writing #{k} -> #{new_rcv}"
+
+        redis.set(k, new_tx, ex: expiration)
+      end
+
+    rescue StandardError => e
+      Rails.logger.error("Issue with website=#{w}, #{e}")
     end
   end
 end
