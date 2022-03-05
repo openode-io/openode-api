@@ -1951,4 +1951,30 @@ class WebsiteTest < ActiveSupport::TestCase
     assert_equal ports[0]['exposed_port'], "66"
     assert_equal ports[1]['exposed_port'], "999"
   end
+
+  # default redir http to https
+
+  test 'REDIR_HTTP_TO_HTTPS default with subdomain' do
+    w = Website.create!(
+      site_name: 'thisisauniquesite',
+      cloud_type: 'cloud',
+      user_id: default_user.id,
+      type: 'docker',
+      domain_type: 'subdomain'
+    )
+
+    assert_equal w.configs["REDIR_HTTP_TO_HTTPS"], "true"
+  end
+
+  test 'REDIR_HTTP_TO_HTTPS default with custom domain' do
+    w = Website.create!(
+      site_name: 'test.hello.com',
+      cloud_type: 'cloud',
+      user_id: default_user.id,
+      type: 'docker',
+      domain_type: 'custom_domain'
+    )
+
+    assert_equal w.configs["REDIR_HTTP_TO_HTTPS"], "false"
+  end
 end
