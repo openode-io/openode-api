@@ -67,4 +67,23 @@ namespace :gcloud_run_maintenance do
       Ex::Logger.error(e, "[#{name}] Issue processing service #{service.inspect}")
     end
   end
+
+  desc ''
+  task collect_gke_traffic: :environment do
+    name = "collect_gke_traffic"
+    Rails.logger.info "[#{name}] begin"
+
+    dep_method = deployment_method
+
+    websites = Website.where(status: 'online')
+
+    websites.each do |w|
+      if (w.configs || {})["EXECUTION_LAYER"] != "kubernetes"
+
+        next
+      end
+
+      puts "w kube -> #{w.site_name}"
+    end
+  end
 end
