@@ -13,6 +13,7 @@ class Website < ApplicationRecord
   serialize :auto_account_types_history, JSON
   serialize :one_click_app, JSON
 
+
   self.inheritance_column = :_type
 
   belongs_to :user
