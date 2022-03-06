@@ -73,6 +73,7 @@ namespace :gcloud_run_maintenance do
     name = "collect_gke_traffic"
     Rails.logger.info "[#{name}] begin"
     redis = Redis.new(url: ENV["REDIS_URL_GKE_TRAFFIC"])
+    gke_traffic_limit = (ENV['GKE_TRAFFIC_LIMIT_PER_HOUR'] || '400000000').to_f
 
     dep_method = deployment_method
 
@@ -116,30 +117,51 @@ namespace :gcloud_run_maintenance do
                 eth0_result["tx_bytes"],
                 ex: expiration)
 
-      if latest_key_recv.present?
-        latest_recv = redis.get(latest_key_recv).to_f
+      def update_traffic(latest_key, tx_type, new_bytes, opts = {})
+        if latest_key.present?
+          latest_recv = opts[:redis].get(latest_key).to_f
 
-        new_rcv = eth0_result["rcv_bytes"].to_f - latest_recv
+          new_rcv = new_bytes.to_f - latest_recv
 
-        k = "traffic--#{website_location.id}--rcv--#{w.site_name}--#{ts}"
-        Rails.logger.info "Writing #{k} -> #{new_rcv}"
+          website = opts[:website_location].website
+          wl = opts[:website_location]
+          ts = opts[:ts]
+          k = "traffic--#{wl.id}--#{tx_type}--#{website.site_name}--#{ts}"
+          Rails.logger.info "Writing #{k} -> #{new_rcv}"
 
-        redis.set(k, new_rcv, ex: expiration)
+          opts[:redis].set(k, new_rcv, ex: opts[:expiration])
+        end
       end
 
-      if latest_key_tx.present?
-        latest_tx = redis.get(latest_key_tx).to_f
+      update_traffic(latest_key_recv, "rcv",
+                     eth0_result["rcv_bytes"],
+                     redis: redis,
+                     ts: ts,
+                     expiration: expiration,
+                     website_location: website_location)
+      update_traffic(latest_key_tx, "tx",
+                     eth0_result["tx_bytes"],
+                     redis: redis,
+                     ts: ts,
+                     expiration: expiration,
+                     website_location: website_location)
 
-        new_tx = eth0_result["tx_bytes"].to_f - latest_tx
+      keys_site = redis.keys("traffic--#{website_location.id}--rcv--*") +
+        redis.keys("traffic--#{website_location.id}--tx--*")
 
-        k = "traffic--#{website_location.id}--tx--#{w.site_name}--#{ts}"
-        Rails.logger.info "Writing #{k} -> #{new_rcv}"
+      sum_traffic = redis.mget(keys_site).map { |v| v.to_f }.sum
+      w.data ||= {}
 
-        redis.set(k, new_tx, ex: expiration)
+      w.data["traffic_limit_reached"] = sum_traffic >= gke_traffic_limit
+      
+      if w.data["traffic_limit_reached"]
+        Rails.logger.info "Limit traffic reached for #{w.site_name}!"
       end
+
+      w.save
 
     rescue StandardError => e
-      Rails.logger.error("Issue with website=#{w}, #{e}")
+      Rails.logger.error("Issue with website=#{w.site_name}, #{e}")
     end
   end
 end

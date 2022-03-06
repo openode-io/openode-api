@@ -95,19 +95,21 @@ class SuperAdmin::WebsitesController < SuperAdmin::SuperAdminController
 
   def prepare_website_location_listing(website_location)
     wl = website_location
+    w = wl.website
 
     {
       id: wl.id,
-      website_id: wl.website.id,
+      website_id: w.id,
       hosts: wl.compute_domains,
       backend_url: wl.obj&.dig("gcloud_url"),
-      execution_layer: wl.website.get_config("EXECUTION_LAYER"),
+      execution_layer: w.get_config("EXECUTION_LAYER"),
       domain_type: wl.website.domain_type,
       cname: wl.deployment_method_configs&.dig("cname"),
-      has_certificate: wl.website.certs.present? || wl.website.subdomain?,
+      has_certificate: w.certs.present? || wl.website.subdomain?,
       gcloud_ssl_cert_url: wl.obj&.dig("gcloud_ssl_cert_url"),
       gcloud_ssl_key_url: wl.obj&.dig("gcloud_ssl_key_url"),
-      redir_http_to_https: wl.website.get_config("REDIR_HTTP_TO_HTTPS")
+      redir_http_to_https: w.get_config("REDIR_HTTP_TO_HTTPS"),
+      traffic_limit_reached: w&.data&.dig("traffic_limit_reached")
     }
   end
 
