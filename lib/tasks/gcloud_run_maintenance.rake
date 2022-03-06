@@ -152,10 +152,14 @@ namespace :gcloud_run_maintenance do
       sum_traffic = redis.mget(keys_site).map(&:to_f).sum
       w.data ||= {}
 
+      orig_traffic_limit_reached = w.data["traffic_limit_reached"]
       w.data["traffic_limit_reached"] = sum_traffic >= gke_traffic_limit
 
       if w.data["traffic_limit_reached"]
         Rails.logger.info "Limit traffic reached for #{w.site_name}!"
+      end
+
+      if orig_traffic_limit_reached != w.data["traffic_limit_reached"]
         website_location.load_balancer_synced = false
         website_location.save
       end
