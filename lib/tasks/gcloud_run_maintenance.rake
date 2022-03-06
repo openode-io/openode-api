@@ -156,6 +156,8 @@ namespace :gcloud_run_maintenance do
 
       if w.data["traffic_limit_reached"]
         Rails.logger.info "Limit traffic reached for #{w.site_name}!"
+        website_location.load_balancer_synced = false
+        website_location.save
       end
 
       w.save
