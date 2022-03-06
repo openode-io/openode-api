@@ -147,13 +147,13 @@ namespace :gcloud_run_maintenance do
                      website_location: website_location)
 
       keys_site = redis.keys("traffic--#{website_location.id}--rcv--*") +
-        redis.keys("traffic--#{website_location.id}--tx--*")
+                  redis.keys("traffic--#{website_location.id}--tx--*")
 
-      sum_traffic = redis.mget(keys_site).map { |v| v.to_f }.sum
+      sum_traffic = redis.mget(keys_site).map(&:to_f).sum
       w.data ||= {}
 
       w.data["traffic_limit_reached"] = sum_traffic >= gke_traffic_limit
-      
+
       if w.data["traffic_limit_reached"]
         Rails.logger.info "Limit traffic reached for #{w.site_name}!"
       end
