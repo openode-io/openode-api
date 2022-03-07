@@ -84,6 +84,16 @@ class LibIoNetTest < ActiveSupport::TestCase
     assert_equal Io::Net.sum_metric(list, 'tx'), 15
   end
 
+  # bytes_diff
+
+  test 'bytes_diff - happy path' do
+    assert_equal Io::Net.bytes_diff(10, 15), 5
+  end
+
+  test 'bytes_diff - happy path' do
+    assert_equal Io::Net.bytes_diff(10, 15), 5
+  end
+
   # get_new_metric_of
   test 'get_new_metric_of - happy path' do
     list = [

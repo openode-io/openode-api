@@ -121,7 +121,7 @@ namespace :gcloud_run_maintenance do
         if latest_key.present?
           latest_recv = opts[:redis].get(latest_key).to_f
 
-          new_rcv = new_bytes.to_f - latest_recv
+          new_rcv = Io::Net.bytes_diff(latest_recv, new_bytes.to_f)
 
           website = opts[:website_location].website
           wl = opts[:website_location]
@@ -133,13 +133,15 @@ namespace :gcloud_run_maintenance do
         end
       end
 
-      update_traffic(latest_key_recv, "rcv",
+      update_traffic(latest_key_recv,
+                     "rcv",
                      eth0_result["rcv_bytes"],
                      redis: redis,
                      ts: ts,
                      expiration: expiration,
                      website_location: website_location)
-      update_traffic(latest_key_tx, "tx",
+      update_traffic(latest_key_tx,
+                     "tx",
                      eth0_result["tx_bytes"],
                      redis: redis,
                      ts: ts,
