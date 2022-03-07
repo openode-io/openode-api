@@ -63,6 +63,10 @@ module Io
       lines.map { |l| l[metric] || 0 }.sum
     end
 
+    def self.bytes_diff(old_value, new_value)
+      new_value.to_f < old_value.to_f ? new_value.to_f : (new_value.to_f - old_value.to_f)
+    end
+
     def self.get_new_metric_of(lines, previous_lines, metric_name)
       new_metric = Net.sum_metric(lines, metric_name)
 
@@ -70,7 +74,7 @@ module Io
 
       old_metric = Net.sum_metric(previous_lines, metric_name)
 
-      new_metric < old_metric ? new_metric : (new_metric - old_metric)
+      Net.bytes_diff(old_metric, new_metric)
     end
 
     def self.diff(current_net_metrics, previous_net_metrics)
