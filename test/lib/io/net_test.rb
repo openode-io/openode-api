@@ -90,8 +90,8 @@ class LibIoNetTest < ActiveSupport::TestCase
     assert_equal Io::Net.bytes_diff(10, 15), 5
   end
 
-  test 'bytes_diff - happy path' do
-    assert_equal Io::Net.bytes_diff(10, 15), 5
+  test 'bytes_diff - reset bytes' do
+    assert_equal Io::Net.bytes_diff(10, 6), 6
   end
 
   # get_new_metric_of
