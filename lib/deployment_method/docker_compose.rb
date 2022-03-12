@@ -50,7 +50,6 @@ module DeploymentMethod
       website_location.allocate_ports!
 
       ex_stdout('prepare_dind_compose_image')
-      send_crontab(options)
     end
 
     def prepare_dind_compose_image(_options = {})
@@ -58,10 +57,6 @@ module DeploymentMethod
 
       "docker build -f #{base_server_files_path}deployment/dind-with-docker-compose/Dockerfile " \
         ' -t dind-with-docker-compose .'
-    end
-
-    def send_crontab(options = {})
-      super(options)
     end
 
     # launch

@@ -120,7 +120,6 @@ Rails.application.routes.draw do
     get '/:site_name/', to: 'instances#show'
     patch '/:site_name/', to: 'instances#update'
     delete '/:site_name/', to: 'instances#destroy_instance'
-    post '/:site_name/crontab', to: 'instances#update_crontab'
     post '/:site_name/prepare-one-click-app', to: 'instances#prepare_one_click_app'
     patch '/:site_name/one-click-app', to: 'instances#update_one_click_app'
     get '/:site_name/status', to: 'instances#status'

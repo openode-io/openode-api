@@ -137,23 +137,6 @@ services:
     assert_equal result[:suffix_container_name], ''
   end
 
-  test 'send crontab without crontab provided' do
-    set_dummy_secrets_to(LocationServer.all)
-    website = default_website
-    website.crontab = ''
-    website.save!
-    runner = DeploymentMethod::Runner.new('docker', 'cloud', dummy_ssh_configs)
-
-    begin_sftp
-    runner.execute([
-                     {
-                       cmd_name: 'send_crontab', options: { is_complex: true, website: website }
-                     }
-                   ])
-
-    assert_equal Remote::Sftp.get_test_uploaded_files.length, 0
-  end
-
   test 'parse_global_containers' do
     set_dummy_secrets_to(LocationServer.all)
     runner = DeploymentMethod::Runner.new('docker', 'cloud', dummy_ssh_configs)
@@ -309,22 +292,6 @@ services:
     assert_scripted do
       begin_ssh
       dep_method.verify_can_deploy(website: website, website_location: website_location)
-    end
-  end
-
-  test 'initialization without crontab' do
-    website = default_website
-    website.crontab = ''
-    website.save
-    website_location = default_website_location
-    dep_method = docker_compose_method
-
-    dep_method.get_file(repo_dir: website.repo_dir, file: 'docker-compose.yml')
-    prepare_ssh_session(dep_method.prepare_dind_compose_image, 'empty')
-
-    assert_scripted do
-      begin_ssh
-      dep_method.initialization(website: website, website_location: website_location)
     end
   end
 

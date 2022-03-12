@@ -1011,16 +1011,12 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
   # PATCH /sitename
   test 'patch /instances/:instance_id/' do
     website = default_website
-    website.crontab = ""
     website.save!
-
-    new_crontab = "\n * * * * * ls -la\n"
 
     patch '/instances/testsite/',
           as: :json,
           params: {
             website: {
-              crontab: new_crontab,
               alerts: [Website::ALERT_STOP_LACK_CREDITS]
             }
           },
@@ -1029,7 +1025,6 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     website.reload
-    assert_equal website.crontab, new_crontab
     assert_equal website.alerts, [Website::ALERT_STOP_LACK_CREDITS]
   end
 
@@ -1050,31 +1045,6 @@ class InstancesControllerTest < ActionDispatch::IntegrationTest
     website.reload
     assert_equal website.site_name, "www.mydomainname.com"
     assert_equal website.domain_type, "custom_domain"
-  end
-
-  test 'post /instances/:instance_id/crontab' do
-    website = default_website
-    website.crontab = ""
-    website.save!
-
-    new_crontab = "12 * * * * * ls -la\n8 * * * * * ls -la2"
-
-    post "/instances/#{website.id}/crontab",
-         as: :json,
-         params: {
-           crontab: [
-             '12 * * * * * ls -la',
-             '8 * * * * * ls -la2'
-           ]
-         },
-         headers: default_headers_auth
-
-    assert_response :success
-
-    website.reload
-
-    assert_equal website.crontab, new_crontab
-    assert_equal website.events.last.obj['title'], 'update-crontab'
   end
 
   test 'DEL /instances/:instance_id/ forbidden' do

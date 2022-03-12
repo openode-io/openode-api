@@ -52,7 +52,6 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/restart - happy path' do
-    @website.crontab = ''
     @website.save!
 
     website2 = Website.where.not(id: @website.id).first
@@ -135,7 +134,6 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/restart - happy path with repository url (public)' do
-    @website.crontab = ''
     @website.save!
 
     website2 = Website.where.not(id: @website.id).first
@@ -229,7 +227,6 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/restart - rollback' do
-    @website.crontab = ''
     @website.save!
 
     parent_deployment = @website.deployments.last
@@ -262,7 +259,6 @@ class InstancesControllerDeployKubernetesTest < ActionDispatch::IntegrationTest
   end
 
   test '/instances/:instance_id/restart - with reference_website_image' do
-    @website.crontab = ''
     @website.save!
 
     referenced_website = Website.last
