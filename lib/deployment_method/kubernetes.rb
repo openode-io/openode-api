@@ -18,8 +18,6 @@ module DeploymentMethod
 
     def initialization(options = {})
       super(options)
-
-      send_crontab(options)
     end
 
     def self.kube_configs
@@ -34,10 +32,6 @@ module DeploymentMethod
 
     def self.configs_at_location(str_id)
       Kubernetes.kube_configs_at_location(str_id)
-    end
-
-    def send_crontab(options = {})
-      super(options)
     end
 
     def cmd_docker_registry_secret(website, docker_images_location)

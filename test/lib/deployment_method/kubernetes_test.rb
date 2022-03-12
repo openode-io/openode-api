@@ -76,35 +76,6 @@ class DeploymentMethodKubernetesTest < ActiveSupport::TestCase
 
   # initialization
 
-  test 'initialization with crontab' do
-    @website.crontab = '* * * * * ls'
-    @website.save!
-    dep_method = kubernetes_method
-
-    begin_sftp
-    dep_method.initialization(website: @website, website_location: @website_location)
-
-    up_files = Remote::Sftp.get_test_uploaded_files
-
-    assert_equal up_files.length, 1
-
-    assert_equal up_files[0][:content], @website.crontab
-    assert_equal up_files[0][:remote_file_path], "#{@website.repo_dir}.openode.cron"
-  end
-
-  test 'initialization without crontab' do
-    @website.crontab = nil
-    @website.save!
-    dep_method = kubernetes_method
-
-    begin_sftp
-    dep_method.initialization(website: @website, website_location: @website_location)
-
-    up_files = Remote::Sftp.get_test_uploaded_files
-
-    assert_equal up_files.length, 0
-  end
-
   # kube_configs
   test 'kube_configs' do
     configs = DeploymentMethod::Kubernetes.kube_configs

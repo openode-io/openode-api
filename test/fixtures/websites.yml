@@ -12,9 +12,7 @@ one:
   credits_check_at: 2019-08-10 14:24:22
   domain_type: subdomain
   nb_launch_issues: 1
-  crontab: MyText
   redir_http_to_https: false
-  sub_status: MyString
   cloud_type: cloud
 
 two:
@@ -29,9 +27,7 @@ two:
   credits_check_at: 2019-08-10 14:24:22
   domain_type: subdomain
   nb_launch_issues: 1
-  crontab: MyText
   redir_http_to_https: false
-  sub_status: MyString
   cloud_type: cloud
 
 three:
@@ -46,9 +42,7 @@ three:
   credits_check_at: 2019-08-10 14:24:22
   domain_type: custom_domain
   nb_launch_issues: 1
-  crontab: MyText
   redir_http_to_https: false
-  sub_status: MyString
   cloud_type: cloud
 
 app_what_is:
@@ -63,9 +57,7 @@ app_what_is:
   credits_check_at: 2019-08-10 14:24:22
   domain_type: custom_domain
   nb_launch_issues: 1
-  crontab: MyText
   redir_http_to_https: false
-  sub_status: MyString
   cloud_type: cloud
 
 with_private_cloud:
@@ -80,9 +72,7 @@ with_private_cloud:
   credits_check_at: 2019-08-10 14:24:22
   domain_type: subdomain
   nb_launch_issues: 1
-  crontab: MyText
   redir_http_to_https: false
-  sub_status: MyString
   cloud_type: private-cloud
 
 with_type_kubernetes:
@@ -97,8 +87,6 @@ with_type_kubernetes:
   credits_check_at: 2019-08-10 14:24:22
   domain_type: subdomain
   nb_launch_issues: 1
-  crontab: MyText
   redir_http_to_https: false
-  sub_status: MyString
   cloud_type: cloud
   open_source_activated: true

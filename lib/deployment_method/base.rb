@@ -11,7 +11,6 @@ module DeploymentMethod
     attr_accessor :runner, :location, :last_auto_manage_memory_at
 
     REMOTE_PATH_API_LIB = '/root/openode-www/api/lib'
-    DEFAULT_CRONTAB_FILENAME = '.openode.cron'
     MAX_DEPLOYMENT_DURATION = 10 * 60
 
     def deployment_id
@@ -150,24 +149,6 @@ module DeploymentMethod
 
     def auto_manage_memory_on_oom(website, pods)
       # to define in child class
-    end
-
-    def send_crontab(options = {})
-      assert options[:website]
-      website = options[:website]
-
-      if website.crontab.present?
-        Rails.logger.info('updating crontab')
-        begin
-          runner.upload_content_to(website.crontab,
-                                   "#{website.repo_dir}#{Base::DEFAULT_CRONTAB_FILENAME}")
-        rescue StandardError => e
-          Rails.logger.error("Failed to copy crontab file #{e}")
-          notify("warn", "Unable to copy the crontab file")
-        end
-      else
-        Rails.logger.info('skipping crontab update (empty)')
-      end
     end
 
     def launch(_options = {})
