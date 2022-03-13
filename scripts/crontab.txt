@@ -9,17 +9,11 @@ PATH=PATH=/bin:/usr/bin:/home/ubuntu/.rvm/rubies/ruby-3.0.1/bin/:/home/ubuntu/.n
 4 */5 * * * cd $PATH_REPO && rails db_clean:old_credit_actions >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 0 */6 * * * cd $PATH_REPO && rails background_notification:after_one_day_registration >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 10 3 * * * cd $PATH_REPO && rails build_clean:synced_files >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
-# 30 */1 * * * cd $PATH_REPO && rails kube_maintenance:monitor_pods >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
-# 35 * * * * cd $PATH_REPO && rails kube_maintenance:monitor_pods_stats >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
-# 45 1 * * * cd $PATH_REPO && rails monitor_deployments:bandwidth >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 1 * * * * cd $PATH_REPO && rails background_notification:low_credit >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 0 * * * * cd $PATH_REPO && rails credits:online_spend >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
-# 5 * * * * cd $PATH_REPO && rails credits:persistence_spend >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 0 10 * * * cd $PATH_REPO && rails credits:verify_expired_open_source >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 2 * * * * cd $PATH_REPO && rails suspension:shutdown_suspended_user_websites >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
-# 45 */6 * * * cd $PATH_REPO && rails kube_maintenance:verify_states_deployments >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 0 */6 * * * cd $PATH_REPO && rails malware:check >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
-# 50 */12 * * * cd $PATH_REPO && rails kube_maintenance:clean_ns >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 */5 * * * * cd $PATH_REPO && rails deployment:shutdown_neverending_deployments >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 30 */12 * * * cd $PATH_REPO && /bin/bash scripts/soft_reload.sh >> scripts/pm2/soft_reload.out.log 2>> scripts/pm2/soft_reload.err.log
 35 */24 * * * cd $PATH_REPO && /usr/local/bin/pm2 reload openode-www >> scripts/pm2/reload-openode-www.out.log 2>> scripts/pm2/reload-openode-www.err.log
@@ -29,9 +23,9 @@ PATH=PATH=/bin:/usr/bin:/home/ubuntu/.rvm/rubies/ruby-3.0.1/bin/:/home/ubuntu/.n
 10 22 * * * cd $PATH_REPO && rails verify_website_environment:open_source_activated >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 */5 * * * * cd $PATH_REPO && rails subscription:clean >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 5 */2 * * * cd $PATH_REPO && rails subscription:check_expirations >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
-# */2 * * * * cd $PATH_REPO && rails kube_maintenance:auto_manage_memory >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 10 10 * * * cd $PATH_REPO && rails registry:clean >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 10 11 * * * cd $PATH_REPO && rails gcloud_run_maintenance:clean_services >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
+10 12 * * * cd $PATH_REPO && rails gcloud_run_maintenance:clean_kube_ns >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 */5 * * * * cd $PATH_REPO && rails gcloud_run_maintenance:collect_gke_traffic >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 10 */22 * * * cd $PATH_REPO && /bin/bash scripts/backup-kubes.sh >> scripts/pm2/task.out.log 2>> scripts/pm2/task.err.log
 0 * * * * cd /home/ubuntu && /bin/bash backup-db.sh
