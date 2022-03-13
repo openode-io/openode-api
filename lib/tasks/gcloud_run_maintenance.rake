@@ -94,12 +94,10 @@ namespace :gcloud_run_maintenance do
       if !website || website.offline? ||
          (website.online? && website.configs["EXECUTION_LAYER"] != "kubernetes")
         Rails.logger.info "Should remove website id #{site_id} namespace"
-        # dep_method.ex(
-        #  "kubectl_generic_cmd", location: location, cmd: "get ns -o json"
-        # )
+        
         params_cmd = { location: location, cmd: "delete ns instance-#{site_id}" }
-        cmd = dep_method.kubectl_generic_cmd(params_cmd)
-        Rails.logger.info "Cmd: #{cmd}"
+        Rails.logger.info "Cmd: #{params_cmd.inspect}"
+        dep_method.ex("kubectl_generic_cmd", params_cmd)
       end
     rescue StandardError => e
       Ex::Logger.error(e, "[#{name}] Issue processing website ns #{ns}")
