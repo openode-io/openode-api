@@ -94,7 +94,7 @@ namespace :gcloud_run_maintenance do
       if !website || website.offline? ||
          (website.online? && website.configs["EXECUTION_LAYER"] != "kubernetes")
         Rails.logger.info "Should remove website id #{site_id} namespace"
-        
+
         params_cmd = { location: location, cmd: "delete ns instance-#{site_id}" }
         Rails.logger.info "Cmd: #{params_cmd.inspect}"
         dep_method.ex("kubectl_generic_cmd", params_cmd)
