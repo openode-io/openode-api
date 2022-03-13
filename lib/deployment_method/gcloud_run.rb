@@ -132,6 +132,15 @@ module DeploymentMethod
       "KUBECONFIG=#{config_path} kubectl #{namespace}#{options[:s_arguments]}"
     end
 
+    def kubectl_generic_cmd(options = {})
+      assert options[:location]
+      assert options[:cmd]
+
+      config_path = kubeconfig_path(options[:location])
+
+      "KUBECONFIG=#{config_path} kubectl #{options[:cmd]}"
+    end
+
     def custom_cmd(options = {})
       website, website_location = get_website_fields(options)
       cmd = options[:cmd]

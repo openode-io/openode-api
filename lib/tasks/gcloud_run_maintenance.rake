@@ -69,6 +69,37 @@ namespace :gcloud_run_maintenance do
   end
 
   desc ''
+  task clean_kube_ns: :environment do
+    name = "clean_kube_ns"
+    Rails.logger.info "[#{name}] begin"
+
+    dep_method = deployment_method
+
+    kubeconfig_locations = DeploymentMethod::GcloudRun.kube_configs["locations"]
+    location_str_id = kubeconfig_locations.first["str_id"]
+    location = Location.find_by str_id: location_str_id
+
+    namespaces = JSON.parse(dep_method.ex(
+      "kubectl_generic_cmd", location: location, cmd: "get ns -o json"
+    )[:stdout])["items"]
+
+    namespaces.each do |ns|
+      ns_name = ns["metadata"]["name"]
+      next unless ns_name.include?("instance-")
+
+      site_id = ns_name.split("-").last.to_i
+
+      website = Website.find_by id: site_id
+
+      if !website || website.offline?
+        Rails.logger.info "Should remove website id #{site_id} namespace"
+      end
+    rescue StandardError => e
+      Ex::Logger.error(e, "[#{name}] Issue processing website ns #{ns}")
+    end
+  end
+
+  desc ''
   task collect_gke_traffic: :environment do
     name = "collect_gke_traffic"
     Rails.logger.info "[#{name}] begin"
