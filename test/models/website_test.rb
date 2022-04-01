@@ -973,7 +973,7 @@ class WebsiteTest < ActiveSupport::TestCase
     plan = website.plan
 
     assert_equal plan[:internal_id], "grun-128"
-    assert_equal plan[:cost_per_month], 0.75
+    assert_equal plan[:cost_per_month], 1.00
 
     assert_equal website.credit_actions.reload.length, 1
     ca = website.credit_actions.first
