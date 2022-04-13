@@ -1,4 +1,5 @@
 /var/www/openode-api/scripts/pm2/*.log {
+  maxsize 20M
   daily
   copytruncate
   missingok
